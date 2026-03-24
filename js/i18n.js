@@ -40,10 +40,12 @@ const _dict = {
     pause_back_level_choice: "🗺  Back to Level Choice",
     pause_back_menu: "⏏  Back to Menu",
     hint_title: "💡  Hint",
-    hint_level1: "Level 1 hint example",
+    hint_level1:
+      "Record yourself next to the platform. Do not move around randomly. After finishing recording, press the playback button. Jump up by stepping on your own head.",
     hint_level2:
-      "use the recording to jump on your own head, then jump to the portal",
+      "while recording, jump to have a higher platform, then step on two buttons at the same time to open the portal",
     hint_level3: "Level 3 hint example",
+    hint_level4: "Level 4 hint example",
     keybind_reset_title: "Reset to default",
     keybind_conflict: "The key {KEY} is already bound to {ACTION}",
     keybind_jump: "Jump",
@@ -70,8 +72,10 @@ const _dict = {
     level1_replay_prompt:
       "...He is repeating every step I just did.\nI think... I cannot touch him? Is it really impossible to touch him?",
     level1_title: "Rule",
-    level2_title: "Electricity",
-    level3_title: "Level 3 Title Placeholder",
+    level2_title: "Higher",
+    level2_jump_higher_prompt: "How can I jump much higher?",
+    level3_title: "Electricity",
+    level4_title: "Level 4 Title Placeholder",
     module_btn_label: "Install Module",
     module_installation_complete:
       "Installation Complete\n Now you can see the record HUD",
@@ -118,9 +122,11 @@ const _dict = {
     pause_back_menu: "⏏  返回菜单",
     hint_title: "💡  提示",
     hint_level1:
-      "在平台下面录制自己，不要乱移动，结束录制之后按回放键，踩着自己的头跳上去",
-    hint_level2: "level2提示实例",
+      "在平台旁边录制自己，不要乱移动，结束录制之后按回放键，踩着自己的头跳上去",
+    hint_level2:
+      "录制自己的过程中跳跃，自己踩在自己的回放幻影头上，在幻影起跳的同时自己也起跳，利用这个技巧踩上更高的平台，最后操纵幻影同时按下两个按钮，打开传送门",
     hint_level3: "level3提示实例",
+    hint_level4: "level4提示实例",
     keybind_reset_title: "重置为默认",
     keybind_conflict: "按键 {KEY} 已绑定到 {ACTION}",
     keybind_jump: "跳跃",
@@ -146,8 +152,10 @@ const _dict = {
     level1_replay_prompt:
       "……他在重复我刚才做的每一步。\n我好像……碰不到他？真的碰不到吗？",
     level1_title: "规则",
-    level2_title: "通电",
-    level3_title: "Level3标题占位",
+    level2_title: "登高",
+    level2_jump_higher_prompt: "怎么才能跳得更高呢？",
+    level3_title: "通关",
+    level4_title: "Level4标题占位",
     module_btn_label: "安装模块",
     module_installation_complete: "安装完成\n现在你可以看到录制面板了",
     first_record_prompt:

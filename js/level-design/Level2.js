@@ -4,6 +4,7 @@ import {
   Wall,
   Portal,
   Button,
+  TextPrompt,
 } from "../game-entity-model/index.js";
 import { BaseLevel } from "./BaseLevel.js";
 import { WireRenderer } from "./WireRenderer.js";
@@ -17,18 +18,39 @@ export class Level2 extends BaseLevel {
     this.entities.add(
       new Wall(p.width - wallThickness, 0, wallThickness, p.height),
     );
-    this._button1 = new Button(700, 80, 20, 5); // 右按钮
-    this._button2 = new Button(215, 80, 20, 5); // 左按钮
-    this._portal = new Portal(1025, 280, 50, 50);
+    // 底部地面
     this.entities.add(new Ground(0, 0, p.width, 80));
-    this._rightPlatform = new Ground(1000, 250, 100, 30, true);
-    this.entities.add(this._rightPlatform);
+
+    // 高台
+    const platformX = 700;
+    const platformW = 600;
+    const platformH = 330;
+    const platformSurface = 80 + platformH; // 360
+    this.entities.add(new Ground(platformX, 80, platformW, platformH, true));
+    // 高台左边的阶梯平台（浮空）
+    this.entities.add(new Ground(300, 120, 100, 30, true)); // 第一级阶梯
+    this.entities.add(new Ground(420, 230, 230, 30, true)); // 第二级阶梯
+    // 按钮和门都放在高台表面
+    this._button1 = new Button(platformX + 300, platformSurface, 20, 5); // 右按钮
+    this._button2 = new Button(platformX + 80, platformSurface, 20, 5); // 左按钮
+    this._portal = new Portal(
+      platformX + platformW - 125,
+      platformSurface,
+      50,
+      50,
+    );
 
     this.entities.add(this._portal);
     this.entities.add(this._button1);
     this.entities.add(this._button2);
 
-    const player = new Player(50, 80, 40, 40);
+    this.entities.add(
+      new TextPrompt(450, 90, this, {
+        textKey: "level2_jump_higher_prompt",
+      }),
+    );
+
+    const player = new Player(50, 450, 40, 40);
     player.createListeners();
     this.entities.add(player);
 
@@ -38,7 +60,6 @@ export class Level2 extends BaseLevel {
       button1: this._button1,
       button2: this._button2,
       portal: this._portal,
-      rightPlatform: this._rightPlatform,
     });
   }
 

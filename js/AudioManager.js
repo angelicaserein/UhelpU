@@ -4,6 +4,7 @@ const TRACKS = {
   level1: "assets/audio/bgm/level1.mp3",
   level2: "assets/audio/bgm/level2.mp3",
   level3: "assets/audio/bgm/level3.mp3",
+  level4: "assets/audio/bgm/level4.mp3",
   levelChoice: "assets/audio/bgm/levelchoice.mp3",
   gameOver: "assets/audio/bgm/gameover.mp3",
   gameWin: "assets/audio/bgm/gamewin.mp3",

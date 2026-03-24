@@ -94,6 +94,10 @@ export class AppCoordinator {
       AudioManager.playBGM("level3");
       return;
     }
+    if (levelIndex === "level4") {
+      AudioManager.playBGM("level4");
+      return;
+    }
     AudioManager.stopBGM();
   }
 

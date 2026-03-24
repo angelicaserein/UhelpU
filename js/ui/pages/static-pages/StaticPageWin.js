@@ -1,8 +1,8 @@
 import { PageBase } from "../PageBase.js";
 import { ButtonBase } from "../../components/ButtonBase.js";
-import { t } from '../../../i18n.js';
+import { t } from "../../../i18n.js";
 import { Assets } from "../../../AssetsManager.js";
-import { AudioManager } from '../../../AudioManager.js';
+import { AudioManager } from "../../../AudioManager.js";
 import { EventTypes } from "../../../event-system/EventTypes.js";
 
 export class StaticPageWin extends PageBase {
@@ -13,27 +13,48 @@ export class StaticPageWin extends PageBase {
     this.eventBus = eventBus;
 
     const levelNum = parseInt(this.levelIndex.replace("level", ""), 10);
-    const TOTAL_LEVELS = 3;
+    const TOTAL_LEVELS = 4;
 
     const btnY0 = p.height / 2 + 50;
 
-    const backBtn = new ButtonBase(p, t('btn_back_menu'), p.width / 2 - 60, btnY0, () => {
-      this.switcher.staticSwitcher.showMainMenu(p);
-    }, 'back-button');
-    backBtn.btn.style('font-size', '20px');
+    const backBtn = new ButtonBase(
+      p,
+      t("btn_back_menu"),
+      p.width / 2 - 60,
+      btnY0,
+      () => {
+        this.switcher.staticSwitcher.showMainMenu(p);
+      },
+      "back-button",
+    );
+    backBtn.btn.style("font-size", "20px");
     this.addElement(backBtn);
 
-    const restartBtn = new ButtonBase(p, t('btn_restart'), p.width / 2 - 60, btnY0 + 56, () => {
-      this.eventBus.publish(EventTypes.LOAD_LEVEL, `level${levelNum}`);
-    }, 'restart-button');
-    restartBtn.btn.style('font-size', '20px');
+    const restartBtn = new ButtonBase(
+      p,
+      t("btn_restart"),
+      p.width / 2 - 60,
+      btnY0 + 56,
+      () => {
+        this.eventBus.publish(EventTypes.LOAD_LEVEL, `level${levelNum}`);
+      },
+      "restart-button",
+    );
+    restartBtn.btn.style("font-size", "20px");
     this.addElement(restartBtn);
 
     if (levelNum < TOTAL_LEVELS) {
-      const nextBtn = new ButtonBase(p, t('btn_next_level'), p.width / 2 - 60, btnY0 + 112, () => {
-        this.eventBus.publish("loadLevel", `level${levelNum + 1}`);
-      }, 'next-button');
-      nextBtn.btn.style('font-size', '20px');
+      const nextBtn = new ButtonBase(
+        p,
+        t("btn_next_level"),
+        p.width / 2 - 60,
+        btnY0 + 112,
+        () => {
+          this.eventBus.publish("loadLevel", `level${levelNum + 1}`);
+        },
+        "next-button",
+      );
+      nextBtn.btn.style("font-size", "20px");
       this.addElement(nextBtn);
     }
 
@@ -47,13 +68,13 @@ export class StaticPageWin extends PageBase {
         speedY: p.random(-0.6, -2.0),
         speedX: p.random(-0.4, 0.4),
         alpha: p.random(160, 255),
-        hue: p.random(40, 60),   // gold range
+        hue: p.random(40, 60), // gold range
       });
     }
   }
 
   enter() {
-    AudioManager.playBGM('gameWin');
+    AudioManager.playBGM("gameWin");
   }
 
   draw() {
@@ -88,11 +109,11 @@ export class StaticPageWin extends PageBase {
 
     p.fill(255, 200, 60, 60);
     p.textSize(78);
-    p.text(t('result_win'), p.width / 2 + 3, p.height / 4 + 3);
+    p.text(t("result_win"), p.width / 2 + 3, p.height / 4 + 3);
 
     p.fill(255, 240, 130);
     p.textSize(76);
-    p.text(t('result_win'), p.width / 2, p.height / 4);
+    p.text(t("result_win"), p.width / 2, p.height / 4);
 
     // sub-label
     p.fill(255, 220, 140, 200);

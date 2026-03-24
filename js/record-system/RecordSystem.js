@@ -26,6 +26,8 @@ export class RecordSystem {
     this.addReplayer = addReplayerCallback;
     this.removeReplayer = removeReplayerCallback;
     this._onReplayStart = options.onReplayStart || null;
+    this._onFirstRecord = options.onFirstRecord || null;
+    this._hasRecordedOnce = false;
     this._keydownHandler = (event) => this.eventHandler(event);
     this._keyupHandler = (event) => this.eventHandler(event);
 
@@ -81,6 +83,7 @@ export class RecordSystem {
     this._pausedReplayElapsed = null;
     this._airBlockFlashMs = -9999; // timestamp of last blocked-in-air attempt
     this._hudVisible = true;
+    this._disabled = false;
   }
 
   setHudVisible(visible) {
@@ -89,6 +92,14 @@ export class RecordSystem {
 
   isHudVisible() {
     return this._hudVisible;
+  }
+
+  setDisabled(v) {
+    this._disabled = !!v;
+  }
+
+  isDisabled() {
+    return this._disabled;
   }
 
   createListeners() {
@@ -127,7 +138,7 @@ export class RecordSystem {
   }
   // event: window raw keyboard event -> returns: string (intent) or null
   eventHandler(event) {
-    if (isGamePaused()) {
+    if (this._disabled || isGamePaused()) {
       this.resetInputState();
       return;
     }
@@ -144,6 +155,20 @@ export class RecordSystem {
           this._airBlockFlashMs = performance.now();
           return;
         }
+      }
+      // Intercept the very first record attempt to fire callback
+      if (
+        intent === "record" &&
+        this.state === "ReadyToRecord" &&
+        !this._hasRecordedOnce &&
+        this._onFirstRecord
+      ) {
+        this._hasRecordedOnce = true;
+        this._onFirstRecord();
+        return;
+      }
+      if (intent === "record" && this.state === "ReadyToRecord") {
+        this._hasRecordedOnce = true;
       }
       this.transition(intent);
     }

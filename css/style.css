@@ -1,30 +1,30 @@
 /*default style*/
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    background: #f0f0f0;
+  margin: 0;
+  padding: 0;
+  background: #f0f0f0;
 }
 canvas {
-    display: block;
+  display: block;
 }
 /*font*/
 @font-face {
-    font-family: "PixelFont";
-    src: url("../assets/fonts/HYPixel11pxU-2.ttf");
+  font-family: "PixelFont";
+  src: url("../assets/fonts/HYPixel11pxU-2.ttf");
 }
 /*main panel*/
 #main {
-    position: absolute;
-    background-image: url("../assets/UI/menu.png");
-    background-size: contain;
-    width: 960px;
-    height: 540px;
+  position: absolute;
+  background-image: url("../assets/UI/menu.png");
+  background-size: contain;
+  width: 960px;
+  height: 540px;
 }
 
 /*.min-btn {
@@ -42,15 +42,14 @@ canvas {
 }*/
 
 #main-btn-levelSelect {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 31px;
-    width: 82px;
-    height: 82px;
-    border-radius: 50%;
-    font-size: 30px;
-
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 31px;
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  font-size: 30px;
 }
 /* #min-btn-setting {
     position: absolute;
@@ -109,120 +108,120 @@ canvas {
 } */
 /*level select panel*/
 #levelSelect {
-    position: absolute;
-    background-image: url("../assets/UI/level-select-panel.png");
-    background-size: contain;
-    width: 960px;
-    height: 540px;
+  position: absolute;
+  background-image: url("../assets/UI/level-select-panel.png");
+  background-size: contain;
+  width: 960px;
+  height: 540px;
 }
 #levelSelect-btn-back {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 5px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    cursor: pointer;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 5px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  cursor: pointer;
 }
 #levelSelect-btn-level1 {
-    position: absolute;
-    left: 119px;
-    top: 236px;
-    width: 50px;
-    height: 30px;
-    cursor: pointer;
+  position: absolute;
+  left: 119px;
+  top: 236px;
+  width: 50px;
+  height: 30px;
+  cursor: pointer;
 }
 #levelSelect-btn-level2 {
-    position: absolute;
-    left: 288px;
-    top: 236px;
-    width: 50px;
-    height: 30px;
-    cursor: pointer;
+  position: absolute;
+  left: 288px;
+  top: 236px;
+  width: 50px;
+  height: 30px;
+  cursor: pointer;
 }
 /*level1*/
 #level1 {
-    position: absolute;
-    width: 960px;
-    height: 540px;
+  position: absolute;
+  width: 960px;
+  height: 540px;
 }
 #inLevel1UI {
-    position: absolute;
-    z-index: 10px;
-    width: 960px;
-    height: 540px;
+  position: absolute;
+  z-index: 10px;
+  width: 960px;
+  height: 540px;
 }
 #level1-btn-back {
-    position: absolute;
-    left: 20px;
-    bottom: 20px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    cursor: pointer;
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  cursor: pointer;
 }
 /*level2*/
 #level2 {
-    position: absolute;
-    width: 960px;
-    height: 540px;
+  position: absolute;
+  width: 960px;
+  height: 540px;
 }
 #inLevel2UI {
-    position: absolute;
-    z-index: 10px;
-    width: 960px;
-    height: 540px;
+  position: absolute;
+  z-index: 10px;
+  width: 960px;
+  height: 540px;
 }
 #level2-btn-back {
-    position: absolute;
-    left: 20px;
-    bottom: 20px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    cursor: pointer;
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  cursor: pointer;
 }
 /*level1 result*/
 #level1Result {
-    position: absolute;
-    background-image: url("../assets/UI/level-select-panel.png");
-    background-size: contain;
-    width: 960px;
-    height: 540px;
+  position: absolute;
+  background-image: url("../assets/UI/level-select-panel.png");
+  background-size: contain;
+  width: 960px;
+  height: 540px;
 }
 #level1Result-btn-back {
-    position: absolute;
-    left: 20px;
-    bottom: 20px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    cursor: pointer;
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  cursor: pointer;
 }
 /*level2 result*/
 #level2Result {
-    position: absolute;
-    background-image: url("../assets/UI/level-select-panel.png");
-    background-size: contain;
-    width: 960px;
-    height: 540px;
+  position: absolute;
+  background-image: url("../assets/UI/level-select-panel.png");
+  background-size: contain;
+  width: 960px;
+  height: 540px;
 }
 #level2Result-btn-back {
-    position: absolute;
-    left: 20px;
-    bottom: 20px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    cursor: pointer;
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 /* ========== 以下为合并的 UI 样式 ========== */
 
 /* 通用按钮格式 */
 .my-button {
-   font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
   width: 100px;
   height: 60px;
   border-radius: 10%;
@@ -245,7 +244,7 @@ canvas {
   position: absolute;
   transform: translateX(-50%);
   color: #ffffff;
-  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
   font-size: 30px;
   letter-spacing: 0.08em;
   text-align: center;
@@ -267,8 +266,12 @@ canvas {
   align-items: center;
   justify-content: center;
   transform: translateY(-2px);
-  transition: background-color 0.8s, border-color 1s;
-  transition: color 0.5s, -webkit-text-stroke 0.5s;
+  transition:
+    background-color 0.8s,
+    border-color 1s;
+  transition:
+    color 0.5s,
+    -webkit-text-stroke 0.5s;
 }
 .start-button:hover {
   color: #fff3fd;
@@ -291,8 +294,12 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.8s, border-color 1s;
-  transition: color 0.5s, -webkit-text-stroke 0.5s;
+  transition:
+    background-color 0.8s,
+    border-color 1s;
+  transition:
+    color 0.5s,
+    -webkit-text-stroke 0.5s;
 }
 .settings-button:hover {
   color: #fff3fd;
@@ -315,8 +322,12 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.8s, border-color 1s;
-  transition: color 0.5s, -webkit-text-stroke 0.5s;
+  transition:
+    background-color 0.8s,
+    border-color 1s;
+  transition:
+    color 0.5s,
+    -webkit-text-stroke 0.5s;
 }
 .credits-button:hover {
   color: #fff3fd;
@@ -332,7 +343,7 @@ canvas {
   border: 3px solid #39073a;
   background-color: rgba(191, 157, 212, 0.1);
   color: #fff3fd;
-  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
   font-weight: bold;
   -webkit-text-stroke: 0.2px #ffeafc;
   display: flex;
@@ -400,7 +411,7 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
   font-size: 50px;
   color: #fff3fd;
   background-color: rgba(101, 78, 119, 0.6);
@@ -442,7 +453,7 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
   font-size: 30px;
   color: #fff3fd;
   background-color: rgba(101, 78, 119, 0.6);
@@ -456,19 +467,68 @@ canvas {
 }
 
 .hint-notebook-button.scene-hint-notebook {
-  width: 760px;
-  height: 560px;
+  width: 520px;
+  height: 380px;
   z-index: 1100;
 }
 
 .hint-notebook-button.scene-hint-notebook .front,
 .hint-notebook-button.scene-hint-notebook .back {
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
   justify-content: flex-start;
-  white-space: pre;
-  font-size: 18px;
-  line-height: 1.25;
-  padding: 16px;
+  white-space: pre-line;
+  font-size: 16px;
+  line-height: 1.4;
+  padding: 24px 20px;
+  text-align: center;
+  overflow-y: auto;
+}
+
+/* ── Structured content layout ── */
+.scene-hint-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #e8d0ff;
+  text-align: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(160, 100, 210, 0.4);
+  width: 100%;
+}
+
+.scene-hint-body {
+  flex: 1;
+  font-size: 15px;
+  color: #ddd0ee;
+  text-align: center;
+  width: 100%;
+  white-space: pre-line;
+}
+
+.scene-hint-footer {
+  font-size: 14px;
+  color: #c8a0ff;
+  text-align: center;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(160, 100, 210, 0.3);
+  width: 100%;
+  animation: hintFooterGlow 1.6s ease-in-out infinite;
+}
+
+@keyframes hintFooterGlow {
+  0%,
+  100% {
+    opacity: 0.5;
+    text-shadow: 0 0 4px rgba(200, 160, 255, 0.3);
+  }
+  50% {
+    opacity: 1;
+    text-shadow:
+      0 0 12px rgba(200, 160, 255, 0.9),
+      0 0 24px rgba(160, 100, 240, 0.5);
+  }
 }
 
 .hint-notebook-button .hint-face-content {
@@ -491,7 +551,7 @@ canvas {
 .hint-notebook-button .hint-face-text {
   width: 100%;
   text-align: center;
-  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
   line-height: 1.25;
   white-space: normal;
 }
@@ -499,16 +559,20 @@ canvas {
 /* 背面"安装模块"按钮 */
 .hint-back-module-btn {
   position: absolute !important;
-  bottom: 30px !important;
+  bottom: 60px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
   width: 120px !important;
   height: 44px !important;
-  background: linear-gradient(90deg, rgba(100, 50, 140, 0.8), rgba(70, 30, 100, 0.8)) !important;
+  background: linear-gradient(
+    90deg,
+    rgba(100, 50, 140, 0.8),
+    rgba(70, 30, 100, 0.8)
+  ) !important;
   border: 2px solid #a060d0 !important;
   border-radius: 8px !important;
   color: #f0e0ff !important;
-  font-family: 'HYPixel11', 'PixelFont', sans-serif !important;
+  font-family: "HYPixel11", "PixelFont", sans-serif !important;
   font-size: 14px !important;
   font-weight: bold !important;
   cursor: pointer !important;
@@ -517,7 +581,11 @@ canvas {
 }
 
 .hint-back-module-btn:hover {
-  background: linear-gradient(90deg, rgba(130, 80, 170, 0.9), rgba(100, 60, 130, 0.9)) !important;
+  background: linear-gradient(
+    90deg,
+    rgba(130, 80, 170, 0.9),
+    rgba(100, 60, 130, 0.9)
+  ) !important;
   border-color: #d090ff !important;
   box-shadow: 0 0 12px rgba(160, 80, 200, 0.6) !important;
 }
@@ -530,7 +598,8 @@ canvas {
 .signboard-button {
   border: none;
   border-radius: 4px;
-  background: url('../assets/images/tiles/signboard.png') center / cover no-repeat;
+  background: url("../assets/images/tiles/signboard.png") center / cover
+    no-repeat;
   background-color: transparent;
   box-shadow: none;
   transform: none;
@@ -550,9 +619,10 @@ canvas {
   background: rgba(14, 7, 22, 0.93);
   border: 2px solid #7a3f8c;
   border-radius: 10px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65),
-              0 0 22px rgba(120, 50, 160, 0.35);
-  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.65),
+    0 0 22px rgba(120, 50, 160, 0.35);
+  font-family: "HYPixel11", "PixelFont", sans-serif;
   color: #f0e0ff;
   overflow: hidden;
   z-index: 1000;
@@ -582,7 +652,11 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: linear-gradient(90deg, rgba(90, 40, 120, 0.95), rgba(50, 15, 75, 0.95));
+  background: linear-gradient(
+    90deg,
+    rgba(90, 40, 120, 0.95),
+    rgba(50, 15, 75, 0.95)
+  );
   border-bottom: 1px solid rgba(140, 70, 180, 0.5);
   cursor: grab;
   user-select: none;
@@ -608,7 +682,10 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   line-height: 1;
   padding: 2px 7px;
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    border-color 0.2s;
 }
 .window-close-btn:hover {
   background-color: rgba(180, 50, 50, 0.65);
@@ -677,11 +754,13 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   border: 1px solid rgba(130, 70, 170, 0.7);
   border-radius: 6px;
   color: #e0c0ff;
-  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
   font-size: 13px;
   cursor: pointer;
   outline: none;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
 }
 .window-select:hover,
 .window-select:focus {
@@ -713,11 +792,14 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   border: 1px solid rgba(130, 70, 170, 0.7);
   border-radius: 6px;
   color: #d0a8f0;
-  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
   font-size: 12px;
   cursor: pointer;
   outline: none;
-  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -737,7 +819,8 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
 }
 
 @keyframes pulse-keybind {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 12px rgba(160, 80, 220, 0.6);
   }
   50% {
@@ -754,12 +837,15 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   border: 1px solid rgba(120, 80, 160, 0.6);
   border-radius: 4px;
   color: #b080d8;
-  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
   font-size: 12px;
   line-height: 1;
   cursor: pointer;
   outline: none;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    border-color 0.2s;
   flex: 0 0 auto;
 }
 
@@ -787,10 +873,12 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   border-radius: 7px;
   background: rgba(30, 12, 50, 0.85);
   color: #e0c0ff;
-  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
   font-size: 14px;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
   box-sizing: border-box;
 }
 .pause-btn:last-child {
@@ -858,10 +946,11 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   background: rgba(20, 16, 34, 0.85);
   border: 2px solid rgba(182, 155, 220, 0.55);
   border-radius: 18px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.42),
-              0 0 30px rgba(170, 150, 215, 0.18);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.42),
+    0 0 30px rgba(170, 150, 215, 0.18);
   backdrop-filter: blur(8px);
-  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
   color: #f6efff;
   overflow: hidden;
   z-index: 1000;
@@ -874,7 +963,11 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   align-items: center;
   justify-content: space-between;
   padding: 18px 24px 14px;
-  background: linear-gradient(90deg, rgba(114, 89, 166, 0.42), rgba(44, 32, 73, 0.3));
+  background: linear-gradient(
+    90deg,
+    rgba(114, 89, 166, 0.42),
+    rgba(44, 32, 73, 0.3)
+  );
   border-bottom: 1px solid rgba(204, 190, 230, 0.2);
 }
 
@@ -893,7 +986,10 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   line-height: 1;
   padding: 2px 7px;
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    border-color 0.2s;
 }
 
 .window-sidebar-close-btn:hover {
@@ -927,10 +1023,12 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   border: 1px solid rgba(130, 70, 170, 0.7);
   border-radius: 8px;
   color: #e0c0ff;
-  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
   font-size: 13px;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
 }
 
 .window-sidebar-tab:hover {
@@ -939,7 +1037,11 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
 }
 
 .window-sidebar-tab.active {
-  background: linear-gradient(135deg, rgba(190, 172, 227, 0.24), rgba(110, 76, 168, 0.34));
+  background: linear-gradient(
+    135deg,
+    rgba(190, 172, 227, 0.24),
+    rgba(110, 76, 168, 0.34)
+  );
   border-color: rgba(230, 220, 255, 0.48);
   color: #fff7ff;
 }
@@ -1040,9 +1142,10 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   background: rgba(14, 7, 22, 0.93);
   border: 2px solid #7a3f8c;
   border-radius: 15px;
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.8),
-              0 0 30px rgba(120, 50, 160, 0.5);
-  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  box-shadow:
+    0 12px 48px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(120, 50, 160, 0.5);
+  font-family: "HYPixel11", "PixelFont", sans-serif;
   color: #f0e0ff;
   max-width: 90%;
   max-height: 80%;

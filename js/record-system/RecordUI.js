@@ -34,7 +34,7 @@ export class RecordUI {
     const base = {
       ...chrome,
       title: t("rec_title_standby"),
-      subtitle: `${t("rec_sub_max")} ${maxSec}s`,
+      subtitle: `${t("rec_sub_max").replace("{KEY}", recordKey)} ${maxSec}s`,
       badge: "STANDBY",
       accentA: p.color(72, 48, 105),
       accentB: p.color(44, 26, 70),
@@ -171,7 +171,7 @@ export class RecordUI {
       pausedReplayElapsed,
     );
 
-    const panelW = Math.min(540, p.width - 32);
+    const panelW = Math.min(630, p.width - 32);
     const panelH = 92;
     const panelX = Math.floor((p.width - panelW) / 2);
     const panelY = 14;
@@ -273,18 +273,18 @@ export class RecordUI {
     // Badge label
     p.fill(ui.textMain);
     p.textAlign(p.LEFT, p.CENTER);
-    p.textSize(11);
+    p.textSize(15);
     p.textStyle(p.BOLD);
     p.text(ui.badge, panelX + 52, panelY + 33);
 
     // Title + subtitle
     p.textStyle(p.BOLD);
-    p.textSize(19);
+    p.textSize(23);
     p.text(ui.title, panelX + 136, panelY + 31);
 
     p.textStyle(p.NORMAL);
     p.fill(ui.textSub);
-    p.textSize(11);
+    p.textSize(15);
     p.text(ui.subtitle, panelX + 136, panelY + 54);
 
     // === PROGRESS BAR ===
@@ -313,7 +313,7 @@ export class RecordUI {
     // HUD label
     p.fill(ui.textSub);
     p.textAlign(p.RIGHT, p.CENTER);
-    p.textSize(10);
+    p.textSize(15);
     p.text(t("rec_hud_label"), panelX + panelW - 14, panelY + 20);
 
     // === AIR BLOCK OVERLAY ===
@@ -322,7 +322,7 @@ export class RecordUI {
       p.rect(panelX + 2, panelY + 2, panelW - 4, panelH - 4);
       p.fill(185, 155, 220, 200);
       p.textAlign(p.CENTER, p.CENTER);
-      p.textSize(13);
+      p.textSize(15);
       p.textStyle(p.BOLD);
       p.text(t("rec_blocked_air"), panelX + panelW / 2, panelY + panelH / 2);
       p.textStyle(p.NORMAL);

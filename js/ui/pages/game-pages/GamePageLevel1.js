@@ -1,6 +1,7 @@
 import { GamePageBase } from "./GamePageBase.js";
 import { HintButton } from "../../components/HintButton.js";
 import { WindowPrompt } from "../../windows/WindowPrompt.js";
+import { WindowPromptPause } from "../../windows/WindowPromptPause.js";
 import { AudioManager } from "../../../AudioManager.js";
 import { i18n, t } from "../../../i18n.js";
 import { EventTypes } from "../../../event-system/EventTypes.js";
@@ -27,7 +28,14 @@ export class GamePageLevel1 extends GamePageBase {
       en: "assets/text/signboard_hint_level1_back_en.txt",
     };
 
-    // Module installation prompt
+    // First-record prompt (pauses game)
+    this._firstRecordPrompt = new WindowPromptPause(p, "first_record_prompt", {
+      width: 420,
+      padding: 36,
+      fontSize: 17,
+    });
+
+    // Module installation prompt — recording unlocks when this is dismissed
     this._moduleInstallationPrompt = new WindowPrompt(
       p,
       "module_installation_complete",
@@ -35,6 +43,7 @@ export class GamePageLevel1 extends GamePageBase {
         width: 400,
         padding: 40,
         fontSize: 18,
+        onClose: () => this._unlockRecordHud(),
       },
     );
 
@@ -70,13 +79,42 @@ export class GamePageLevel1 extends GamePageBase {
     this._loadSceneHintBackText();
     resetLevel1PromptState();
     this._applyRecordHudVisibility();
+    this._applyRecordDisabledState();
+    this._hookFirstRecordPrompt();
   }
 
   // ── Overrides ────────────────────────────────────────────────
 
+  /**
+   * Parse text into structured HTML (title / body / footer).
+   * Sections separated by lines containing only "---".
+   */
+  _formatHintHtml(raw) {
+    if (!raw) return "";
+    const sections = raw.split(/^---$/m).map((s) => s.trim());
+    const title = sections[0] || "";
+    const body = sections[1] || "";
+    const footer = sections[2] || "";
+    let html = "";
+    if (title)
+      html += `<div class="scene-hint-title">${this._esc(title)}</div>`;
+    if (body) html += `<div class="scene-hint-body">${this._esc(body)}</div>`;
+    if (footer)
+      html += `<div class="scene-hint-footer">${this._esc(footer)}</div>`;
+    return html;
+  }
+
+  /** Minimal HTML-escape, preserving newlines as <br>. */
+  _esc(text) {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\n/g, "<br>");
+  }
+
   _onHint() {
     this._windowHint.open();
-    this._unlockRecordHud();
   }
 
   _pauseGame() {
@@ -104,11 +142,25 @@ export class GamePageLevel1 extends GamePageBase {
     recordSystem.setHudVisible(this._isRecordHudUnlocked);
   }
 
+  _applyRecordDisabledState() {
+    const rs = this._getCurrentRecordSystem();
+    if (!rs) return;
+    rs.setDisabled(!this._isRecordHudUnlocked);
+  }
+
   _unlockRecordHud() {
     markLevel1RecordHudOpened();
     if (this._isRecordHudUnlocked) return;
     this._isRecordHudUnlocked = true;
     this._applyRecordHudVisibility();
+    this._applyRecordDisabledState();
+    this._hookFirstRecordPrompt();
+  }
+
+  _hookFirstRecordPrompt() {
+    const rs = this._getCurrentRecordSystem();
+    if (!rs) return;
+    rs._onFirstRecord = () => this._firstRecordPrompt.open();
   }
 
   // ── Scene hint text loading ──────────────────────────────────
@@ -126,9 +178,12 @@ export class GamePageLevel1 extends GamePageBase {
       }
       if (!response.ok) return;
 
-      this._sceneHintFrontText = await response.text();
+      this._sceneHintFrontTextRaw = await response.text();
+      this._sceneHintFrontText = this._formatHintHtml(
+        this._sceneHintFrontTextRaw,
+      );
       if (this._sceneHintBtn) {
-        this._sceneHintBtn.setFrontText(this._sceneHintFrontText);
+        this._sceneHintBtn.front.html(this._sceneHintFrontText);
       }
     } catch {
       // Ignore load failure; keep default text
@@ -148,9 +203,12 @@ export class GamePageLevel1 extends GamePageBase {
       }
       if (!response.ok) return;
 
-      this._sceneHintBackText = await response.text();
+      this._sceneHintBackTextRaw = await response.text();
+      this._sceneHintBackText = this._formatHintHtml(
+        this._sceneHintBackTextRaw,
+      );
       if (this._sceneHintBtn) {
-        this._sceneHintBtn.setBackText(this._sceneHintBackText);
+        this._sceneHintBtn.back.html(this._sceneHintBackText);
       }
     } catch {
       // Ignore load failure; keep default text
@@ -166,9 +224,9 @@ export class GamePageLevel1 extends GamePageBase {
     const margin = 16;
     const groundHeight = 80;
     const maxBottomY = p.height - groundHeight;
-    const sceneHintW = Math.min(760, Math.max(240, p.width - margin * 2));
+    const sceneHintW = Math.min(520, Math.max(240, p.width - margin * 2));
     const maxSceneHintH = Math.max(180, maxBottomY - margin);
-    const sceneHintH = Math.min(560, Math.max(180, maxSceneHintH));
+    const sceneHintH = Math.min(380, Math.max(180, maxSceneHintH));
     const sceneHintX = Math.max(
       0,
       Math.min((p.width - sceneHintW) / 2, p.width - sceneHintW),
@@ -180,12 +238,22 @@ export class GamePageLevel1 extends GamePageBase {
     );
     const sceneHintBtn = new HintButton(
       p,
-      this._sceneHintFrontText || "发现了一个神秘的告示牌……",
+      "",
       sceneHintX,
       sceneHintY,
       () => {},
       "scene-hint-notebook",
-      this._sceneHintBackText || "按 ESC 或右上角暂停，内有 Hint",
+      "",
+    );
+    sceneHintBtn.front.html(
+      this._sceneHintFrontText ||
+        this._formatHintHtml(
+          "Notice\n---\nA mysterious signboard...\n---\nClick to flip!",
+        ),
+    );
+    sceneHintBtn.back.html(
+      this._sceneHintBackText ||
+        this._formatHintHtml("模块数据\n---\n按 ESC 或右上角暂停，内有 Hint"),
     );
 
     sceneHintBtn.container.style("width", `${sceneHintW}px`);
@@ -198,7 +266,6 @@ export class GamePageLevel1 extends GamePageBase {
       moduleBtn.parent(sceneHintBtn.back);
       moduleBtn.mousePressed(() => {
         this._moduleInstallationPrompt.open();
-        this._unlockRecordHud();
         this._isModuleInstalled = true;
         this._hideSceneHintButton();
         AudioManager.playSFX("click");
@@ -244,6 +311,7 @@ export class GamePageLevel1 extends GamePageBase {
       );
     }
     i18n.offChange(this._onLangChange);
+    if (this._firstRecordPrompt) this._firstRecordPrompt.remove();
     if (this._moduleInstallationPrompt) this._moduleInstallationPrompt.remove();
     super.exit(); // handles ESC listener, windows, super.exit()
   }

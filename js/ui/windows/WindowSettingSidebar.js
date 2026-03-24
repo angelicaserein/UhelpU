@@ -144,7 +144,7 @@ export class WindowSettingSidebar extends WindowSidebarBase {
 
     this._langSelect = this.p.createSelect();
     this._langSelect.option("English", "en");
-    this._langSelect.option("涓枃", "zh");
+    this._langSelect.option("简体中文", "zh");
     this._langSelect.addClass("window-select");
     this._langSelect.parent(langRow);
     this._langSelect.selected(i18n.getLang());

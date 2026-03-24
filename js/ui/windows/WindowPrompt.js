@@ -1,7 +1,7 @@
 // WindowPrompt.js - 轻量级提示浮窗
 // 特点：在画布居中显示，点击关闭
 
-import { i18n, t } from '../../i18n.js';
+import { i18n, t } from "../../i18n.js";
 
 export class WindowPrompt {
   /**
@@ -14,14 +14,14 @@ export class WindowPrompt {
    *   - fontSize: 字体大小，默认18
    *   - onClose: 关闭时的回调函数
    */
-  constructor(p, contentKey = '', options = {}) {
+  constructor(p, contentKey = "", options = {}) {
     this.p = p;
     this.contentKey = contentKey;
     this.isVisible = false;
 
     // 配置选项
     this.width = options.width ?? 400;
-    this.backgroundColor = options.backgroundColor ?? 'rgba(14, 7, 22, 0.93)';
+    this.backgroundColor = options.backgroundColor ?? "rgba(14, 7, 22, 0.93)";
     this.padding = options.padding ?? 40;
     this.fontSize = options.fontSize ?? 18;
     this.onClose = options.onClose ?? null;
@@ -40,28 +40,28 @@ export class WindowPrompt {
     const p = this.p;
 
     // 全屏遮罩层（相对于画布）
-    this.overlay = p.createDiv('');
-    this.overlay.addClass('window-prompt-overlay');
-    this.overlay.style('display', 'none');
+    this.overlay = p.createDiv("");
+    this.overlay.addClass("window-prompt-overlay");
+    this.overlay.style("display", "none");
     this.overlay.mousePressed(() => this.close());
 
     // 主容器
-    this.container = p.createDiv('');
-    this.container.addClass('window-prompt-container');
+    this.container = p.createDiv("");
+    this.container.addClass("window-prompt-container");
     this.container.parent(this.overlay);
-    this.container.style('width', this.width + 'px');
-    this.container.style('padding', this.padding + 'px');
-    this.container.style('background-color', this.backgroundColor);
+    this.container.style("width", this.width + "px");
+    this.container.style("padding", this.padding + "px");
+    this.container.style("background-color", this.backgroundColor);
 
     // 内容文本
     this._contentEl = p.createDiv(this._getContent());
-    this._contentEl.addClass('window-prompt-content');
-    this._contentEl.style('font-size', this.fontSize + 'px');
+    this._contentEl.addClass("window-prompt-content");
+    this._contentEl.style("font-size", this.fontSize + "px");
     this._contentEl.parent(this.container);
 
     // 关闭提示文本（支持i18n）
-    this._tipsEl = p.createDiv(t('click_to_close'));
-    this._tipsEl.addClass('window-prompt-tips');
+    this._tipsEl = p.createDiv(t("click_to_close"));
+    this._tipsEl.addClass("window-prompt-tips");
     this._tipsEl.parent(this.container);
 
     // 初始隐藏
@@ -72,7 +72,7 @@ export class WindowPrompt {
 
   _getContent() {
     if (!this.contentKey) {
-      return '这是一个占位符提示框，等会会改成真正的提示框内容。';
+      return "这是一个占位符提示框，等会会改成真正的提示框内容。";
     }
     return t(this.contentKey);
   }
@@ -82,7 +82,7 @@ export class WindowPrompt {
       this._contentEl.html(this._getContent());
     }
     if (this._tipsEl) {
-      this._tipsEl.html(t('click_to_close'));
+      this._tipsEl.html(t("click_to_close"));
     }
   }
 
@@ -111,24 +111,25 @@ export class WindowPrompt {
 
     // 设置遮罩层覆盖画布
     this.overlay.position(overlayX, overlayY);
-    this.overlay.style('width', canvasWidth + 'px');
-    this.overlay.style('height', canvasHeight + 'px');
+    this.overlay.style("width", canvasWidth + "px");
+    this.overlay.style("height", canvasHeight + "px");
   }
 
   // ─── 显示/隐藏 ──────────────────────────────────────────────────────────────
 
   open() {
     this.isVisible = true;
+    this._refreshContent();
     this._updatePosition();
     this.overlay.show();
-    this.overlay.style('display', 'flex');
+    this.overlay.style("display", "flex");
   }
 
   close() {
     this.isVisible = false;
     this.overlay.hide();
 
-    if (this.onClose && typeof this.onClose === 'function') {
+    if (this.onClose && typeof this.onClose === "function") {
       this.onClose();
     }
   }

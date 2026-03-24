@@ -1,24 +1,8 @@
-┌───
-│ FACILITY ZERO // SECTOR-07              
-│ WEEKLY SCHEDULE & SUPPLY NOTICE         
-├───
-│ [SCHEDULE]                              
-│ DAY 3 09:00 Cognitive Load Test Group A 
-│ DAY 3 14:00 Physical Assessment (All)   
-│ DAY 4 10:30 Perception Calibration B    
-│ DAY 5 All Day Reactor Zone Maintenance  
-│ * Schedule changes follow broadcasts.   
-├───
-│ [SUPPLY PICKUP]                         
-│ Weekly allocation:                      
-│ Nutrition Gel x2 / Spare Suit x1        
-│ Pickup time: Daily 08:00-08:30          
-│ Pickup point: Corridor 3 Supply Window  
-│ * Late pickup will not be reissued.     
-├───
-│ Contact the experiment coordinator.     
-│ FACILITY ZERO Logistics Team            
-│ DAY 001 // Routine Update               
-└───
-
-(You notice a chip-like piece fell from behind the notice.)
+FACILITY ZERO
+WEEKLY SCHEDULE & SUPPLY NOTICE
+---
+You notice a bulletin board here.
+Written below are the experiment schedule, this week's ration allocation, and other information.
+As you look, a chip-like object falls from behind the notice paper.
+---
+Tap this interface to turn the page!

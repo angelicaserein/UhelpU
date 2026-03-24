@@ -1,15 +1,8 @@
-
-  Install that module.
-  Once it is installed, you will know how to use it.
-
-  Remember one thing-
-
-  While recording, plan for your future self.
-  Because your future self is your present self.
-
-                                                 
-                                                 
-
-
-
-
+Module Data
+---
+Install the module.
+Once installed, try it out and see how it works.
+When recording, think ahead for your future self.
+Because your future self is still you, right now.
+---
+After installation, please review the controls carefully.

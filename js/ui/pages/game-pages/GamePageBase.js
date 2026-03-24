@@ -4,6 +4,7 @@ import { WindowPause } from "../../windows/WindowPause.js";
 import { WindowSetting } from "../../windows/WindowSetting.js";
 import { WindowHint } from "../../windows/WindowHint.js";
 import { AudioManager } from "../../../AudioManager.js";
+import { EventTypes } from "../../../event-system/EventTypes.js";
 
 /**
  * Shared base for all in-game UI pages.
@@ -23,7 +24,7 @@ export class GamePageBase extends PageBase {
         // Back button
         const backBtn = new ButtonBase(p, "◀", 0.02 * p.width, 0.03 * p.height, () => {
             this._resumeGame();
-            this.switcher.eventBus && this.switcher.eventBus.publish("returnLevelChoice");
+            this.switcher.eventBus && this.switcher.eventBus.publish(EventTypes.RETURN_LEVEL_CHOICE);
         }, "back-button");
         backBtn.btn.style("width", 0.030 * p.width + "px");
         backBtn.btn.style("height", 0.055 * p.height + "px");
@@ -44,11 +45,11 @@ export class GamePageBase extends PageBase {
             onHint: () => this._onHint(),
             onBackLevelChoice: () => {
                 this._resumeGame();
-                this.switcher.eventBus && this.switcher.eventBus.publish("returnLevelChoice");
+                this.switcher.eventBus && this.switcher.eventBus.publish(EventTypes.RETURN_LEVEL_CHOICE);
             },
             onBackMenu: () => {
                 this._resumeGame();
-                this.switcher.eventBus && this.switcher.eventBus.publish("unloadLevel");
+                this.switcher.eventBus && this.switcher.eventBus.publish(EventTypes.UNLOAD_LEVEL);
                 this.switcher.main.staticSwitcher.showMainMenu(p);
             },
         });
@@ -89,13 +90,13 @@ export class GamePageBase extends PageBase {
 
     _pauseGame() {
         this._isPaused = true;
-        this.switcher.eventBus && this.switcher.eventBus.publish("pauseGame");
+        this.switcher.eventBus && this.switcher.eventBus.publish(EventTypes.PAUSE_GAME);
         this._windowPause.open();
     }
 
     _resumeGame() {
         this._isPaused = false;
-        this.switcher.eventBus && this.switcher.eventBus.publish("resumeGame");
+        this.switcher.eventBus && this.switcher.eventBus.publish(EventTypes.RESUME_GAME);
         this._windowPause.close();
         this._windowSetting.close();
         this._windowHint.close();

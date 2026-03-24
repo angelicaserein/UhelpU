@@ -1,4 +1,0 @@
-class test {
-  oqeu;
-  dnqowudho;
-}

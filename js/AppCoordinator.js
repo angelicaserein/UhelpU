@@ -1,5 +1,6 @@
 import { SwitcherMain } from "./switchers/SwitcherMain.js";
 import { EventBus } from "./event-system/EventBus.js";
+import { EventTypes } from "./event-system/EventTypes.js";
 import { LevelManager } from "./level-design/LevelManager.js";
 import { StaticPageResult } from "./ui/pages/static-pages/StaticPageResult.js";
 import { StaticPageWin } from "./ui/pages/static-pages/StaticPageWin.js";
@@ -19,7 +20,7 @@ export class AppCoordinator {
   }
 
   bindEvents() {
-    this.eventBus.subscribe("loadLevel", (levelIndex) => {
+    this.eventBus.subscribe(EventTypes.LOAD_LEVEL, (levelIndex) => {
       this.playLevelBgm(levelIndex);
 
       this.levelManager.loadLevel(levelIndex, this.p, this.eventBus);
@@ -33,19 +34,19 @@ export class AppCoordinator {
       this.switcher.switchToGame(gamePage, this.p);
     });
 
-    this.eventBus.subscribe("unloadLevel", () => {
+    this.eventBus.subscribe(EventTypes.UNLOAD_LEVEL, () => {
       this.levelManager.unloadLevel(this.p, this.eventBus);
       this.switcher.gameSwitcher.runtimeLevelManager = null;
       this.switcher.staticSwitcher.showMainMenu(this.p, this.eventBus);
     });
 
-    this.eventBus.subscribe("returnLevelChoice", () => {
+    this.eventBus.subscribe(EventTypes.RETURN_LEVEL_CHOICE, () => {
       this.levelManager.unloadLevel(this.p, this.eventBus);
       this.switcher.gameSwitcher.runtimeLevelManager = null;
       this.switcher.staticSwitcher.showLevelChoice(this.p);
     });
 
-    this.eventBus.subscribe("autoResult", (result) => {
+    this.eventBus.subscribe(EventTypes.AUTO_RESULT, (result) => {
       const levelIndex = this.levelManager.currentLevelIndex;
       this.levelManager.unloadLevel(this.p, this.eventBus);
       this.switcher.gameSwitcher.runtimeLevelManager = null;
@@ -71,11 +72,11 @@ export class AppCoordinator {
       this.switcher.switchToStatic(resultPage, this.p);
     });
 
-    this.eventBus.subscribe("pauseGame", () => {
+    this.eventBus.subscribe(EventTypes.PAUSE_GAME, () => {
       this.levelManager.setPaused(true);
     });
 
-    this.eventBus.subscribe("resumeGame", () => {
+    this.eventBus.subscribe(EventTypes.RESUME_GAME, () => {
       this.levelManager.setPaused(false);
     });
   }

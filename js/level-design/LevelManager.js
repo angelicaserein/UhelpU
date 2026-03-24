@@ -2,6 +2,7 @@ import { Level1 } from "./Level1.js";
 import { Level2 } from "./Level2.js";
 import { Level3 } from "./Level3.js";
 import { setGamePaused, isGamePaused } from "../game-runtime/GamePauseState.js";
+import { EventTypes } from "../event-system/EventTypes.js";
 import { Assets } from "../AssetsManager.js";
 import { t } from "../i18n.js";
 
@@ -251,7 +252,7 @@ export class LevelManager {
         player.y + player.collider.h < viewBounds.minY
       ) {
         // 发布结算事件
-        eventBus && eventBus.publish("autoResult", "autoResult2");
+        eventBus && eventBus.publish(EventTypes.AUTO_RESULT, "autoResult2");
       }
     }
   }

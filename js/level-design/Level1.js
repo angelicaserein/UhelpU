@@ -11,7 +11,7 @@ import { BaseLevel } from "./BaseLevel.js";
 import {
   shouldShowLevel1PromptByRule,
   markLevel1ReplayStarted,
-} from "../game-runtime/Level1PromptState.js";
+} from "./Level1PromptState.js";
 
 export class Level1 extends BaseLevel {
   constructor(p, eventBus) {
@@ -64,8 +64,6 @@ export class Level1 extends BaseLevel {
       },
     );
     this.entities.add(cKeyPrompt);
-
-    // ...existing code...
 
     const missedPromptWidth = 280;
     const signboardRightX = signboard.x + signboard.w;

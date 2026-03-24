@@ -3,6 +3,7 @@ import { ButtonBase } from "../../components/ButtonBase.js";
 import { t } from '../../../i18n.js';
 import { Assets } from "../../../AssetsManager.js";
 import { AudioManager } from '../../../AudioManager.js';
+import { EventTypes } from "../../../event-system/EventTypes.js";
 
 export class StaticPageResult extends PageBase {
   constructor(result, levelIndex, switcher, p, eventBus) {
@@ -21,7 +22,7 @@ export class StaticPageResult extends PageBase {
     this.addElement(backBtn);
 
     const restartBtn = new ButtonBase(p, t('btn_restart'), p.width/2 - 60, p.height/2 + 106, () => {
-      this.eventBus.publish("loadLevel", `level${levelNum}`);
+      this.eventBus.publish(EventTypes.LOAD_LEVEL, `level${levelNum}`);
     }, 'restart-button');
     restartBtn.btn.style('font-size', '20px');
     this.addElement(restartBtn);

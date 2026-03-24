@@ -3,6 +3,7 @@ import { ButtonBase } from "../../components/ButtonBase.js";
 import { FollowImage } from "../../components/FollowImage.js";
 import { Assets } from "../../../AssetsManager.js";
 import { AudioManager } from '../../../AudioManager.js';
+import { EventTypes } from "../../../event-system/EventTypes.js";
 
 export class StaticPageLevelChoice extends PageBase {
   constructor(switcher, p, eventBus) {
@@ -27,7 +28,7 @@ export class StaticPageLevelChoice extends PageBase {
 
     // Level 1 按钮
     const level1Btn = new ButtonBase(p, ' ', 0.125 * p.width, 0.441 * p.height, () => {
-      this.eventBus.publish("loadLevel", "level1");
+      this.eventBus.publish(EventTypes.LOAD_LEVEL, "level1");
     }, 'level1-button');
     level1Btn.btn.style('width', 0.050 * p.width + 'px');
     level1Btn.btn.style('height', 0.048 * p.height + 'px');
@@ -35,7 +36,7 @@ export class StaticPageLevelChoice extends PageBase {
 
     // Level 2 按钮
     const level2Btn = new ButtonBase(p, ' ', 0.3 * p.width, 0.441 * p.height, () => {
-      this.eventBus.publish("loadLevel", "level2");
+      this.eventBus.publish(EventTypes.LOAD_LEVEL, "level2");
     }, 'level2-button');
     level2Btn.btn.style('width', 0.051 * p.width + 'px');
     level2Btn.btn.style('height', 0.048 * p.height + 'px');
@@ -43,7 +44,7 @@ export class StaticPageLevelChoice extends PageBase {
 
     // Level 3 按钮
     const level3Btn = new ButtonBase(p, ' ', 0.477 * p.width, 0.441 * p.height, () => {
-      this.eventBus.publish("loadLevel", "level3");
+      this.eventBus.publish(EventTypes.LOAD_LEVEL, "level3");
     }, 'level3-button');
     level3Btn.btn.style('width', 0.049 * p.width + 'px');
     level3Btn.btn.style('height', 0.048 * p.height + 'px');

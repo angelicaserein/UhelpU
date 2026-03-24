@@ -1,4 +1,5 @@
 import { ColliderShape, ColliderType } from "./enumerator.js";
+import { EventTypes } from "../event-system/EventTypes.js";
 
 export const responderMap = {
     "DYNAMIC-STATIC": (a, msg) => basicBlockResponse(a, msg),
@@ -53,7 +54,7 @@ function dynDynBlockResponse(a, b, msg) {
 function dynTriResponse(a, b, eventBus) {
     //level1
     if(a.type === "player" && b.type === "home") {
-        eventBus && eventBus.publish("autoResult", "autoResult1");
+        eventBus && eventBus.publish(EventTypes.AUTO_RESULT, "autoResult1");
         return;
     }
     //level2
@@ -68,7 +69,7 @@ function dynTriResponse(a, b, eventBus) {
     }
     if(a.type === "player" && b.type === "portal") {
         if(b.isOpen) {
-            eventBus && eventBus.publish("autoResult", "autoResult1");
+            eventBus && eventBus.publish(EventTypes.AUTO_RESULT, "autoResult1");
         }
         return;
     }

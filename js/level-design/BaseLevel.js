@@ -48,6 +48,15 @@ export class BaseLevel {
       player.clearListeners();
     }
 
+    // 调用每个实体的 onDestroy 钩子（清理监听器等资源）
+    if (this.entities) {
+      for (const entity of this.entities) {
+        if (typeof entity.onDestroy === "function") {
+          entity.onDestroy();
+        }
+      }
+    }
+
     // 修复：重进关卡时清空所有实体，防止公告栏等交互范围残留
     if (this.entities && typeof this.entities.clear === "function") {
       this.entities.clear();

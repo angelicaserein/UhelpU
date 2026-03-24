@@ -3,10 +3,11 @@ import { HintButton } from "../../components/HintButton.js";
 import { WindowPrompt } from "../../windows/WindowPrompt.js";
 import { AudioManager } from "../../../AudioManager.js";
 import { i18n, t } from "../../../i18n.js";
+import { EventTypes } from "../../../event-system/EventTypes.js";
 import {
   markLevel1RecordHudOpened,
   resetLevel1PromptState,
-} from "../../../game-runtime/Level1PromptState.js";
+} from "../../../level-design/Level1PromptState.js";
 
 export class GamePageLevel1 extends GamePageBase {
   constructor(switcher, p) {
@@ -50,11 +51,11 @@ export class GamePageLevel1 extends GamePageBase {
     };
     if (this.switcher.eventBus) {
       this.switcher.eventBus.subscribe(
-        "signboardInteracted",
+        EventTypes.SIGNBOARD_INTERACTED,
         this._onSignboardInteracted,
       );
       this.switcher.eventBus.subscribe(
-        "signboardOutOfRange",
+        EventTypes.SIGNBOARD_OUT_OF_RANGE,
         this._onSignboardOutOfRange,
       );
     }

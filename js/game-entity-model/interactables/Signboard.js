@@ -1,6 +1,7 @@
 import { GameEntity } from "../base/GameEntity.js";
 import { RectangleCollider } from "../../collision-system/CollideComponent.js";
 import { ColliderType } from "../../collision-system/enumerator.js";
+import { EventTypes } from "../../event-system/EventTypes.js";
 import { Assets } from "../../AssetsManager.js";
 import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
 
@@ -73,7 +74,7 @@ export class Signboard extends GameEntity {
     this._inRange = this.isPlayerOverlapping();
 
     if (wasInRange && !this._inRange && this.eventBus) {
-      this.eventBus.publish("signboardOutOfRange");
+      this.eventBus.publish(EventTypes.SIGNBOARD_OUT_OF_RANGE);
     }
   }
 
@@ -109,7 +110,7 @@ export class Signboard extends GameEntity {
   tryInteract() {
     if (this.isPlayerOverlapping()) {
       if (this.eventBus) {
-        this.eventBus.publish("signboardInteracted");
+        this.eventBus.publish(EventTypes.SIGNBOARD_INTERACTED);
       }
     }
   }
@@ -150,5 +151,9 @@ export class Signboard extends GameEntity {
   clearListeners() {
     document.removeEventListener("keydown", this._onKeyDown);
     document.removeEventListener("keyup", this._onKeyUp);
+  }
+
+  onDestroy() {
+    this.clearListeners();
   }
 }

@@ -23,15 +23,24 @@ export class TextPrompt extends KeyPrompt {
     this._visibilityFn = options.visibilityFn || null;
     this._showDistance = options.showDistance || 50;
     this._hideDistance = options.hideDistance || 150;
+    this._onTrigger = options.onTrigger || null;
+    this._wasVisible = false;
   }
 
   update(p) {
     if (this._visibilityFn && !this._visibilityFn()) {
       this._targetAlpha = 0;
       this._currentAlpha = 0;
+      this._wasVisible = false;
       return;
     }
     super.update(p);
+
+    const isVisible = this._targetAlpha > 0;
+    if (isVisible && !this._wasVisible && this._onTrigger) {
+      this._onTrigger();
+    }
+    this._wasVisible = isVisible;
   }
 
   draw(p) {

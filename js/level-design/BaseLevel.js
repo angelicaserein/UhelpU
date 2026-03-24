@@ -126,7 +126,11 @@ export class BaseLevel {
       p.push();
       p.translate(-bgOffsetX, 0);
       p.scale(1, -1);
-      p.image(bg, 0, -p.height, p.width, p.height);
+      // Calculate scale to make background slightly larger than canvas while maintaining aspect ratio
+      const scaleX = p.width / bg.width;
+      const scaleY = p.height / bg.height;
+      const scale = Math.max(scaleX, scaleY) * 1.05; // Slightly larger than canvas
+      p.image(bg, 0, -p.height, bg.width * scale, bg.height * scale);
       p.pop();
       return;
     }

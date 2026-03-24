@@ -28,6 +28,7 @@ export class Signboard extends GameEntity {
     h = Signboard.DEFAULT_H,
     getPlayer = null,
     eventBus = null,
+    { imageKey = "tileImage_signboard" } = {},
   ) {
     super(x, y);
     this.type = "signboard";
@@ -35,6 +36,7 @@ export class Signboard extends GameEntity {
     this.h = h;
     this._getPlayer = getPlayer;
     this.eventBus = eventBus;
+    this._imageKey = imageKey;
     this.zIndex = -1; // 木牌在角色下层，不挡住它们
 
     this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
@@ -83,7 +85,7 @@ export class Signboard extends GameEntity {
    * 图像需要 y 轴翻转（游戏坐标系反向）
    */
   draw(p) {
-    const img = Assets.tileImage_signboard;
+    const img = Assets[this._imageKey];
     if (!img) return;
 
     // 翻转图像（游戏坐标系 y 轴朝上）

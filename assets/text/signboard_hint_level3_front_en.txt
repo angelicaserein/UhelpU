@@ -1,0 +1,5 @@
+Ladder
+---
+You found a ladder, but you can't lift it.
+---
+Try something else!

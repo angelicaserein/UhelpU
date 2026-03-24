@@ -48,6 +48,7 @@ export const Assets = {
   tileImage_platform: null,
   tileImage_wall: null,
   tileImage_signboard: null,
+  tileImage_signboard2: null,
 
   // 安全加载：失败时返回 null 而不是抛异常
   async _safeLoad(promise, name) {
@@ -184,6 +185,10 @@ export const Assets = {
         p.loadImage("assets/images/tiles/signboard.png"),
         "木牌贴图",
       ),
+      this._safeLoad(
+        p.loadImage("assets/images/tiles/signboard2.png"),
+        "木牌2贴图",
+      ),
     ]);
 
     // 按顺序赋值
@@ -236,5 +241,6 @@ export const Assets = {
     this.tileImage_platform = results[39];
     this.tileImage_wall = results[40];
     this.tileImage_signboard = results[41];
+    this.tileImage_signboard2 = results[42];
   },
 };

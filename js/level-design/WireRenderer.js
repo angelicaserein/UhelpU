@@ -1,6 +1,10 @@
 ﻿/**
- * WireRenderer 鈥?handles electric-wire state, drawing, and portal indicator lights.
+ * WireRenderer — handles electric-wire state, drawing, and portal indicator lights.
  * Extracted from Level2 to keep level files focused on layout/design.
+ *
+ * Automatically detects platforms between each button and the portal
+ * to create routing waypoints. If no platform lies in the path,
+ * the wire connects directly.
  */
 export class WireRenderer {
   /**
@@ -8,15 +12,24 @@ export class WireRenderer {
    * @param {object} config.button1      - right button entity
    * @param {object} config.button2      - left button entity
    * @param {object} config.portal       - portal entity
-   * @param {object} config.rightPlatform - platform used for wire routing
+   * @param {Set|Array} config.entities  - all level entities (used to find platforms for routing)
    * @param {number} [config.wireSpeed=0.05] - per-frame progress increment
    */
-  constructor({ button1, button2, portal, rightPlatform, wireSpeed = 0.05 }) {
+  constructor({ button1, button2, portal, entities, wireSpeed = 0.05 }) {
     this._button1 = button1;
     this._button2 = button2;
     this._portal = portal;
-    this._rightPlatform = rightPlatform;
     this._wireSpeed = wireSpeed;
+
+    // Collect platform entities (type "ground" that are NOT full-width floors)
+    this._platforms = [];
+    if (entities) {
+      for (const e of entities) {
+        if (e.type === "ground" && e.collider) {
+          this._platforms.push(e);
+        }
+      }
+    }
 
     this._wire1Progress = 0;
     this._wire2Progress = 0;
@@ -26,7 +39,7 @@ export class WireRenderer {
     this._wireFrame = 0;
   }
 
-  // 鈹€鈹€ State update (call after collision) 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+  // Update wire progress based on button states, and unlock portal when both wires complete
 
   update() {
     if (this._button1.isPressed) {
@@ -73,30 +86,77 @@ export class WireRenderer {
     const gateX = this._portal.x + this._portal.collider.w / 2;
     const gateY = this._portal.y;
 
-    let routeX, routeY;
-    if (this._rightPlatform) {
-      routeX = this._rightPlatform.x;
-      routeY = this._rightPlatform.y + this._rightPlatform.collider.h;
-    } else {
-      routeX = gateX;
-      routeY = gateY;
-    }
-
-    const wire1Path = [
-      { x: b1x, y: b1y },
-      { x: routeX, y: b1y },
-      { x: routeX, y: routeY },
-      { x: gateX, y: routeY },
-    ];
-    const wire2Path = [
-      { x: b2x, y: b2y },
-      { x: routeX, y: b2y },
-      { x: routeX, y: routeY },
-      { x: gateX, y: routeY },
-    ];
+    const wire1Path = this._buildWirePath(b1x, b1y, gateX, gateY);
+    const wire2Path = this._buildWirePath(b2x, b2y, gateX, gateY);
 
     this._drawOneWire(p, wire1Path, this._wire1Progress);
     this._drawOneWire(p, wire2Path, this._wire2Progress);
+  }
+
+  /**
+   * Build a wire path from (sx,sy) to (ex,ey).
+   * Finds the best platform whose top surface lies vertically between
+   * the button and portal, and uses its edge as a routing waypoint.
+   * If no suitable platform exists, connects directly via an L-shaped path.
+   */
+  _buildWirePath(sx, sy, ex, ey) {
+    const route = this._findRoutePlatform(sx, sy, ex, ey);
+    if (route) {
+      return [
+        { x: sx, y: sy },
+        { x: route.x, y: sy },
+        { x: route.x, y: route.y },
+        { x: ex, y: route.y },
+      ];
+    }
+    // No platform in the way — L-shaped direct connection
+    return [
+      { x: sx, y: sy },
+      { x: ex, y: sy },
+      { x: ex, y: ey },
+    ];
+  }
+
+  /**
+   * Find the best platform to route a wire through.
+   * A platform qualifies if its bounding box overlaps with the rectangular
+   * corridor between the button and the portal (i.e. the platform is "in the way").
+   * Returns { x, y } routing point (platform edge), or null if none qualifies.
+   */
+  _findRoutePlatform(sx, sy, ex, ey) {
+    const minX = Math.min(sx, ex);
+    const maxX = Math.max(sx, ex);
+    const minY = Math.min(sy, ey);
+    const maxY = Math.max(sy, ey);
+
+    let best = null;
+    let bestDist = Infinity;
+
+    for (const plat of this._platforms) {
+      const platLeft = plat.x;
+      const platRight = plat.x + plat.collider.w;
+      const platBottom = plat.y;
+      const platTop = plat.y + plat.collider.h;
+
+      // AABB overlap: platform vertical range must overlap wire vertical range
+      if (platTop < minY || platBottom > maxY) continue;
+
+      // Platform horizontal range must overlap wire horizontal range
+      if (platRight < minX || platLeft > maxX) continue;
+
+      // Use the platform edge closest to the start as routing x,
+      // and platform top as routing y
+      const routeX = Math.max(platLeft, Math.min(platRight, sx));
+      const routeY = platTop;
+
+      const dist = Math.abs(routeX - sx) + Math.abs(routeY - sy);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = { x: routeX, y: routeY };
+      }
+    }
+
+    return best;
   }
 
   _drawOneWire(p, path, progress) {

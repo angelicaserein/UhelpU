@@ -1,0 +1,11 @@
+Random Thoughts
+---
+The ladder hitbox was off; you couldn’t climb down once you went up; you couldn’t move left or right properly on the ladder; pressing jump then up would lock you back to the ladder; the controls felt bad when pressing jump and up together on the ladder; the playback phantom couldn’t use the ladder; the original player’s actions messed up the phantom’s climbing during playback.
+
+I fixed every single one of these bugs one by one, and both the clone and the player now collide with ladders perfectly.
+
+But when I tried to fix the bug where the clone couldn’t accurately replay the recorded actions, the whole program crashed.
+
+That broke me too, so I deleted the entire ladder system entirely.
+---
+Coming soon: a brand-new ladder system

@@ -1174,3 +1174,82 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   margin-top: 10px;
   opacity: 0.8;
 }
+
+.rainbow-wave {
+  display: inline-block;
+  font-weight: bold;
+  animation:
+    rainbow-color 2s linear infinite,
+    wave 1.6s ease-in-out infinite;
+}
+
+.rainbow-wave:nth-child(1) {
+  animation-delay: 0s, 0s;
+}
+.rainbow-wave:nth-child(2) {
+  animation-delay: 0s, 0.15s;
+}
+.rainbow-wave:nth-child(3) {
+  animation-delay: 0s, 0.3s;
+}
+.rainbow-wave:nth-child(4) {
+  animation-delay: 0s, 0.45s;
+}
+.rainbow-wave:nth-child(5) {
+  animation-delay: 0s, 0.6s;
+}
+.rainbow-wave:nth-child(6) {
+  animation-delay: 0s, 0.75s;
+}
+.rainbow-wave:nth-child(7) {
+  animation-delay: 0s, 0.9s;
+}
+.rainbow-wave:nth-child(8) {
+  animation-delay: 0s, 1.05s;
+}
+.rainbow-wave:nth-child(9) {
+  animation-delay: 0s, 1.2s;
+}
+.rainbow-wave:nth-child(10) {
+  animation-delay: 0s, 1.35s;
+}
+.rainbow-wave:nth-child(11) {
+  animation-delay: 0s, 1.5s;
+}
+.rainbow-wave:nth-child(12) {
+  animation-delay: 0s, 1.65s;
+}
+
+@keyframes rainbow-color {
+  0% {
+    color: #ff4e50;
+  }
+  16% {
+    color: #ff9f43;
+  }
+  33% {
+    color: #feca57;
+  }
+  50% {
+    color: #48dbfb;
+  }
+  66% {
+    color: #a29bfe;
+  }
+  83% {
+    color: #fd79a8;
+  }
+  100% {
+    color: #ff4e50;
+  }
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}

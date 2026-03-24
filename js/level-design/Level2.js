@@ -8,6 +8,7 @@ import {
 } from "../game-entity-model/index.js";
 import { BaseLevel } from "./BaseLevel.js";
 import { WireRenderer } from "./WireRenderer.js";
+import { WindowPrompt } from "../ui/windows/WindowPrompt.js";
 
 export class Level2 extends BaseLevel {
   constructor(p, eventBus) {
@@ -44,9 +45,21 @@ export class Level2 extends BaseLevel {
     this.entities.add(this._button1);
     this.entities.add(this._button2);
 
+    this._jumpPromptCount = 0;
+    this._jumpHintWindow = new WindowPrompt(p, "level2_jump_hint_window", {
+      width: 420,
+      fontSize: 17,
+    });
+
     this.entities.add(
       new TextPrompt(450, 90, this, {
         textKey: "level2_jump_higher_prompt",
+        onTrigger: () => {
+          this._jumpPromptCount++;
+          if (this._jumpPromptCount === 3) {
+            this._jumpHintWindow.open();
+          }
+        },
       }),
     );
 
@@ -60,6 +73,7 @@ export class Level2 extends BaseLevel {
       button1: this._button1,
       button2: this._button2,
       portal: this._portal,
+      entities: this.entities,
     });
   }
 
@@ -90,5 +104,13 @@ export class Level2 extends BaseLevel {
 
     this._button1.releaseButton();
     this._button2.releaseButton();
+  }
+
+  clearLevel() {
+    if (this._jumpHintWindow) {
+      this._jumpHintWindow.remove();
+      this._jumpHintWindow = null;
+    }
+    super.clearLevel();
   }
 }

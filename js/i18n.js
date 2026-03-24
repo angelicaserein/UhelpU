@@ -74,6 +74,8 @@ const _dict = {
     level1_title: "Rule",
     level2_title: "Higher",
     level2_jump_higher_prompt: "How can I jump much higher?",
+    level2_jump_hint_window:
+      'Congratulations! You\'ve unlocked the achievement: "<span class="rainbow-wave">P</span><span class="rainbow-wave">e</span><span class="rainbow-wave">r</span><span class="rainbow-wave">s</span><span class="rainbow-wave">e</span><span class="rainbow-wave">v</span><span class="rainbow-wave">e</span><span class="rainbow-wave">r</span><span class="rainbow-wave">a</span><span class="rainbow-wave">n</span><span class="rainbow-wave">c</span><span class="rainbow-wave">e</span>"!\n(Hint: hint is in the pause menu, not here haha)',
     level3_title: "Electricity",
     level4_title: "Level 4 Title Placeholder",
     module_btn_label: "Install Module",
@@ -154,6 +156,8 @@ const _dict = {
     level1_title: "规则",
     level2_title: "登高",
     level2_jump_higher_prompt: "怎么才能跳得更高呢？",
+    level2_jump_hint_window:
+      '恭喜你解锁"<span class="rainbow-wave">坚</span><span class="rainbow-wave">持</span><span class="rainbow-wave">不</span><span class="rainbow-wave">懈</span>"的成就！\n（提示在暂停菜单里哦，不在这里哈哈）',
     level3_title: "通关",
     level4_title: "Level4标题占位",
     module_btn_label: "安装模块",

@@ -86,10 +86,10 @@ export class Level4 extends BaseLevel {
 
     // ---- Room 1 ----
     // 第一组：按钮地刺放在地面 (y=80)
-    this._room1Button = new Button(-500, 80, 20, 5); //每个参数分别是按钮的 x, y, width, height
+    this._room1Button = new Button(-400, 80, 20, 5); //每个参数分别是按钮的 x, y, width, height
     this._room1Spike = new Spike(300, 80, 150, 20); //每个参数分别是地刺的 x, y, width, height
     // 第二组
-    this._room1Button2 = new Button(-400, 80, 20, 5);
+    this._room1Button2 = new Button(-300, 80, 20, 5);
     this._room1Spike2 = new Spike(550, 80, 150, 20);
 
     const room1 = new Room(
@@ -145,10 +145,11 @@ export class Level4 extends BaseLevel {
     const room = this.rooms[this._activeRoomIndex];
     const leftBound = this._activeRoomIndex * p.width;
     const rightBound = leftBound + p.width;
+    const playerCenterX = player.x + player.collider.w / 2;
 
-    if (player.x + player.collider.w > rightBound && room.exits.right) {
+    if (playerCenterX > rightBound && room.exits.right) {
       this._switchRoom(room.exits.right.targetRoomIndex, "right");
-    } else if (player.x < leftBound && room.exits.left) {
+    } else if (playerCenterX < leftBound && room.exits.left) {
       this._switchRoom(room.exits.left.targetRoomIndex, "left");
     }
   }

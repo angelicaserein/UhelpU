@@ -1,0 +1,1073 @@
+/*default style*/
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: #f0f0f0;
+}
+canvas {
+    display: block;
+}
+/*font*/
+@font-face {
+    font-family: "PixelFont";
+    src: url("../assets/fonts/HYPixel11pxU-2.ttf");
+}
+/*main panel*/
+#main {
+    position: absolute;
+    background-image: url("../assets/UI/menu.png");
+    background-size: contain;
+    width: 960px;
+    height: 540px;
+}
+
+/*.min-btn {
+    background-color: transparent;
+    border: none;
+    font-family: "PixelFont", sans-serif;
+    font-weight: 700;
+    color: #410341;
+    cursor: pointer;
+
+}
+.min-btn:hover {
+    background-color: rgba(255,255,255,0.2);
+    color: #800080;
+}*/
+
+#main-btn-levelSelect {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 31px;
+    width: 82px;
+    height: 82px;
+    border-radius: 50%;
+    font-size: 30px;
+
+}
+/* #min-btn-setting {
+    position: absolute;
+    left: 341px;
+    bottom: 40px;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    font-size: 13px;
+}
+
+#min-btn-credits {
+    position: absolute;
+    right: 341px;
+    bottom: 40px;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    font-size: 13px;
+} */
+/*setting panel*/
+/* #setting-panel {
+    position: absolute;
+    background-image: url("../assets/UI/setting-panel.png");
+    background-size: contain;
+    width: 960px;
+    height: 540px;
+}
+
+#setting-btn-back {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/*credits panel*/
+/* #credits-panel {
+    position: absolute;
+    background-image: url("../assets/UI/credits-panel.png");
+    background-size: contain;
+    width: 960px;
+    height: 540px;
+}
+#credits-btn-back {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+} */
+/*level select panel*/
+#levelSelect {
+    position: absolute;
+    background-image: url("../assets/UI/level-select-panel.png");
+    background-size: contain;
+    width: 960px;
+    height: 540px;
+}
+#levelSelect-btn-back {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 5px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+#levelSelect-btn-level1 {
+    position: absolute;
+    left: 119px;
+    top: 236px;
+    width: 50px;
+    height: 30px;
+    cursor: pointer;
+}
+#levelSelect-btn-level2 {
+    position: absolute;
+    left: 288px;
+    top: 236px;
+    width: 50px;
+    height: 30px;
+    cursor: pointer;
+}
+/*level1*/
+#level1 {
+    position: absolute;
+    width: 960px;
+    height: 540px;
+}
+#inLevel1UI {
+    position: absolute;
+    z-index: 10px;
+    width: 960px;
+    height: 540px;
+}
+#level1-btn-back {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+/*level2*/
+#level2 {
+    position: absolute;
+    width: 960px;
+    height: 540px;
+}
+#inLevel2UI {
+    position: absolute;
+    z-index: 10px;
+    width: 960px;
+    height: 540px;
+}
+#level2-btn-back {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+/*level1 result*/
+#level1Result {
+    position: absolute;
+    background-image: url("../assets/UI/level-select-panel.png");
+    background-size: contain;
+    width: 960px;
+    height: 540px;
+}
+#level1Result-btn-back {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+/*level2 result*/
+#level2Result {
+    position: absolute;
+    background-image: url("../assets/UI/level-select-panel.png");
+    background-size: contain;
+    width: 960px;
+    height: 540px;
+}
+#level2Result-btn-back {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* ========== 以下为合并的 UI 样式 ========== */
+
+/* 通用按钮格式 */
+.my-button {
+   font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  width: 100px;
+  height: 60px;
+  border-radius: 10%;
+  font-size: 26px;
+  border: none;
+  cursor: pointer;
+  background-color: rgba(101, 78, 119, 0.2);
+  color: white;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+}
+.my-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.menu-subtitle {
+  position: absolute;
+  transform: translateX(-50%);
+  color: #ffffff;
+  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-size: 30px;
+  letter-spacing: 0.08em;
+  text-align: center;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* 开始按钮 */
+.start-button {
+  color: #0d010b;
+  font-weight: bold;
+  -webkit-text-stroke: 1px #0d010b;
+  border: 3px solid #4c1745;
+  border-radius: 50%;
+  font-size: 42px;
+  background-color: rgba(101, 78, 119, 0.8);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-2px);
+  transition: background-color 0.8s, border-color 1s;
+  transition: color 0.5s, -webkit-text-stroke 0.5s;
+}
+.start-button:hover {
+  color: #fff3fd;
+  font-weight: bold;
+  -webkit-text-stroke: 1px #ffeafc;
+  background-color: rgba(191, 157, 212, 0.3);
+  border-width: 3px;
+}
+
+/* 设置按钮 */
+.settings-button {
+  color: #0d010b;
+  font-weight: bold;
+  -webkit-text-stroke: 1px #0d010b;
+  border: 3px solid #4c1745;
+  border-radius: 50%;
+  font-size: 16px;
+  background-color: rgba(101, 78, 119, 0.8);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.8s, border-color 1s;
+  transition: color 0.5s, -webkit-text-stroke 0.5s;
+}
+.settings-button:hover {
+  color: #fff3fd;
+  font-weight: bold;
+  -webkit-text-stroke: 0.2px #ffeafc;
+  background-color: rgba(191, 157, 212, 0.3);
+  border-width: 3px;
+}
+
+/* credits按钮 */
+.credits-button {
+  color: #0d010b;
+  font-weight: bold;
+  -webkit-text-stroke: 1px #0d010b;
+  border: 3px solid #4c1745;
+  border-radius: 50%;
+  font-size: 18px;
+  background-color: rgba(101, 78, 119, 0.8);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.8s, border-color 1s;
+  transition: color 0.5s, -webkit-text-stroke 0.5s;
+}
+.credits-button:hover {
+  color: #fff3fd;
+  font-weight: bold;
+  -webkit-text-stroke: 0.2px #ffeafc;
+  background-color: rgba(191, 157, 212, 0.3);
+  border-width: 3px;
+}
+
+/* hint按钮（呼吸灯） */
+.hint-button {
+  border-radius: 5%;
+  border: 3px solid #39073a;
+  background-color: rgba(191, 157, 212, 0.1);
+  color: #fff3fd;
+  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-weight: bold;
+  -webkit-text-stroke: 0.2px #ffeafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-sizing: border-box;
+  animation: breathe 2s ease-in-out infinite;
+}
+@keyframes breathe {
+  0% {
+    background-color: rgba(191, 157, 212, 0.1);
+    opacity: 0.7;
+    -webkit-text-stroke: 0.2px #ffeafc;
+  }
+  50% {
+    background-color: rgba(191, 157, 212, 0.8);
+    opacity: 0.9;
+    -webkit-text-stroke: 0.5px #fff3fd;
+  }
+  100% {
+    background-color: rgba(51, 11, 76, 0.1);
+    opacity: 0.7;
+    -webkit-text-stroke: 0.3px #ffeafc;
+  }
+}
+.hint-button:hover {
+  animation: breathe 1s ease-in-out infinite;
+}
+
+/* back按钮 */
+.back-button {
+  font-size: 36px;
+  border-radius: 50%;
+  background-color: rgba(191, 157, 212, 0.3);
+  transform: translateX(-5px);
+}
+
+/* notebook按钮（翻转卡片） */
+.notebook-button {
+  perspective: 600px;
+  cursor: pointer;
+  position: absolute;
+  width: 200px;
+  height: 250px;
+}
+.notebook-button .flipper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+.notebook-button:hover .flipper {
+  transform: rotateY(180deg);
+}
+.notebook-button .front,
+.notebook-button .back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  backface-visibility: hidden;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-size: 50px;
+  color: #fff3fd;
+  background-color: rgba(101, 78, 119, 0.6);
+  border: 2px solid #4c1745;
+  border-radius: 8px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+.notebook-button .back {
+  transform: rotateY(180deg);
+}
+
+/* hint notebook按钮（仅点击翻页） */
+.hint-notebook-button {
+  perspective: 600px;
+  cursor: pointer;
+  position: absolute;
+  width: 400px;
+  height: 420px;
+}
+.hint-notebook-button .flipper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+.hint-notebook-button.is-flipped .flipper {
+  transform: rotateY(180deg);
+}
+.hint-notebook-button .front,
+.hint-notebook-button .back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  backface-visibility: hidden;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-size: 30px;
+  color: #fff3fd;
+  background-color: rgba(101, 78, 119, 0.6);
+  border: 2px solid #4c1745;
+  border-radius: 8px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+.hint-notebook-button .back {
+  transform: rotateY(180deg);
+}
+
+.hint-notebook-button.scene-hint-notebook {
+  width: 760px;
+  height: 560px;
+  z-index: 1100;
+}
+
+.hint-notebook-button.scene-hint-notebook .front,
+.hint-notebook-button.scene-hint-notebook .back {
+  align-items: flex-start;
+  justify-content: flex-start;
+  white-space: pre;
+  font-size: 18px;
+  line-height: 1.25;
+  padding: 16px;
+}
+
+.hint-notebook-button .hint-face-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.hint-notebook-button .hint-face-image {
+  width: 100%;
+  max-height: 58%;
+  object-fit: contain;
+  display: block;
+}
+
+.hint-notebook-button .hint-face-text {
+  width: 100%;
+  text-align: center;
+  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  line-height: 1.25;
+  white-space: normal;
+}
+
+/* 背面"安装模块"按钮 */
+.hint-back-module-btn {
+  position: absolute !important;
+  bottom: 30px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 120px !important;
+  height: 44px !important;
+  background: linear-gradient(90deg, rgba(100, 50, 140, 0.8), rgba(70, 30, 100, 0.8)) !important;
+  border: 2px solid #a060d0 !important;
+  border-radius: 8px !important;
+  color: #f0e0ff !important;
+  font-family: 'HYPixel11', 'PixelFont', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  padding: 0 !important;
+}
+
+.hint-back-module-btn:hover {
+  background: linear-gradient(90deg, rgba(130, 80, 170, 0.9), rgba(100, 60, 130, 0.9)) !important;
+  border-color: #d090ff !important;
+  box-shadow: 0 0 12px rgba(160, 80, 200, 0.6) !important;
+}
+
+.hint-back-module-btn:active {
+  transform: translateX(-50%) scale(0.95) !important;
+}
+
+/* level1 场景木牌 */
+.signboard-button {
+  border: none;
+  border-radius: 4px;
+  background: url('../assets/images/tiles/signboard.png') center / cover no-repeat;
+  background-color: transparent;
+  box-shadow: none;
+  transform: none;
+  padding: 0;
+  transition: filter 0.16s ease;
+  cursor: pointer;
+}
+
+.signboard-button.signboard-button-in-range {
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.95));
+}
+
+/* ========== 悬浮窗 (Floating Window) ========== */
+
+.window-base {
+  position: absolute;
+  background: rgba(14, 7, 22, 0.93);
+  border: 2px solid #7a3f8c;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65),
+              0 0 22px rgba(120, 50, 160, 0.35);
+  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  color: #f0e0ff;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.window-setting-top {
+  z-index: 2147483647;
+}
+
+body.game-paused .window-pause-top {
+  z-index: 2147483646 !important;
+}
+
+body.game-paused .window-setting-top,
+body.game-paused .window-hint-top {
+  z-index: 2147483647 !important;
+}
+
+body.game-paused .hint-notebook-button.scene-hint-notebook {
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+
+/* 标题栏 */
+.window-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: linear-gradient(90deg, rgba(90, 40, 120, 0.95), rgba(50, 15, 75, 0.95));
+  border-bottom: 1px solid rgba(140, 70, 180, 0.5);
+  cursor: grab;
+  user-select: none;
+}
+.window-titlebar:active {
+  cursor: grabbing;
+}
+
+.window-title-text {
+  font-size: 15px;
+  font-weight: bold;
+  color: #e0c0ff;
+  pointer-events: none;
+}
+
+/* 关闭按钮 */
+.window-close-btn {
+  background: transparent;
+  border: 1px solid rgba(150, 80, 180, 0.6);
+  border-radius: 4px;
+  color: #c080e0;
+  font-size: 13px;
+  line-height: 1;
+  padding: 2px 7px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+.window-close-btn:hover {
+  background-color: rgba(180, 50, 50, 0.65);
+  color: #fff;
+  border-color: #c05050;
+}
+
+/* 内容区 */
+.window-content {
+  padding: 14px 16px 16px;
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* 分区标题 */
+.window-section-title {
+  font-size: 13px;
+  color: #b880e8;
+  margin: 6px 0 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(120, 60, 160, 0.4);
+}
+
+/* 滑块行 */
+.window-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.window-label {
+  font-size: 12px;
+  color: #d0a8f0;
+  min-width: 36px;
+}
+
+.window-slider {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  cursor: pointer;
+  accent-color: #a060d0;
+  background: rgba(90, 50, 120, 0.5);
+  outline: none;
+  border: none;
+}
+
+.window-slider-value {
+  font-size: 12px;
+  color: #a880c8;
+  min-width: 32px;
+  text-align: right;
+}
+
+/* 语言选择行 */
+.window-lang-row {
+  margin-top: 4px;
+}
+
+.window-select {
+  width: 100%;
+  padding: 5px 10px;
+  background: rgba(30, 12, 50, 0.85);
+  border: 1px solid rgba(130, 70, 170, 0.7);
+  border-radius: 6px;
+  color: #e0c0ff;
+  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.window-select:hover,
+.window-select:focus {
+  border-color: #b060d0;
+  background: rgba(55, 25, 85, 0.9);
+}
+
+/* 按键绑定行 */
+.window-keybind-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  justify-content: space-between;
+}
+
+/* 按键绑定标签 */
+.window-keybind-row .window-label {
+  min-width: 80px;
+  flex: 0 0 auto;
+}
+
+/* 按键显示按钮 */
+.window-keybind-btn {
+  flex: 1;
+  padding: 6px 12px;
+  height: 28px;
+  background: rgba(30, 12, 50, 0.85);
+  border: 1px solid rgba(130, 70, 170, 0.7);
+  border-radius: 6px;
+  color: #d0a8f0;
+  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.window-keybind-btn:hover {
+  border-color: #b060d0;
+  background: rgba(55, 25, 85, 0.9);
+}
+
+/* 监听中的按键按钮 */
+.window-keybind-btn-listening {
+  background: rgba(120, 60, 160, 0.7) !important;
+  border-color: #8060d0 !important;
+  box-shadow: 0 0 12px rgba(160, 80, 220, 0.6) !important;
+  animation: pulse-keybind 0.6s ease-in-out infinite;
+}
+
+@keyframes pulse-keybind {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(160, 80, 220, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(160, 80, 220, 0.9);
+  }
+}
+
+/* 按键重置按钮 */
+.window-keybind-reset {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  background: rgba(80, 40, 100, 0.7);
+  border: 1px solid rgba(120, 80, 160, 0.6);
+  border-radius: 4px;
+  color: #b080d8;
+  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  flex: 0 0 auto;
+}
+
+.window-keybind-reset:hover {
+  background-color: rgba(160, 80, 140, 0.8);
+  color: #d0b0ff;
+  border-color: #a080d0;
+}
+
+/* ── 暂停按钮（游戏中右上角 ⏸） */
+.pause-button {
+  font-size: 22px;
+  border-radius: 50%;
+  background-color: rgba(191, 157, 212, 0.3);
+  transform: translateX(-5px);
+}
+
+/* ── 暂停窗口内部按钮 */
+.pause-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 0;
+  margin-bottom: 10px;
+  border: 1px solid rgba(140, 70, 180, 0.6);
+  border-radius: 7px;
+  background: rgba(30, 12, 50, 0.85);
+  color: #e0c0ff;
+  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  box-sizing: border-box;
+}
+.pause-btn:last-child {
+  margin-bottom: 0;
+}
+.pause-btn:hover {
+  background: rgba(90, 40, 120, 0.75);
+  border-color: #b060d0;
+}
+.pause-btn-resume {
+  border-color: rgba(80, 160, 100, 0.7);
+  color: #a8f0c0;
+}
+.pause-btn-resume:hover {
+  background: rgba(30, 80, 45, 0.75);
+  border-color: #50c070;
+  color: #d0ffd8;
+}
+
+.pause-btn-setting {
+  border-color: rgba(100, 130, 200, 0.75);
+  color: #bcd2ff;
+}
+
+.pause-btn-setting:hover {
+  background: rgba(35, 55, 105, 0.78);
+  border-color: #6f93f0;
+  color: #dbe6ff;
+}
+
+.pause-btn-hint {
+  border-color: rgba(210, 170, 90, 0.8);
+  color: #ffe7a8;
+}
+
+.pause-btn-hint:hover {
+  background: rgba(120, 90, 28, 0.78);
+  border-color: #efc666;
+  color: #fff4cc;
+}
+
+.pause-btn-level-choice {
+  border-color: rgba(84, 162, 156, 0.8);
+  color: #b7f1e8;
+}
+
+.pause-btn-level-choice:hover {
+  background: rgba(28, 102, 96, 0.78);
+  border-color: #66d1c6;
+  color: #d8fff9;
+}
+
+.window-hint-text {
+  color: #f2e5ff;
+  line-height: 1.65;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ========== Setting Sidebar Floating Window ========== */
+
+.window-sidebar-base {
+  position: absolute;
+  background: rgba(20, 16, 34, 0.85);
+  border: 2px solid rgba(182, 155, 220, 0.55);
+  border-radius: 18px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.42),
+              0 0 30px rgba(170, 150, 215, 0.18);
+  backdrop-filter: blur(8px);
+  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  color: #f6efff;
+  overflow: hidden;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.window-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px 14px;
+  background: linear-gradient(90deg, rgba(114, 89, 166, 0.42), rgba(44, 32, 73, 0.3));
+  border-bottom: 1px solid rgba(204, 190, 230, 0.2);
+}
+
+.window-sidebar-title {
+  font-size: 22px;
+  letter-spacing: 1px;
+  color: #f6efff;
+}
+
+.window-sidebar-close-btn {
+  background: transparent;
+  border: 1px solid rgba(150, 80, 180, 0.6);
+  border-radius: 4px;
+  color: #c080e0;
+  font-size: 13px;
+  line-height: 1;
+  padding: 2px 7px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.window-sidebar-close-btn:hover {
+  background-color: rgba(180, 50, 50, 0.65);
+  color: #fff;
+  border-color: #c05050;
+}
+
+.window-sidebar-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 26px;
+  min-height: 0;
+  padding: 24px 32px 28px;
+}
+
+.window-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 20px;
+  border-right: 1px solid rgba(214, 204, 232, 0.16);
+}
+
+.window-sidebar-tab {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  background: rgba(30, 12, 50, 0.85);
+  border: 1px solid rgba(130, 70, 170, 0.7);
+  border-radius: 8px;
+  color: #e0c0ff;
+  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.window-sidebar-tab:hover {
+  background: rgba(55, 25, 85, 0.9);
+  border-color: #b060d0;
+}
+
+.window-sidebar-tab.active {
+  background: linear-gradient(135deg, rgba(190, 172, 227, 0.24), rgba(110, 76, 168, 0.34));
+  border-color: rgba(230, 220, 255, 0.48);
+  color: #fff7ff;
+}
+
+.window-sidebar-panels {
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.window-sidebar-panel {
+  display: none;
+}
+
+.window-sidebar-panel.active {
+  display: block;
+}
+
+.window-setting-sidebar .window-section-title {
+  font-size: 18px;
+  color: #f0e5ff;
+  margin: 10px 0 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(214, 204, 232, 0.18);
+}
+
+.window-setting-sidebar .window-slider-row {
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.window-setting-sidebar .window-label {
+  font-size: 16px;
+  min-width: 120px;
+  color: #f1e7ff;
+}
+
+.window-setting-sidebar .window-slider {
+  height: 8px;
+}
+
+.window-setting-sidebar .window-slider-value {
+  min-width: 56px;
+  font-size: 15px;
+  color: #f0e1ff;
+}
+
+.window-setting-sidebar .window-lang-row {
+  margin-top: 10px;
+  margin-bottom: 24px;
+}
+
+.window-setting-sidebar .window-select {
+  padding: 12px 16px;
+  font-size: 15px;
+  border-radius: 10px;
+}
+
+.window-setting-sidebar .window-keybind-row {
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.window-setting-sidebar .window-keybind-row .window-label {
+  min-width: 140px;
+}
+
+.window-setting-sidebar .window-keybind-btn {
+  height: 40px;
+  padding: 8px 14px;
+  font-size: 15px;
+  border-radius: 10px;
+}
+
+.window-setting-sidebar .window-keybind-reset {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+  border-radius: 10px;
+}
+
+/* ========== 提示框浮窗 (Window Prompt) ========== */
+
+.window-prompt-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  cursor: pointer;
+}
+
+.window-prompt-container {
+  background: rgba(14, 7, 22, 0.93);
+  border: 2px solid #7a3f8c;
+  border-radius: 15px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.8),
+              0 0 30px rgba(120, 50, 160, 0.5);
+  font-family: 'HYPixel11', 'PixelFont', sans-serif;
+  color: #f0e0ff;
+  max-width: 90%;
+  max-height: 80%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  backdrop-filter: blur(10px);
+  cursor: default;
+  pointer-events: auto;
+}
+
+.window-prompt-content {
+  color: #f2e5ff;
+  line-height: 1.8;
+  word-break: break-word;
+  white-space: pre-wrap;
+  text-align: center;
+  flex: 1;
+}
+
+.window-prompt-tips {
+  color: #b8a0d0;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 10px;
+  opacity: 0.8;
+}

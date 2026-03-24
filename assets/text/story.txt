@@ -1,0 +1,56 @@
+  "U HELP U",
+  "It is a dark time for Subject 42.",
+  "Trapped within the sprawling,",
+  "mechanical labyrinth of FACILITY ZERO,",
+  "all hope of escape seems lost.",
+  "The automated defenses are relentless,",
+  "and the shifting walls offer no sanctuary.",
+  "But in the depths of despair,",
+  "a breakthrough occurred.",
+  "A critical error in the facility’s core",
+  "reactor initiated Project CHRONOS,",
+  "granting Subject 42 a time-bending ability.",
+  "He can now record his own actions and",
+  "manifest a solid, physical echo",
+  "of his past self.",
+  "This Phantom is no mere hologram.",
+  "It perfectly replays every recorded",
+  "step and jump, acting as a tangible",
+  "force in the real world.",
+  "Subject 42 must stand upon the shoulders",
+  "of his past incarnation to reach impossible",
+  "heights, and synchronize movements",
+  "to trigger remote mechanisms.",
+  "Now, navigating treacherous platforms",
+  "the protagonist must cooperate across time.",
+  "In this solitary prison, your only",
+  "teammate is your past self.",
+  "Escape before the system terminates forever...",
+
+“对于42号实验体来说，这是一个黑暗的时刻。”
+“被困在庞大的，”
+“零号设施的机械迷宫中，”
+“所有逃脱的希望似乎都破灭了。”
+“自动防御系统无情地运转，”
+“移动的墙壁无法提供任何庇护。”
+“但在绝望的深渊中，”
+“出现了一个突破。”
+“设施核心的一个关键错误，”
+“反应堆启动了‘时间计划’，”
+“赋予了42号实验体扭曲时间的能力。”
+“他现在可以记录自己的行动，并，”
+“显现出一个，坚实的实体分身，”
+“是他过去的自己。”
+“这个幻影并非仅仅是全息影像。”
+“它完美地重现了每一个记录下来的，”
+“一步一步，一次次跳跃，如同一个有形的，”
+“现实世界中的力量。”
+“42号实验体必须站在，”
+“他过去的肩膀上。”化身达到不可能的高度”，
+“高度，并同步动作”，
+“触发远程机制”，
+“现在，在险恶的平台上航行”，
+“主角必须跨越时空合作”，
+“在这座孤独的监狱里，你唯一的”，
+“队友是过去的自己”，
+“在系统永远终止之前逃脱……”

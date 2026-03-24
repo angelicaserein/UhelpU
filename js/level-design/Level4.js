@@ -4,6 +4,8 @@ import {
   Ground,
   Wall,
   Portal,
+  Button,
+  Spike,
 } from "../game-entity-model/index.js";
 import { CollisionSystem } from "../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../physics-system/PhysicsSystem.js";
@@ -11,6 +13,7 @@ import { RecordSystem } from "../record-system/RecordSystem.js";
 import { BaseLevel } from "./BaseLevel.js";
 import { Assets } from "../AssetsManager.js";
 import { Room } from "./Room.js";
+import { ButtonSpikeLinkSystem } from "../mechanism-system/ButtonSpikeLinkSystem.js";
 
 export class Level4 extends BaseLevel {
   constructor(p, eventBus) {
@@ -22,6 +25,26 @@ export class Level4 extends BaseLevel {
 
     this.rooms = this._buildRooms(p);
     this._applyWorldOffsetsToRooms(p);
+
+    // 按钮-地刺联动系统（每个房间各一组）
+    this._spikeLinkSystem0 = new ButtonSpikeLinkSystem([
+      {
+        button: this._room0Button,
+        spikes: [{ spike: this._room0Spike, retractDistance: 30 }],
+      },
+    ]);
+    this._spikeLinkSystem1 = new ButtonSpikeLinkSystem([
+      {
+        button: this._room1Button,
+        spikes: [{ spike: this._room1Spike, retractDistance: 30 }],
+      },
+    ]);
+    this._spikeLinkSystem2 = new ButtonSpikeLinkSystem([
+      {
+        button: this._room1Button2,
+        spikes: [{ spike: this._room1Spike2, retractDistance: 30 }],
+      },
+    ]);
 
     const wallThickness = 20;
     this._player = new Player(50, 450, 40, 40);
@@ -44,30 +67,46 @@ export class Level4 extends BaseLevel {
   _buildRooms(p) {
     const wallThickness = 20;
 
+    // ---- Room 0 ----
+    // 按钮放在浮空平台 (200,160,160,20) 表面，地刺放在地面 (y=80)
+    this._room0Button = new Button(250, 80, 20, 5); //每个参数分别是按钮的 x, y, width, height
+    this._room0Spike = new Spike(350, 80, 200, 20); //每个参数分别是地刺的 x, y, width, height
+
     const room0 = new Room(
       [
         new Wall(0, 0, wallThickness, p.height),
         new Ground(0, 0, p.width, 80),
-        new Ground(200, 160, 160, 20, true),
+        this._room0Button,
+        this._room0Spike,
       ],
       {
         right: { targetRoomIndex: 1 },
       },
     );
 
+    // ---- Room 1 ----
+    // 第一组：按钮地刺放在地面 (y=80)
+    this._room1Button = new Button(-500, 80, 20, 5); //每个参数分别是按钮的 x, y, width, height
+    this._room1Spike = new Spike(300, 80, 150, 20); //每个参数分别是地刺的 x, y, width, height
+    // 第二组
+    this._room1Button2 = new Button(-400, 80, 20, 5);
+    this._room1Spike2 = new Spike(550, 80, 150, 20);
+
     const room1 = new Room(
       [
         new Wall(p.width - wallThickness, 0, wallThickness, p.height),
-        new Ground(0, 0, p.width, 80),
-        new Ground(360, 130, 140, 20, true),
-        new Ground(600, 200, 160, 20, true),
+        new Ground(0, 0, p.width, 80), //每个参数分别是地面块的 x, y, width, height
+        this._room1Button,
+        this._room1Spike,
+        this._room1Button2,
+        this._room1Spike2,
       ],
       {
         left: { targetRoomIndex: 0 },
       },
     );
 
-    const portal = new Portal(700, 220, 50, 50);
+    const portal = new Portal(900, 80, 50, 50); //参数分别是传送门的 x, y, width, height
     portal.openPortal();
     room1.entities.add(portal);
 
@@ -234,6 +273,11 @@ export class Level4 extends BaseLevel {
   updateCollision(p = this.p, eventBus = this.eventBus) {
     this.collisionSystem.collisionEntry(eventBus);
 
+    // 更新按钮-地刺联动
+    this._spikeLinkSystem0.update();
+    this._spikeLinkSystem1.update();
+    this._spikeLinkSystem2.update();
+
     if (this._transition) {
       this._updateTransition(p);
       return;
@@ -246,11 +290,27 @@ export class Level4 extends BaseLevel {
     const cameraX = this._getCameraX(p);
     p.push();
     p.translate(-cameraX, 0);
+
+    // 地刺先画，地面覆盖地刺底部
     for (const entity of this.entities) {
-      entity.draw(p);
+      if (entity.type === "spike") entity.draw(p);
     }
+    for (const entity of this.entities) {
+      if (entity.type === "ground") entity.draw(p);
+    }
+    for (const entity of this.entities) {
+      if (entity.type !== "spike" && entity.type !== "ground") {
+        entity.draw(p);
+      }
+    }
+
     p.pop();
 
     this.recordSystem.draw && this.recordSystem.draw(p);
+
+    // 每帧末尾释放按钮，下一帧碰撞重新判定
+    this._room0Button.releaseButton();
+    this._room1Button.releaseButton();
+    this._room1Button2.releaseButton();
   }
 }

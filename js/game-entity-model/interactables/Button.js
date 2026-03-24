@@ -24,7 +24,8 @@ export class Button extends GameEntity {
     this.isPressed = false;
   }
   draw(p) {
-    p.noStroke();
+    p.stroke(255);
+    p.strokeWeight(2);
     if (this.isPressed) {
       // 踩下状态：绿色，压缩
       p.fill(50, 255, 50);

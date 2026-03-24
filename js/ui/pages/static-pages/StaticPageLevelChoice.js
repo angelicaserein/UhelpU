@@ -1,6 +1,7 @@
 import { PageBase } from "../PageBase.js";
 import { ButtonBase } from "../../components/ButtonBase.js";
 import { FollowImage } from "../../components/FollowImage.js";
+import { LevelInfo } from "../../components/LevelInfo.js";
 import { Assets } from "../../../AssetsManager.js";
 import { AudioManager } from "../../../AudioManager.js";
 import { EventTypes } from "../../../event-system/EventTypes.js";
@@ -11,6 +12,7 @@ export class StaticPageLevelChoice extends PageBase {
     this.p = p;
     this.eventBus = eventBus;
     this.follower = null;
+    this.levelInfo = null;
   }
 
   enter() {
@@ -33,79 +35,57 @@ export class StaticPageLevelChoice extends PageBase {
     backBtn.btn.style("height", 0.065 * p.height + "px");
     this.addElement(backBtn);
 
-    // Level 1 按钮
-    const level1Btn = new ButtonBase(
-      p,
-      " ",
-      0.125 * p.width,
-      0.441 * p.height,
-      () => {
-        this.eventBus.publish(EventTypes.LOAD_LEVEL, "level1");
-      },
-      "level1-button",
-    );
-    level1Btn.btn.style("width", 0.05 * p.width + "px");
-    level1Btn.btn.style("height", 0.048 * p.height + "px");
-    this.addElement(level1Btn);
+    // 关卡按钮配置
+    const levelConfigs = [
+      { num: 1, x: 0.125, w: 0.05, cls: "level1-button" },
+      { num: 2, x: 0.3, w: 0.051, cls: "level2-button" },
+      { num: 3, x: 0.477, w: 0.049, cls: "level3-button" },
+      { num: 4, x: 0.654, w: 0.049, cls: "level4-button" },
+    ];
 
-    // Level 2 按钮
-    const level2Btn = new ButtonBase(
-      p,
-      " ",
-      0.3 * p.width,
-      0.441 * p.height,
-      () => {
-        this.eventBus.publish(EventTypes.LOAD_LEVEL, "level2");
-      },
-      "level2-button",
-    );
-    level2Btn.btn.style("width", 0.051 * p.width + "px");
-    level2Btn.btn.style("height", 0.048 * p.height + "px");
-    this.addElement(level2Btn);
-
-    // Level 3 按钮
-    const level3Btn = new ButtonBase(
-      p,
-      " ",
-      0.477 * p.width,
-      0.441 * p.height,
-      () => {
-        this.eventBus.publish(EventTypes.LOAD_LEVEL, "level3");
-      },
-      "level3-button",
-    );
-    level3Btn.btn.style("width", 0.049 * p.width + "px");
-    level3Btn.btn.style("height", 0.048 * p.height + "px");
-    this.addElement(level3Btn);
-
-    // Level 4 按钮
-    const level4Btn = new ButtonBase(
-      p,
-      " ",
-      0.654 * p.width,
-      0.441 * p.height,
-      () => {
-        this.eventBus.publish(EventTypes.LOAD_LEVEL, "level4");
-      },
-      "level4-button",
-    );
-    level4Btn.btn.style("width", 0.049 * p.width + "px");
-    level4Btn.btn.style("height", 0.048 * p.height + "px");
-    this.addElement(level4Btn);
+    for (const cfg of levelConfigs) {
+      const btn = new ButtonBase(
+        p,
+        " ",
+        cfg.x * p.width,
+        0.441 * p.height,
+        () => {
+          this.eventBus.publish(EventTypes.LOAD_LEVEL, `level${cfg.num}`);
+        },
+        cfg.cls,
+      );
+      btn.btn.style("width", cfg.w * p.width + "px");
+      btn.btn.style("height", 0.048 * p.height + "px");
+      btn.btn.mouseOver(() => this.levelInfo?.setActiveLevel(cfg.num));
+      btn.btn.mouseOut(() => this.levelInfo?.setActiveLevel(null));
+      this.addElement(btn);
+    }
 
     // 跟随鼠标的动图
+    const followerX = p.width * 0.5;
+    const followerY = p.height * 0.115;
+    const followerR = 0.04 * p.width;
     this.follower = new FollowImage(
       p,
       Assets.followerImg2,
-      p.width * 0.5,
-      p.height * 0.115,
-      0.04 * p.width,
+      followerX,
+      followerY,
+      followerR,
       60,
+    );
+
+    // 关卡信息悬浮面板（FollowImage 左右两侧）
+    this.levelInfo = new LevelInfo(
+      p,
+      followerX,
+      followerY + 15,
+      followerR + 150,
     );
   }
 
   update() {
     if (this.follower) this.follower.update();
+    if (this.levelInfo) this.levelInfo.update();
   }
 
   draw() {
@@ -115,6 +95,7 @@ export class StaticPageLevelChoice extends PageBase {
     } else {
       p.background(200, 255, 200);
     }
+    if (this.levelInfo) this.levelInfo.draw();
     if (this.follower) this.follower.draw();
   }
 }

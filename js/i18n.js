@@ -72,12 +72,20 @@ const _dict = {
     level1_replay_prompt:
       "...He is repeating every step I just did.\nI think... I cannot touch him? Is it really impossible to touch him?",
     level1_title: "Rule",
+    level1_info_left: "level 1\nRule",
+    level1_info_right: "Difficulty\nTutorial 💜",
     level2_title: "Higher",
+    level2_info_left: "level 2\nHigher",
+    level2_info_right: "Difficulty\n💜💜",
     level2_jump_higher_prompt: "How can I jump much higher?",
     level2_jump_hint_window:
       'Congratulations! You\'ve unlocked the achievement: "<span class="rainbow-wave">P</span><span class="rainbow-wave">e</span><span class="rainbow-wave">r</span><span class="rainbow-wave">s</span><span class="rainbow-wave">e</span><span class="rainbow-wave">v</span><span class="rainbow-wave">e</span><span class="rainbow-wave">r</span><span class="rainbow-wave">a</span><span class="rainbow-wave">n</span><span class="rainbow-wave">c</span><span class="rainbow-wave">e</span>"!\n(Hint: hint is in the pause menu, not here haha)',
     level3_title: "Electricity",
+    level3_info_left: "level 3\nElectricity",
+    level3_info_right: "Difficulty\n💜💜💜",
     level4_title: "Level 4 Title Placeholder",
+    level4_info_left: "level 4\nLevel 4",
+    level4_info_right: "Difficulty\n💜💜💜💜",
     module_btn_label: "Install Module",
     module_installation_complete:
       "Installation Complete\n Now you can see the record HUD",
@@ -154,12 +162,20 @@ const _dict = {
     level1_replay_prompt:
       "……他在重复我刚才做的每一步。\n我好像……碰不到他？真的碰不到吗？",
     level1_title: "规则",
+    level1_info_left: "第一关\n规则",
+    level1_info_right: "难度\n⭐",
     level2_title: "登高",
+    level2_info_left: "第二关\n登高",
+    level2_info_right: "难度\n⭐⭐",
     level2_jump_higher_prompt: "怎么才能跳得更高呢？",
     level2_jump_hint_window:
       '恭喜你解锁"<span class="rainbow-wave">坚</span><span class="rainbow-wave">持</span><span class="rainbow-wave">不</span><span class="rainbow-wave">懈</span>"的成就！\n（提示在暂停菜单里哦，不在这里哈哈）',
     level3_title: "通关",
+    level3_info_left: "第三关\n通关",
+    level3_info_right: "难度\n⭐⭐⭐",
     level4_title: "Level4标题占位",
+    level4_info_left: "第四关\nLevel4",
+    level4_info_right: "难度\n⭐⭐⭐⭐",
     module_btn_label: "安装模块",
     module_installation_complete: "安装完成\n现在你可以看到录制面板了",
     first_record_prompt:

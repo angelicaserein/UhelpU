@@ -213,7 +213,7 @@ export class Level4 extends BaseLevel {
         const scaleX = p.width / bg.width;
         const scaleY = p.height / bg.height;
         const scale = Math.max(scaleX, scaleY) * 1.05; // Slightly larger than canvas
-        p.image(bg, 0, -p.height, bg.width * scale, bg.height * scale);
+        p.image(bg, i * p.width, -p.height, bg.width * scale, bg.height * scale);
       }
       p.pop();
     } else {

@@ -15,46 +15,53 @@ export class StaticPageWin extends PageBase {
     const levelNum = parseInt(this.levelIndex.replace("level", ""), 10);
     const TOTAL_LEVELS = 4;
 
+    const btnW = 180;
+    const btnH = 46;
+    const btnGap = 14;
+    const btnX = p.width / 2 - btnW / 2;
     const btnY0 = p.height / 2 + 50;
 
     const backBtn = new ButtonBase(
       p,
       t("btn_back_menu"),
-      p.width / 2 - 60,
+      btnX,
       btnY0,
       () => {
         this.switcher.staticSwitcher.showMainMenu(p);
       },
-      "back-button",
+      "win-action-button",
     );
-    backBtn.btn.style("font-size", "20px");
+    backBtn.btn.style("width", btnW + "px");
+    backBtn.btn.style("height", btnH + "px");
     this.addElement(backBtn);
 
     const restartBtn = new ButtonBase(
       p,
       t("btn_restart"),
-      p.width / 2 - 60,
-      btnY0 + 56,
+      btnX,
+      btnY0 + btnH + btnGap,
       () => {
         this.eventBus.publish(EventTypes.LOAD_LEVEL, `level${levelNum}`);
       },
-      "restart-button",
+      "win-action-button",
     );
-    restartBtn.btn.style("font-size", "20px");
+    restartBtn.btn.style("width", btnW + "px");
+    restartBtn.btn.style("height", btnH + "px");
     this.addElement(restartBtn);
 
     if (levelNum < TOTAL_LEVELS) {
       const nextBtn = new ButtonBase(
         p,
         t("btn_next_level"),
-        p.width / 2 - 60,
-        btnY0 + 112,
+        btnX,
+        btnY0 + (btnH + btnGap) * 2,
         () => {
           this.eventBus.publish("loadLevel", `level${levelNum + 1}`);
         },
-        "next-button",
+        "win-action-button",
       );
-      nextBtn.btn.style("font-size", "20px");
+      nextBtn.btn.style("width", btnW + "px");
+      nextBtn.btn.style("height", btnH + "px");
       this.addElement(nextBtn);
     }
 
@@ -68,7 +75,7 @@ export class StaticPageWin extends PageBase {
         speedY: p.random(-0.6, -2.0),
         speedX: p.random(-0.4, 0.4),
         alpha: p.random(160, 255),
-        hue: p.random(40, 60), // gold range
+        hue: p.random(280, 320), // pink-purple range
       });
     }
   }
@@ -80,12 +87,12 @@ export class StaticPageWin extends PageBase {
   draw() {
     const p = this.p;
 
-    // warm gold-to-dark-purple gradient background
+    // pink-to-purple gradient background
     for (let y = 0; y < p.height; y++) {
       const t = y / p.height;
-      const r = p.lerp(255, 30, t);
-      const g = p.lerp(220, 18, t);
-      const b = p.lerp(80, 60, t);
+      const r = p.lerp(255, 100, t);
+      const g = p.lerp(150, 40, t);
+      const b = p.lerp(200, 180, t);
       p.stroke(r, g, b);
       p.line(0, y, p.width, y);
     }
@@ -99,7 +106,7 @@ export class StaticPageWin extends PageBase {
         s.y = p.height + 5;
         s.x = p.random(p.width);
       }
-      p.fill(255, 220 + s.hue - 50, 80, s.alpha);
+      p.fill(255, 180, 220, s.alpha);
       p.rect(s.x, s.y, s.size, s.size);
     }
 
@@ -107,16 +114,16 @@ export class StaticPageWin extends PageBase {
     p.textAlign(p.CENTER, p.CENTER);
     if (Assets.customFont) p.textFont(Assets.customFont);
 
-    p.fill(255, 200, 60, 60);
+    p.fill(200, 80, 180, 60);
     p.textSize(78);
     p.text(t("result_win"), p.width / 2 + 3, p.height / 4 + 3);
 
-    p.fill(255, 240, 130);
+    p.fill(255, 200, 240);
     p.textSize(76);
     p.text(t("result_win"), p.width / 2, p.height / 4);
 
     // sub-label
-    p.fill(255, 220, 140, 200);
+    p.fill(255, 200, 240, 200);
     p.textSize(20);
     const levelNum = parseInt(this.levelIndex.replace("level", ""), 10);
     p.text(`- Level ${levelNum} -`, p.width / 2, p.height / 4 + 68);

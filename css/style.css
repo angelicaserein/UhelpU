@@ -382,6 +382,45 @@ canvas {
   transform: translateX(-5px);
 }
 
+/* 胜利结算页按钮 */
+.win-action-button {
+  width: 180px;
+  height: 46px;
+  font-size: 18px;
+  font-weight: bold;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  color: #fff3fd;
+  -webkit-text-stroke: 0.3px #ffeafc;
+  background: linear-gradient(
+    90deg,
+    rgba(101, 78, 119, 0.75),
+    rgba(70, 40, 100, 0.75)
+  );
+  border: 2px solid #7a3f8c;
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(120, 50, 160, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+  transition:
+    background 0.3s,
+    border-color 0.3s,
+    box-shadow 0.3s,
+    opacity 0.3s;
+}
+.win-action-button:hover {
+  opacity: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(140, 100, 170, 0.9),
+    rgba(100, 60, 140, 0.9)
+  );
+  border-color: #a060d0;
+  box-shadow: 0 0 18px rgba(160, 80, 200, 0.5);
+}
+
 /* notebook按钮（翻转卡片） */
 .notebook-button {
   perspective: 600px;

@@ -57,7 +57,7 @@ const _dict = {
 
     // ── Record HUD ───────────────────────────────────────────────────
     rec_title_standby: "Phantom Recorder Standby",
-    rec_title_recording: "Recording",
+    rec_title_recording: "Recording: actions being recorded",
     rec_title_ready: "Record Complete",
     rec_title_replaying: "Replaying",
     rec_sub_max: "Press {KEY} to Start Recording | Max Record Duration",
@@ -113,7 +113,7 @@ const _dict = {
     btn_back_menu: "返回菜单",
     btn_restart: "重新开始当前关卡",
     btn_next_level: "下一关",
-    result_win: "恭喜通关！",
+    result_win: "~恭喜通关~",
     result_lose: "游戏结束",
 
     // ── Setting Window ───────────────────────────────────────────────

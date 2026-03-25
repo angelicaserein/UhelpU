@@ -1,4 +1,5 @@
 import { GameEntity } from "./GameEntity.js";
+import { AudioManager } from "../../AudioManager.js";
 
 export class Character extends GameEntity {
     constructor(x, y) {
@@ -25,6 +26,12 @@ export class Character extends GameEntity {
         this._jumpBurstParticles = [];
         this._wasOnGround = true;
         this._trailFacing = 1;
+
+        // Zzz idle bubble effect
+        this._zzzBubbles = [];
+        this._zzzLastEmitMs = 0;
+        this._zzzEmitIndex = 0;
+        this._zzzEmitIntervalMs = 650;
     }
 
     // ── Death ─────────────────────────────────────────────────────
@@ -34,6 +41,7 @@ export class Character extends GameEntity {
         this.deathState.isDead = true;
         this.deathState.deathType = deathType;
         this.deathState.initialized = false;
+        AudioManager.playSFX("dead");
     }
 
     initDeathEffect() {
@@ -170,6 +178,63 @@ export class Character extends GameEntity {
             if (particle.life <= 0) {
                 this._jumpBurstParticles.splice(i, 1);
             }
+        }
+    }
+
+    // ── Zzz idle bubbles ──────────────────────────────────────────
+
+    _updateZzzBubbles(p, spawnX, spawnY, isActive) {
+        for (let i = this._zzzBubbles.length - 1; i >= 0; i--) {
+            const b = this._zzzBubbles[i];
+            b.y += b.vy;  // y 轴已全局翻转：y 增大 = 视觉上升
+            b.x += b.vx;
+            b.life -= 1;
+            if (b.life <= 0) this._zzzBubbles.splice(i, 1);
+        }
+
+        if (!isActive) {
+            this._zzzLastEmitMs = 0;
+            this._zzzEmitIndex = 0;
+            return;
+        }
+
+        const now = p.millis();
+        if (this._zzzLastEmitMs === 0) this._zzzLastEmitMs = now;
+
+        if (now - this._zzzLastEmitMs >= this._zzzEmitIntervalMs) {
+            this._zzzLastEmitMs = now;
+            const idx = this._zzzEmitIndex % 3;
+            const sizes = [7, 10, 13];
+            const offsets = [0, 4, 9];
+            const life = 58;
+            this._zzzBubbles.push({
+                x: spawnX + offsets[idx],
+                y: spawnY,
+                vx: 0.22,
+                vy: 0.42,
+                size: sizes[idx],
+                life,
+                maxLife: life,
+            });
+            this._zzzEmitIndex++;
+        }
+    }
+
+    _drawZzzBubbles(p) {
+        if (this._zzzBubbles.length === 0) return;
+        for (const b of this._zzzBubbles) {
+            const t = b.life / b.maxLife;
+            const alpha = Math.floor(t * 210);
+            p.push();
+            p.translate(b.x, b.y);
+            p.scale(1, -1);  // 抵消全局 y 翻转，让字母显示正常
+            p.noStroke();
+            p.textAlign(p.CENTER, p.CENTER);
+            p.textStyle(p.BOLD);
+            p.fill(135, 206, 235, alpha);
+            p.textSize(b.size);
+            p.text("z", 0, 0);
+            p.pop();
         }
     }
 

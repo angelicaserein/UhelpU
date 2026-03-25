@@ -20,9 +20,13 @@ const TRACKS = {
 
 const SFX_TRACKS = {
   click: "assets/audio/sxf/click.mp3",
+  dead: "assets/audio/sxf/dead.mp3",
 };
 
 const clamp01 = (value) => Math.max(0, Math.min(1, Number(value) || 0));
+
+const FADE_INTERVAL = 50;  // ms per tick
+const FADE_STEPS = 800 / FADE_INTERVAL; // 800ms total fade
 
 class AudioManagerImpl {
   constructor() {
@@ -32,6 +36,9 @@ class AudioManagerImpl {
     this._sfxMap = new Map();
     this._currentBgmKey = null;
     this._currentBgm = null;
+    this._fadeOutTimer = null;
+    this._fadeInTimer = null;
+    this._fadingOutBgm = null;
     this._bindUnlockGesture();
   }
 
@@ -76,6 +83,51 @@ class AudioManagerImpl {
     return audio;
   }
 
+  _clearFadeTimers() {
+    if (this._fadeOutTimer) {
+      clearInterval(this._fadeOutTimer);
+      this._fadeOutTimer = null;
+      // 立即停掉仍在淡出中的旧音频，防止它变成"孤儿"继续播放
+      if (this._fadingOutBgm) {
+        this._fadingOutBgm.pause();
+        this._fadingOutBgm.currentTime = 0;
+        this._fadingOutBgm = null;
+      }
+    }
+    if (this._fadeInTimer) { clearInterval(this._fadeInTimer); this._fadeInTimer = null; }
+  }
+
+  _fadeOut(audio, onComplete) {
+    this._fadingOutBgm = audio;
+    const startVolume = audio.volume;
+    let step = 0;
+    this._fadeOutTimer = setInterval(() => {
+      step++;
+      audio.volume = clamp01(startVolume * (1 - step / FADE_STEPS));
+      if (step >= FADE_STEPS) {
+        clearInterval(this._fadeOutTimer);
+        this._fadeOutTimer = null;
+        this._fadingOutBgm = null;
+        audio.volume = 0;
+        if (onComplete) onComplete();
+      }
+    }, FADE_INTERVAL);
+  }
+
+  _fadeIn(audio) {
+    const target = this._bgmVolume;
+    let step = 0;
+    this._fadeInTimer = setInterval(() => {
+      step++;
+      audio.volume = clamp01(target * (step / FADE_STEPS));
+      if (step >= FADE_STEPS) {
+        clearInterval(this._fadeInTimer);
+        this._fadeInTimer = null;
+        audio.volume = target;
+      }
+    }, FADE_INTERVAL);
+  }
+
   playBGM(trackKey) {
     const next = this._getOrCreateBgm(trackKey);
     if (!next) {
@@ -84,30 +136,45 @@ class AudioManagerImpl {
     }
 
     if (this._currentBgmKey === trackKey) {
-      next.volume = this._bgmVolume;
       if (next.paused) {
+        this._clearFadeTimers();
+        next.volume = 0;
         next.play().catch(() => {});
+        this._fadeIn(next);
       }
       return;
     }
 
-    if (this._currentBgm) {
-      this._currentBgm.pause();
-      this._currentBgm.currentTime = 0;
-    }
-
+    this._clearFadeTimers();
+    const prevBgm = this._currentBgm;
     this._currentBgm = next;
     this._currentBgmKey = trackKey;
-    this._currentBgm.volume = this._bgmVolume;
-    this._currentBgm.play().catch(() => {});
+
+    if (prevBgm) {
+      this._fadeOut(prevBgm, () => {
+        prevBgm.pause();
+        prevBgm.currentTime = 0;
+        next.volume = 0;
+        next.play().catch(() => {});
+        this._fadeIn(next);
+      });
+    } else {
+      next.volume = 0;
+      next.play().catch(() => {});
+      this._fadeIn(next);
+    }
   }
 
   stopBGM() {
     if (!this._currentBgm) return;
-    this._currentBgm.pause();
-    this._currentBgm.currentTime = 0;
+    this._clearFadeTimers();
+    const bgm = this._currentBgm;
     this._currentBgm = null;
     this._currentBgmKey = null;
+    this._fadeOut(bgm, () => {
+      bgm.pause();
+      bgm.currentTime = 0;
+    });
   }
 
   setBGMVolume(volume01) {

@@ -99,6 +99,7 @@ export class Player extends Character {
       this._jumpRingEffects = [];
       this._jumpBurstParticles = [];
       this._landingDustParticles = [];
+      this._zzzBubbles = [];
       this._wasOnGround = true;
       const deadSprite = Assets.playerImg_dead;
       if (deadSprite) {
@@ -184,6 +185,17 @@ export class Player extends Character {
       this._idleStartMs = null;
     }
 
+    const idleElapsedForZzz = isIdle && this._idleStartMs !== null
+      ? p.millis() - this._idleStartMs
+      : 0;
+    const isIdleAnimating = isIdle && idleElapsedForZzz >= this._idleDelayMs;
+    this._updateZzzBubbles(
+      p,
+      this.x + this.collider.w * 0.8,
+      this.y + this.collider.h + 6,  // y 轴翻转：头顶 = y + h + offset
+      isIdleAnimating,
+    );
+
     if (!sprite) {
       sprite = getPlayerSprite(
         this.movementComponent.velX,
@@ -207,5 +219,6 @@ export class Player extends Character {
 
     // Landing dust drawn after sprite so it appears at the character's sides
     this._drawLandingDust(p);
+    this._drawZzzBubbles(p);
   }
 }

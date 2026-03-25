@@ -69,6 +69,15 @@ export class WindowPause extends WindowBase {
       if (this._callbacks.onHint) this._callbacks.onHint();
     });
 
+    // ── Restart Level 按钮 ───────────────────────────────────────
+    this._restartBtn = p.createButton(t('pause_restart'));
+    this._restartBtn.addClass('pause-btn pause-btn-restart');
+    this._restartBtn.parent(area);
+    this._restartBtn.mousePressed(() => {
+      this.close();
+      if (this._callbacks.onRestartLevel) this._callbacks.onRestartLevel();
+    });
+
     // ── Back to Level Choice 按钮 ────────────────────────────────
     this._levelChoiceBtn = p.createButton(t('pause_back_level_choice'));
     this._levelChoiceBtn.addClass('pause-btn pause-btn-level-choice');
@@ -94,6 +103,7 @@ export class WindowPause extends WindowBase {
     this._resumeBtn && this._resumeBtn.html(t('pause_resume'));
     this._settingBtn && this._settingBtn.html(t('pause_setting'));
     this._hintBtn && this._hintBtn.html(t('pause_hint_btn'));
+    this._restartBtn && this._restartBtn.html(t('pause_restart'));
     this._levelChoiceBtn && this._levelChoiceBtn.html(t('pause_back_level_choice'));
     this._menuBtn && this._menuBtn.html(t('pause_back_menu'));
   }

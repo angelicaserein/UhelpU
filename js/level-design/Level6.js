@@ -4,6 +4,10 @@ import {
   Ground,
   Wall,
   Portal,
+  Button,
+  Platform,
+  TextPrompt,
+  Checkpoint,
 } from "../game-entity-model/index.js";
 import { CollisionSystem } from "../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../physics-system/PhysicsSystem.js";
@@ -11,6 +15,7 @@ import { RecordSystem } from "../record-system/RecordSystem.js";
 import { BaseLevel } from "./BaseLevel.js";
 import { Assets } from "../AssetsManager.js";
 import { Room } from "./Room.js";
+import { ButtonPlatformLinkSystem } from "../mechanism-system/ButtonPlatformLinkSystem.js";
 
 export class Level6 extends BaseLevel {
   constructor(p, eventBus) {
@@ -38,15 +43,83 @@ export class Level6 extends BaseLevel {
 
     this.physicsSystem = new PhysicsSystem(this.entities);
     this.collisionSystem = new CollisionSystem(this.entities, eventBus);
+
+    this._platformLinkSystem = new ButtonPlatformLinkSystem(
+      [
+        {
+          button: this._room0Button4,
+          platforms: [{ platform: this._room0DisappearPlatform4 }],
+        },
+        {
+          button: this._room0Button5,
+          platforms: [{ platform: this._room0DisappearPlatform5 }],
+        },
+        {
+          button: this._room0Button6,
+          platforms: [{ platform: this._room0DisappearPlatform6, mode: "appear" }],
+        },
+      ],
+      this.collisionSystem,
+    );
   }
 
   _buildRooms(p) {
     const wallThickness = 20;
 
+    // 从 Level5 Room0 中 x > 1350 的实体，x 全部 -1320
+    this._room0NormalPlatform3 = new Platform(-370, 80, 900, 240);
+
+    this._room0Checkpoint2 = new Checkpoint(
+      130,
+      320,
+      40,
+      70,
+      () => this._player,
+    );
+    this._room0RecordingPrompt = new TextPrompt(130, 370, this, {
+      textKey: "level6_checkpoint_prompt",
+      textSize: 20,
+      width: 480,
+      height: 150,
+    });
+    this._room0Button4 = new Button(380, 320, 20, 5, {
+      color: { unpressed: [255, 60, 60], pressed: [180, 30, 30] },
+    });
+    this._room0DisappearPlatform4 = new Platform(530, 300, 150, 20);
+    this._room0NormalPlatform6 = new Platform(630, 300, 650, 20);
+    this._room0NormalPlatform8 = new Platform(730, 100, 80, 20);
+    this._room0NormalPlatform9 = new Platform(880, 140, 80, 20);
+    this._room0NormalPlatform10 = new Platform(1030, 200, 160, 20);
+    this._room0NormalPlatform7 = new Platform(1260, 80, 20, 460);
+    this._room0Checkpoint3 = new Checkpoint(680, 560, 40, 70, () => this._player);
+    this._room0DisappearPlatform6 = new Platform(630, 540, 650, 20);
+    this._room0Button6 = new Button(690, 320, 20, 5, {
+      color: { unpressed: [255, 60, 60], pressed: [180, 30, 30] },
+    });
+    this._room0Button5 = new Button(1135, 220, 20, 5, {
+      color: { unpressed: [255, 60, 60], pressed: [180, 30, 30] },
+    });
+    this._room0DisappearPlatform5 = new Platform(610, 300, 20, 300);
+
     const room0 = new Room(
       [
         new Wall(0, 0, wallThickness, p.height),
         new Ground(0, 0, p.width, 80),
+        this._room0NormalPlatform3,
+        this._room0Checkpoint2,
+        this._room0RecordingPrompt,
+        this._room0Button4,
+        this._room0DisappearPlatform4,
+        this._room0NormalPlatform6,
+        this._room0NormalPlatform8,
+        this._room0NormalPlatform9,
+        this._room0NormalPlatform10,
+        this._room0NormalPlatform7,
+        this._room0Checkpoint3,
+        this._room0DisappearPlatform6,
+        this._room0Button6,
+        this._room0Button5,
+        this._room0DisappearPlatform5,
       ],
       { right: { targetRoomIndex: 1 } },
     );
@@ -215,6 +288,7 @@ export class Level6 extends BaseLevel {
 
   updateCollision(p = this.p, eventBus = this.eventBus) {
     this.collisionSystem.collisionEntry(eventBus);
+    this._platformLinkSystem.update();
     if (this._transition) {
       this._updateTransition(p);
       return;
@@ -233,8 +307,15 @@ export class Level6 extends BaseLevel {
       if (entity.type === "ground") entity.draw(p);
     }
     for (const entity of this.entities) {
-      if (entity.type !== "spike" && entity.type !== "ground") entity.draw(p);
+      if (
+        entity.type !== "spike" &&
+        entity.type !== "ground" &&
+        !entity._hidden
+      ) {
+        entity.draw(p);
+      }
     }
+    this._platformLinkSystem.draw(p);
     p.pop();
     this.recordSystem.draw && this.recordSystem.draw(p);
   }

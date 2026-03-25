@@ -128,15 +128,6 @@ export class Level5 extends BaseLevel {
       height: 120,
     });
 
-    // x=1450 处的存档点
-    this._room0Checkpoint2 = new Checkpoint(
-      1450,
-      320,
-      40,
-      70,
-      () => this._player,
-    );
-
     // 第二存档点上方的提示
     this._room0RecordingPrompt = new TextPrompt(1450, 370, this, {
       textKey: "level5_recording_prompt",
@@ -199,7 +190,6 @@ export class Level5 extends BaseLevel {
         this._room0Button3,
         this._room0DisappearPlatform3,
         this._room0JailPrompt,
-        this._room0Checkpoint2,
         this._room0RecordingPrompt,
         this._room0Button4,
         this._room0DisappearPlatform4,

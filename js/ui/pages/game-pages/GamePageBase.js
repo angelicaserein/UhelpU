@@ -60,6 +60,11 @@ export class GamePageBase extends PageBase {
       onResume: () => this._resumeGame(),
       onSetting: () => this._windowSetting.open(),
       onHint: () => this._onHint(),
+      onRestartLevel: () => {
+        this._resumeGame();
+        this.switcher.eventBus &&
+          this.switcher.eventBus.publish(EventTypes.LOAD_LEVEL, `level${hintLevel}`);
+      },
       onBackLevelChoice: () => {
         this._resumeGame();
         this.switcher.eventBus &&

@@ -7,6 +7,7 @@ import {
   Button,
   Spike,
   NPC,
+  TextPrompt,
 } from "../game-entity-model/index.js";
 import { CollisionSystem } from "../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../physics-system/PhysicsSystem.js";
@@ -85,6 +86,7 @@ export class Level4 extends BaseLevel {
       dialogueLines: ["npc_guide_line1", "npc_guide_line2", "npc_guide_line3"],
       exhaustedLine: "npc_guide_exhausted",
       maxDialogueCount: 2,
+      dialogueScale: 1.5,
     });
     this._room0NPC2 = new NPC(680, 80, 40, 40, {
       getPlayer: () => this._player,
@@ -97,6 +99,7 @@ export class Level4 extends BaseLevel {
       ],
       exhaustedLine: "npc_guide2_exhausted",
       maxDialogueCount: 2,
+      dialogueScale: 1.5,
     });
     this._room0NPC3 = new NPC(760, 80, 40, 40, {
       getPlayer: () => this._player,
@@ -109,6 +112,7 @@ export class Level4 extends BaseLevel {
       ],
       exhaustedLine: "npc_guide3_exhausted",
       maxDialogueCount: 2,
+      dialogueScale: 1.5,
     });
     this._room0NPC4 = new NPC(840, 80, 40, 40, {
       getPlayer: () => this._player,
@@ -121,6 +125,7 @@ export class Level4 extends BaseLevel {
       ],
       exhaustedLine: "npc_guide4_exhausted",
       maxDialogueCount: 2,
+      dialogueScale: 1.5,
     });
 
     const room0 = new Room(
@@ -169,9 +174,14 @@ export class Level4 extends BaseLevel {
       },
     );
 
-    const portal = new Portal(900, 80, 50, 50); //参数分别是传送门的 x, y, width, height
+    const portal = new Portal(1100, 80, 50, 50); //参数分别是传送门的 x, y, width, height
     portal.openPortal();
     room1.entities.add(portal);
+
+    const buttonHintPrompt = new TextPrompt(800, 90, this, {
+      textKey: "level4_button_hint",
+    });
+    room1.entities.add(buttonHintPrompt);
 
     return [room0, room1];
   }

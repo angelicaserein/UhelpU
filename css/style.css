@@ -376,10 +376,19 @@ canvas {
 
 /* back按钮 */
 .back-button {
-  font-size: 36px;
+  font-size: 18px;
   border-radius: 50%;
-  background-color: rgba(191, 157, 212, 0.3);
+  background: rgba(55, 20, 85, 0.45);
+  border: 1.5px solid rgba(255, 236, 169, 0.35);
+  color: rgba(255, 248, 223, 0.75);
+  backdrop-filter: blur(4px);
   transform: translateX(-5px);
+  transition: all 0.3s ease;
+}
+.back-button:hover {
+  background: rgba(75, 30, 115, 0.6);
+  border-color: rgba(255, 236, 165, 0.7);
+  color: #fff1c0;
 }
 
 /* 胜利结算页按钮 */
@@ -896,10 +905,19 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
 
 /* ── 暂停按钮（游戏中右上角 ⏸） */
 .pause-button {
-  font-size: 22px;
+  font-size: 16px;
   border-radius: 50%;
-  background-color: rgba(191, 157, 212, 0.3);
+  background: rgba(55, 20, 85, 0.45);
+  border: 1.5px solid rgba(255, 236, 169, 0.35);
+  color: rgba(255, 248, 223, 0.75);
+  backdrop-filter: blur(4px);
   transform: translateX(-5px);
+  transition: all 0.3s ease;
+}
+.pause-button:hover {
+  background: rgba(75, 30, 115, 0.6);
+  border-color: rgba(255, 236, 165, 0.7);
+  color: #fff1c0;
 }
 
 /* ── 暂停窗口内部按钮 */

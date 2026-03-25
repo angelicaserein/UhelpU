@@ -42,6 +42,7 @@ export class NPC extends GameEntity {
     this._dialogueCompletedCount = 0;
     this._imageKey = options.imageKey || null;
     this._color = options.color || [100, 200, 255];
+    this._dialogueScale = options.dialogueScale || 1;
     this.zIndex = -1;
 
     this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
@@ -272,21 +273,22 @@ export class NPC extends GameEntity {
    * 绘制对话气泡
    */
   _drawDialogueBubble(p) {
+    const s = this._dialogueScale;
     const lineKey = this._useExhaustedLine
       ? this._exhaustedLine
       : this.dialogueLines[this._dialogueIndex] || "";
     const line = t(lineKey);
-    const bubbleW = 200;
-    const bubbleH = 60;
+    const bubbleW = 200 * s;
+    const bubbleH = 60 * s;
     const bubbleX = this.x + this.w / 2 - bubbleW / 2;
-    const bubbleY = this.y + this.h + 50;
+    const bubbleY = this.y + this.h + 50 * s;
 
     p.push();
     // 气泡背景
     p.fill(0, 0, 0, 180);
     p.stroke(255, 255, 255, 150);
-    p.strokeWeight(2);
-    p.rect(bubbleX, bubbleY, bubbleW, bubbleH, 6);
+    p.strokeWeight(2 * s);
+    p.rect(bubbleX, bubbleY, bubbleW, bubbleH, 6 * s);
 
     // 气泡文字（补偿 y 轴翻转）
     p.translate(bubbleX + bubbleW / 2, bubbleY + bubbleH / 2);
@@ -294,16 +296,16 @@ export class NPC extends GameEntity {
     p.fill(255);
     p.noStroke();
     p.textAlign(p.CENTER, p.CENTER);
-    p.textSize(12);
+    p.textSize(12 * s);
     if (Assets.customFont) {
       p.textFont(Assets.customFont);
     }
     p.text(
       line,
-      -(bubbleW - 16) / 2,
-      -(bubbleH - 12) / 2,
-      bubbleW - 16,
-      bubbleH - 12,
+      -(bubbleW - 16 * s) / 2,
+      -(bubbleH - 12 * s) / 2,
+      bubbleW - 16 * s,
+      bubbleH - 12 * s,
     );
     p.pop();
 
@@ -316,12 +318,12 @@ export class NPC extends GameEntity {
       const interactKey = keyCodeToLabel(kbm.getKeyByIntent("interaction"));
       const hintText = t("npc_continue_hint").replace("{KEY}", interactKey);
       p.push();
-      p.translate(bubbleX + bubbleW - 8, bubbleY + 16); //参数分别是提示文本的 x 和 y 坐标（相对于气泡框）
+      p.translate(bubbleX + bubbleW - 8 * s, bubbleY + 16 * s); //参数分别是提示文本的 x 和 y 坐标（相对于气泡框）
       p.scale(1, -1);
       p.fill(200, 200, 200, 180);
       p.noStroke();
       p.textAlign(p.RIGHT, p.TOP);
-      p.textSize(9);
+      p.textSize(9 * s);
       p.text(hintText, 0, 0);
       p.pop();
     }

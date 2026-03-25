@@ -80,12 +80,13 @@ const _dict = {
     level2_jump_higher_prompt: "How can I jump much higher?",
     level2_jump_hint_window:
       'Congratulations! You\'ve unlocked the achievement: "<span class="rainbow-wave">P</span><span class="rainbow-wave">e</span><span class="rainbow-wave">r</span><span class="rainbow-wave">s</span><span class="rainbow-wave">e</span><span class="rainbow-wave">v</span><span class="rainbow-wave">e</span><span class="rainbow-wave">r</span><span class="rainbow-wave">a</span><span class="rainbow-wave">n</span><span class="rainbow-wave">c</span><span class="rainbow-wave">e</span>"!\n(Hint: hint is in the pause menu, not here haha)',
+    level3_signboard_prompt: "Which key was it to interact again?",
     level3_title: "Electricity",
     level3_info_left: "level 3\nElectricity",
     level3_info_right: "Difficulty\n💜💜💜",
     level4_title: "Trap",
     level4_info_left: "level 4\nTrap",
-    level4_info_right: "Difficulty\n💜💜💜💜",
+    level4_info_right: "Difficulty\n💜💜",
     module_btn_label: "Install Module",
     module_installation_complete:
       "Installation Complete\n Now you can see the record HUD",
@@ -111,13 +112,13 @@ const _dict = {
     npc_guide3_exhausted: "I'm sleeping, don't bother me~",
     // NPC 4
     npc_guide4_line1:
-      "I am the last NPC, but I have the most lines! Impressive, right?",
+      "I am the last NPC, but I have the most lines! Impressive?",
     npc_guide4_line2:
       "I think the second NPC said something important, do you think so?",
     npc_guide4_line3: "But I can't understand!",
     npc_guide4_exhausted:
       "I want to figure out the buttons and spikes, but I'm too sleepy... Zzz",
-    npc_continue_hint: "[E] Continue",
+    npc_continue_hint: "[{KEY}] Continue",
   },
 
   zh: {
@@ -189,19 +190,20 @@ const _dict = {
       "……他在重复我刚才做的每一步。\n我好像……碰不到他？真的碰不到吗？",
     level1_title: "规则",
     level1_info_left: "第一关\n规则",
-    level1_info_right: "难度\n⭐",
+    level1_info_right: "难度\n🩷",
     level2_title: "登高",
     level2_info_left: "第二关\n登高",
-    level2_info_right: "难度\n⭐⭐",
+    level2_info_right: "难度\n🩷🩷",
     level2_jump_higher_prompt: "怎么才能跳得更高呢？",
     level2_jump_hint_window:
       '恭喜你解锁"<span class="rainbow-wave">坚</span><span class="rainbow-wave">持</span><span class="rainbow-wave">不</span><span class="rainbow-wave">懈</span>"的成就！\n（提示在暂停菜单里哦，不在这里哈哈）',
+    level3_signboard_prompt: "我记得按哪个键可以交互来着？",
     level3_title: "通电",
     level3_info_left: "第三关\n通电",
-    level3_info_right: "难度\n⭐⭐⭐",
+    level3_info_right: "难度\n🩷🩷🩷",
     level4_title: "陷阱",
     level4_info_left: "第四关\n陷阱",
-    level4_info_right: "难度\n⭐⭐⭐⭐",
+    level4_info_right: "难度\n🩷🩷",
     module_btn_label: "安装模块",
     module_installation_complete: "安装完成\n现在你可以看到录制面板了",
     first_record_prompt:
@@ -220,16 +222,16 @@ const _dict = {
     npc_guide2_line3: "但是睡觉更重要！",
     npc_guide2_exhausted: "我在睡觉啦，不要打扰我哦~",
     // NPC 3
-    npc_guide3_line1: "我看起来和其他三个NPC不一样，对吗？",
+    npc_guide3_line1: "我和其他三个NPC不一样，对吗？",
     npc_guide3_line2: "我喜欢它们，它们和我一样可爱。",
     npc_guide3_line3: "但是我更喜欢睡觉！",
     npc_guide3_exhausted: "我在睡觉啦，不要打扰我哦~",
     // NPC 4
-    npc_guide4_line1: "我是最后一个 NPC，但我台词最多！厉害吧？",
-    npc_guide4_line2: "我觉得第二个 NPC 说了些重要的东西，你觉得呢？",
+    npc_guide4_line1: "我是最后一个NPC，但我台词最多！厉害不？",
+    npc_guide4_line2: "我觉得第二个NPC说了些重要的东西，你觉得呢？",
     npc_guide4_line3: "但是睡觉更重要！",
     npc_guide4_exhausted: "我想搞清楚那些按钮和地刺\n但我太困了... Zzz",
-    npc_continue_hint: "[交互键] 继续",
+    npc_continue_hint: "[{KEY}] 继续",
   },
 };
 

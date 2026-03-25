@@ -70,8 +70,12 @@ export class Level4 extends BaseLevel {
 
     // ---- Room 0 ----
     // 按钮放在浮空平台 (200,160,160,20) 表面，地刺放在地面 (y=80)
-    this._room0Button = new Button(250, 80, 20, 5); //每个参数分别是按钮的 x, y, width, height
-    this._room0Spike = new Spike(350, 80, 200, 20); //每个参数分别是地刺的 x, y, width, height
+    this._room0Button = new Button(250, 80, 20, 5, {
+      color: { unpressed: [255, 60, 60], pressed: [180, 30, 30] },
+    });
+    this._room0Spike = new Spike(350, 80, 200, 20, {
+      color: [255, 60, 60],
+    });
 
     this._room0NPC = new NPC(600, 80, 40, 40, {
       //每个参数分别是 NPC 的 x, y, width, height
@@ -82,7 +86,7 @@ export class Level4 extends BaseLevel {
       exhaustedLine: "npc_guide_exhausted",
       maxDialogueCount: 2,
     });
-    this._room0NPC2 = new NPC(650, 80, 40, 40, {
+    this._room0NPC2 = new NPC(680, 80, 40, 40, {
       getPlayer: () => this._player,
       eventBus: this.eventBus,
       npcId: "guide2",
@@ -94,7 +98,7 @@ export class Level4 extends BaseLevel {
       exhaustedLine: "npc_guide2_exhausted",
       maxDialogueCount: 2,
     });
-    this._room0NPC3 = new NPC(700, 80, 40, 40, {
+    this._room0NPC3 = new NPC(760, 80, 40, 40, {
       getPlayer: () => this._player,
       eventBus: this.eventBus,
       npcId: "guide3",
@@ -106,7 +110,7 @@ export class Level4 extends BaseLevel {
       exhaustedLine: "npc_guide3_exhausted",
       maxDialogueCount: 2,
     });
-    this._room0NPC4 = new NPC(750, 80, 40, 40, {
+    this._room0NPC4 = new NPC(840, 80, 40, 40, {
       getPlayer: () => this._player,
       eventBus: this.eventBus,
       npcId: "guide4",
@@ -137,11 +141,19 @@ export class Level4 extends BaseLevel {
 
     // ---- Room 1 ----
     // 第一组：按钮地刺放在地面 (y=80)
-    this._room1Button = new Button(-400, 80, 20, 5); //每个参数分别是按钮的 x, y, width, height
-    this._room1Spike = new Spike(300, 80, 150, 20); //每个参数分别是地刺的 x, y, width, height
+    this._room1Button = new Button(-400, 80, 20, 5, {
+      color: { unpressed: [255, 220, 50], pressed: [180, 150, 30] },
+    });
+    this._room1Spike = new Spike(300, 80, 150, 20, {
+      color: [255, 220, 50],
+    });
     // 第二组
-    this._room1Button2 = new Button(-300, 80, 20, 5);
-    this._room1Spike2 = new Spike(550, 80, 150, 20);
+    this._room1Button2 = new Button(-300, 80, 20, 5, {
+      color: { unpressed: [60, 120, 255], pressed: [30, 70, 180] },
+    });
+    this._room1Spike2 = new Spike(550, 80, 150, 20, {
+      color: [60, 120, 255],
+    });
 
     const room1 = new Room(
       [

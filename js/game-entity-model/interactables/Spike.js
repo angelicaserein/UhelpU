@@ -6,15 +6,17 @@ import {
 } from "../../collision-system/enumerator.js";
 
 export class Spike extends GameEntity {
-  constructor(x, y, w, h) {
+  constructor(x, y, w, h, options = {}) {
     super(x, y);
     this.type = "spike";
     this.movementComponent = null;
     this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
+    this.color = options.color || null;
   }
 
   draw(p) {
-    p.fill(100);
+    const c = this.color || [100];
+    p.fill(...c);
     p.noStroke();
     const spikeW = 20;
     const spikeH = this.collider.h;

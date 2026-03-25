@@ -13,6 +13,8 @@ export class Button extends GameEntity {
     this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
     this.isPressed = false;
     this.bindKey = options.bindKey || null;
+    // color: { unpressed: [r,g,b], pressed: [r,g,b] }
+    this.color = options.color || null;
   }
   pressButton() {
     this.isPressed = true;
@@ -27,12 +29,12 @@ export class Button extends GameEntity {
     p.stroke(255);
     p.strokeWeight(2);
     if (this.isPressed) {
-      // 踩下状态：绿色，压缩
-      p.fill(50, 255, 50);
+      const c = this.color?.pressed || [50, 255, 50];
+      p.fill(...c);
       p.rect(this.x, this.y, this.collider.w, this.collider.h / 2);
     } else {
-      // 未踩下：红色
-      p.fill(255, 50, 50);
+      const c = this.color?.unpressed || [255, 50, 50];
+      p.fill(...c);
       p.rect(this.x, this.y, this.collider.w, this.collider.h);
     }
   }

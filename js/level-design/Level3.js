@@ -5,6 +5,7 @@ import {
   Portal,
   Button,
   Signboard,
+  TextPrompt,
 } from "../game-entity-model/index.js";
 import { BaseLevel } from "./BaseLevel.js";
 import { WireRenderer } from "./WireRenderer.js";
@@ -39,6 +40,21 @@ export class Level3 extends BaseLevel {
       { imageKey: "tileImage_signboard2" },
     );
     this.entities.add(signboard);
+
+    const signboardPrompt = new TextPrompt(
+      signboard.x - 30,
+      signboard.y + signboard.h + 10,
+      this,
+      {
+        textKey: "level3_signboard_prompt",
+        width: 280,
+        height: 72,
+        textSize: 14,
+        showDistance: 80,
+        hideDistance: 200,
+      },
+    );
+    this.entities.add(signboardPrompt);
 
     const player = new Player(50, 450, 40, 40);
     player.createListeners();

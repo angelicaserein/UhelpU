@@ -4,6 +4,7 @@ import { ColliderType } from "../../collision-system/enumerator.js";
 import { EventTypes } from "../../event-system/EventTypes.js";
 import { Assets } from "../../AssetsManager.js";
 import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
+import { keyCodeToLabel } from "../../record-system/RecordKeyUtil.js";
 import { t } from "../../i18n.js";
 
 /**
@@ -311,7 +312,9 @@ export class NPC extends GameEntity {
       !this._useExhaustedLine &&
       this._dialogueIndex < this.dialogueLines.length - 1
     ) {
-      const hintText = t("npc_continue_hint");
+      const kbm = new KeyBindingManager();
+      const interactKey = keyCodeToLabel(kbm.getKeyByIntent("interaction"));
+      const hintText = t("npc_continue_hint").replace("{KEY}", interactKey);
       p.push();
       p.translate(bubbleX + bubbleW - 8, bubbleY + 16); //参数分别是提示文本的 x 和 y 坐标（相对于气泡框）
       p.scale(1, -1);

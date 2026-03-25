@@ -8,6 +8,9 @@ import {
   Spike,
   NPC,
   TextPrompt,
+  Checkpoint,
+  KeyPrompt,
+  Platform,
 } from "../game-entity-model/index.js";
 import { CollisionSystem } from "../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../physics-system/PhysicsSystem.js";
@@ -16,9 +19,12 @@ import { BaseLevel } from "./BaseLevel.js";
 import { Assets } from "../AssetsManager.js";
 import { Room } from "./Room.js";
 import { ButtonSpikeLinkSystem } from "../mechanism-system/ButtonSpikeLinkSystem.js";
+import { ButtonPlatformLinkSystem } from "../mechanism-system/ButtonPlatformLinkSystem.js";
 import { AchievementToast } from "../achievement system/AchievementToast.js";
 import { AchievementData } from "../achievement system/AchievementData.js";
 import { WindowPrompt } from "../ui/windows/WindowPrompt.js";
+import { KeyBindingManager } from "../key-binding-system/KeyBindingManager.js";
+import { t } from "../i18n.js";
 
 export class Level4 extends BaseLevel {
   constructor(p, eventBus) {
@@ -63,6 +69,10 @@ export class Level4 extends BaseLevel {
         fontSize: 17,
       },
     );
+    this._checkpointHintWindow = new WindowPrompt(p, "level4_checkpoint_hint", {
+      width: 420,
+      fontSize: 17,
+    });
 
     const wallThickness = 20;
     this._player = new Player(50, 450, 40, 40);
@@ -80,6 +90,21 @@ export class Level4 extends BaseLevel {
 
     this.physicsSystem = new PhysicsSystem(this.entities);
     this.collisionSystem = new CollisionSystem(this.entities, eventBus);
+
+    // 按钮-平台联动系统
+    this._platformLinkSystem = new ButtonPlatformLinkSystem(
+      [
+        {
+          button: this._room1PlatformButton,
+          platforms: [
+            { platform: this._portalPlatformLeft },
+            { platform: this._portalPlatformRight },
+            { platform: this._portalPlatformTop },
+          ],
+        },
+      ],
+      this.collisionSystem,
+    );
   }
 
   _buildRooms(p) {
@@ -144,6 +169,28 @@ export class Level4 extends BaseLevel {
       dialogueScale: 1.5,
     });
 
+    //参数分别是 x, y, width, height
+    this._room0Checkpoint = new Checkpoint(
+      950,
+      80,
+      40,
+      70,
+      () => this._player,
+      {
+        onActivate: () => {
+          this._checkpointKeyPrompt._hidden = true;
+          this._checkpointHintWindow.open();
+        },
+      },
+    );
+
+    this._checkpointKeyPrompt = new KeyPrompt(
+      950 + 20 - 14,
+      80 + 70 + 8,
+      this,
+      { keys: [{ col: 0, row: 0, label: "E" }] },
+    );
+
     const room0 = new Room(
       [
         new Wall(0, 0, wallThickness, p.height),
@@ -154,6 +201,8 @@ export class Level4 extends BaseLevel {
         this._room0NPC2,
         this._room0NPC3,
         this._room0NPC4,
+        this._room0Checkpoint,
+        this._checkpointKeyPrompt,
       ],
       {
         right: { targetRoomIndex: 1 },
@@ -162,19 +211,27 @@ export class Level4 extends BaseLevel {
 
     // ---- Room 1 ----
     // 第一组：按钮地刺放在地面 (y=80)
-    this._room1Button = new Button(-400, 80, 20, 5, {
+    this._room1Button = new Button(-250, 80, 20, 5, {
       color: { unpressed: [255, 220, 50], pressed: [180, 150, 30] },
     });
     this._room1Spike = new Spike(300, 80, 150, 20, {
       color: [255, 220, 50],
     });
     // 第二组
-    this._room1Button2 = new Button(-300, 80, 20, 5, {
+    this._room1Button2 = new Button(-150, 80, 20, 5, {
       color: { unpressed: [60, 120, 255], pressed: [30, 70, 180] },
     });
     this._room1Spike2 = new Spike(550, 80, 150, 20, {
       color: [60, 120, 255],
     });
+
+    // 按钮-平台联动：绿色按钮控制围住传送门的3个平台
+    this._room1PlatformButton = new Button(1050, 80, 20, 5, {
+      color: { unpressed: [60, 200, 80], pressed: [30, 140, 40] },
+    });
+    this._portalPlatformLeft = new Platform(1150, 80, 22, 72);
+    this._portalPlatformRight = new Platform(1278, 80, 22, 72);
+    this._portalPlatformTop = new Platform(1150, 152, 150, 20);
 
     const room1 = new Room(
       [
@@ -184,17 +241,21 @@ export class Level4 extends BaseLevel {
         this._room1Spike,
         this._room1Button2,
         this._room1Spike2,
+        this._room1PlatformButton,
+        this._portalPlatformLeft,
+        this._portalPlatformRight,
+        this._portalPlatformTop,
       ],
       {
         left: { targetRoomIndex: 0 },
       },
     );
 
-    const portal = new Portal(1100, 80, 50, 50); //参数分别是传送门的 x, y, width, height
+    const portal = new Portal(1200, 80, 50, 50); //参数分别是传送门的 x, y, width, height
     portal.openPortal();
     room1.entities.add(portal);
 
-    const buttonHintPrompt = new TextPrompt(800, 90, this, {
+    const buttonHintPrompt = new TextPrompt(750, 90, this, {
       textKey: "level4_button_hint",
       onTrigger: () => {
         if (!this._room1ButtonEverPressed && !this._room1Button2EverPressed) {
@@ -394,6 +455,7 @@ export class Level4 extends BaseLevel {
     this._spikeLinkSystem0.update();
     this._spikeLinkSystem1.update();
     this._spikeLinkSystem2.update();
+    this._platformLinkSystem.update();
 
     if (this._transition) {
       this._updateTransition(p);
@@ -416,10 +478,16 @@ export class Level4 extends BaseLevel {
       if (entity.type === "ground") entity.draw(p);
     }
     for (const entity of this.entities) {
-      if (entity.type !== "spike" && entity.type !== "ground") {
+      if (
+        entity.type !== "spike" &&
+        entity.type !== "ground" &&
+        !entity._hidden
+      ) {
         entity.draw(p);
       }
     }
+
+    this._platformLinkSystem.draw(p);
 
     p.pop();
 
@@ -429,5 +497,6 @@ export class Level4 extends BaseLevel {
     this._room0Button.releaseButton();
     this._room1Button.releaseButton();
     this._room1Button2.releaseButton();
+    this._room1PlatformButton.releaseButton();
   }
 }

@@ -47,8 +47,10 @@ export class LevelManager {
     // 回到最近已激活存档点
     this._keyBindingManager = KeyBindingManager.getInstance();
     this._onTeleportKeyDown = (e) => {
-      const teleportKey = this._keyBindingManager.getKeyByIntent("teleportCheckpoint");
-      if (teleportKey && e.code === teleportKey) this._teleportToNearestCheckpoint();
+      const teleportKey =
+        this._keyBindingManager.getKeyByIntent("teleportCheckpoint");
+      if (teleportKey && e.code === teleportKey)
+        this._teleportToNearestCheckpoint();
     };
     document.addEventListener("keydown", this._onTeleportKeyDown);
   }

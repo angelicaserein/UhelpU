@@ -35,6 +35,9 @@ export class Checkpoint extends GameEntity {
     this._haloTime = 0;
     this._haloParticles = [];
 
+    // 激活回调
+    this._onActivate = options.onActivate || null;
+
     // 键盘监听
     this._onKeyDown = (e) => {
       const interactionKey =
@@ -87,6 +90,7 @@ export class Checkpoint extends GameEntity {
 
   activate() {
     this.activated = true;
+    if (this._onActivate) this._onActivate();
   }
 
   reset() {

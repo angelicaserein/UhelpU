@@ -184,7 +184,15 @@ export class WindowSettingSidebar extends WindowSidebarBase {
   }
 
   _getIntentOrder() {
-    return ["jump", "moveLeft", "moveRight", "interaction", "record", "replay", "teleportCheckpoint"];
+    return [
+      "jump",
+      "moveLeft",
+      "moveRight",
+      "interaction",
+      "record",
+      "replay",
+      "teleportCheckpoint",
+    ];
   }
 
   _refreshLabels() {

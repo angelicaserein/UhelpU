@@ -47,7 +47,10 @@ export class KeyPrompt extends GameEntity {
    * 每帧更新：计算与玩家的距离，更新透明度
    */
   update(p) {
-    if (!this.level) return;
+    if (!this.level || this._hidden) {
+      this._currentAlpha = 0;
+      return;
+    }
 
     const player = this.level.getPlayer();
     if (!player) {

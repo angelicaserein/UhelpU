@@ -254,7 +254,15 @@ export class WindowSetting extends WindowBase {
   }
 
   _getIntentOrder() {
-    return ["jump", "moveLeft", "moveRight", "interaction", "record", "replay", "teleportCheckpoint"];
+    return [
+      "jump",
+      "moveLeft",
+      "moveRight",
+      "interaction",
+      "record",
+      "replay",
+      "teleportCheckpoint",
+    ];
   }
 
   /**

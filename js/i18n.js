@@ -53,6 +53,8 @@ const _dict = {
     hint_level4:
       "During the recording, step on the yellow and blue buttons respectively. After your main character reaches the second side, click playback, then walk over the spike traps at the right time.",
     level4_button_hint: "Do I have to use these two buttons?",
+    level4_checkpoint_hint:
+      "You have successfully activated the checkpoint!<br>P.S. Press B to return to the checkpoint at any time.",
     level4_selfjump_hint_window:
       'Congratulations!\n You\'ve unlocked the achievement: "<span class="rainbow-wave">S</span><span class="rainbow-wave">e</span><span class="rainbow-wave">l</span><span class="rainbow-wave">f</span><span class="rainbow-wave">-</span><span class="rainbow-wave">J</span><span class="rainbow-wave">u</span><span class="rainbow-wave">m</span><span class="rainbow-wave">p</span>"!',
     level5_jail_prompt: "Huh?",
@@ -235,6 +237,8 @@ const _dict = {
     hint_level4:
       "在录制的时间内分别踩下黄色和蓝色的按钮，本体走到第二面之后再点击回放，看准时机走过地刺。",
     level4_button_hint: "我必须要用这两个按钮吗",
+    level4_checkpoint_hint:
+      "你成功激活了存档点！<br>p.s. 按B键可以随时返回存档点",
     level4_selfjump_hint_window:
       '恭喜你解锁"<span class="rainbow-wave">S</span><span class="rainbow-wave">e</span><span class="rainbow-wave">l</span><span class="rainbow-wave">f</span><span class="rainbow-wave">-</span><span class="rainbow-wave">J</span><span class="rainbow-wave">u</span><span class="rainbow-wave">m</span><span class="rainbow-wave">p</span>"的成就！',
     level5_jail_prompt: "咦？",

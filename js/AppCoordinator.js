@@ -111,6 +111,30 @@ export class AppCoordinator {
       AudioManager.playBGM("level4");
       return;
     }
+    if (levelIndex === "level5") {
+      AudioManager.playBGM("level5");
+      return;
+    }
+    if (levelIndex === "level6") {
+      AudioManager.playBGM("level6");
+      return;
+    }
+    if (levelIndex === "level7") {
+      AudioManager.playBGM("level7");
+      return;
+    }
+    if (levelIndex === "level8") {
+      AudioManager.playBGM("level8");
+      return;
+    }
+    if (levelIndex === "level9") {
+      AudioManager.playBGM("level9");
+      return;
+    }
+    if (levelIndex === "level10") {
+      AudioManager.playBGM("level10");
+      return;
+    }
     AudioManager.stopBGM();
   }
 

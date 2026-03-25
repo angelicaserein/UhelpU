@@ -2,6 +2,12 @@ import { Level1 } from "./Level1.js";
 import { Level2 } from "./Level2.js";
 import { Level3 } from "./Level3.js";
 import { Level4 } from "./Level4.js";
+import { Level5 } from "./Level5.js";
+import { Level6 } from "./Level6.js";
+import { Level7 } from "./Level7.js";
+import { Level8 } from "./Level8.js";
+import { Level9 } from "./Level9.js";
+import { Level10 } from "./Level10.js";
 import { setGamePaused, isGamePaused } from "../game-runtime/GamePauseState.js";
 import { EventTypes } from "../event-system/EventTypes.js";
 import { Assets } from "../AssetsManager.js";
@@ -16,6 +22,12 @@ export class LevelManager {
       level2: Level2,
       level3: Level3,
       level4: Level4,
+      level5: Level5,
+      level6: Level6,
+      level7: Level7,
+      level8: Level8,
+      level9: Level9,
+      level10: Level10,
     };
     this.level = null;
     this.currentLevelIndex = null;

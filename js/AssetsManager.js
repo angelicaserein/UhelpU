@@ -27,6 +27,12 @@ export const Assets = {
   bgImageLevel2: null,
   bgImageLevel3: null,
   bgImageLevel4: null,
+  bgImageLevel5: null,
+  bgImageLevel6: null,
+  bgImageLevel7: null,
+  bgImageLevel8: null,
+  bgImageLevel9: null,
+  bgImageLevel10: null,
 
   // 本体贴图（5方向）
   playerImg_right: null,
@@ -93,6 +99,12 @@ export const Assets = {
       this._safeLoad(p.loadImage("assets/images/bg/level2.png"), "关卡2背景"),
       this._safeLoad(p.loadImage("assets/images/bg/level3.png"), "关卡3背景"),
       this._safeLoad(p.loadImage("assets/images/bg/level4.png"), "关卡4背景"),
+      this._safeLoad(p.loadImage("assets/images/bg/level5.png"), "关卡5背景"),
+      this._safeLoad(p.loadImage("assets/images/bg/level6.png"), "关卡6背景"),
+      this._safeLoad(p.loadImage("assets/images/bg/level7.png"), "关卡7背景"),
+      this._safeLoad(p.loadImage("assets/images/bg/level8.png"), "关卡8背景"),
+      this._safeLoad(p.loadImage("assets/images/bg/level9.png"), "关卡9背景"),
+      this._safeLoad(p.loadImage("assets/images/bg/level10.png"), "关卡10背景"),
       this._safeLoad(p.loadImage("assets/images/bg/follower1.png"), "动图1"),
       this._safeLoad(p.loadImage("assets/images/bg/follower2.png"), "动图2"),
       this._safeLoad(p.loadFont("assets/fonts/HYPixel11pxU-2.ttf"), "字体"),
@@ -225,67 +237,73 @@ export const Assets = {
     this.bgImageLevel2 = results[6];
     this.bgImageLevel3 = results[7];
     this.bgImageLevel4 = results[8];
-    this.followerImg1 = results[9];
-    this.followerImg2 = results[10];
-    this.customFont = results[11];
-    this.storyTexts_en = results[12];
-    this.storyTexts_zh = results[13];
+    this.bgImageLevel5 = results[9];
+    this.bgImageLevel6 = results[10];
+    this.bgImageLevel7 = results[11];
+    this.bgImageLevel8 = results[12];
+    this.bgImageLevel9 = results[13];
+    this.bgImageLevel10 = results[14];
+    this.followerImg1 = results[15];
+    this.followerImg2 = results[16];
+    this.customFont = results[17];
+    this.storyTexts_en = results[18];
+    this.storyTexts_zh = results[19];
     // 本体贴图
-    this.playerImg_right = results[14];
-    this.playerImg_left = results[15];
-    this.playerImg_up = results[16];
-    this.playerImg_upRight = results[17];
-    this.playerImg_upLeft = results[18];
-    this.playerImg_dead = results[19];
+    this.playerImg_right = results[20];
+    this.playerImg_left = results[21];
+    this.playerImg_up = results[22];
+    this.playerImg_upRight = results[23];
+    this.playerImg_upLeft = results[24];
+    this.playerImg_dead = results[25];
     this.playerIdleImgs = [
-      results[20],
-      results[21],
-      results[22],
-      results[23],
-      results[24],
-      results[25],
+      results[26],
+      results[27],
+      results[28],
+      results[29],
+      results[30],
+      results[31],
     ];
     // 分身贴图
-    this.cloneImg_right = results[26];
-    this.cloneImg_left = results[27];
-    this.cloneImg_up = results[28];
-    this.cloneImg_upRight = results[29];
-    this.cloneImg_upLeft = results[30];
+    this.cloneImg_right = results[32];
+    this.cloneImg_left = results[33];
+    this.cloneImg_up = results[34];
+    this.cloneImg_upRight = results[35];
+    this.cloneImg_upLeft = results[36];
     this.cloneIdleImgs = [
-      results[31],
-      results[32],
-      results[33],
-      results[34],
-      results[35],
-      results[36],
-    ];
-    // NPC 贴图
-    this.npcIdleImgs = [
       results[37],
       results[38],
       results[39],
       results[40],
       results[41],
+      results[42],
     ];
-    this.npcFaceImg = results[42];
+    // NPC 贴图
+    this.npcIdleImgs = [
+      results[43],
+      results[44],
+      results[45],
+      results[46],
+      results[47],
+    ];
+    this.npcFaceImg = results[48];
     // 地块贴图
-    this.tileImage_goal = results[43];
-    this.tileImage_ground = results[44];
-    this.tileImage_platform = results[45];
-    this.tileImage_wall = results[46];
-    this.tileImage_signboard = results[47];
-    this.tileImage_signboard2 = results[48];
+    this.tileImage_goal = results[49];
+    this.tileImage_ground = results[50];
+    this.tileImage_platform = results[51];
+    this.tileImage_wall = results[52];
+    this.tileImage_signboard = results[53];
+    this.tileImage_signboard2 = results[54];
     this.achieveImgs = [
-      results[49],
-      results[50],
-      results[51],
-      results[52],
-      results[53],
-      results[54],
       results[55],
       results[56],
       results[57],
       results[58],
+      results[59],
+      results[60],
+      results[61],
+      results[62],
+      results[63],
+      results[64],
     ];
   },
 };

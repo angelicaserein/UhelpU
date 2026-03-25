@@ -35,20 +35,49 @@ export class StaticPageLevelChoice extends PageBase {
     backBtn.btn.style("height", 0.065 * p.height + "px");
     this.addElement(backBtn);
 
-    // 关卡按钮配置
-    const levelConfigs = [
+    // 关卡按钮配置 — 上排 1-5，下排 6-10
+    const topRowConfigs = [
       { num: 1, x: 0.125, w: 0.05, cls: "level1-button" },
       { num: 2, x: 0.3, w: 0.051, cls: "level2-button" },
       { num: 3, x: 0.477, w: 0.049, cls: "level3-button" },
       { num: 4, x: 0.654, w: 0.049, cls: "level4-button" },
+      { num: 5, x: 0.828, w: 0.049, cls: "level5-button" },
+    ];
+    const bottomRowConfigs = [
+      { num: 6, x: 0.143, w: 0.05, cls: "level6-button" },
+      { num: 7, x: 0.328, w: 0.051, cls: "level7-button" },
+      { num: 8, x: 0.504, w: 0.049, cls: "level8-button" },
+      { num: 9, x: 0.669, w: 0.049, cls: "level9-button" },
+      { num: 10, x: 0.832, w: 0.049, cls: "level10-button" },
     ];
 
-    for (const cfg of levelConfigs) {
+    const topRowY = 0.441;
+    const bottomRowY = 0.815;
+
+    for (const cfg of topRowConfigs) {
       const btn = new ButtonBase(
         p,
         " ",
         cfg.x * p.width,
-        0.441 * p.height,
+        topRowY * p.height,
+        () => {
+          this.eventBus.publish(EventTypes.LOAD_LEVEL, `level${cfg.num}`);
+        },
+        cfg.cls,
+      );
+      btn.btn.style("width", cfg.w * p.width + "px");
+      btn.btn.style("height", 0.048 * p.height + "px");
+      btn.btn.mouseOver(() => this.levelInfo?.setActiveLevel(cfg.num));
+      btn.btn.mouseOut(() => this.levelInfo?.setActiveLevel(null));
+      this.addElement(btn);
+    }
+
+    for (const cfg of bottomRowConfigs) {
+      const btn = new ButtonBase(
+        p,
+        " ",
+        cfg.x * p.width,
+        bottomRowY * p.height,
         () => {
           this.eventBus.publish(EventTypes.LOAD_LEVEL, `level${cfg.num}`);
         },

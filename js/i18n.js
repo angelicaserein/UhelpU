@@ -24,6 +24,7 @@ const _dict = {
     btn_next_level: "Next Level",
     result_win: "Level Complete!",
     result_lose: "Game Over",
+    result_press_r: "Press R to Restart",
 
     // ── Setting Window ───────────────────────────────────────────────
     win_title: "⚙  Settings",
@@ -142,6 +143,7 @@ const _dict = {
     btn_next_level: "下一关",
     result_win: "~恭喜通关~",
     result_lose: "游戏结束",
+    result_press_r: "按 R 键重新开始",
 
     // ── Setting Window ───────────────────────────────────────────────
     win_title: "⚙  设置",

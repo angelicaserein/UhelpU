@@ -21,6 +21,13 @@ export class AppCoordinator {
 
   bindEvents() {
     this.eventBus.subscribe(EventTypes.LOAD_LEVEL, (levelIndex) => {
+      this.switcher.clearOverlay(this.p);
+      if (this.levelManager.level) {
+        this.levelManager.setPaused(false);
+        this.levelManager.unloadLevel(this.p, this.eventBus);
+        this.switcher.gameSwitcher.runtimeLevelManager = null;
+      }
+
       this.playLevelBgm(levelIndex);
 
       this.levelManager.loadLevel(levelIndex, this.p, this.eventBus);
@@ -35,12 +42,16 @@ export class AppCoordinator {
     });
 
     this.eventBus.subscribe(EventTypes.UNLOAD_LEVEL, () => {
+      this.switcher.clearOverlay(this.p);
+      this.levelManager.setPaused(false);
       this.levelManager.unloadLevel(this.p, this.eventBus);
       this.switcher.gameSwitcher.runtimeLevelManager = null;
       this.switcher.staticSwitcher.showMainMenu(this.p, this.eventBus);
     });
 
     this.eventBus.subscribe(EventTypes.RETURN_LEVEL_CHOICE, () => {
+      this.switcher.clearOverlay(this.p);
+      this.levelManager.setPaused(false);
       this.levelManager.unloadLevel(this.p, this.eventBus);
       this.switcher.gameSwitcher.runtimeLevelManager = null;
       this.switcher.staticSwitcher.showLevelChoice(this.p);
@@ -48,10 +59,10 @@ export class AppCoordinator {
 
     this.eventBus.subscribe(EventTypes.AUTO_RESULT, (result) => {
       const levelIndex = this.levelManager.currentLevelIndex;
-      this.levelManager.unloadLevel(this.p, this.eventBus);
-      this.switcher.gameSwitcher.runtimeLevelManager = null;
 
       if (result === "autoResult1") {
+        this.levelManager.unloadLevel(this.p, this.eventBus);
+        this.switcher.gameSwitcher.runtimeLevelManager = null;
         const winPage = new StaticPageWin(
           levelIndex,
           this.switcher,
@@ -62,6 +73,8 @@ export class AppCoordinator {
         return;
       }
 
+      // Lose: pause game and show overlay on top of the game
+      this.levelManager.setPaused(true);
       const resultPage = new StaticPageResult(
         result,
         levelIndex,
@@ -69,7 +82,7 @@ export class AppCoordinator {
         this.p,
         this.eventBus,
       );
-      this.switcher.switchToStatic(resultPage, this.p);
+      this.switcher.setOverlay(resultPage, this.p);
     });
 
     this.eventBus.subscribe(EventTypes.PAUSE_GAME, () => {
@@ -105,5 +118,12 @@ export class AppCoordinator {
     this.switcher.update(this.p);
     this.switcher.draw(this.p);
     this.levelManager.update(this.p, this.eventBus);
+    // Draw overlay after level rendering (game over, etc.)
+    if (this.switcher.overlay) {
+      this.p.push();
+      this.p.resetMatrix();
+      this.switcher.overlay.draw();
+      this.p.pop();
+    }
   }
 }

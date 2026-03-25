@@ -8,6 +8,19 @@ export class SwitcherMain {
     this.staticSwitcher = new SwitcherStaticPage(this, p);
     this.gameSwitcher = new SwitcherGamePage(this, eventBus);
     this.activeSwitcher = this.staticSwitcher;
+    this.overlay = null;
+  }
+
+  setOverlay(page, p = this.p) {
+    this.overlay = page;
+    if (page && page.enter) page.enter(p);
+  }
+
+  clearOverlay(p = this.p) {
+    if (this.overlay) {
+      if (this.overlay.exit) this.overlay.exit(p);
+      this.overlay = null;
+    }
   }
 
   // 切换到静态页面

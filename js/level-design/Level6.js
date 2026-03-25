@@ -8,6 +8,7 @@ import {
   Platform,
   TextPrompt,
   Checkpoint,
+  Spike,
 } from "../game-entity-model/index.js";
 import { CollisionSystem } from "../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../physics-system/PhysicsSystem.js";
@@ -56,7 +57,9 @@ export class Level6 extends BaseLevel {
         },
         {
           button: this._room0Button6,
-          platforms: [{ platform: this._room0DisappearPlatform6, mode: "appear" }],
+          platforms: [
+            { platform: this._room0DisappearPlatform6, mode: "appear" },
+          ],
         },
       ],
       this.collisionSystem,
@@ -91,7 +94,13 @@ export class Level6 extends BaseLevel {
     this._room0NormalPlatform9 = new Platform(880, 140, 80, 20);
     this._room0NormalPlatform10 = new Platform(1030, 200, 160, 20);
     this._room0NormalPlatform7 = new Platform(1260, 80, 20, 460);
-    this._room0Checkpoint3 = new Checkpoint(680, 560, 40, 70, () => this._player);
+    this._room0Checkpoint3 = new Checkpoint(
+      680,
+      560,
+      40,
+      70,
+      () => this._player,
+    );
     this._room0DisappearPlatform6 = new Platform(630, 540, 650, 20);
     this._room0Button6 = new Button(690, 320, 20, 5, {
       color: { unpressed: [255, 60, 60], pressed: [180, 30, 30] },
@@ -124,14 +133,25 @@ export class Level6 extends BaseLevel {
       { right: { targetRoomIndex: 1 } },
     );
 
-    const portal = new Portal(p.width - 100, 80, 50, 50);
-    portal.openPortal();
+    // 传送门铺满悬崖右边底部到右墙
+    const portalSize = 50;
+    const portalEntities = [];
+    for (let px = 200; px + portalSize <= p.width - wallThickness; px += portalSize) {
+      const pe = new Portal(px, 80, portalSize, portalSize);
+      pe.openPortal();
+      portalEntities.push(pe);
+    }
 
     const room1 = new Room(
       [
         new Wall(p.width - wallThickness, 0, wallThickness, p.height),
         new Ground(0, 0, p.width, 80),
-        portal,
+        new Spike(-100, 80, p.width - wallThickness, 20),
+        // 左侧悬崖
+        new Platform(0, 80, 200, 460),
+        // 桥（从悬崖右边延伸，与悬崖同高）
+        new Platform(200, 520, 200, 20),
+        ...portalEntities,
       ],
       { left: { targetRoomIndex: 0 } },
     );
@@ -296,6 +316,51 @@ export class Level6 extends BaseLevel {
     this._checkRoomTransition(p);
   }
 
+  _drawSea(p) {
+    const seaLeft = p.width + 200;   // room1 起始 + 悬崖宽度
+    const seaRight = p.width * 2 - 20; // room1 右墙
+    const seaBottom = 80;
+    const seaTop = 320;              // 海面高度
+    const t = p.millis() * 0.001;
+
+    p.noStroke();
+
+    // 海洋主体
+    p.fill(30, 110, 200, 220);
+    p.rect(seaLeft, seaBottom, seaRight - seaLeft, seaTop - seaBottom);
+
+    // 波浪层 1（浅蓝，较高）
+    const steps = 80;
+    const w = seaRight - seaLeft;
+    p.fill(60, 160, 230, 200);
+    p.beginShape();
+    p.vertex(seaLeft, seaBottom);
+    for (let i = 0; i <= steps; i++) {
+      const wx = seaLeft + (i / steps) * w;
+      const wy = seaTop
+        + Math.sin(i * 0.3 + t * 2) * 10
+        + Math.sin(i * 0.7 - t * 1.5) * 5;
+      p.vertex(wx, wy);
+    }
+    p.vertex(seaRight, seaBottom);
+    p.endShape(p.CLOSE);
+
+    // 波浪层 2（深蓝，低20像素，增加层次感）
+    const seaTop2 = seaTop - 20;
+    p.fill(20, 70, 160, 210);
+    p.beginShape();
+    p.vertex(seaLeft, seaBottom);
+    for (let i = 0; i <= steps; i++) {
+      const wx = seaLeft + (i / steps) * w;
+      const wy = seaTop2
+        + Math.sin(i * 0.4 - t * 1.8) * 8
+        + Math.sin(i * 0.9 + t * 1.2) * 4;
+      p.vertex(wx, wy);
+    }
+    p.vertex(seaRight, seaBottom);
+    p.endShape(p.CLOSE);
+  }
+
   draw(p = this.p) {
     const cameraX = this._getCameraX(p);
     p.push();
@@ -316,6 +381,7 @@ export class Level6 extends BaseLevel {
       }
     }
     this._platformLinkSystem.draw(p);
+    this._drawSea(p);
     p.pop();
     this.recordSystem.draw && this.recordSystem.draw(p);
   }

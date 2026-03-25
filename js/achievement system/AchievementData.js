@@ -6,7 +6,7 @@ export const AchievementData = {
   _list: [
     { id: "perseverance", icon: "💪" },
     { id: "selfjump", icon: "🏔" },
-    { id: "electrician", icon: "⚡" },
+    { id: "prisoner", icon: "⚡" },
     { id: "trap_master", icon: "🫤" },
     { id: "perfectionist", icon: "🏆" },
     { id: "first_steps", icon: "🎮" },
@@ -14,7 +14,6 @@ export const AchievementData = {
     { id: "socialite", icon: "💬" },
     { id: "director", icon: "🎬" },
     { id: "phantom_master", icon: "👻" },
-    { id: "jail", icon: "🔒" },
   ],
 
   _unlocked: new Set(),

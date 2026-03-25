@@ -52,14 +52,20 @@ const _dict = {
       "Record the first half of yourself to build a path for your future self to jump up, then press the button in the second half. After recording ends, your real self steps on your own head to jump onto the platform, then presses the power-on button together with the phantom.",
     hint_level4:
       "During the recording, step on the yellow and blue buttons respectively. After your main character reaches the second side, click playback, then walk over the spike traps at the right time.",
+    hint_level5:
+      "Stand on a disappearing platform and record yourself, then go press the button to make the platform vanish — your recorded phantom will fall off and press the button for you!\n\n\n\n\n👇👇👇 The following hint is for the part after the next checkpoint:\n\n\n\n\n\n\nWhen recording, if you jump too hastily and press jump again before the phantom fully lands, the phantom will inherit that mid-air input and won't be able to jump properly.",
     level4_button_hint: "Do I have to use these two buttons?",
     level4_checkpoint_hint:
       "You have successfully activated the checkpoint!<br>P.S. Press B to return to the checkpoint at any time.",
     level4_selfjump_hint_window:
-      'Congratulations!\n You\'ve unlocked the achievement: "<span class="rainbow-wave">S</span><span class="rainbow-wave">e</span><span class="rainbow-wave">l</span><span class="rainbow-wave">f</span><span class="rainbow-wave">-</span><span class="rainbow-wave">J</span><span class="rainbow-wave">u</span><span class="rainbow-wave">m</span><span class="rainbow-wave">p</span>"!',
-    level5_jail_prompt: "Huh?",
+      'Congratulations!\n You\'ve unlocked the achievement: \n"<span class="rainbow-wave">S</span><span class="rainbow-wave">e</span><span class="rainbow-wave">l</span><span class="rainbow-wave">f</span><span class="rainbow-wave">-</span><span class="rainbow-wave">J</span><span class="rainbow-wave">u</span><span class="rainbow-wave">m</span><span class="rainbow-wave">p</span>"!',
+    level5_jail_prompt: "Huh?\nRemember to press B",
+    level5_pause_hint:
+      "Someone told me once\nIf you're stuck, try pressing pause.",
     level5_jail_hint_window:
-      'Congratulations!\n You\'ve unlocked the achievement: "<span class="rainbow-wave">J</span><span class="rainbow-wave">a</span><span class="rainbow-wave">i</span><span class="rainbow-wave">l</span>"!',
+      'Congratulations!\n You\'ve unlocked the achievement: \n"<span class="rainbow-wave">P</span><span class="rainbow-wave">r</span><span class="rainbow-wave">i</span><span class="rainbow-wave">s</span><span class="rainbow-wave">o</span><span class="rainbow-wave">n</span><span class="rainbow-wave">e</span><span class="rainbow-wave">r</span>"!',
+    level5_recording_prompt:
+      "I'm recording my key inputs,not my position.And pressing jump in mid-air does nothing...",
     keybind_reset_title: "Reset to default",
     keybind_conflict: "The key {KEY} is already bound to {ACTION}",
     keybind_jump: "Jump",
@@ -94,7 +100,7 @@ const _dict = {
     level2_info_right: "Difficulty\n💜💜",
     level2_jump_higher_prompt: "How can I jump much higher?",
     level2_jump_hint_window:
-      'Congratulations!\n You\'ve unlocked the achievement: "<span class="rainbow-wave">P</span><span class="rainbow-wave">e</span><span class="rainbow-wave">r</span><span class="rainbow-wave">s</span><span class="rainbow-wave">e</span><span class="rainbow-wave">v</span><span class="rainbow-wave">e</span><span class="rainbow-wave">r</span><span class="rainbow-wave">a</span><span class="rainbow-wave">n</span><span class="rainbow-wave">c</span><span class="rainbow-wave">e</span>"!\n(Hint: hint is in the pause menu, not here haha)',
+      'Congratulations!\n You\'ve unlocked the achievement: \n"<span class="rainbow-wave">P</span><span class="rainbow-wave">e</span><span class="rainbow-wave">r</span><span class="rainbow-wave">s</span><span class="rainbow-wave">e</span><span class="rainbow-wave">v</span><span class="rainbow-wave">e</span><span class="rainbow-wave">r</span><span class="rainbow-wave">a</span><span class="rainbow-wave">n</span><span class="rainbow-wave">c</span><span class="rainbow-wave">e</span>"!\n(Hint: hint is in the pause menu, not here haha)',
     level3_signboard_prompt: "Which key was it to interact again?",
     level3_title: "Electricity",
     level3_info_left: "level 3\nElectricity",
@@ -102,9 +108,9 @@ const _dict = {
     level4_title: "Trap",
     level4_info_left: "level 4\nTrap",
     level4_info_right: "Difficulty\n💜💜",
-    level5_title: "Level 5",
-    level5_info_left: "level 5",
-    level5_info_right: "Difficulty\n💜",
+    level5_title: "Jail",
+    level5_info_left: "level 5\nJail",
+    level5_info_right: "Difficulty\n💜💜💜💜",
     level6_title: "Level 6",
     level6_info_left: "level 6",
     level6_info_right: "Difficulty\n💜",
@@ -138,8 +144,10 @@ const _dict = {
     achiev_selfjump_desc: "You're a jumping master!",
     achiev_selfjump_unlock_desc:
       "Jump over spikes without stepping on yellow/blue buttons in level 4",
-    achiev_electrician_name: "Electrician",
-    achiev_electrician_desc: "Complete Level 3 — Electricity",
+    achiev_prisoner_name: "Prisoner",
+    achiev_prisoner_desc: "Some people are alive, but they are already dead.",
+    achiev_prisoner_unlock_desc:
+      "Trap yourself in Level 5 without activating the checkpoint",
     achiev_trap_master_name: "Trap Master",
     achiev_trap_master_desc: "Complete Level 4 — Trap",
     achiev_perfectionist_name: "Perfectionist",
@@ -156,7 +164,7 @@ const _dict = {
     achiev_director_desc: "Use recording for the first time",
     achiev_phantom_master_name: "Phantom Master",
     achiev_phantom_master_desc: "Complete a level using phantom replay",
-    achiev_jail_name: "Jail",
+    achiev_jail_name: "Prisoner",
     achiev_jail_desc: "Some people are alive, but they are already dead.",
     achiev_jail_unlock_desc: "Trap yourself in Level 5",
 
@@ -233,17 +241,22 @@ const _dict = {
     hint_level2:
       "录制自己的过程中跳跃，自己踩在自己的回放幻影头上，在幻影起跳的同时自己也起跳，利用这个技巧踩上更高的平台，最后操纵幻影同时按下两个按钮，打开传送门。",
     hint_level3:
-      "录制自己的前半段先为未来的自己搭好跳上去的路，后半段再去按按钮，录制结束后本体踩着自己的头跳上平台之后再和幻影一起按下通电的按钮。",
+      "录制自己的前半段先为未来的自己搭好跳上去的路，后半段再去按按钮，录制结束后本体踩着自己的头跳上平台之后再和幻影一起按下通电的按钮。（不止这一种解法哦）",
     hint_level4:
       "在录制的时间内分别踩下黄色和蓝色的按钮，本体走到第二面之后再点击回放，看准时机走过地刺。",
+    hint_level5:
+      "站在可以消失的平台上录制自己，然后去按按钮让平台消失，这时候录制的幻影可以从平台上掉下去按按钮哦！\n\n\n\n\n👇👇👇往下是下一个存档点后面部分的提示：\n\n\n\n\n\n\n在录制操作时，如果你跳得太急，幻影还没完全落地就再次按了跳跃，那么幻影会继承这个空中按键的状态，导致它无法正常起跳。",
     level4_button_hint: "我必须要用这两个按钮吗",
     level4_checkpoint_hint:
       "你成功激活了存档点！<br>p.s. 按B键可以随时返回存档点",
     level4_selfjump_hint_window:
       '恭喜你解锁"<span class="rainbow-wave">S</span><span class="rainbow-wave">e</span><span class="rainbow-wave">l</span><span class="rainbow-wave">f</span><span class="rainbow-wave">-</span><span class="rainbow-wave">J</span><span class="rainbow-wave">u</span><span class="rainbow-wave">m</span><span class="rainbow-wave">p</span>"的成就！',
     level5_jail_prompt: "咦？",
+    level5_pause_hint: "好像有人告诉过我\n卡关了的话应该按暂停看看。",
     level5_jail_hint_window:
-      '恭喜你解锁新成就："<span class="rainbow-wave">牢</span><span class="rainbow-wave">笼</span>"!',
+      '恭喜你解锁"<span class="rainbow-wave">囚</span><span class="rainbow-wave">犯</span>"的成就！',
+    level5_recording_prompt:
+      "我录制的是我的按键操作，而不是我的位置。而且我在空中按跳是没用的……",
     keybind_reset_title: "重置为默认",
     keybind_conflict: "按键 {KEY} 已绑定到 {ACTION}",
     keybind_jump: "跳跃",
@@ -319,8 +332,9 @@ const _dict = {
     achiev_selfjump_name: "无钮自通",
     achiev_selfjump_desc: "你是跳跃高手！",
     achiev_selfjump_unlock_desc: "在第四关里不踩到黄、蓝按钮就跳过地刺",
-    achiev_electrician_name: "电工",
-    achiev_electrician_desc: "通关第三关 — 通电",
+    achiev_prisoner_name: "囚犯",
+    achiev_prisoner_desc: "有的人活着，他已经死了。",
+    achiev_prisoner_unlock_desc: "在第五关中没有激活存档点的情况下把自己困住",
     achiev_trap_master_name: "陷阱大师",
     achiev_trap_master_desc: "通关第四关 — 陷阱",
     achiev_perfectionist_name: "完美主义者",
@@ -336,7 +350,7 @@ const _dict = {
     achiev_director_desc: "第一次使用录制功能",
     achiev_phantom_master_name: "幻影大师",
     achiev_phantom_master_desc: "使用幻影回放完成一个关卡",
-    achiev_jail_name: "牢笼",
+    achiev_jail_name: "囚犯",
     achiev_jail_desc: "有的人活着，但他已经死了。",
     achiev_jail_unlock_desc: "在第五关中把自己困住",
 

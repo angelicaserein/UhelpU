@@ -7,6 +7,7 @@ import {
   Button,
   Platform,
   TextPrompt,
+  Checkpoint,
 } from "../game-entity-model/index.js";
 import { CollisionSystem } from "../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../physics-system/PhysicsSystem.js";
@@ -71,6 +72,14 @@ export class Level5 extends BaseLevel {
           button: this._room0Button3,
           platforms: [{ platform: this._room0DisappearPlatform3 }],
         },
+        {
+          button: this._room0Button4,
+          platforms: [{ platform: this._room0DisappearPlatform4 }],
+        },
+        {
+          button: this._room0Button5,
+          platforms: [{ platform: this._room0DisappearPlatform5 }],
+        },
       ],
       this.collisionSystem,
     );
@@ -94,22 +103,73 @@ export class Level5 extends BaseLevel {
     this._room0Button2 = new Button(700, 320, 20, 5, {
       color: { unpressed: [255, 60, 60], pressed: [180, 30, 30] },
     });
+    // 第二个按钮左侧的存档点
+    this._room0Checkpoint = new Checkpoint(
+      1050,
+      320,
+      40,
+      70,
+      () => this._player,
+    );
     this._room0DisappearPlatform2 = new Platform(770, 300, 120, 20);
-    this._room0NormalPlatform3 = new Platform(950, 80, 600, 240);
+    this._room0NormalPlatform3 = new Platform(950, 80, 900, 240); //参数：Platform(x, y, w, h) — x=起始横坐标, y=80(地面高度), w=宽度, h=高度
 
     // 第三组：按钮在第二和第三正常平台中间地面上，消失平台在第三正常平台右边
     this._room0Button3 = new Button(850, 80, 20, 5, {
       color: { unpressed: [255, 60, 60], pressed: [180, 30, 30] },
     });
-    this._room0DisappearPlatform3 = new Platform(1200, 300, 20, 300);
+    this._room0DisappearPlatform3 = new Platform(1300, 300, 20, 300);
+
+    // 存档点与右侧平台中间的提示
+    this._room0PauseHintPrompt = new TextPrompt(1000, 350, this, {
+      textKey: "level5_pause_hint",
+      textSize: 20,
+    });
+
+    // x=1450 处的存档点
+    this._room0Checkpoint2 = new Checkpoint(
+      1450,
+      320,
+      40,
+      70,
+      () => this._player,
+    );
+
+    // 第二存档点上方的提示
+    this._room0RecordingPrompt = new TextPrompt(1450, 370, this, {
+      textKey: "level5_recording_prompt",
+      textSize: 20,
+    });
+
+    // 第四组：按钮 + 消失平台
+    this._room0Button4 = new Button(1700, 320, 20, 5, {
+      color: { unpressed: [255, 60, 60], pressed: [180, 30, 30] },
+    });
+    this._room0DisappearPlatform4 = new Platform(1850, 300, 150, 20);
+
+    // 第五组：正常平台 + 3个跳台
+    this._room0NormalPlatform6 = new Platform(1950, 300, 650, 20);
+    this._room0NormalPlatform8 = new Platform(2050, 100, 80, 20);
+    this._room0NormalPlatform9 = new Platform(2200, 140, 80, 20);
+    this._room0NormalPlatform10 = new Platform(2350, 200, 160, 20);
+
+    // 第六组：正常平台 + 按钮 + 消失平台
+    this._room0NormalPlatform7 = new Platform(2580, 80, 20, 220);
+    this._room0Button5 = new Button(2455, 220, 20, 5, {
+      color: { unpressed: [255, 60, 60], pressed: [180, 30, 30] },
+    });
+    this._room0DisappearPlatform5 = new Platform(2580, 300, 20, 300);
 
     // 第三个按钮上方的提示 + 成就触发
     this._room0JailPrompt = new TextPrompt(720, 100, this, {
       textKey: "level5_jail_prompt",
       textSize: 20,
       onTrigger: () => {
-        if (!AchievementData.isUnlocked("jail")) {
-          AchievementData.unlock("jail");
+        if (
+          !AchievementData.isUnlocked("prisoner") &&
+          !this._room0Checkpoint.activated
+        ) {
+          AchievementData.unlock("prisoner");
           this._achievementToast.show("achievement_unlocked");
           this._jailHintWindow.open();
         }
@@ -126,11 +186,24 @@ export class Level5 extends BaseLevel {
         this._room0GroundPlatform,
         this._room0NormalPlatform2,
         this._room0Button2,
+        this._room0Checkpoint,
+        this._room0PauseHintPrompt,
         this._room0DisappearPlatform2,
         this._room0NormalPlatform3,
         this._room0Button3,
         this._room0DisappearPlatform3,
         this._room0JailPrompt,
+        this._room0Checkpoint2,
+        this._room0RecordingPrompt,
+        this._room0Button4,
+        this._room0DisappearPlatform4,
+        this._room0NormalPlatform6,
+        this._room0NormalPlatform8,
+        this._room0NormalPlatform9,
+        this._room0NormalPlatform10,
+        this._room0NormalPlatform7,
+        this._room0Button5,
+        this._room0DisappearPlatform5,
       ],
       {
         right: { targetRoomIndex: 1 },

@@ -218,7 +218,7 @@ export class Level4 extends BaseLevel {
       color: [255, 220, 50],
     });
     // 第二组
-    this._room1Button2 = new Button(-150, 80, 20, 5, {
+    this._room1Button2 = new Button(-100, 80, 20, 5, {
       color: { unpressed: [60, 120, 255], pressed: [30, 70, 180] },
     });
     this._room1Spike2 = new Spike(550, 80, 150, 20, {

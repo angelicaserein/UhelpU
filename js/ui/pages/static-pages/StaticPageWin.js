@@ -13,7 +13,7 @@ export class StaticPageWin extends PageBase {
     this.eventBus = eventBus;
 
     const levelNum = parseInt(this.levelIndex.replace("level", ""), 10);
-    const TOTAL_LEVELS = 4;
+    const TOTAL_LEVELS = 10;
 
     const btnW = 180;
     const btnH = 46;

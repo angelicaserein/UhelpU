@@ -210,10 +210,11 @@ export class StaticPageAchieves extends PageBase {
     p.textAlign(p.CENTER, p.CENTER);
     p.noStroke();
     if (unlocked) {
-      if (card.idx === 0 && Assets.achieveImg1) {
+      const achImg = Assets.achieveImgs[card.idx];
+      if (achImg) {
         const imgSize = w * 0.45;
         p.imageMode(p.CENTER);
-        p.image(Assets.achieveImg1, x + w / 2, y + h * 0.33, imgSize, imgSize);
+        p.image(achImg, x + w / 2, y + h * 0.33, imgSize, imgSize);
       } else {
         p.textSize(w * 0.3);
         p.text(achievement.icon, x + w / 2, y + h * 0.33);
@@ -441,8 +442,12 @@ export class StaticPageAchieves extends PageBase {
     const title = unlocked
       ? t(`achiev_${achievement.id}_name`)
       : t("achiev_locked");
+    const unlockDescKey = `achiev_${achievement.id}_unlock_desc`;
+    const unlockDesc = t(unlockDescKey);
     const desc = unlocked
-      ? t(`achiev_${achievement.id}_desc`)
+      ? unlockDesc !== unlockDescKey
+        ? unlockDesc
+        : t(`achiev_${achievement.id}_desc`)
       : t("achiev_locked_desc");
     const icon = unlocked ? "✅" : "🔒";
 

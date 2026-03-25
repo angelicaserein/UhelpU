@@ -5,7 +5,7 @@ const STORAGE_KEY = "kinoko_achievements";
 export const AchievementData = {
   _list: [
     { id: "perseverance", icon: "💪" },
-    { id: "climber", icon: "🏔" },
+    { id: "selfjump", icon: "🏔" },
     { id: "electrician", icon: "⚡" },
     { id: "trap_master", icon: "🫤" },
     { id: "perfectionist", icon: "🏆" },

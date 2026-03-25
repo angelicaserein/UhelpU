@@ -16,6 +16,9 @@ import { BaseLevel } from "./BaseLevel.js";
 import { Assets } from "../AssetsManager.js";
 import { Room } from "./Room.js";
 import { ButtonSpikeLinkSystem } from "../mechanism-system/ButtonSpikeLinkSystem.js";
+import { AchievementToast } from "../achievement system/AchievementToast.js";
+import { AchievementData } from "../achievement system/AchievementData.js";
+import { WindowPrompt } from "../ui/windows/WindowPrompt.js";
 
 export class Level4 extends BaseLevel {
   constructor(p, eventBus) {
@@ -47,6 +50,19 @@ export class Level4 extends BaseLevel {
         spikes: [{ spike: this._room1Spike2, retractDistance: 30 }],
       },
     ]);
+
+    // 记录 room1 两个按钮是否曾被踩过
+    this._room1ButtonEverPressed = false;
+    this._room1Button2EverPressed = false;
+    this._achievementToast = new AchievementToast(p);
+    this._selfjumpHintWindow = new WindowPrompt(
+      p,
+      "level4_selfjump_hint_window",
+      {
+        width: 420,
+        fontSize: 17,
+      },
+    );
 
     const wallThickness = 20;
     this._player = new Player(50, 450, 40, 40);
@@ -180,6 +196,15 @@ export class Level4 extends BaseLevel {
 
     const buttonHintPrompt = new TextPrompt(800, 90, this, {
       textKey: "level4_button_hint",
+      onTrigger: () => {
+        if (!this._room1ButtonEverPressed && !this._room1Button2EverPressed) {
+          if (!AchievementData.isUnlocked("selfjump")) {
+            AchievementData.unlock("selfjump");
+            this._achievementToast.show("achievement_unlocked");
+            this._selfjumpHintWindow.open();
+          }
+        }
+      },
     });
     room1.entities.add(buttonHintPrompt);
 
@@ -283,6 +308,14 @@ export class Level4 extends BaseLevel {
   clearLevel(p = this.p, eventBus = this.eventBus) {
     this.recordSystem.clearAllListenersAndTimers();
     this._player.clearListeners();
+    if (this._achievementToast) {
+      this._achievementToast.remove();
+      this._achievementToast = null;
+    }
+    if (this._selfjumpHintWindow) {
+      this._selfjumpHintWindow.remove();
+      this._selfjumpHintWindow = null;
+    }
   }
 
   addReplayer(startX, startY) {
@@ -342,6 +375,10 @@ export class Level4 extends BaseLevel {
 
   updatePhysics() {
     this.physicsSystem.physicsEntry();
+    // 记录 room1 按钮是否曾被踩过
+    if (this._room1Button.isPressed) this._room1ButtonEverPressed = true;
+    if (this._room1Button2.isPressed) this._room1Button2EverPressed = true;
+
     // 更新所有游戏实体（NPC 交互检测等）
     for (const entity of this.entities) {
       if (entity.update && typeof entity.update === "function") {

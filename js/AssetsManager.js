@@ -22,8 +22,8 @@ export const Assets = {
   bgImageAchieves: null,
   bgImageLevel1: null,
 
-  // 成就图标
-  achieveImg1: null,
+  // 成就图标（1.png ~ 10.png）
+  achieveImgs: [],
   bgImageLevel2: null,
   bgImageLevel3: null,
   bgImageLevel4: null,
@@ -204,6 +204,15 @@ export const Assets = {
         "木牌2贴图",
       ),
       this._safeLoad(p.loadImage("assets/images/achieve/1.png"), "成就图标1"),
+      this._safeLoad(p.loadImage("assets/images/achieve/2.png"), "成就图标2"),
+      this._safeLoad(p.loadImage("assets/images/achieve/3.png"), "成就图标3"),
+      this._safeLoad(p.loadImage("assets/images/achieve/4.png"), "成就图标4"),
+      this._safeLoad(p.loadImage("assets/images/achieve/5.png"), "成就图标5"),
+      this._safeLoad(p.loadImage("assets/images/achieve/6.png"), "成就图标6"),
+      this._safeLoad(p.loadImage("assets/images/achieve/7.png"), "成就图标7"),
+      this._safeLoad(p.loadImage("assets/images/achieve/8.png"), "成就图标8"),
+      this._safeLoad(p.loadImage("assets/images/achieve/9.png"), "成就图标9"),
+      this._safeLoad(p.loadImage("assets/images/achieve/10.png"), "成就图标10"),
     ]);
 
     // 按顺序赋值
@@ -266,6 +275,17 @@ export const Assets = {
     this.tileImage_wall = results[46];
     this.tileImage_signboard = results[47];
     this.tileImage_signboard2 = results[48];
-    this.achieveImg1 = results[49];
+    this.achieveImgs = [
+      results[49],
+      results[50],
+      results[51],
+      results[52],
+      results[53],
+      results[54],
+      results[55],
+      results[56],
+      results[57],
+      results[58],
+    ];
   },
 };

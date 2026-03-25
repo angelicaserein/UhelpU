@@ -47,10 +47,14 @@ const _dict = {
     hint_level1:
       "Record yourself next to the platform. Do not move around randomly. After finishing recording, press the playback button. Jump up by stepping on your own head.",
     hint_level2:
-      "while recording, jump to have a higher platform, then step on two buttons at the same time to open the portal",
-    hint_level3: "Level 3 hint example",
-    hint_level4: "Level 4 hint example",
-    level4_button_hint: "Do I have to use those buttons?",
+      "While recording, jump to have a higher platform, then step on two buttons at the same time to open the portal",
+    hint_level3:
+      "Record the first half of yourself to build a path for your future self to jump up, then press the button in the second half. After recording ends, your real self steps on your own head to jump onto the platform, then presses the power-on button together with the phantom.",
+    hint_level4:
+      "During the recording, step on the yellow and blue buttons respectively. After your main character reaches the second side, click playback, then walk over the spike traps at the right time.",
+    level4_button_hint: "Do I have to use these two buttons?",
+    level4_selfjump_hint_window:
+      'Congratulations!\n You\'ve unlocked the achievement: "<span class="rainbow-wave">S</span><span class="rainbow-wave">e</span><span class="rainbow-wave">l</span><span class="rainbow-wave">f</span><span class="rainbow-wave">-</span><span class="rainbow-wave">J</span><span class="rainbow-wave">u</span><span class="rainbow-wave">m</span><span class="rainbow-wave">p</span>"!',
     keybind_reset_title: "Reset to default",
     keybind_conflict: "The key {KEY} is already bound to {ACTION}",
     keybind_jump: "Jump",
@@ -84,7 +88,7 @@ const _dict = {
     level2_info_right: "Difficulty\n💜💜",
     level2_jump_higher_prompt: "How can I jump much higher?",
     level2_jump_hint_window:
-      'Congratulations! You\'ve unlocked the achievement: "<span class="rainbow-wave">P</span><span class="rainbow-wave">e</span><span class="rainbow-wave">r</span><span class="rainbow-wave">s</span><span class="rainbow-wave">e</span><span class="rainbow-wave">v</span><span class="rainbow-wave">e</span><span class="rainbow-wave">r</span><span class="rainbow-wave">a</span><span class="rainbow-wave">n</span><span class="rainbow-wave">c</span><span class="rainbow-wave">e</span>"!\n(Hint: hint is in the pause menu, not here haha)',
+      'Congratulations!\n You\'ve unlocked the achievement: "<span class="rainbow-wave">P</span><span class="rainbow-wave">e</span><span class="rainbow-wave">r</span><span class="rainbow-wave">s</span><span class="rainbow-wave">e</span><span class="rainbow-wave">v</span><span class="rainbow-wave">e</span><span class="rainbow-wave">r</span><span class="rainbow-wave">a</span><span class="rainbow-wave">n</span><span class="rainbow-wave">c</span><span class="rainbow-wave">e</span>"!\n(Hint: hint is in the pause menu, not here haha)',
     level3_signboard_prompt: "Which key was it to interact again?",
     level3_title: "Electricity",
     level3_info_left: "level 3\nElectricity",
@@ -106,8 +110,10 @@ const _dict = {
     achiev_locked_desc: "Complete the required task to unlock this achievement",
     achiev_first_steps_name: "First Steps",
     achiev_first_steps_desc: "Complete Level 1 — Rule",
-    achiev_climber_name: "Climber",
-    achiev_climber_desc: "Complete Level 2 — Higher",
+    achiev_selfjump_name: "Self-Jump",
+    achiev_selfjump_desc: "You're a jumping master!",
+    achiev_selfjump_unlock_desc:
+      "Jump over spikes without stepping on yellow/blue buttons in level 4",
     achiev_electrician_name: "Electrician",
     achiev_electrician_desc: "Complete Level 3 — Electricity",
     achiev_trap_master_name: "Trap Master",
@@ -116,6 +122,8 @@ const _dict = {
     achiev_perfectionist_desc: "Complete all levels",
     achiev_perseverance_name: "Perseverance",
     achiev_perseverance_desc: "Did you fall down 3 times? ",
+    achiev_perseverance_unlock_desc:
+      'Trigger "How can I jump much higher?" 3 times in Level 2',
     achiev_student_name: "Student",
     achiev_student_desc: "Read all signboards",
     achiev_socialite_name: "Socialite",
@@ -197,9 +205,13 @@ const _dict = {
       "在平台旁边录制自己，不要乱移动，结束录制之后按回放键，踩着自己的头跳上去",
     hint_level2:
       "录制自己的过程中跳跃，自己踩在自己的回放幻影头上，在幻影起跳的同时自己也起跳，利用这个技巧踩上更高的平台，最后操纵幻影同时按下两个按钮，打开传送门",
-    hint_level3: "level3提示实例",
-    hint_level4: "level4提示实例",
-    level4_button_hint: "我必须要用那些按钮吗",
+    hint_level3:
+      "录制自己的前半段先为未来的自己搭好跳上去的路，后半段再去按按钮，录制结束后本体踩着自己的头跳上平台之后再和幻影一起按下通电的按钮",
+    hint_level4:
+      "在录制的时间内分别踩下黄色和蓝色的按钮，本体走到第二面之后再点击回放，看准时机走过地刺。",
+    level4_button_hint: "我必须要用这两个按钮吗",
+    level4_selfjump_hint_window:
+      '恭喜你解锁"<span class="rainbow-wave">S</span><span class="rainbow-wave">e</span><span class="rainbow-wave">l</span><span class="rainbow-wave">f</span><span class="rainbow-wave">-</span><span class="rainbow-wave">J</span><span class="rainbow-wave">u</span><span class="rainbow-wave">m</span><span class="rainbow-wave">p</span>"的成就！',
     keybind_reset_title: "重置为默认",
     keybind_conflict: "按键 {KEY} 已绑定到 {ACTION}",
     keybind_jump: "跳跃",
@@ -253,8 +265,9 @@ const _dict = {
     achiev_locked_desc: "完成指定任务以解锁此成就",
     achiev_first_steps_name: "第一步",
     achiev_first_steps_desc: "通关第一关 — 规则",
-    achiev_climber_name: "攀登者",
-    achiev_climber_desc: "通关第二关 — 登高",
+    achiev_selfjump_name: "无钮自通",
+    achiev_selfjump_desc: "你是跳跃高手！",
+    achiev_selfjump_unlock_desc: "在第四关里不踩到黄、蓝按钮就跳过地刺",
     achiev_electrician_name: "电工",
     achiev_electrician_desc: "通关第三关 — 通电",
     achiev_trap_master_name: "陷阱大师",
@@ -263,6 +276,7 @@ const _dict = {
     achiev_perfectionist_desc: "通关所有关卡",
     achiev_perseverance_name: "坚持不懈",
     achiev_perseverance_desc: "你是不是掉下来了三次？",
+    achiev_perseverance_unlock_desc: "在第二关里触发三次“怎么才能跳得更高呢？”",
     achiev_student_name: "好学生",
     achiev_student_desc: "阅读所有告示牌",
     achiev_socialite_name: "社交达人",

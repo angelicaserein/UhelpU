@@ -52,7 +52,8 @@ export class Level2 extends BaseLevel {
     });
 
     this.entities.add(
-      new TextPrompt(450, 90, this, {
+      new TextPrompt(450, 70, this, {
+        // 每个参数分别是 x, y, 关卡实例
         textKey: "level2_jump_higher_prompt",
         onTrigger: () => {
           this._jumpPromptCount++;

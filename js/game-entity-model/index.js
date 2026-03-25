@@ -18,6 +18,7 @@ export { Portal } from "./interactables/Portal.js";
 export { Button } from "./interactables/Button.js";
 export { Home } from "./interactables/Home.js";
 export { Signboard } from "./interactables/Signboard.js";
+export { NPC } from "./interactables/NPC.js";
 
 // prompts
 export { KeyPrompt } from "./prompts/KeyPrompt.js";

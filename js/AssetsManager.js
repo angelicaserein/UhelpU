@@ -42,6 +42,10 @@ export const Assets = {
   cloneImg_upLeft: null,
   cloneIdleImgs: [],
 
+  // NPC 贴图
+  npcIdleImgs: [],
+  npcFaceImg: null,
+
   // 地块贴图
   tileImage_goal: null,
   tileImage_ground: null,
@@ -173,6 +177,13 @@ export const Assets = {
         p.loadImage("assets/images/idle-action/66.png"),
         "分身idle66",
       ),
+      // NPC 贴图
+      this._safeLoad(p.loadImage("assets/images/npc/npc11.png"), "NPC idle1"),
+      this._safeLoad(p.loadImage("assets/images/npc/npc12.png"), "NPC idle2"),
+      this._safeLoad(p.loadImage("assets/images/npc/npc13.png"), "NPC idle3"),
+      this._safeLoad(p.loadImage("assets/images/npc/npc14.png"), "NPC idle4"),
+      this._safeLoad(p.loadImage("assets/images/npc/npc15.png"), "NPC idle5"),
+      this._safeLoad(p.loadImage("assets/images/npc/npc-face.png"), "NPC face"),
       // 地块贴图
       this._safeLoad(p.loadImage("assets/images/tiles/goal.png"), "终点门"),
       this._safeLoad(p.loadImage("assets/images/tiles/ground.png"), "地面贴图"),
@@ -235,12 +246,21 @@ export const Assets = {
       results[35],
       results[36],
     ];
+    // NPC 贴图
+    this.npcIdleImgs = [
+      results[37],
+      results[38],
+      results[39],
+      results[40],
+      results[41],
+    ];
+    this.npcFaceImg = results[42];
     // 地块贴图
-    this.tileImage_goal = results[37];
-    this.tileImage_ground = results[38];
-    this.tileImage_platform = results[39];
-    this.tileImage_wall = results[40];
-    this.tileImage_signboard = results[41];
-    this.tileImage_signboard2 = results[42];
+    this.tileImage_goal = results[43];
+    this.tileImage_ground = results[44];
+    this.tileImage_platform = results[45];
+    this.tileImage_wall = results[46];
+    this.tileImage_signboard = results[47];
+    this.tileImage_signboard2 = results[48];
   },
 };

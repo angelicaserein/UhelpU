@@ -6,6 +6,7 @@ import {
   Portal,
   Button,
   Spike,
+  NPC,
 } from "../game-entity-model/index.js";
 import { CollisionSystem } from "../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../physics-system/PhysicsSystem.js";
@@ -72,12 +73,62 @@ export class Level4 extends BaseLevel {
     this._room0Button = new Button(250, 80, 20, 5); //每个参数分别是按钮的 x, y, width, height
     this._room0Spike = new Spike(350, 80, 200, 20); //每个参数分别是地刺的 x, y, width, height
 
+    this._room0NPC = new NPC(600, 80, 40, 40, {
+      //每个参数分别是 NPC 的 x, y, width, height
+      getPlayer: () => this._player,
+      eventBus: this.eventBus,
+      npcId: "guide",
+      dialogueLines: ["npc_guide_line1", "npc_guide_line2", "npc_guide_line3"],
+      exhaustedLine: "npc_guide_exhausted",
+      maxDialogueCount: 2,
+    });
+    this._room0NPC2 = new NPC(650, 80, 40, 40, {
+      getPlayer: () => this._player,
+      eventBus: this.eventBus,
+      npcId: "guide2",
+      dialogueLines: [
+        "npc_guide2_line1",
+        "npc_guide2_line2",
+        "npc_guide2_line3",
+      ],
+      exhaustedLine: "npc_guide2_exhausted",
+      maxDialogueCount: 2,
+    });
+    this._room0NPC3 = new NPC(700, 80, 40, 40, {
+      getPlayer: () => this._player,
+      eventBus: this.eventBus,
+      npcId: "guide3",
+      dialogueLines: [
+        "npc_guide3_line1",
+        "npc_guide3_line2",
+        "npc_guide3_line3",
+      ],
+      exhaustedLine: "npc_guide3_exhausted",
+      maxDialogueCount: 2,
+    });
+    this._room0NPC4 = new NPC(750, 80, 40, 40, {
+      getPlayer: () => this._player,
+      eventBus: this.eventBus,
+      npcId: "guide4",
+      dialogueLines: [
+        "npc_guide4_line1",
+        "npc_guide4_line2",
+        "npc_guide4_line3",
+      ],
+      exhaustedLine: "npc_guide4_exhausted",
+      maxDialogueCount: 2,
+    });
+
     const room0 = new Room(
       [
         new Wall(0, 0, wallThickness, p.height),
         new Ground(0, 0, p.width, 80),
         this._room0Button,
         this._room0Spike,
+        this._room0NPC,
+        this._room0NPC2,
+        this._room0NPC3,
+        this._room0NPC4,
       ],
       {
         right: { targetRoomIndex: 1 },
@@ -269,6 +320,12 @@ export class Level4 extends BaseLevel {
 
   updatePhysics() {
     this.physicsSystem.physicsEntry();
+    // 更新所有游戏实体（NPC 交互检测等）
+    for (const entity of this.entities) {
+      if (entity.update && typeof entity.update === "function") {
+        entity.update(this.p);
+      }
+    }
   }
 
   updateCollision(p = this.p, eventBus = this.eventBus) {

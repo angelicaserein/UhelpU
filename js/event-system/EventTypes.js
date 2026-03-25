@@ -3,19 +3,24 @@
 // Import this instead of using raw string literals to catch typos at development time.
 
 export const EventTypes = Object.freeze({
-    // Level lifecycle
-    LOAD_LEVEL:          "loadLevel",
-    UNLOAD_LEVEL:        "unloadLevel",
-    RETURN_LEVEL_CHOICE: "returnLevelChoice",
+  // Level lifecycle
+  LOAD_LEVEL: "loadLevel",
+  UNLOAD_LEVEL: "unloadLevel",
+  RETURN_LEVEL_CHOICE: "returnLevelChoice",
 
-    // Game result
-    AUTO_RESULT: "autoResult",
+  // Game result
+  AUTO_RESULT: "autoResult",
 
-    // Pause / resume
-    PAUSE_GAME:  "pauseGame",
-    RESUME_GAME: "resumeGame",
+  // Pause / resume
+  PAUSE_GAME: "pauseGame",
+  RESUME_GAME: "resumeGame",
 
-    // Signboard interactions
-    SIGNBOARD_INTERACTED:    "signboardInteracted",
-    SIGNBOARD_OUT_OF_RANGE:  "signboardOutOfRange",
+  // Signboard interactions
+  SIGNBOARD_INTERACTED: "signboardInteracted",
+  SIGNBOARD_OUT_OF_RANGE: "signboardOutOfRange",
+
+  // NPC dialogue
+  NPC_DIALOGUE_START: "npcDialogueStart",
+  NPC_DIALOGUE_NEXT: "npcDialogueNext",
+  NPC_DIALOGUE_END: "npcDialogueEnd",
 });

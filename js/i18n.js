@@ -83,8 +83,8 @@ const _dict = {
     level3_title: "Electricity",
     level3_info_left: "level 3\nElectricity",
     level3_info_right: "Difficulty\n💜💜💜",
-    level4_title: "Level 4 Title Placeholder",
-    level4_info_left: "level 4\nLevel 4",
+    level4_title: "Trap",
+    level4_info_left: "level 4\nTrap",
     level4_info_right: "Difficulty\n💜💜💜💜",
     module_btn_label: "Install Module",
     module_installation_complete:
@@ -92,6 +92,32 @@ const _dict = {
     first_record_prompt:
       "You have successfully learned to record your actions!\nPress the record key again to start~\nMax recording duration: 5 seconds",
     click_to_close: "Click anywhere to close",
+
+    // ── NPC Dialogue ─────────────────────────────────────────────
+    // NPC 1
+    npc_guide_line1: "Wow, it's great to meet you here!",
+    npc_guide_line2: "Are you sleepy too?",
+    npc_guide_line3: "I sleep with my eyes open;P",
+    npc_guide_exhausted: "I'm sleeping, don't bother me~",
+    // NPC 2
+    npc_guide2_line1: "Did you see the colorful buttons and spikes?",
+    npc_guide2_line2: "I dont know why but I feel like they are important",
+    npc_guide2_line3: "But sleep is more important!",
+    npc_guide2_exhausted: "I'm sleeping, don't bother me~",
+    // NPC 3
+    npc_guide3_line1: "I look different from the other three NPCs, do I?",
+    npc_guide3_line2: "I like them, they are cute as me.",
+    npc_guide3_line3: "But I like sleeping more!",
+    npc_guide3_exhausted: "I'm sleeping, don't bother me~",
+    // NPC 4
+    npc_guide4_line1:
+      "I am the last NPC, but I have the most lines! Impressive, right?",
+    npc_guide4_line2:
+      "I think the second NPC said something important, do you think so?",
+    npc_guide4_line3: "But I can't understand!",
+    npc_guide4_exhausted:
+      "I want to figure out the buttons and spikes, but I'm too sleepy... Zzz",
+    npc_continue_hint: "[E] Continue",
   },
 
   zh: {
@@ -170,17 +196,40 @@ const _dict = {
     level2_jump_higher_prompt: "怎么才能跳得更高呢？",
     level2_jump_hint_window:
       '恭喜你解锁"<span class="rainbow-wave">坚</span><span class="rainbow-wave">持</span><span class="rainbow-wave">不</span><span class="rainbow-wave">懈</span>"的成就！\n（提示在暂停菜单里哦，不在这里哈哈）',
-    level3_title: "通关",
-    level3_info_left: "第三关\n通关",
+    level3_title: "通电",
+    level3_info_left: "第三关\n通电",
     level3_info_right: "难度\n⭐⭐⭐",
-    level4_title: "Level4标题占位",
-    level4_info_left: "第四关\nLevel4",
+    level4_title: "陷阱",
+    level4_info_left: "第四关\n陷阱",
     level4_info_right: "难度\n⭐⭐⭐⭐",
     module_btn_label: "安装模块",
     module_installation_complete: "安装完成\n现在你可以看到录制面板了",
     first_record_prompt:
       "你学会录制自己的操作了！\n再按一次录制键开始吧\n最多只能录 5 秒哦",
     click_to_close: "点击任意处关闭",
+
+    // ── NPC 对话 ───────────────────────────────────────────────
+    // NPC 1
+    npc_guide_line1: "哇，在这里很难得遇见你！",
+    npc_guide_line2: "你也很困吗？",
+    npc_guide_line3: "我会睁着眼睡觉;P",
+    npc_guide_exhausted: "我在睡觉啦，不要打扰我哦~",
+    // NPC 2
+    npc_guide2_line1: "你看到那些彩色的按钮和地刺了吗？",
+    npc_guide2_line2: "我不知道为什么，我觉得它们很重要",
+    npc_guide2_line3: "但是睡觉更重要！",
+    npc_guide2_exhausted: "我在睡觉啦，不要打扰我哦~",
+    // NPC 3
+    npc_guide3_line1: "我看起来和其他三个NPC不一样，对吗？",
+    npc_guide3_line2: "我喜欢它们，它们和我一样可爱。",
+    npc_guide3_line3: "但是我更喜欢睡觉！",
+    npc_guide3_exhausted: "我在睡觉啦，不要打扰我哦~",
+    // NPC 4
+    npc_guide4_line1: "我是最后一个 NPC，但我台词最多！厉害吧？",
+    npc_guide4_line2: "我觉得第二个 NPC 说了些重要的东西，你觉得呢？",
+    npc_guide4_line3: "但是睡觉更重要！",
+    npc_guide4_exhausted: "我想搞清楚那些按钮和地刺\n但我太困了... Zzz",
+    npc_continue_hint: "[交互键] 继续",
   },
 };
 

@@ -6,7 +6,7 @@ new p5((p) => {
   let app;
 
   p.setup = async () => {
-    p.createCanvas(1280, 720);
+    p.createCanvas(1366, 768);
 
     // p5.js 2.0: 在 setup 中用 await 加载资源
     await Assets.loadAll(p);

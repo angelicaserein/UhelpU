@@ -12,6 +12,7 @@ import { setGamePaused, isGamePaused } from "../game-runtime/GamePauseState.js";
 import { EventTypes } from "../event-system/EventTypes.js";
 import { Assets } from "../AssetsManager.js";
 import { t } from "../i18n.js";
+import { KeyBindingManager } from "../key-binding-system/KeyBindingManager.js";
 
 export class LevelManager {
   constructor(p, eventBus) {
@@ -42,6 +43,14 @@ export class LevelManager {
       fadeStartMs: 1300,
       titleKey: "",
     };
+
+    // 回到最近已激活存档点
+    this._keyBindingManager = KeyBindingManager.getInstance();
+    this._onTeleportKeyDown = (e) => {
+      const teleportKey = this._keyBindingManager.getKeyByIntent("teleportCheckpoint");
+      if (teleportKey && e.code === teleportKey) this._teleportToNearestCheckpoint();
+    };
+    document.addEventListener("keydown", this._onTeleportKeyDown);
   }
 
   startLevelTitleOverlay(levelIndex, p = this.p) {
@@ -265,9 +274,78 @@ export class LevelManager {
         player.y > viewBounds.maxY ||
         player.y + player.collider.h < viewBounds.minY
       ) {
-        // 发布结算事件
-        eventBus && eventBus.publish(EventTypes.AUTO_RESULT, "autoResult2");
+        // 查找最近的已激活存档点
+        const checkpoint = this._findNearestActivatedCheckpoint(player);
+        if (checkpoint) {
+          this._respawnPlayerAtCheckpoint(player, checkpoint);
+        } else {
+          // 没有存档点，发布结算事件
+          eventBus && eventBus.publish(EventTypes.AUTO_RESULT, "autoResult2");
+        }
       }
+    }
+  }
+
+  // 查找离玩家最近的已激活存档点
+  _findNearestActivatedCheckpoint(player) {
+    let nearest = null;
+    let minDist = Infinity;
+    for (const entity of this.level.entities) {
+      if (entity.type === "checkpoint" && entity.activated) {
+        const dx = entity.x - player.x;
+        const dy = entity.y - player.y;
+        const dist = dx * dx + dy * dy;
+        if (dist < minDist) {
+          minDist = dist;
+          nearest = entity;
+        }
+      }
+    }
+    return nearest;
+  }
+
+  // 在存档点位置重生玩家
+  _respawnPlayerAtCheckpoint(player, checkpoint) {
+    player.x = checkpoint.x;
+    player.y = checkpoint.y;
+    player.deathState.isDead = false;
+    player.deathState.initialized = false;
+    player.deathState.deathType = null;
+    if (player.movementComponent) {
+      player.movementComponent.velX = 0;
+      player.movementComponent.velY = 0;
+    }
+    // 重置控制器输入状态，防止残留按键导致自动移动
+    if (player.controllerManager) {
+      player.controllerManager.resetInputState();
+    }
+  }
+
+  // 按B键传送到最近的已激活存档点
+  _teleportToNearestCheckpoint() {
+    if (!this.level) return;
+    if (isGamePaused()) return;
+
+    let player = null;
+    for (const entity of this.level.entities) {
+      if (entity.type === "player") {
+        player = entity;
+        break;
+      }
+    }
+    if (!player || (player.deathState && player.deathState.isDead)) return;
+
+    const checkpoint = this._findNearestActivatedCheckpoint(player);
+    if (!checkpoint) return;
+
+    player.x = checkpoint.x;
+    player.y = checkpoint.y;
+    if (player.movementComponent) {
+      player.movementComponent.velX = 0;
+      player.movementComponent.velY = 0;
+    }
+    if (player.controllerManager) {
+      player.controllerManager.resetInputState();
     }
   }
 }

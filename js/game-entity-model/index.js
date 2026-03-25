@@ -19,6 +19,7 @@ export { Button } from "./interactables/Button.js";
 export { Home } from "./interactables/Home.js";
 export { Signboard } from "./interactables/Signboard.js";
 export { NPC } from "./interactables/NPC.js";
+export { Checkpoint } from "./interactables/Checkpoint.js";
 
 // prompts
 export { KeyPrompt } from "./prompts/KeyPrompt.js";

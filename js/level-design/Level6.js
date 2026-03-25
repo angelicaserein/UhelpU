@@ -4,6 +4,8 @@ import {
   Ground,
   Wall,
   Portal,
+  Checkpoint,
+  Spike,
 } from "../game-entity-model/index.js";
 import { CollisionSystem } from "../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../physics-system/PhysicsSystem.js";
@@ -43,8 +45,23 @@ export class Level6 extends BaseLevel {
   _buildRooms(p) {
     const wallThickness = 20;
 
+    const checkpoint = new Checkpoint(
+      p.width / 2 - 200,
+      80,
+      40,
+      70,
+      () => this._player,
+    );
+
+    const spike = new Spike(p.width / 2, 80, 100, 20);
+
     const room0 = new Room(
-      [new Wall(0, 0, wallThickness, p.height), new Ground(0, 0, p.width, 80)],
+      [
+        new Wall(0, 0, wallThickness, p.height),
+        new Ground(0, 0, p.width, 80),
+        checkpoint,
+        spike,
+      ],
       { right: { targetRoomIndex: 1 } },
     );
 

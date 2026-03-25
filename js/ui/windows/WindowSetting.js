@@ -248,12 +248,13 @@ export class WindowSetting extends WindowBase {
       interaction: t("keybind_interaction"),
       record: t("keybind_record"),
       replay: t("keybind_replay"),
+      teleportCheckpoint: t("keybind_teleportCheckpoint"),
     };
     return keyMap[intent] || intent;
   }
 
   _getIntentOrder() {
-    return ["jump", "moveLeft", "moveRight", "interaction", "record", "replay"];
+    return ["jump", "moveLeft", "moveRight", "interaction", "record", "replay", "teleportCheckpoint"];
   }
 
   /**
@@ -269,6 +270,7 @@ export class WindowSetting extends WindowBase {
       KeyC: "C",
       KeyE: "E",
       KeyR: "R",
+      KeyB: "B",
       Space: "Space",
       ArrowUp: "↑",
       ArrowDown: "↓",

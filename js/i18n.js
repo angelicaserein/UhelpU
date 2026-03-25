@@ -66,6 +66,7 @@ const _dict = {
     keybind_interaction: "Interaction",
     keybind_record: "Record/Stop",
     keybind_replay: "Replay",
+    keybind_teleportCheckpoint: "Teleport to Checkpoint",
 
     // ── Record HUD ───────────────────────────────────────────────────
     rec_title_standby: "Phantom Recorder Standby",
@@ -247,6 +248,7 @@ const _dict = {
     keybind_interaction: "交互",
     keybind_record: "录制/停止",
     keybind_replay: "回放",
+    keybind_teleportCheckpoint: "回到存档点",
 
     // ── Record HUD ───────────────────────────────────────────────────
     rec_title_standby: "幻影录制器待命",

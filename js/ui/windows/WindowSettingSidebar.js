@@ -184,7 +184,7 @@ export class WindowSettingSidebar extends WindowSidebarBase {
   }
 
   _getIntentOrder() {
-    return ["jump", "moveLeft", "moveRight", "interaction", "record", "replay"];
+    return ["jump", "moveLeft", "moveRight", "interaction", "record", "replay", "teleportCheckpoint"];
   }
 
   _refreshLabels() {
@@ -289,6 +289,7 @@ export class WindowSettingSidebar extends WindowSidebarBase {
       interaction: t("keybind_interaction"),
       record: t("keybind_record"),
       replay: t("keybind_replay"),
+      teleportCheckpoint: t("keybind_teleportCheckpoint"),
     };
     return keyMap[intent] || intent;
   }
@@ -302,6 +303,7 @@ export class WindowSettingSidebar extends WindowSidebarBase {
       KeyC: "C",
       KeyE: "E",
       KeyR: "R",
+      KeyB: "B",
       Space: "Space",
       ArrowUp: "↑",
       ArrowDown: "↓",

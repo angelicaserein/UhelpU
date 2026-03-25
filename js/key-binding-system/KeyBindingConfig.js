@@ -14,6 +14,9 @@ export const DEFAULT_KEYBINDING = {
   // 录制系统
   record: "KeyC",
   replay: "KeyR",
+
+  // 存档点
+  teleportCheckpoint: "KeyB",
 };
 
 // localStorage 储存键名（已废弃，刷新不再持久化）

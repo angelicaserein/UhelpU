@@ -436,9 +436,6 @@ export class Level4 extends BaseLevel {
 
   updatePhysics() {
     this.physicsSystem.physicsEntry();
-    // 记录 room1 按钮是否曾被踩过
-    if (this._room1Button.isPressed) this._room1ButtonEverPressed = true;
-    if (this._room1Button2.isPressed) this._room1Button2EverPressed = true;
 
     // 更新所有游戏实体（NPC 交互检测等）
     for (const entity of this.entities) {
@@ -450,6 +447,10 @@ export class Level4 extends BaseLevel {
 
   updateCollision(p = this.p, eventBus = this.eventBus) {
     this.collisionSystem.collisionEntry(eventBus);
+
+    // 记录 room1 按钮是否曾被踩过（必须在碰撞检测之后读取 isPressed）
+    if (this._room1Button.isPressed) this._room1ButtonEverPressed = true;
+    if (this._room1Button2.isPressed) this._room1Button2EverPressed = true;
 
     // 更新按钮-地刺联动
     this._spikeLinkSystem0.update();

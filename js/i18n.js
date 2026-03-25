@@ -59,7 +59,8 @@ const _dict = {
       "You have successfully activated the checkpoint!<br>P.S. Press B to return to the checkpoint at any time.",
     level4_selfjump_hint_window:
       'Congratulations!\n You\'ve unlocked the achievement: \n"<span class="rainbow-wave">S</span><span class="rainbow-wave">e</span><span class="rainbow-wave">l</span><span class="rainbow-wave">f</span><span class="rainbow-wave">-</span><span class="rainbow-wave">J</span><span class="rainbow-wave">u</span><span class="rainbow-wave">m</span><span class="rainbow-wave">p</span>"!',
-    level5_jail_prompt: "Huh?\nRemember to press B",
+    level5_jail_prompt:
+      "Huh?\nRemember to press B when checkpoint is activated!",
     level5_pause_hint:
       "Someone told me once\nIf you're stuck, try pressing pause.",
     level5_jail_hint_window:
@@ -166,7 +167,8 @@ const _dict = {
     achiev_phantom_master_desc: "Complete a level using phantom replay",
     achiev_jail_name: "Prisoner",
     achiev_jail_desc: "Some people are alive, but they are already dead.",
-    achiev_jail_unlock_desc: "Trap yourself in Level 5",
+    achiev_jail_unlock_desc:
+      "Trap yourself in Level 5 without activating the checkpoint",
 
     // ── NPC Dialogue ─────────────────────────────────────────────
     // NPC 1
@@ -251,7 +253,7 @@ const _dict = {
       "你成功激活了存档点！<br>p.s. 按B键可以随时返回存档点",
     level4_selfjump_hint_window:
       '恭喜你解锁"<span class="rainbow-wave">S</span><span class="rainbow-wave">e</span><span class="rainbow-wave">l</span><span class="rainbow-wave">f</span><span class="rainbow-wave">-</span><span class="rainbow-wave">J</span><span class="rainbow-wave">u</span><span class="rainbow-wave">m</span><span class="rainbow-wave">p</span>"的成就！',
-    level5_jail_prompt: "咦？",
+    level5_jail_prompt: "咦？\n记得存档点激活后按B键哦！",
     level5_pause_hint: "好像有人告诉过我\n卡关了的话应该按暂停看看。",
     level5_jail_hint_window:
       '恭喜你解锁"<span class="rainbow-wave">囚</span><span class="rainbow-wave">犯</span>"的成就！',
@@ -298,9 +300,9 @@ const _dict = {
     level4_title: "陷阱",
     level4_info_left: "第四关\n陷阱",
     level4_info_right: "难度\n🩷🩷",
-    level5_title: "第五关",
-    level5_info_left: "第五关",
-    level5_info_right: "难度\n🩷",
+    level5_title: "牢笼",
+    level5_info_left: "第五关\n牢笼",
+    level5_info_right: "难度\n🩷🩷🩷🩷",
     level6_title: "第六关",
     level6_info_left: "第六关",
     level6_info_right: "难度\n🩷",
@@ -352,7 +354,7 @@ const _dict = {
     achiev_phantom_master_desc: "使用幻影回放完成一个关卡",
     achiev_jail_name: "囚犯",
     achiev_jail_desc: "有的人活着，但他已经死了。",
-    achiev_jail_unlock_desc: "在第五关中把自己困住",
+    achiev_jail_unlock_desc: "在第五关中没有激活存档点的情况下把自己困住",
 
     // ── NPC 对话 ───────────────────────────────────────────────
     // NPC 1

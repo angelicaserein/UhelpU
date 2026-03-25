@@ -124,6 +124,8 @@ export class Level5 extends BaseLevel {
     this._room0PauseHintPrompt = new TextPrompt(1000, 350, this, {
       textKey: "level5_pause_hint",
       textSize: 20,
+      width: 400,
+      height: 120,
     });
 
     // x=1450 处的存档点
@@ -139,6 +141,8 @@ export class Level5 extends BaseLevel {
     this._room0RecordingPrompt = new TextPrompt(1450, 370, this, {
       textKey: "level5_recording_prompt",
       textSize: 20,
+      width: 480,
+      height: 150,
     });
 
     // 第四组：按钮 + 消失平台
@@ -164,6 +168,8 @@ export class Level5 extends BaseLevel {
     this._room0JailPrompt = new TextPrompt(720, 100, this, {
       textKey: "level5_jail_prompt",
       textSize: 20,
+      width: 400,
+      height: 120,
       onTrigger: () => {
         if (
           !AchievementData.isUnlocked("prisoner") &&

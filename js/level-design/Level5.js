@@ -4,6 +4,9 @@ import {
   Ground,
   Wall,
   Portal,
+  Button,
+  Platform,
+  TextPrompt,
 } from "../game-entity-model/index.js";
 import { CollisionSystem } from "../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../physics-system/PhysicsSystem.js";
@@ -11,6 +14,10 @@ import { RecordSystem } from "../record-system/RecordSystem.js";
 import { BaseLevel } from "./BaseLevel.js";
 import { Assets } from "../AssetsManager.js";
 import { Room } from "./Room.js";
+import { ButtonPlatformLinkSystem } from "../mechanism-system/ButtonPlatformLinkSystem.js";
+import { AchievementToast } from "../achievement system/AchievementToast.js";
+import { AchievementData } from "../achievement system/AchievementData.js";
+import { WindowPrompt } from "../ui/windows/WindowPrompt.js";
 
 export class Level5 extends BaseLevel {
   constructor(p, eventBus) {
@@ -22,6 +29,12 @@ export class Level5 extends BaseLevel {
 
     this.rooms = this._buildRooms(p);
     this._applyWorldOffsetsToRooms(p);
+
+    this._achievementToast = new AchievementToast(p);
+    this._jailHintWindow = new WindowPrompt(p, "level5_jail_hint_window", {
+      width: 420,
+      fontSize: 17,
+    });
 
     const wallThickness = 20;
     this._player = new Player(50, 450, 40, 40);
@@ -39,14 +52,86 @@ export class Level5 extends BaseLevel {
 
     this.physicsSystem = new PhysicsSystem(this.entities);
     this.collisionSystem = new CollisionSystem(this.entities, eventBus);
+
+    // 按钮-消失平台联动系统（必须在 collisionSystem 之后创建）
+    this._platformLinkSystem = new ButtonPlatformLinkSystem(
+      [
+        {
+          button: this._room0Button,
+          platforms: [
+            { platform: this._room0DisappearPlatform, mode: "appear" },
+            { platform: this._room0DisappearPlatform1b, mode: "appear" },
+          ],
+        },
+        {
+          button: this._room0Button2,
+          platforms: [{ platform: this._room0DisappearPlatform2 }],
+        },
+        {
+          button: this._room0Button3,
+          platforms: [{ platform: this._room0DisappearPlatform3 }],
+        },
+      ],
+      this.collisionSystem,
+    );
   }
 
   _buildRooms(p) {
     const wallThickness = 20;
 
     // ---- Room 0 ----
+    this._room0Button = new Button(450, 80, 20, 5, {
+      // 参数：Button(x, y, w, h, options) — x=起始横坐标, y=起始纵坐标, w=宽度, h=高度
+      color: { unpressed: [255, 60, 60], pressed: [180, 30, 30] },
+    });
+    this._room0DisappearPlatform = new Platform(350, 180, 110, 20); //每个平台的参数：Platform(x, y, w, h) — x=起始横坐标, y=起始纵坐标, w=宽度, h=高度
+    this._room0DisappearPlatform1b = new Platform(460, 240, 110, 20); // 第一组第二个消失平台，在第一个上方
+    // ▼ 贴地消失平台：Platform(x, y, w, h) — x=起始横坐标, y=80(地面高度), w=宽度, h=高度
+    this._room0GroundPlatform = new Platform(250, 80, 100, 120);
+
+    // 右侧第二组：正常平台 + 按钮 + 消失平台
+    this._room0NormalPlatform2 = new Platform(570, 80, 200, 240);
+    this._room0Button2 = new Button(700, 320, 20, 5, {
+      color: { unpressed: [255, 60, 60], pressed: [180, 30, 30] },
+    });
+    this._room0DisappearPlatform2 = new Platform(770, 300, 120, 20);
+    this._room0NormalPlatform3 = new Platform(950, 80, 600, 240);
+
+    // 第三组：按钮在第二和第三正常平台中间地面上，消失平台在第三正常平台右边
+    this._room0Button3 = new Button(850, 80, 20, 5, {
+      color: { unpressed: [255, 60, 60], pressed: [180, 30, 30] },
+    });
+    this._room0DisappearPlatform3 = new Platform(1200, 300, 20, 300);
+
+    // 第三个按钮上方的提示 + 成就触发
+    this._room0JailPrompt = new TextPrompt(720, 100, this, {
+      textKey: "level5_jail_prompt",
+      textSize: 20,
+      onTrigger: () => {
+        if (!AchievementData.isUnlocked("jail")) {
+          AchievementData.unlock("jail");
+          this._achievementToast.show("achievement_unlocked");
+          this._jailHintWindow.open();
+        }
+      },
+    });
+
     const room0 = new Room(
-      [new Wall(0, 0, wallThickness, p.height), new Ground(0, 0, p.width, 80)],
+      [
+        new Wall(0, 0, wallThickness, p.height),
+        new Ground(0, 0, p.width, 80),
+        this._room0Button,
+        this._room0DisappearPlatform,
+        this._room0DisappearPlatform1b,
+        this._room0GroundPlatform,
+        this._room0NormalPlatform2,
+        this._room0Button2,
+        this._room0DisappearPlatform2,
+        this._room0NormalPlatform3,
+        this._room0Button3,
+        this._room0DisappearPlatform3,
+        this._room0JailPrompt,
+      ],
       {
         right: { targetRoomIndex: 1 },
       },
@@ -167,6 +252,14 @@ export class Level5 extends BaseLevel {
   clearLevel(p = this.p, eventBus = this.eventBus) {
     this.recordSystem.clearAllListenersAndTimers();
     this._player.clearListeners();
+    if (this._achievementToast) {
+      this._achievementToast.remove();
+      this._achievementToast = null;
+    }
+    if (this._jailHintWindow) {
+      this._jailHintWindow.remove();
+      this._jailHintWindow = null;
+    }
     super.clearLevel(p, eventBus);
   }
 
@@ -236,6 +329,7 @@ export class Level5 extends BaseLevel {
 
   updateCollision(p = this.p, eventBus = this.eventBus) {
     this.collisionSystem.collisionEntry(eventBus);
+    this._platformLinkSystem.update();
 
     if (this._transition) {
       this._updateTransition(p);
@@ -257,10 +351,16 @@ export class Level5 extends BaseLevel {
       if (entity.type === "ground") entity.draw(p);
     }
     for (const entity of this.entities) {
-      if (entity.type !== "spike" && entity.type !== "ground") {
+      if (
+        entity.type !== "spike" &&
+        entity.type !== "ground" &&
+        !entity._hidden
+      ) {
         entity.draw(p);
       }
     }
+
+    this._platformLinkSystem.draw(p);
 
     p.pop();
 

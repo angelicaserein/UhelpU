@@ -30,6 +30,13 @@ export class CollisionSystem {
     // Final DD pass to guarantee no overlap before render
     if (replayerActive) this.processDynamicDynamicPair(player, replayer);
 
+    // 每帧重置所有按钮状态，碰撞检测时会重新按下仍被踩到的按钮
+    for (const tri of this._triggerEntities) {
+      if (tri.type === "button" && tri.isPressed) {
+        tri.releaseButton();
+      }
+    }
+
     for (const dyn of this._dynamicEntities) {
       for (const tri of this._triggerEntities) {
         this.processDynamicTriggerPair(dyn, tri, eventBus);

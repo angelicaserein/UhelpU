@@ -55,6 +55,9 @@ const _dict = {
     level4_button_hint: "Do I have to use these two buttons?",
     level4_selfjump_hint_window:
       'Congratulations!\n You\'ve unlocked the achievement: "<span class="rainbow-wave">S</span><span class="rainbow-wave">e</span><span class="rainbow-wave">l</span><span class="rainbow-wave">f</span><span class="rainbow-wave">-</span><span class="rainbow-wave">J</span><span class="rainbow-wave">u</span><span class="rainbow-wave">m</span><span class="rainbow-wave">p</span>"!',
+    level5_jail_prompt: "Huh?",
+    level5_jail_hint_window:
+      'Congratulations!\n You\'ve unlocked the achievement: "<span class="rainbow-wave">J</span><span class="rainbow-wave">a</span><span class="rainbow-wave">i</span><span class="rainbow-wave">l</span>"!',
     keybind_reset_title: "Reset to default",
     keybind_conflict: "The key {KEY} is already bound to {ACTION}",
     keybind_jump: "Jump",
@@ -150,6 +153,9 @@ const _dict = {
     achiev_director_desc: "Use recording for the first time",
     achiev_phantom_master_name: "Phantom Master",
     achiev_phantom_master_desc: "Complete a level using phantom replay",
+    achiev_jail_name: "Jail",
+    achiev_jail_desc: "Some people are alive, but they are already dead.",
+    achiev_jail_unlock_desc: "Trap yourself in Level 5",
 
     // ── NPC Dialogue ─────────────────────────────────────────────
     // NPC 1
@@ -230,6 +236,9 @@ const _dict = {
     level4_button_hint: "我必须要用这两个按钮吗",
     level4_selfjump_hint_window:
       '恭喜你解锁"<span class="rainbow-wave">S</span><span class="rainbow-wave">e</span><span class="rainbow-wave">l</span><span class="rainbow-wave">f</span><span class="rainbow-wave">-</span><span class="rainbow-wave">J</span><span class="rainbow-wave">u</span><span class="rainbow-wave">m</span><span class="rainbow-wave">p</span>"的成就！',
+    level5_jail_prompt: "咦？",
+    level5_jail_hint_window:
+      '恭喜你解锁新成就："<span class="rainbow-wave">牢</span><span class="rainbow-wave">笼</span>"!',
     keybind_reset_title: "重置为默认",
     keybind_conflict: "按键 {KEY} 已绑定到 {ACTION}",
     keybind_jump: "跳跃",
@@ -321,6 +330,9 @@ const _dict = {
     achiev_director_desc: "第一次使用录制功能",
     achiev_phantom_master_name: "幻影大师",
     achiev_phantom_master_desc: "使用幻影回放完成一个关卡",
+    achiev_jail_name: "牢笼",
+    achiev_jail_desc: "有的人活着，但他已经死了。",
+    achiev_jail_unlock_desc: "在第五关中把自己困住",
 
     // ── NPC 对话 ───────────────────────────────────────────────
     // NPC 1

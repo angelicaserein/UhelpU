@@ -14,6 +14,7 @@ export const AchievementData = {
     { id: "socialite", icon: "💬" },
     { id: "director", icon: "🎬" },
     { id: "phantom_master", icon: "👻" },
+    { id: "jail", icon: "🔒" },
   ],
 
   _unlocked: new Set(),

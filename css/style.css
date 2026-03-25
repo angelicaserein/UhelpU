@@ -61,7 +61,7 @@ canvas {
     font-size: 13px;
 }
 
-#min-btn-credits {
+#min-btn-achieves {
     position: absolute;
     right: 341px;
     bottom: 40px;
@@ -89,15 +89,15 @@ canvas {
     cursor: pointer;
 }
 
-/*credits panel*/
-/* #credits-panel {
+/*achieves panel*/
+/* #achieves-panel {
     position: absolute;
     background-image: url("../assets/UI/credits-panel.png");
     background-size: contain;
     width: 960px;
     height: 540px;
 }
-#credits-btn-back {
+#achieves-btn-back {
     position: absolute;
     left: 20px;
     bottom: 20px;
@@ -309,14 +309,14 @@ canvas {
   border-width: 3px;
 }
 
-/* credits按钮 */
-.credits-button {
+/* achieves按钮 */
+.achieves-button {
   color: #0d010b;
   font-weight: bold;
   -webkit-text-stroke: 1px #0d010b;
   border: 3px solid #4c1745;
   border-radius: 50%;
-  font-size: 18px;
+  font-size: 16px;
   background-color: rgba(101, 78, 119, 0.8);
   box-sizing: border-box;
   display: flex;
@@ -329,7 +329,7 @@ canvas {
     color 0.5s,
     -webkit-text-stroke 0.5s;
 }
-.credits-button:hover {
+.achieves-button:hover {
   color: #fff3fd;
   font-weight: bold;
   -webkit-text-stroke: 0.2px #ffeafc;
@@ -1126,6 +1126,14 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   border-bottom: 1px solid rgba(214, 204, 232, 0.18);
 }
 
+.window-credits-text {
+  color: #e0d4f0;
+  font-size: 14px;
+  line-height: 2;
+  white-space: pre-wrap;
+  padding: 10px 5px;
+}
+
 .window-setting-sidebar .window-slider-row {
   gap: 18px;
   margin-bottom: 18px;
@@ -1236,8 +1244,8 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   display: inline-block;
   font-weight: bold;
   animation:
-    rainbow-color 2s linear infinite,
-    wave 1.6s ease-in-out infinite;
+    rainbow-color 3s linear infinite,
+    wave 2.4s ease-in-out infinite;
 }
 
 .rainbow-wave:nth-child(1) {
@@ -1307,6 +1315,96 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-5px);
+    transform: translateY(-2px);
   }
+}
+
+/* ── Achievement Toast ──────────────────────────────────────────── */
+.achievement-toast-anchor {
+  position: absolute;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 10001;
+}
+
+.achievement-toast-band {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  padding: 0 60px;
+  /* 白色半透明光带 + 两侧渐变，模拟关卡标题风格 */
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.35) 18%,
+    rgba(255, 255, 255, 0.42) 40%,
+    rgba(255, 255, 255, 0.42) 60%,
+    rgba(255, 255, 255, 0.35) 82%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  white-space: nowrap;
+  opacity: 0;
+  transition:
+    opacity 0.5s cubic-bezier(0.33, 1, 0.68, 1),
+    transform 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.achievement-toast-band-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.achievement-toast-label {
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-weight: bold;
+  font-size: clamp(16px, 1.8vw, 24px);
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+  letter-spacing: 2px;
+}
+
+/* ── Achievement Page ───────────────────────────────────────────── */
+.achiev-tooltip {
+  position: absolute;
+  background: rgba(14, 7, 22, 0.95);
+  border: 1.5px solid #7a3f8c;
+  border-radius: 8px;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.6),
+    0 0 15px rgba(120, 50, 160, 0.3);
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  padding: 10px 16px;
+  min-width: 160px;
+  max-width: 240px;
+  z-index: 10000;
+  pointer-events: none;
+  white-space: normal;
+}
+
+.achiev-tooltip-below {
+  transform: translateX(-50%);
+}
+
+.achiev-tooltip-above {
+  transform: translate(-50%, -100%);
+}
+
+.achiev-tooltip-title {
+  color: #e0c0ff;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(120, 60, 160, 0.4);
+  padding-bottom: 5px;
+}
+
+.achiev-tooltip-desc {
+  color: #b8a0d0;
+  font-size: 12px;
+  line-height: 1.5;
 }

@@ -19,8 +19,11 @@ export const Assets = {
   bgImageSettings: null,
   bgImageLevelChoice: null,
   bgImageOpeningScene: null,
-  bgImageCredits: null,
+  bgImageAchieves: null,
   bgImageLevel1: null,
+
+  // 成就图标
+  achieveImg1: null,
   bgImageLevel2: null,
   bgImageLevel3: null,
   bgImageLevel4: null,
@@ -83,8 +86,8 @@ export const Assets = {
         "开场动画背景",
       ),
       this._safeLoad(
-        p.loadImage("assets/images/bg/credits.png"),
-        "Credits页背景",
+        p.loadImage("assets/images/bg/achieve.png"),
+        "Achieves页背景",
       ),
       this._safeLoad(p.loadImage("assets/images/bg/level1.png"), "关卡1背景"),
       this._safeLoad(p.loadImage("assets/images/bg/level2.png"), "关卡2背景"),
@@ -200,6 +203,7 @@ export const Assets = {
         p.loadImage("assets/images/tiles/signboard2.png"),
         "木牌2贴图",
       ),
+      this._safeLoad(p.loadImage("assets/images/achieve/1.png"), "成就图标1"),
     ]);
 
     // 按顺序赋值
@@ -207,7 +211,7 @@ export const Assets = {
     this.bgImageSettings = results[1];
     this.bgImageLevelChoice = results[2];
     this.bgImageOpeningScene = results[3];
-    this.bgImageCredits = results[4];
+    this.bgImageAchieves = results[4];
     this.bgImageLevel1 = results[5];
     this.bgImageLevel2 = results[6];
     this.bgImageLevel3 = results[7];
@@ -262,5 +266,6 @@ export const Assets = {
     this.tileImage_wall = results[46];
     this.tileImage_signboard = results[47];
     this.tileImage_signboard2 = results[48];
+    this.achieveImg1 = results[49];
   },
 };

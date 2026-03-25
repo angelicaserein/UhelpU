@@ -9,7 +9,7 @@ const TRACKS = {
   gameOver: "assets/audio/bgm/gameover.mp3",
   gameWin: "assets/audio/bgm/gamewin.mp3",
   openingStory: "assets/audio/bgm/openingstory.mp3",
-  credits: "assets/audio/bgm/credits.mp3",
+  achieves: "assets/audio/bgm/achieves.mp3",
 };
 
 const SFX_TRACKS = {

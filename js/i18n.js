@@ -7,7 +7,7 @@ const _dict = {
     // ── Menu ─────────────────────────────────────────────────────────
     btn_play: "PLAY",
     btn_settings: "Settings",
-    btn_credits: "Credits",
+    btn_achieves: "Achieves",
     menu_subtitle: "----   you help you   ----",
 
     // ── Opening Story ────────────────────────────────────────────────
@@ -33,6 +33,9 @@ const _dict = {
     win_sfx: "SFX",
     win_language: "🌐 Language",
     win_keybind: "⌨ Controls",
+    win_credits: "📜 Credits",
+    win_credits_content:
+      "Game Design & Development:\nTeam 13\n\nSpecial Thanks:\nBristol University",
     pause_title: "⏸  Paused",
     pause_hint: "Game is paused",
     pause_resume: "▶  Resume",
@@ -96,6 +99,32 @@ const _dict = {
       "You have successfully learned to record your actions!\nPress the record key again to start~\nMax recording duration: 5 seconds",
     click_to_close: "Click anywhere to close",
 
+    // ── Achievement ─────────────────────────────────────────────────
+    achievement_unlocked: "New Achievement Unlocked!",
+    achiev_title: "Achievements",
+    achiev_locked: "???",
+    achiev_locked_desc: "Complete the required task to unlock this achievement",
+    achiev_first_steps_name: "First Steps",
+    achiev_first_steps_desc: "Complete Level 1 — Rule",
+    achiev_climber_name: "Climber",
+    achiev_climber_desc: "Complete Level 2 — Higher",
+    achiev_electrician_name: "Electrician",
+    achiev_electrician_desc: "Complete Level 3 — Electricity",
+    achiev_trap_master_name: "Trap Master",
+    achiev_trap_master_desc: "Complete Level 4 — Trap",
+    achiev_perfectionist_name: "Perfectionist",
+    achiev_perfectionist_desc: "Complete all levels",
+    achiev_perseverance_name: "Perseverance",
+    achiev_perseverance_desc: "Did you fall down 3 times? ",
+    achiev_student_name: "Student",
+    achiev_student_desc: "Read all signboards",
+    achiev_socialite_name: "Socialite",
+    achiev_socialite_desc: "Talk to all NPCs",
+    achiev_director_name: "Director",
+    achiev_director_desc: "Use recording for the first time",
+    achiev_phantom_master_name: "Phantom Master",
+    achiev_phantom_master_desc: "Complete a level using phantom replay",
+
     // ── NPC Dialogue ─────────────────────────────────────────────
     // NPC 1
     npc_guide_line1: "Wow, it's great to meet you here!",
@@ -127,7 +156,7 @@ const _dict = {
     // ── Menu ─────────────────────────────────────────────────────────
     btn_play: "开始",
     btn_settings: "设置",
-    btn_credits: "关于",
+    btn_achieves: "成就",
     menu_subtitle: "----   能自渡者，方得天助   ----",
 
     // ── Opening Story ────────────────────────────────────────────────
@@ -153,6 +182,9 @@ const _dict = {
     win_sfx: "音效",
     win_language: "🌐 语言",
     win_keybind: "⌨ 按键设置",
+    win_credits: "📜 制作人员",
+    win_credits_content:
+      "游戏设计与开发：\nTeam 13\n\n特别鸣谢：\n布里斯托尔大学",
     pause_title: "⏸  已暂停",
     pause_hint: "游戏已暂停",
     pause_resume: "▶  继续游戏",
@@ -213,6 +245,32 @@ const _dict = {
     first_record_prompt:
       "你学会录制自己的操作了！\n再按一次录制键开始吧\n最多只能录 5 秒哦",
     click_to_close: "点击任意处关闭",
+
+    // ── 成就 ──────────────────────────────────────────────────────────
+    achievement_unlocked: "新的成就已解锁！",
+    achiev_title: "成就",
+    achiev_locked: "???",
+    achiev_locked_desc: "完成指定任务以解锁此成就",
+    achiev_first_steps_name: "第一步",
+    achiev_first_steps_desc: "通关第一关 — 规则",
+    achiev_climber_name: "攀登者",
+    achiev_climber_desc: "通关第二关 — 登高",
+    achiev_electrician_name: "电工",
+    achiev_electrician_desc: "通关第三关 — 通电",
+    achiev_trap_master_name: "陷阱大师",
+    achiev_trap_master_desc: "通关第四关 — 陷阱",
+    achiev_perfectionist_name: "完美主义者",
+    achiev_perfectionist_desc: "通关所有关卡",
+    achiev_perseverance_name: "坚持不懈",
+    achiev_perseverance_desc: "你是不是掉下来了三次？",
+    achiev_student_name: "好学生",
+    achiev_student_desc: "阅读所有告示牌",
+    achiev_socialite_name: "社交达人",
+    achiev_socialite_desc: "与所有NPC对话",
+    achiev_director_name: "导演",
+    achiev_director_desc: "第一次使用录制功能",
+    achiev_phantom_master_name: "幻影大师",
+    achiev_phantom_master_desc: "使用幻影回放完成一个关卡",
 
     // ── NPC 对话 ───────────────────────────────────────────────
     // NPC 1

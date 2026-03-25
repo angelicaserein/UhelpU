@@ -2,10 +2,9 @@ import { SwitcherBase } from "./SwitcherBase.js";
 import { StaticPageMenu } from "../ui/pages/static-pages/StaticPageMenu.js";
 import { StaticPageResult } from "../ui/pages/static-pages/StaticPageResult.js";
 import { StaticPageSetting } from "../ui/pages/static-pages/StaticPageSetting.js";
-import { StaticPageCredits } from "../ui/pages/static-pages/StaticPageCredits.js";
+import { StaticPageAchieves } from "../ui/pages/static-pages/StaticPageAchieves.js";
 import { StaticPageOpeningStory } from "../ui/pages/static-pages/StaticPageOpeningStory.js";
 import { StaticPageLevelChoice } from "../ui/pages/static-pages/StaticPageLevelChoice.js";
-
 
 export class SwitcherStaticPage extends SwitcherBase {
   constructor(mainSwitcher, p) {
@@ -25,8 +24,8 @@ export class SwitcherStaticPage extends SwitcherBase {
     this.main.switchToStatic(page, p);
   }
 
-  showCredits(p = this.p) {
-    const page = new StaticPageCredits(this, p);
+  showAchieves(p = this.p) {
+    const page = new StaticPageAchieves(this, p);
     this.main.switchToStatic(page, p);
   }
 

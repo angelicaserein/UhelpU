@@ -9,6 +9,8 @@ import {
 import { BaseLevel } from "./BaseLevel.js";
 import { WireRenderer } from "./WireRenderer.js";
 import { WindowPrompt } from "../ui/windows/WindowPrompt.js";
+import { AchievementToast } from "../achievement system/AchievementToast.js";
+import { AchievementData } from "../achievement system/AchievementData.js";
 
 export class Level2 extends BaseLevel {
   constructor(p, eventBus) {
@@ -50,6 +52,7 @@ export class Level2 extends BaseLevel {
       width: 420,
       fontSize: 17,
     });
+    this._achievementToast = new AchievementToast(p);
 
     this.entities.add(
       new TextPrompt(450, 70, this, {
@@ -59,6 +62,8 @@ export class Level2 extends BaseLevel {
           this._jumpPromptCount++;
           if (this._jumpPromptCount === 3) {
             this._jumpHintWindow.open();
+            this._achievementToast.show("achievement_unlocked");
+            AchievementData.unlock("perseverance");
           }
         },
       }),
@@ -111,6 +116,10 @@ export class Level2 extends BaseLevel {
     if (this._jumpHintWindow) {
       this._jumpHintWindow.remove();
       this._jumpHintWindow = null;
+    }
+    if (this._achievementToast) {
+      this._achievementToast.remove();
+      this._achievementToast = null;
     }
     super.clearLevel();
   }

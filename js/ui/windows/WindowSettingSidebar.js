@@ -52,11 +52,15 @@ export class WindowSettingSidebar extends WindowSidebarBase {
       this._buildKeybindSection(keybindPanel);
     }
 
+    const creditsPanel = this._createSectionPanel("credits");
+    this._buildCreditsSection(creditsPanel);
+
     this._createSectionButton("sound", t("win_sound"));
     this._createSectionButton("language", t("win_language"));
     if (this._keyBindingManager) {
       this._createSectionButton("keybind", t("win_keybind"));
     }
+    this._createSectionButton("credits", t("win_credits"));
 
     this._setActiveSection("sound");
   }
@@ -169,6 +173,16 @@ export class WindowSettingSidebar extends WindowSidebarBase {
     }
   }
 
+  _buildCreditsSection(parent) {
+    this._creditsHeader = this.p.createDiv(t("win_credits"));
+    this._creditsHeader.addClass("window-section-title");
+    this._creditsHeader.parent(parent);
+
+    this._creditsContent = this.p.createDiv(t("win_credits_content"));
+    this._creditsContent.addClass("window-credits-text");
+    this._creditsContent.parent(parent);
+  }
+
   _getIntentOrder() {
     return ["jump", "moveLeft", "moveRight", "interaction", "record", "replay"];
   }
@@ -188,6 +202,11 @@ export class WindowSettingSidebar extends WindowSidebarBase {
       this._sectionButtons.language.html(t("win_language"));
     if (this._sectionButtons.keybind)
       this._sectionButtons.keybind.html(t("win_keybind"));
+    if (this._sectionButtons.credits)
+      this._sectionButtons.credits.html(t("win_credits"));
+    if (this._creditsHeader) this._creditsHeader.html(t("win_credits"));
+    if (this._creditsContent)
+      this._creditsContent.html(t("win_credits_content"));
 
     for (const [intent, labelEl] of Object.entries(this._keyBindLabels)) {
       labelEl.html(this._getIntentLabel(intent));

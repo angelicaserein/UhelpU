@@ -28,7 +28,7 @@ export class Signboard extends GameEntity {
     h = Signboard.DEFAULT_H,
     getPlayer = null,
     eventBus = null,
-    { imageKey = "tileImage_signboard" } = {},
+    { imageKey = "tileImage_signboard", onInteract = null } = {},
   ) {
     super(x, y);
     this.type = "signboard";
@@ -37,6 +37,7 @@ export class Signboard extends GameEntity {
     this._getPlayer = getPlayer;
     this.eventBus = eventBus;
     this._imageKey = imageKey;
+    this._onInteract = onInteract;
     this.zIndex = -1; // 木牌在角色下层，不挡住它们
 
     this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
@@ -113,6 +114,9 @@ export class Signboard extends GameEntity {
     if (this.isPlayerOverlapping()) {
       if (this.eventBus) {
         this.eventBus.publish(EventTypes.SIGNBOARD_INTERACTED);
+      }
+      if (this._onInteract) {
+        this._onInteract();
       }
     }
   }

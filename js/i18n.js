@@ -70,6 +70,7 @@ const _dict = {
       "I'm recording my key inputs,not my position.And pressing jump in mid-air does nothing...",
     level6_checkpoint_prompt:
       "Wait... isn't this the same as the last level?\nWhat's the point of this checkpoint?",
+    jump_sign_prompt: 'This scene is a tribute to "Jump Off the Bridge".',
     keybind_reset_title: "Reset to default",
     keybind_conflict: "The key {KEY} is already bound to {ACTION}",
     keybind_jump: "Jump",
@@ -116,6 +117,7 @@ const _dict = {
     level5_info_left: "level 5\nJail",
     level5_info_right: "Difficulty\n💜💜💜💜",
     level6_title: "Checkpoint",
+    level6_room2_title: "“Jump Off The Bridge”",
     level6_info_left: "level 6\nCheckpoint",
     level6_info_right: "Difficulty\n💜💜💜",
     level7_title: "Level 7",
@@ -264,6 +266,7 @@ const _dict = {
     level5_recording_prompt:
       "我录制的是我的按键操作，而不是我的位置。而且我在空中按跳是没用的……",
     level6_checkpoint_prompt: "这好像和上一关一样？\n这个存档点放这干啥",
+    jump_sign_prompt: "本场景致敬《Jump Off the Bridge》",
     keybind_reset_title: "重置为默认",
     keybind_conflict: "按键 {KEY} 已绑定到 {ACTION}",
     keybind_jump: "跳跃",
@@ -309,6 +312,7 @@ const _dict = {
     level5_info_left: "第五关\n牢笼",
     level5_info_right: "难度\n🩷🩷🩷🩷",
     level6_title: "第六关",
+    level6_room2_title: "《Jump Off the Bridge》",
     level6_info_left: "第六关",
     level6_info_right: "难度\n🩷",
     level7_title: "第七关",

@@ -17,6 +17,9 @@ import { BaseLevel } from "./BaseLevel.js";
 import { Assets } from "../AssetsManager.js";
 import { Room } from "./Room.js";
 import { ButtonPlatformLinkSystem } from "../mechanism-system/ButtonPlatformLinkSystem.js";
+import { t } from "../i18n.js";
+import { Signboard } from "../game-entity-model/interactables/Signboard.js";
+import { WindowPrompt } from "../ui/windows/WindowPrompt.js";
 
 export class Level6 extends BaseLevel {
   constructor(p, eventBus) {
@@ -25,6 +28,19 @@ export class Level6 extends BaseLevel {
     this._replayer = null;
     this._transition = null;
     this._transitionDurationMs = 260;
+    this._roomTitleOverlay = {
+      active: false,
+      startedAtMs: 0,
+      totalDurationMs: 2500,
+      fadeStartMs: 1300,
+      titleKey: "",
+    };
+
+    this._jumpSignWindow = new WindowPrompt(p, "jump_sign_prompt", {
+      imageUrl: "assets/images/tiles/Jump2.png",
+      width: 580,
+      padding: 24,
+    });
 
     this.rooms = this._buildRooms(p);
     this._applyWorldOffsetsToRooms(p);
@@ -151,6 +167,8 @@ export class Level6 extends BaseLevel {
         new Platform(0, 80, 200, 460),
         // 桥（从悬崖右边延伸，与悬崖同高）
         new Platform(200, 520, 200, 20),
+        // Jump signboard 放在桥上
+        new Signboard(220, 540, 65, 65, () => this._player, this.eventBus, { imageKey: "tileImage_Jump", onInteract: () => this._jumpSignWindow.open() }),
         ...portalEntities,
       ],
       { left: { targetRoomIndex: 0 } },
@@ -208,6 +226,13 @@ export class Level6 extends BaseLevel {
       direction,
       elapsedMs: 0,
     };
+    if (roomIndex === 1) {
+      this._roomTitleOverlay.active = true;
+      this._roomTitleOverlay.startedAtMs = this.p?.millis
+        ? this.p.millis()
+        : performance.now();
+      this._roomTitleOverlay.titleKey = "level6_room2_title";
+    }
   }
 
   _easeOutCubic(t) {
@@ -241,6 +266,10 @@ export class Level6 extends BaseLevel {
   clearLevel(p = this.p, eventBus = this.eventBus) {
     this.recordSystem.clearAllListenersAndTimers();
     this._player.clearListeners();
+    if (this._jumpSignWindow) {
+      this._jumpSignWindow.remove();
+      this._jumpSignWindow = null;
+    }
     super.clearLevel(p, eventBus);
   }
 
@@ -316,6 +345,56 @@ export class Level6 extends BaseLevel {
     this._checkRoomTransition(p);
   }
 
+  _drawRoomTitleOverlay(p) {
+    const overlay = this._roomTitleOverlay;
+    if (!overlay.active || !overlay.titleKey) return;
+
+    const nowMs = p?.millis ? p.millis() : performance.now();
+    const elapsed = nowMs - overlay.startedAtMs;
+    if (elapsed >= overlay.totalDurationMs) {
+      overlay.active = false;
+      return;
+    }
+
+    let alphaRate = 1;
+    if (elapsed > overlay.fadeStartMs) {
+      const fadeDuration = Math.max(1, overlay.totalDurationMs - overlay.fadeStartMs);
+      alphaRate = 1 - (elapsed - overlay.fadeStartMs) / fadeDuration;
+    }
+    alphaRate = Math.max(0, Math.min(1, alphaRate));
+
+    const centerY = p.height * 0.28;
+    const bandH = Math.max(46, p.height * 0.072);
+    const coreBandW = p.width * 0.54;
+    const sideFadeOuterW = p.width * 0.3;
+    const sideFadeInnerExtendW = p.width * 0.08;
+    const sideFadeW = sideFadeOuterW + sideFadeInnerExtendW;
+    const bandY = centerY - bandH * 0.5;
+    const coreBandX = (p.width - coreBandW) * 0.5;
+    const leftOuterX = coreBandX - sideFadeOuterW;
+    const rightOuterX = coreBandX + coreBandW + sideFadeOuterW - 1;
+
+    p.push();
+    p.resetMatrix();
+    p.noStroke();
+
+    for (let i = 0; i < sideFadeW; i++) {
+      const t_ = i / Math.max(1, sideFadeW - 1);
+      const a = (1 - t_) * 108 * alphaRate;
+      p.fill(255, 255, 255, a);
+      p.rect(leftOuterX + i, bandY, 1, bandH, 0);
+      p.rect(rightOuterX - i, bandY, 1, bandH, 0);
+    }
+
+    p.fill(255, 255, 255, 248 * alphaRate);
+    p.textAlign(p.CENTER, p.CENTER);
+    if (Assets.customFont) p.textFont(Assets.customFont);
+    p.textStyle(p.BOLD);
+    p.textSize(Math.max(26, Math.floor(p.width * 0.03)));
+    p.text(t(overlay.titleKey), p.width * 0.5, centerY);
+    p.pop();
+  }
+
   _drawSea(p) {
     const seaLeft = p.width + 200;   // room1 起始 + 悬崖宽度
     const seaRight = p.width * 2 - 20; // room1 右墙
@@ -383,6 +462,7 @@ export class Level6 extends BaseLevel {
     this._platformLinkSystem.draw(p);
     this._drawSea(p);
     p.pop();
+    this._drawRoomTitleOverlay(p);
     this.recordSystem.draw && this.recordSystem.draw(p);
   }
 }

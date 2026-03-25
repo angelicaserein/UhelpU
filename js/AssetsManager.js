@@ -62,6 +62,7 @@ export const Assets = {
   tileImage_wall: null,
   tileImage_signboard: null,
   tileImage_signboard2: null,
+  tileImage_Jump: null,
 
   // 安全加载：失败时返回 null 而不是抛异常
   async _safeLoad(promise, name) {
@@ -225,6 +226,7 @@ export const Assets = {
       this._safeLoad(p.loadImage("assets/images/achieve/8.png"), "成就图标8"),
       this._safeLoad(p.loadImage("assets/images/achieve/9.png"), "成就图标9"),
       this._safeLoad(p.loadImage("assets/images/achieve/10.png"), "成就图标10"),
+      this._safeLoad(p.loadImage("assets/images/tiles/Jump.png"), "Jump贴图"),
     ]);
 
     // 按顺序赋值
@@ -293,6 +295,7 @@ export const Assets = {
     this.tileImage_wall = results[52];
     this.tileImage_signboard = results[53];
     this.tileImage_signboard2 = results[54];
+    this.tileImage_Jump = results[65];
     this.achieveImgs = [
       results[55],
       results[56],

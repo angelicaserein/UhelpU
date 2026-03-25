@@ -25,6 +25,7 @@ export class WindowPrompt {
     this.padding = options.padding ?? 40;
     this.fontSize = options.fontSize ?? 18;
     this.onClose = options.onClose ?? null;
+    this.imageUrl = options.imageUrl ?? null;
 
     // 创建DOM
     this._buildDOM();
@@ -52,6 +53,16 @@ export class WindowPrompt {
     this.container.style("width", this.width + "px");
     this.container.style("padding", this.padding + "px");
     this.container.style("background-color", this.backgroundColor);
+
+    // 图片（可选）
+    if (this.imageUrl) {
+      this._imgEl = p.createImg(this.imageUrl, "");
+      this._imgEl.style("width", "100%");
+      this._imgEl.style("height", "auto");
+      this._imgEl.style("display", "block");
+      this._imgEl.style("margin-bottom", "16px");
+      this._imgEl.parent(this.container);
+    }
 
     // 内容文本
     this._contentEl = p.createDiv(this._getContent());

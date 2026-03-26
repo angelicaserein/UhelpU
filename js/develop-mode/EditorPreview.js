@@ -13,6 +13,11 @@ import {
   PLATFORM_DEFAULTS,
   SPIKE_DEFAULTS,
   WALL_DEFAULTS,
+  WIRE_PORTAL_DEFAULTS,
+  BTN_SPIKE_DEFAULTS,
+  NPC_SIZE,
+  SIGNBOARD_SIZE,
+  CHECKPOINT_SIZE,
 } from "./EditorConfig.js";
 
 export class EditorPreview {
@@ -47,7 +52,7 @@ export class EditorPreview {
     groundH,
     insideToolbar,
   ) {
-    if (insideToolbar) {
+    if (insideToolbar || tool === EntityTool.SPAWN) {
       this.visible = false;
       return;
     }
@@ -68,6 +73,21 @@ export class EditorPreview {
     } else if (tool === EntityTool.WALL) {
       this.previewW = WALL_DEFAULTS.width;
       this.previewH = WALL_DEFAULTS.height;
+    } else if (tool === EntityTool.WIRE_PORTAL) {
+      this.previewW = WIRE_PORTAL_DEFAULTS.buttonWidth;
+      this.previewH = WIRE_PORTAL_DEFAULTS.buttonHeight;
+    } else if (tool === EntityTool.BTN_SPIKE) {
+      this.previewW = BTN_SPIKE_DEFAULTS.buttonWidth;
+      this.previewH = BTN_SPIKE_DEFAULTS.buttonHeight;
+    } else if (tool === EntityTool.NPC) {
+      this.previewW = NPC_SIZE.width;
+      this.previewH = NPC_SIZE.height;
+    } else if (tool === EntityTool.SIGNBOARD) {
+      this.previewW = SIGNBOARD_SIZE.width;
+      this.previewH = SIGNBOARD_SIZE.height;
+    } else if (tool === EntityTool.CHECKPOINT) {
+      this.previewW = CHECKPOINT_SIZE.width;
+      this.previewH = CHECKPOINT_SIZE.height;
     } else {
       this.previewW = PORTAL_SIZE.width;
       this.previewH = PORTAL_SIZE.height;
@@ -142,6 +162,121 @@ export class EditorPreview {
       );
       p.noStroke();
       p.fill(140, 140, 160, PREVIEW_ALPHA * 0.4);
+      p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
+    } else if (tool === EntityTool.WIRE_PORTAL) {
+      // 按钮预览（紫色）
+      p.stroke(180, 100, 240, PREVIEW_ALPHA);
+      this._dashedRect(
+        p,
+        this.previewX,
+        this.previewY,
+        this.previewW,
+        this.previewH,
+        8,
+      );
+      p.noStroke();
+      p.fill(180, 100, 240, PREVIEW_ALPHA * 0.4);
+      p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
+
+      // 传送门预览（偏移位置）
+      const portalX = this.previewX + WIRE_PORTAL_DEFAULTS.offsetX;
+      const portalY = this.previewY;
+      const portalW = WIRE_PORTAL_DEFAULTS.portalWidth;
+      const portalH = WIRE_PORTAL_DEFAULTS.portalHeight;
+      p.stroke(180, 100, 240, PREVIEW_ALPHA);
+      this._dashedRect(p, portalX, portalY, portalW, portalH, 8);
+      p.noStroke();
+      p.fill(180, 100, 240, PREVIEW_ALPHA * 0.3);
+      p.rect(portalX, portalY, portalW, portalH);
+
+      // 连接线
+      p.stroke(180, 100, 240, PREVIEW_ALPHA * 0.6);
+      p.strokeWeight(1);
+      this._dashedLine(
+        p,
+        this.previewX + this.previewW / 2,
+        this.previewY + this.previewH,
+        portalX + portalW / 2,
+        portalY + portalH,
+        6,
+      );
+      p.strokeWeight(2);
+    } else if (tool === EntityTool.BTN_SPIKE) {
+      // 按钮预览（橙色）
+      p.stroke(240, 160, 30, PREVIEW_ALPHA);
+      this._dashedRect(
+        p,
+        this.previewX,
+        this.previewY,
+        this.previewW,
+        this.previewH,
+        8,
+      );
+      p.noStroke();
+      p.fill(240, 160, 30, PREVIEW_ALPHA * 0.4);
+      p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
+
+      // 地刺预览（偏移位置）
+      const spikeX = this.previewX + BTN_SPIKE_DEFAULTS.offsetX;
+      const spikeY = this.previewY;
+      const spikeW = BTN_SPIKE_DEFAULTS.spikeWidth;
+      const spikeH = BTN_SPIKE_DEFAULTS.spikeHeight;
+      p.stroke(240, 160, 30, PREVIEW_ALPHA);
+      this._dashedRect(p, spikeX, spikeY, spikeW, spikeH, 8);
+      p.noStroke();
+      p.fill(240, 160, 30, PREVIEW_ALPHA * 0.3);
+      p.rect(spikeX, spikeY, spikeW, spikeH);
+
+      // 连接线
+      p.stroke(240, 160, 30, PREVIEW_ALPHA * 0.6);
+      p.strokeWeight(1);
+      this._dashedLine(
+        p,
+        this.previewX + this.previewW / 2,
+        this.previewY + this.previewH,
+        spikeX + spikeW / 2,
+        spikeY + spikeH,
+        6,
+      );
+      p.strokeWeight(2);
+    } else if (tool === EntityTool.NPC) {
+      p.stroke(60, 200, 220, PREVIEW_ALPHA);
+      this._dashedRect(
+        p,
+        this.previewX,
+        this.previewY,
+        this.previewW,
+        this.previewH,
+        8,
+      );
+      p.noStroke();
+      p.fill(60, 200, 220, PREVIEW_ALPHA * 0.4);
+      p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
+    } else if (tool === EntityTool.SIGNBOARD) {
+      p.stroke(200, 160, 80, PREVIEW_ALPHA);
+      this._dashedRect(
+        p,
+        this.previewX,
+        this.previewY,
+        this.previewW,
+        this.previewH,
+        8,
+      );
+      p.noStroke();
+      p.fill(200, 160, 80, PREVIEW_ALPHA * 0.4);
+      p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
+    } else if (tool === EntityTool.CHECKPOINT) {
+      p.stroke(200, 80, 180, PREVIEW_ALPHA);
+      this._dashedRect(
+        p,
+        this.previewX,
+        this.previewY,
+        this.previewW,
+        this.previewH,
+        8,
+      );
+      p.noStroke();
+      p.fill(200, 80, 180, PREVIEW_ALPHA * 0.4);
       p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
     } else {
       p.stroke(100, 160, 255, PREVIEW_ALPHA);

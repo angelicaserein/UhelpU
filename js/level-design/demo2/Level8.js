@@ -4,6 +4,9 @@
   Ground,
   Wall,
   Portal,
+  Button,
+  Spike,
+  Platform,
 } from "../../game-entity-model/index.js";
 import { CollisionSystem } from "../../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../../physics-system/PhysicsSystem.js";
@@ -11,6 +14,8 @@ import { RecordSystem } from "../../record-system/RecordSystem.js";
 import { BaseLevel } from "../BaseLevel.js";
 import { Assets } from "../../AssetsManager.js";
 import { Room } from "../Room.js";
+import { ButtonSpikeLinkSystem } from "../../mechanism-system/demo2/ButtonSpikeLinkSystem.js";
+import { ButtonPlatformLinkSystem } from "../../mechanism-system/demo2/ButtonPlatformLinkSystem.js";
 
 export class Level8 extends BaseLevel {
   constructor(p, eventBus) {
@@ -38,15 +43,85 @@ export class Level8 extends BaseLevel {
 
     this.physicsSystem = new PhysicsSystem(this.entities);
     this.collisionSystem = new CollisionSystem(this.entities, eventBus);
+
+    // ── 按钮-地刺联动系统（2 组） ──
+    this._buttonSpikeLinkSystem = new ButtonSpikeLinkSystem([
+      {
+        button: this._spikeBtn0,
+        spikes: [
+          { spike: this._spike0a, retractDistance: 40 },
+          { spike: this._spike0b, retractDistance: 40 },
+        ],
+      },
+      {
+        button: this._spikeBtn1,
+        spikes: [
+          { spike: this._spike1a, retractDistance: 40 },
+          { spike: this._spike1b, retractDistance: 40 },
+        ],
+      },
+    ]);
+
+    // ── 按钮-消失平台联动系统（2 组） ──
+    this._buttonPlatformLinkSystem = new ButtonPlatformLinkSystem(
+      [
+        {
+          button: this._platBtn0,
+          platforms: [
+            { platform: this._platform0a, mode: "disappear" },
+            { platform: this._platform0b, mode: "disappear" },
+          ],
+        },
+        {
+          button: this._platBtn1,
+          platforms: [
+            { platform: this._platform1a, mode: "disappear" },
+            { platform: this._platform1b, mode: "disappear" },
+          ],
+        },
+      ],
+      this.collisionSystem,
+    );
   }
 
   _buildRooms(p) {
     const wallThickness = 20;
 
+    // ── Room 0 实体 ──────────────────────────────────
+    // 地刺系统 1：按钮在左侧地面，地刺挡在中部路径上
+    this._spikeBtn0 = new Button(80, 80, 34, 16);
+    this._spike0a = new Spike(300, 80, 30, 30);
+    this._spike0b = new Spike(340, 80, 30, 30);
+
+    // 消失平台系统 1：按钮在地面右侧，平台悬浮在中上方
+    this._platBtn0 = new Button(550, 80, 34, 16);
+    this._platform0a = new Platform(200, 220, 100, 20);
+    this._platform0b = new Platform(360, 300, 100, 20);
+
     const room0 = new Room(
-      [new Wall(0, 0, wallThickness, p.height), new Ground(0, 0, p.width, 80)],
+      [
+        new Wall(0, 0, wallThickness, p.height),
+        new Ground(0, 0, p.width, 80),
+        this._spikeBtn0,
+        this._spike0a,
+        this._spike0b,
+        this._platBtn0,
+        this._platform0a,
+        this._platform0b,
+      ],
       { right: { targetRoomIndex: 1 } },
     );
+
+    // ── Room 1 实体 ──────────────────────────────────
+    // 地刺系统 2：按钮在左侧地面，地刺挡在中部路径上
+    this._spikeBtn1 = new Button(120, 80, 34, 16);
+    this._spike1a = new Spike(380, 80, 30, 30);
+    this._spike1b = new Spike(420, 80, 30, 30);
+
+    // 消失平台系统 2：按钮在地面右侧，平台悬浮
+    this._platBtn1 = new Button(600, 80, 34, 16);
+    this._platform1a = new Platform(250, 200, 120, 20);
+    this._platform1b = new Platform(450, 280, 100, 20);
 
     const portal = new Portal(p.width - 100, 80, 50, 50);
     portal.openPortal();
@@ -55,6 +130,12 @@ export class Level8 extends BaseLevel {
       [
         new Wall(p.width - wallThickness, 0, wallThickness, p.height),
         new Ground(0, 0, p.width, 80),
+        this._spikeBtn1,
+        this._spike1a,
+        this._spike1b,
+        this._platBtn1,
+        this._platform1a,
+        this._platform1b,
         portal,
       ],
       { left: { targetRoomIndex: 0 } },
@@ -209,6 +290,8 @@ export class Level8 extends BaseLevel {
       if (entity.update && typeof entity.update === "function")
         entity.update(this.p);
     }
+    this._buttonSpikeLinkSystem.update();
+    this._buttonPlatformLinkSystem.update();
   }
 
   updateCollision(p = this.p, eventBus = this.eventBus) {
@@ -230,6 +313,7 @@ export class Level8 extends BaseLevel {
     for (const entity of this.entities) {
       if (entity.type === "ground") entity.draw(p);
     }
+    this._buttonPlatformLinkSystem.draw(p);
     for (const entity of this.entities) {
       if (entity.type !== "spike" && entity.type !== "ground") entity.draw(p);
     }

@@ -14,6 +14,11 @@ import {
   PLATFORM_DEFAULTS,
   SPIKE_DEFAULTS,
   WALL_DEFAULTS,
+  WIRE_PORTAL_DEFAULTS,
+  BTN_SPIKE_DEFAULTS,
+  NPC_SIZE,
+  SIGNBOARD_SIZE,
+  CHECKPOINT_SIZE,
   DELETE_BTN_SIZE,
 } from "./EditorConfig.js";
 import { Ground } from "../game-entity-model/terrain/Ground.js";
@@ -21,6 +26,12 @@ import { Portal } from "../game-entity-model/interactables/Portal.js";
 import { Platform } from "../game-entity-model/terrain/Platform.js";
 import { Spike } from "../game-entity-model/interactables/Spike.js";
 import { Wall } from "../game-entity-model/terrain/Wall.js";
+import { Button } from "../game-entity-model/interactables/Button.js";
+import { BtnWirePortalSystem } from "../mechanism-system/demo2/BtnWirePortalSystem.js";
+import { ButtonSpikeLinkSystem } from "../mechanism-system/demo2/ButtonSpikeLinkSystem.js";
+import { NPC } from "../game-entity-model/interactables/NPC.js";
+import { Signboard } from "../game-entity-model/interactables/Signboard.js";
+import { Checkpoint } from "../game-entity-model/interactables/Checkpoint.js";
 
 /**
  * @typedef {Object} PlacedRecord
@@ -43,6 +54,17 @@ export class EditorEntityManager {
     this._resizeHandle = null;
     /** 拖拽时的锚点（对角固定点） */
     this._anchor = null;
+
+    /** WirePortal / BtnSpike 子实体拖拽移动状态 */
+    this._movingEntity = null; // 正在移动的子实体引用 (button or portal or spike)
+    this._movingRecord = null; // 所属的记录
+    this._moveOffsetX = 0;
+    this._moveOffsetY = 0;
+
+    /** BtnSpike 地刺调整大小状态 */
+    this._bsResizeRecord = null;
+    this._bsResizeHandle = null;
+    this._bsResizeAnchor = null;
   }
 
   /**
@@ -58,6 +80,75 @@ export class EditorEntityManager {
       gameEntity = new Spike(x, y, w, h, { color: [220, 50, 50] });
     } else if (tool === EntityTool.WALL) {
       gameEntity = new Wall(x, y, w, h);
+    } else if (tool === EntityTool.WIRE_PORTAL) {
+      const btn = new Button(
+        x,
+        y,
+        WIRE_PORTAL_DEFAULTS.buttonWidth,
+        WIRE_PORTAL_DEFAULTS.buttonHeight,
+      );
+      const portal = new Portal(
+        x + WIRE_PORTAL_DEFAULTS.offsetX,
+        y,
+        WIRE_PORTAL_DEFAULTS.portalWidth,
+        WIRE_PORTAL_DEFAULTS.portalHeight,
+      );
+      const system = new BtnWirePortalSystem({ button: btn, portal: portal });
+      this._level.entities.add(btn);
+      this._level.entities.add(portal);
+      this._syncSystems();
+      const record = {
+        tool,
+        gameEntity: btn,
+        portalEntity: portal,
+        wireSystem: system,
+      };
+      this._records.push(record);
+      return record;
+    } else if (tool === EntityTool.BTN_SPIKE) {
+      const btn = new Button(
+        x,
+        y,
+        BTN_SPIKE_DEFAULTS.buttonWidth,
+        BTN_SPIKE_DEFAULTS.buttonHeight,
+      );
+      const spike = new Spike(
+        x + BTN_SPIKE_DEFAULTS.offsetX,
+        y,
+        BTN_SPIKE_DEFAULTS.spikeWidth,
+        BTN_SPIKE_DEFAULTS.spikeHeight,
+        { color: [220, 50, 50] },
+      );
+      const system = new ButtonSpikeLinkSystem([
+        { button: btn, spikes: [spike] },
+      ]);
+      this._level.entities.add(btn);
+      this._level.entities.add(spike);
+      this._syncSystems();
+      const record = {
+        tool,
+        gameEntity: btn,
+        spikeEntity: spike,
+        spikeLinkSystem: system,
+      };
+      this._records.push(record);
+      return record;
+    } else if (tool === EntityTool.NPC) {
+      gameEntity = new NPC(x, y, NPC_SIZE.width, NPC_SIZE.height);
+    } else if (tool === EntityTool.SIGNBOARD) {
+      gameEntity = new Signboard(
+        x,
+        y,
+        SIGNBOARD_SIZE.width,
+        SIGNBOARD_SIZE.height,
+      );
+    } else if (tool === EntityTool.CHECKPOINT) {
+      gameEntity = new Checkpoint(
+        x,
+        y,
+        CHECKPOINT_SIZE.width,
+        CHECKPOINT_SIZE.height,
+      );
     } else {
       gameEntity = new Portal(x, y, w, h);
       gameEntity.openPortal();
@@ -77,6 +168,8 @@ export class EditorEntityManager {
     const record = this._records.pop();
     if (!record) return null;
     this._level.entities.delete(record.gameEntity);
+    if (record.portalEntity) this._level.entities.delete(record.portalEntity);
+    if (record.spikeEntity) this._level.entities.delete(record.spikeEntity);
     this._syncSystems();
     return record;
   }
@@ -85,6 +178,8 @@ export class EditorEntityManager {
   clear() {
     for (const record of this._records) {
       this._level.entities.delete(record.gameEntity);
+      if (record.portalEntity) this._level.entities.delete(record.portalEntity);
+      if (record.spikeEntity) this._level.entities.delete(record.spikeEntity);
     }
     this._records.length = 0;
     this._syncSystems();
@@ -95,6 +190,8 @@ export class EditorEntityManager {
     const idx = this._records.indexOf(record);
     if (idx === -1) return false;
     this._level.entities.delete(record.gameEntity);
+    if (record.portalEntity) this._level.entities.delete(record.portalEntity);
+    if (record.spikeEntity) this._level.entities.delete(record.spikeEntity);
     this._records.splice(idx, 1);
     if (this._selected === record) this.deselect();
     this._syncSystems();
@@ -131,6 +228,38 @@ export class EditorEntityManager {
       ) {
         return rec;
       }
+      // WirePortal: 也检查传送门侧的删除按钮
+      if (rec.portalEntity) {
+        const ptl = rec.portalEntity;
+        const pw = ptl.collider ? ptl.collider.w : 50;
+        const ph = ptl.collider ? ptl.collider.h : 50;
+        const pbx = ptl.x + pw - bs / 2;
+        const pby = ptl.y + ph + 2;
+        if (
+          worldX >= pbx &&
+          worldX <= pbx + bs &&
+          worldY >= pby &&
+          worldY <= pby + bs
+        ) {
+          return rec;
+        }
+      }
+      // BtnSpike: 也检查地刺侧的删除按钮
+      if (rec.spikeEntity) {
+        const spk = rec.spikeEntity;
+        const sw = spk.collider ? spk.collider.w : 100;
+        const sh = spk.collider ? spk.collider.h : 20;
+        const sbx = spk.x + sw - bs / 2;
+        const sby = spk.y + sh + 2;
+        if (
+          worldX >= sbx &&
+          worldX <= sbx + bs &&
+          worldY >= sby &&
+          worldY <= sby + bs
+        ) {
+          return rec;
+        }
+      }
     }
     return null;
   }
@@ -139,7 +268,15 @@ export class EditorEntityManager {
   findAt(worldX, worldY) {
     for (let i = this._records.length - 1; i >= 0; i--) {
       const rec = this._records[i];
-      if (rec.tool === EntityTool.PORTAL) continue;
+      if (
+        rec.tool === EntityTool.PORTAL ||
+        rec.tool === EntityTool.WIRE_PORTAL ||
+        rec.tool === EntityTool.BTN_SPIKE ||
+        rec.tool === EntityTool.NPC ||
+        rec.tool === EntityTool.SIGNBOARD ||
+        rec.tool === EntityTool.CHECKPOINT
+      )
+        continue;
       const e = rec.gameEntity;
       const w = e.collider ? e.collider.w : 0;
       const h = e.collider ? e.collider.h : 0;
@@ -175,6 +312,126 @@ export class EditorEntityManager {
   /** 是否正在拖拽调整大小 */
   isResizing() {
     return this._resizeHandle !== null;
+  }
+
+  /** 是否正在移动 WirePortal / BtnSpike 子实体 */
+  isMoving() {
+    return this._movingEntity !== null;
+  }
+
+  /**
+   * 查找世界坐标处的 WirePortal 子实体
+   * @returns {{ record, entity }|null}
+   */
+  findWirePortalSubEntity(worldX, worldY) {
+    for (let i = this._records.length - 1; i >= 0; i--) {
+      const rec = this._records[i];
+      if (rec.tool !== EntityTool.WIRE_PORTAL) continue;
+      // 检查 portal
+      const ptl = rec.portalEntity;
+      const pw = ptl.collider ? ptl.collider.w : 50;
+      const ph = ptl.collider ? ptl.collider.h : 50;
+      if (
+        worldX >= ptl.x &&
+        worldX <= ptl.x + pw &&
+        worldY >= ptl.y &&
+        worldY <= ptl.y + ph
+      ) {
+        return { record: rec, entity: ptl };
+      }
+      // 检查 button
+      const btn = rec.gameEntity;
+      const bw = btn.collider ? btn.collider.w : 34;
+      const bh = btn.collider ? btn.collider.h : 16;
+      if (
+        worldX >= btn.x &&
+        worldX <= btn.x + bw &&
+        worldY >= btn.y &&
+        worldY <= btn.y + bh
+      ) {
+        return { record: rec, entity: btn };
+      }
+    }
+    return null;
+  }
+
+  /**
+   * 查找世界坐标处的 BtnSpike 子实体
+   * @returns {{ record, entity, isSpike: boolean }|null}
+   */
+  findBtnSpikeSubEntity(worldX, worldY) {
+    for (let i = this._records.length - 1; i >= 0; i--) {
+      const rec = this._records[i];
+      if (rec.tool !== EntityTool.BTN_SPIKE) continue;
+      // 检查 spike
+      const spk = rec.spikeEntity;
+      const sw = spk.collider ? spk.collider.w : 100;
+      const sh = spk.collider ? spk.collider.h : 20;
+      if (
+        worldX >= spk.x &&
+        worldX <= spk.x + sw &&
+        worldY >= spk.y &&
+        worldY <= spk.y + sh
+      ) {
+        return { record: rec, entity: spk, isSpike: true };
+      }
+      // 检查 button
+      const btn = rec.gameEntity;
+      const bw = btn.collider ? btn.collider.w : 34;
+      const bh = btn.collider ? btn.collider.h : 16;
+      if (
+        worldX >= btn.x &&
+        worldX <= btn.x + bw &&
+        worldY >= btn.y &&
+        worldY <= btn.y + bh
+      ) {
+        return { record: rec, entity: btn, isSpike: false };
+      }
+    }
+    return null;
+  }
+
+  /** 开始拖拽 WirePortal 子实体 */
+  startMove(record, entity, worldX, worldY) {
+    this._movingRecord = record;
+    this._movingEntity = entity;
+    this._moveOffsetX = worldX - entity.x;
+    this._moveOffsetY = worldY - entity.y;
+  }
+
+  /** 拖拽中更新 WirePortal 子实体位置 */
+  updateMove(worldX, worldY) {
+    if (!this._movingEntity) return;
+    this._movingEntity.x = this._snap(worldX - this._moveOffsetX);
+    this._movingEntity.y = this._snap(worldY - this._moveOffsetY);
+    this._syncSystems();
+  }
+
+  /** 结束拖拽并重建电线路径 */
+  endMove() {
+    if (this._movingRecord && this._movingRecord.tool === EntityTool.WIRE_PORTAL) {
+      this._rebuildWirePath(this._movingRecord);
+    }
+    this._movingEntity = null;
+    this._movingRecord = null;
+    this._moveOffsetX = 0;
+    this._moveOffsetY = 0;
+  }
+
+  /** 重建 WirePortal 记录的电线路径 */
+  _rebuildWirePath(record) {
+    const sys = record.wireSystem;
+    sys._wirePath = sys._buildAutoWirePath(50);
+    sys._totalLen = 0;
+    sys._segLens = [];
+    const wp = sys._wirePath;
+    for (let i = 1; i < wp.length; i++) {
+      const dx = wp[i].x - wp[i - 1].x;
+      const dy = wp[i].y - wp[i - 1].y;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      sys._segLens.push(len);
+      sys._totalLen += len;
+    }
   }
 
   /**
@@ -272,6 +529,95 @@ export class EditorEntityManager {
     this._anchor = null;
   }
 
+  // ══════════════════════════════════════════════════════════════
+  // BtnSpike 地刺调整大小
+  // ══════════════════════════════════════════════════════════════
+
+  /** 是否正在调整 BtnSpike 地刺大小 */
+  isBtnSpikeResizing() {
+    return this._bsResizeHandle !== null;
+  }
+
+  /**
+   * 检测世界坐标是否落在某个 BtnSpike 地刺的手柄上
+   * @returns {{ record, handle: string }|null}
+   */
+  getBtnSpikeHandleAt(worldX, worldY) {
+    for (let i = this._records.length - 1; i >= 0; i--) {
+      const rec = this._records[i];
+      if (rec.tool !== EntityTool.BTN_SPIKE) continue;
+      const spk = rec.spikeEntity;
+      const w = spk.collider ? spk.collider.w : 100;
+      const h = spk.collider ? spk.collider.h : 20;
+      const handles = {
+        bl: { x: spk.x, y: spk.y },
+        br: { x: spk.x + w, y: spk.y },
+        tl: { x: spk.x, y: spk.y + h },
+        tr: { x: spk.x + w, y: spk.y + h },
+      };
+      for (const [id, pos] of Object.entries(handles)) {
+        if (
+          Math.abs(worldX - pos.x) <= HANDLE_SIZE &&
+          Math.abs(worldY - pos.y) <= HANDLE_SIZE
+        ) {
+          return { record: rec, handle: id };
+        }
+      }
+    }
+    return null;
+  }
+
+  /** 开始调整 BtnSpike 地刺大小 */
+  startBtnSpikeResize(record, handle) {
+    const spk = record.spikeEntity;
+    const w = spk.collider.w;
+    const h = spk.collider.h;
+    const anchors = {
+      bl: { x: spk.x + w, y: spk.y + h },
+      br: { x: spk.x, y: spk.y + h },
+      tl: { x: spk.x + w, y: spk.y },
+      tr: { x: spk.x, y: spk.y },
+    };
+    this._bsResizeRecord = record;
+    this._bsResizeHandle = handle;
+    this._bsResizeAnchor = anchors[handle];
+  }
+
+  /** 调整 BtnSpike 地刺大小中 */
+  updateBtnSpikeResize(worldX, worldY) {
+    if (!this._bsResizeHandle || !this._bsResizeRecord) return;
+    const sx = this._snap(worldX);
+    const sy = this._snap(worldY);
+    const limits = SPIKE_DEFAULTS;
+
+    let newW = Math.abs(this._bsResizeAnchor.x - sx);
+    let newH = Math.abs(this._bsResizeAnchor.y - sy);
+    newW = Math.max(limits.minWidth, Math.min(limits.maxWidth, newW));
+    newH = Math.max(limits.minHeight, Math.min(limits.maxHeight, newH));
+
+    const spk = this._bsResizeRecord.spikeEntity;
+    if (sx <= this._bsResizeAnchor.x) {
+      spk.x = this._bsResizeAnchor.x - newW;
+    } else {
+      spk.x = this._bsResizeAnchor.x;
+    }
+    if (sy <= this._bsResizeAnchor.y) {
+      spk.y = this._bsResizeAnchor.y - newH;
+    } else {
+      spk.y = this._bsResizeAnchor.y;
+    }
+    spk.collider.w = newW;
+    spk.collider.h = newH;
+    this._syncSystems();
+  }
+
+  /** 结束 BtnSpike 地刺大小调整 */
+  endBtnSpikeResize() {
+    this._bsResizeRecord = null;
+    this._bsResizeHandle = null;
+    this._bsResizeAnchor = null;
+  }
+
   _snap(v) {
     return Math.round(v / GRID_SIZE) * GRID_SIZE;
   }
@@ -292,6 +638,125 @@ export class EditorEntityManager {
    */
   draw(p) {
     for (const rec of this._records) {
+      // WIRE_PORTAL: 特殊处理 — 绘制按钮+传送门+连线
+      if (rec.tool === EntityTool.WIRE_PORTAL) {
+        const btn = rec.gameEntity;
+        const ptl = rec.portalEntity;
+        const bw = btn.collider ? btn.collider.w : 34;
+        const bh = btn.collider ? btn.collider.h : 16;
+        const pw = ptl.collider ? ptl.collider.w : 50;
+        const ph = ptl.collider ? ptl.collider.h : 50;
+        const btnMoving = this._movingEntity === btn;
+        const ptlMoving = this._movingEntity === ptl;
+
+        p.push();
+        p.noFill();
+
+        // Button 边框
+        p.strokeWeight(btnMoving ? 3 : 2);
+        p.stroke(btnMoving ? 255 : 180, 100, 240, btnMoving ? 255 : 180);
+        p.rect(btn.x, btn.y, bw, bh);
+
+        // Portal 边框
+        p.strokeWeight(ptlMoving ? 3 : 2);
+        p.stroke(ptlMoving ? 255 : 180, 100, 240, ptlMoving ? 255 : 180);
+        p.rect(ptl.x, ptl.y, pw, ph);
+
+        // 连接线
+        p.stroke(180, 100, 240, 100);
+        p.strokeWeight(1);
+        p.line(btn.x + bw / 2, btn.y + bh, ptl.x + pw / 2, ptl.y + ph);
+
+        // 删除按钮（Button 侧 + Portal 侧）
+        this._drawDeleteBtn(p, btn.x + bw, btn.y + bh);
+        this._drawDeleteBtn(p, ptl.x + pw, ptl.y + ph);
+
+        // 标签
+        p.push();
+        p.translate(btn.x, btn.y + bh);
+        p.scale(1, -1);
+        p.fill(255, 255, 255, 220);
+        p.noStroke();
+        p.textSize(10);
+        p.textAlign(p.LEFT, p.TOP);
+        p.text(`WP-Btn ${bw}×${bh}`, 3, 3);
+        p.pop();
+
+        p.push();
+        p.translate(ptl.x, ptl.y + ph);
+        p.scale(1, -1);
+        p.fill(255, 255, 255, 220);
+        p.noStroke();
+        p.textSize(10);
+        p.textAlign(p.LEFT, p.TOP);
+        p.text(`WP-Ptl ${pw}×${ph}`, 3, 3);
+        p.pop();
+
+        p.pop();
+        continue;
+      }
+
+      // BTN_SPIKE: 特殊处理 — 绘制按钮+地刺+连线+手柄
+      if (rec.tool === EntityTool.BTN_SPIKE) {
+        const btn = rec.gameEntity;
+        const spk = rec.spikeEntity;
+        const bw = btn.collider ? btn.collider.w : 34;
+        const bh = btn.collider ? btn.collider.h : 16;
+        const sw = spk.collider ? spk.collider.w : 100;
+        const sh = spk.collider ? spk.collider.h : 20;
+        const btnMoving = this._movingEntity === btn;
+        const spkMoving = this._movingEntity === spk;
+
+        p.push();
+        p.noFill();
+
+        // Button 边框（橙色系）
+        p.strokeWeight(btnMoving ? 3 : 2);
+        p.stroke(btnMoving ? 255 : 240, 160, 30, btnMoving ? 255 : 180);
+        p.rect(btn.x, btn.y, bw, bh);
+
+        // Spike 边框（橙色系）
+        p.strokeWeight(spkMoving ? 3 : 2);
+        p.stroke(spkMoving ? 255 : 240, 160, 30, spkMoving ? 255 : 180);
+        p.rect(spk.x, spk.y, sw, sh);
+
+        // 连接线
+        p.stroke(240, 160, 30, 100);
+        p.strokeWeight(1);
+        p.line(btn.x + bw / 2, btn.y + bh, spk.x + sw / 2, spk.y + sh);
+
+        // 地刺调整手柄
+        this._drawHandles(p, spk.x, spk.y, sw, sh);
+
+        // 删除按钮（Button 侧 + Spike 侧）
+        this._drawDeleteBtn(p, btn.x + bw, btn.y + bh);
+        this._drawDeleteBtn(p, spk.x + sw, spk.y + sh);
+
+        // 标签
+        p.push();
+        p.translate(btn.x, btn.y + bh);
+        p.scale(1, -1);
+        p.fill(255, 255, 255, 220);
+        p.noStroke();
+        p.textSize(10);
+        p.textAlign(p.LEFT, p.TOP);
+        p.text(`BS-Btn ${bw}×${bh}`, 3, 3);
+        p.pop();
+
+        p.push();
+        p.translate(spk.x, spk.y + sh);
+        p.scale(1, -1);
+        p.fill(255, 255, 255, 220);
+        p.noStroke();
+        p.textSize(10);
+        p.textAlign(p.LEFT, p.TOP);
+        p.text(`BS-Spk ${sw}×${sh}`, 3, 3);
+        p.pop();
+
+        p.pop();
+        continue;
+      }
+
       const e = rec.gameEntity;
       const w = e.collider ? e.collider.w : 50;
       const h = e.collider ? e.collider.h : 50;
@@ -308,13 +773,25 @@ export class EditorEntityManager {
         p.stroke(isSelected ? 255 : 220, 80, 80, isSelected ? 240 : 180);
       } else if (rec.tool === EntityTool.WALL) {
         p.stroke(isSelected ? 255 : 140, 140, 160, isSelected ? 240 : 180);
+      } else if (rec.tool === EntityTool.NPC) {
+        p.stroke(60, 200, 220, 180);
+      } else if (rec.tool === EntityTool.SIGNBOARD) {
+        p.stroke(200, 160, 80, 180);
+      } else if (rec.tool === EntityTool.CHECKPOINT) {
+        p.stroke(200, 80, 180, 180);
       } else {
         p.stroke(100, 170, 255, 180);
       }
       p.rect(e.x, e.y, w, h);
 
       // 选中可调整大小实体时绘制四个角手柄
-      if (isSelected && rec.tool !== EntityTool.PORTAL) {
+      if (
+        isSelected &&
+        rec.tool !== EntityTool.PORTAL &&
+        rec.tool !== EntityTool.NPC &&
+        rec.tool !== EntityTool.SIGNBOARD &&
+        rec.tool !== EntityTool.CHECKPOINT
+      ) {
         this._drawHandles(p, e.x, e.y, w, h);
       }
 
@@ -337,6 +814,12 @@ export class EditorEntityManager {
         p.text(`S ${w}×${h}`, 3, 3);
       } else if (rec.tool === EntityTool.WALL) {
         p.text(`W ${w}×${h}`, 3, 3);
+      } else if (rec.tool === EntityTool.NPC) {
+        p.text("NPC", 3, 3);
+      } else if (rec.tool === EntityTool.SIGNBOARD) {
+        p.text("Sign", 3, 3);
+      } else if (rec.tool === EntityTool.CHECKPOINT) {
+        p.text("CkPt", 3, 3);
       } else {
         p.text("Portal", 3, 3);
       }

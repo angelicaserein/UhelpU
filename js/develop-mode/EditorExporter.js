@@ -21,17 +21,23 @@ export class EditorExporter {
     roomCount = 2,
     canvasWidth = 800,
     canvasHeight = 600,
+    spawn = null,
   ) {
-    if (records.length === 0) return "// 没有放置任何实体";
-
     const lines = [];
-    lines.push("// ── 编辑器导出的实体 ──────────────────────────────────");
+    lines.push("// ── 编辑器导出的实体 ───────────────────────────────────────");
     lines.push("//");
     lines.push(`// 房间数量: ${roomCount}`);
     for (let i = 0; i < roomCount; i++) {
       lines.push(
         `//   Room ${i}: x ∈ [${i * canvasWidth}, ${(i + 1) * canvasWidth})`,
       );
+    }
+
+    // 玩家出生点
+    if (spawn) {
+      lines.push("//");
+      lines.push("// 玩家出生点:");
+      lines.push(`this._player = new Player(${spawn.x}, ${spawn.y}, ${spawn.w}, ${spawn.h});`);
     }
     lines.push("//");
     lines.push("// 自动墙壁（左/右边界）:");
@@ -48,6 +54,9 @@ export class EditorExporter {
       { tool: EntityTool.SPIKE, label: "Spike", ctor: "Spike" },
       { tool: EntityTool.WALL, label: "Wall", ctor: "Wall" },
       { tool: EntityTool.PORTAL, label: "Portal", ctor: "Portal" },
+      { tool: EntityTool.NPC, label: "NPC", ctor: "NPC" },
+      { tool: EntityTool.SIGNBOARD, label: "Signboard", ctor: "Signboard" },
+      { tool: EntityTool.CHECKPOINT, label: "Checkpoint", ctor: "Checkpoint" },
     ];
 
     for (const g of groups) {
@@ -63,6 +72,73 @@ export class EditorExporter {
       }
     }
 
+    // BtnWirePortalSystem 复合实体导出
+    const wpItems = records.filter((r) => r.tool === EntityTool.WIRE_PORTAL);
+    if (wpItems.length > 0) {
+      lines.push("");
+      lines.push("// BtnWirePortalSystem");
+      lines.push(
+        '// import { Button } from "../game-entity-model/interactables/Button.js";',
+      );
+      lines.push(
+        '// import { BtnWirePortalSystem } from "../mechanism-system/demo2/BtnWirePortalSystem.js";',
+      );
+      wpItems.forEach((r, idx) => {
+        const btn = r.gameEntity;
+        const ptl = r.portalEntity;
+        const bw = btn.collider ? btn.collider.w : 34;
+        const bh = btn.collider ? btn.collider.h : 16;
+        const pw = ptl.collider ? ptl.collider.w : 50;
+        const ph = ptl.collider ? ptl.collider.h : 50;
+        lines.push(
+          `const wpBtn_${idx} = new Button(${btn.x}, ${btn.y}, ${bw}, ${bh});`,
+        );
+        lines.push(
+          `const wpPortal_${idx} = new Portal(${ptl.x}, ${ptl.y}, ${pw}, ${ph});`,
+        );
+        lines.push(
+          `const wpSys_${idx} = new BtnWirePortalSystem({ button: wpBtn_${idx}, portal: wpPortal_${idx} });`,
+        );
+      });
+      lines.push("// wpBtn / wpPortal 需要加入 Room 实体列表");
+      lines.push("// wpSys 需要在 update() 和 draw() 中调用");
+    }
+
+    // ButtonSpikeLinkSystem 复合实体导出
+    const bsItems = records.filter((r) => r.tool === EntityTool.BTN_SPIKE);
+    if (bsItems.length > 0) {
+      lines.push("");
+      lines.push("// ButtonSpikeLinkSystem");
+      lines.push(
+        '// import { Button } from "../game-entity-model/interactables/Button.js";',
+      );
+      lines.push(
+        '// import { Spike } from "../game-entity-model/interactables/Spike.js";',
+      );
+      lines.push(
+        '// import { ButtonSpikeLinkSystem } from "../mechanism-system/demo2/ButtonSpikeLinkSystem.js";',
+      );
+      bsItems.forEach((r, idx) => {
+        const btn = r.gameEntity;
+        const spk = r.spikeEntity;
+        const bw = btn.collider ? btn.collider.w : 34;
+        const bh = btn.collider ? btn.collider.h : 16;
+        const sw = spk.collider ? spk.collider.w : 100;
+        const sh = spk.collider ? spk.collider.h : 20;
+        lines.push(
+          `const bsBtn_${idx} = new Button(${btn.x}, ${btn.y}, ${bw}, ${bh});`,
+        );
+        lines.push(
+          `const bsSpike_${idx} = new Spike(${spk.x}, ${spk.y}, ${sw}, ${sh});`,
+        );
+        lines.push(
+          `const bsSys_${idx} = new ButtonSpikeLinkSystem([{ button: bsBtn_${idx}, spikes: [bsSpike_${idx}] }]);`,
+        );
+      });
+      lines.push("// bsBtn / bsSpike 需要加入 Room 实体列表");
+      lines.push("// bsSys 需要在 update() 中调用");
+    }
+
     return lines.join("\n");
   }
 
@@ -76,12 +152,14 @@ export class EditorExporter {
     roomCount = 2,
     canvasWidth = 800,
     canvasHeight = 600,
+    spawn = null,
   ) {
     const code = EditorExporter.generateCode(
       records,
       roomCount,
       canvasWidth,
       canvasHeight,
+      spawn,
     );
     try {
       await navigator.clipboard.writeText(code);

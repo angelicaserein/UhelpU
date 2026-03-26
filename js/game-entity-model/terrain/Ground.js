@@ -10,6 +10,7 @@ export class Ground extends GameEntity {
   constructor(x, y, w, h, isPlatform = false) {
     super(x, y);
     this.type = "ground";
+    this.zIndex = -10;
     this.movementComponent = null;
     this.collider = new RectangleCollider(ColliderType.STATIC, w, h);
     this.isPlatform = isPlatform;

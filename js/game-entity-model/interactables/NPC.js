@@ -43,7 +43,7 @@ export class NPC extends GameEntity {
     this._imageKey = options.imageKey || null;
     this._color = options.color || [100, 200, 255];
     this._dialogueScale = options.dialogueScale || 1;
-    this.zIndex = -1;
+    this.zIndex = 5; // NPC 在交互物上层、玩家下层
 
     this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
 

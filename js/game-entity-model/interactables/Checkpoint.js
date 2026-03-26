@@ -18,6 +18,7 @@ export class Checkpoint extends GameEntity {
   constructor(x, y, w = 40, h = 70, getPlayer = null, options = {}) {
     super(x, y);
     this.type = "checkpoint";
+    this.zIndex = 0;
     this.movementComponent = null;
     this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
     this.activated = false;

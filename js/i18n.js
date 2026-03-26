@@ -68,9 +68,9 @@ const _dict = {
     achiev_locked_desc: "Complete the required task to unlock this achievement",
 
     // ── World Select ─────────────────────────────────────────────────
-    world_1: "World 1",
+    world_1: "Demo 2",
     world_2: "World 2",
-    world_3: "World 3",
+    world_3: "Demo 1",
   },
 
   zh: {
@@ -137,9 +137,9 @@ const _dict = {
     achiev_locked_desc: "完成指定任务以解锁此成就",
 
     // ── World Select ─────────────────────────────────────────────────
-    world_1: "世界 1",
+    world_1: "Demo 2",
     world_2: "世界 2",
-    world_3: "世界 3",
+    world_3: "初代 Demo",
   },
 };
 

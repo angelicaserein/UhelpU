@@ -7,6 +7,7 @@ export class BasePlatform extends GameEntity {
   constructor(x, y, w, h, options = {}) {
     super(x, y);
     this.type = "platform";
+    this.zIndex = -10;
     this.movementComponent = null;
     this.collider = new RectangleCollider(ColliderType.STATIC, w, h);
 

@@ -38,7 +38,7 @@ export class Signboard extends GameEntity {
     this.eventBus = eventBus;
     this._imageKey = imageKey;
     this._onInteract = onInteract;
-    this.zIndex = -1; // 木牌在角色下层，不挡住它们
+    this.zIndex = -5; // 木牌在地形上层、交互物下层
 
     this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
     this._inRange = false;

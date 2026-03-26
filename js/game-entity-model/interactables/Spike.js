@@ -9,6 +9,7 @@ export class Spike extends GameEntity {
   constructor(x, y, w, h, options = {}) {
     super(x, y);
     this.type = "spike";
+    this.zIndex = -20;
     this.movementComponent = null;
     this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
     this.color = options.color || null;

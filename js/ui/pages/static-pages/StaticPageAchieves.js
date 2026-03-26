@@ -1,8 +1,9 @@
 import { PageBase } from "../PageBase.js";
 import { ButtonBase } from "../../components/ButtonBase.js";
+import { BackButton } from "../../components/BackButton.js";
 import { Assets } from "../../../AssetsManager.js";
 import { AudioManager } from "../../../AudioManager.js";
-import { AchievementData } from "../../../achievement system/AchievementData.js";
+import { Demo1AchievementData } from "../../../achievement system/Demo1AchievementData.js";
 import { i18n, t } from "../../../i18n.js";
 
 export class StaticPageAchieves extends PageBase {
@@ -52,18 +53,7 @@ export class StaticPageAchieves extends PageBase {
     const p = this.p;
     AudioManager.playBGM("achieves");
 
-    // 返回按钮
-    const backBtn = new ButtonBase(
-      p,
-      "◀",
-      0.02 * p.width,
-      0.03 * p.height,
-      () => this.switcher.showMainMenu(p),
-      "back-button",
-    );
-    backBtn.btn.style("width", 0.03 * p.width + "px");
-    backBtn.btn.style("height", 0.055 * p.height + "px");
-    this.addElement(backBtn);
+    this.addElement(new BackButton(p, () => this.switcher.showMainMenu(p)));
 
     // 悬浮提示框
     this.tooltip = p.createDiv("");
@@ -140,7 +130,7 @@ export class StaticPageAchieves extends PageBase {
     );
 
     // 成就卡片
-    const achievements = AchievementData.getAll();
+    const achievements = Demo1AchievementData.getAll();
     this.hoveredIdx = -1;
     for (let i = 0; i < this._cards.length && i < achievements.length; i++) {
       const card = this._cards[i];
@@ -160,7 +150,7 @@ export class StaticPageAchieves extends PageBase {
 
   // ── 成就卡片 ──────────────────────────────────────────────────
   _drawCard(p, card, achievement, hovered) {
-    const unlocked = AchievementData.isUnlocked(achievement.id);
+    const unlocked = Demo1AchievementData.isUnlocked(achievement.id);
     const { x, y, w, h } = card;
 
     p.push();
@@ -278,14 +268,14 @@ export class StaticPageAchieves extends PageBase {
   // ── 彩虹波浪成就名 DOM 标签 ────────────────────────────────────
   _createRainbowNameLabels(p) {
     this._removeRainbowNameLabels();
-    const achievements = AchievementData.getAll();
+    const achievements = Demo1AchievementData.getAll();
     const canvas = p.canvas;
     const rect = canvas.getBoundingClientRect();
 
     for (let i = 0; i < this._cards.length && i < achievements.length; i++) {
       const card = this._cards[i];
       const achievement = achievements[i];
-      const unlocked = AchievementData.isUnlocked(achievement.id);
+      const unlocked = Demo1AchievementData.isUnlocked(achievement.id);
       if (!unlocked) continue;
 
       const plateW = card.w * 0.85;
@@ -325,7 +315,7 @@ export class StaticPageAchieves extends PageBase {
   }
 
   _refreshRainbowNameLabels() {
-    const achievements = AchievementData.getAll();
+    const achievements = Demo1AchievementData.getAll();
     for (const label of this._nameLabels) {
       const idx = parseInt(label.dataset.achievIdx);
       const achievement = achievements[idx];
@@ -436,9 +426,9 @@ export class StaticPageAchieves extends PageBase {
   _refreshTooltipContent() {
     if (!this.tooltip || this.hoveredIdx < 0) return;
 
-    const achievement = AchievementData.getAll()[this.hoveredIdx];
+    const achievement = Demo1AchievementData.getAll()[this.hoveredIdx];
     if (!achievement) return;
-    const unlocked = AchievementData.isUnlocked(achievement.id);
+    const unlocked = Demo1AchievementData.isUnlocked(achievement.id);
     const title = unlocked
       ? t(`achiev_${achievement.id}_name`)
       : t("achiev_locked");

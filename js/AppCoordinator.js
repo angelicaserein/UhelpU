@@ -1,9 +1,12 @@
+import "./i18nDemo1.js"; // 注册 Demo1 关卡专属文案
 import { SwitcherMain } from "./switchers/SwitcherMain.js";
 import { EventBus } from "./event-system/EventBus.js";
 import { EventTypes } from "./event-system/EventTypes.js";
 import { LevelManager } from "./level-design/LevelManager.js";
-import { StaticPageResult } from "./ui/pages/static-pages/StaticPageResult.js";
-import { StaticPageWin } from "./ui/pages/static-pages/StaticPageWin.js";
+import { StaticPageResultDemo1 } from "./ui/pages/static-pages/StaticPageResultDemo1.js";
+import { StaticPageResultDemo2 } from "./ui/pages/static-pages/StaticPageResultDemo2.js";
+import { StaticPageWinDemo1 } from "./ui/pages/static-pages/StaticPageWinDemo1.js";
+import { StaticPageWinDemo2 } from "./ui/pages/static-pages/StaticPageWinDemo2.js";
 import { AudioManager } from "./AudioManager.js";
 
 export class AppCoordinator {
@@ -33,9 +36,8 @@ export class AppCoordinator {
       this.levelManager.loadLevel(levelIndex, this.p, this.eventBus);
       this.switcher.gameSwitcher.runtimeLevelManager = this.levelManager;
 
-      const levelNum = parseInt(String(levelIndex).replace("level", ""), 10);
       const gamePage = this.switcher.gameSwitcher.createLevelPage(
-        levelNum,
+        levelIndex,
         this.p,
       );
       this.switcher.switchToGame(gamePage, this.p);
@@ -54,16 +56,19 @@ export class AppCoordinator {
       this.levelManager.setPaused(false);
       this.levelManager.unloadLevel(this.p, this.eventBus);
       this.switcher.gameSwitcher.runtimeLevelManager = null;
-      this.switcher.staticSwitcher.showLevelChoice(this.p);
+      this.switcher.staticSwitcher.showWorldSelect(this.p);
     });
 
     this.eventBus.subscribe(EventTypes.AUTO_RESULT, (result) => {
       const levelIndex = this.levelManager.currentLevelIndex;
 
+      const isDemo2 = levelIndex.startsWith("demo2_");
+
       if (result === "autoResult1") {
         this.levelManager.unloadLevel(this.p, this.eventBus);
         this.switcher.gameSwitcher.runtimeLevelManager = null;
-        const winPage = new StaticPageWin(
+        const WinPage = isDemo2 ? StaticPageWinDemo2 : StaticPageWinDemo1;
+        const winPage = new WinPage(
           levelIndex,
           this.switcher,
           this.p,
@@ -75,7 +80,10 @@ export class AppCoordinator {
 
       // Lose: pause game and show overlay on top of the game
       this.levelManager.setPaused(true);
-      const resultPage = new StaticPageResult(
+      const ResultPage = isDemo2
+        ? StaticPageResultDemo2
+        : StaticPageResultDemo1;
+      const resultPage = new ResultPage(
         result,
         levelIndex,
         this.switcher,

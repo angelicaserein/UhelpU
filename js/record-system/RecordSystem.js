@@ -1,5 +1,5 @@
 import { Clip } from "./Clip.js";
-import { RecordUI } from "./RecordUI.js";
+import { Demo1RecordUI } from "./Demo1RecordUI.js";
 import { KeyBindingManager } from "../key-binding-system/KeyBindingManager.js";
 import { isGamePaused } from "../game-runtime/GamePauseState.js";
 
@@ -11,6 +11,7 @@ export class RecordSystem {
    * @param {Function} removeReplayerCallback
    * @param {object}   [options]
    * @param {Function} [options.onReplayStart] - called once each time replay begins
+   * @param {class}    [options.uiClass] - UI renderer class (default: Demo1RecordUI)
    */
   constructor(
     player,
@@ -28,6 +29,7 @@ export class RecordSystem {
     this._onReplayStart = options.onReplayStart || null;
     this._onFirstRecord = options.onFirstRecord || null;
     this._hasRecordedOnce = false;
+    this._uiClass = options.uiClass || Demo1RecordUI;
     this._keydownHandler = (event) => this.eventHandler(event);
     this._keyupHandler = (event) => this.eventHandler(event);
 
@@ -447,7 +449,7 @@ export class RecordSystem {
 
   draw(p) {
     if (!this._hudVisible) return;
-    RecordUI.draw(p, {
+    this._uiClass.draw(p, {
       state: this.state,
       maxRecordTime: this.maxRecordTime,
       recordStartTime: this.recordStartTime,

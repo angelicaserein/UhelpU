@@ -7,7 +7,7 @@ import { Assets } from "../../../AssetsManager.js";
 import { AudioManager } from "../../../AudioManager.js";
 import { EventTypes } from "../../../event-system/EventTypes.js";
 
-export class StaticPageLevelChoice extends PageBase {
+export class StaticPageLevelChoiceDemo2 extends PageBase {
   constructor(switcher, p, eventBus) {
     super(switcher);
     this.p = p;
@@ -23,7 +23,7 @@ export class StaticPageLevelChoice extends PageBase {
 
     this.addElement(new BackButton(p, () => this.switcher.showWorldSelect(p)));
 
-    // 关卡按钮配置 — 上排 1-5，下排 6-10
+    // demo2 关卡按钮配置 — 上排 1-5，下排 6-10
     const topRowConfigs = [
       { num: 1, x: 0.125, w: 0.05, cls: "level1-button" },
       { num: 2, x: 0.3, w: 0.051, cls: "level2-button" },
@@ -49,7 +49,7 @@ export class StaticPageLevelChoice extends PageBase {
         cfg.x * p.width,
         topRowY * p.height,
         () => {
-          this.eventBus.publish(EventTypes.LOAD_LEVEL, `level${cfg.num}`);
+          this.eventBus.publish(EventTypes.LOAD_LEVEL, `demo2_level${cfg.num}`);
         },
         cfg.cls,
       );
@@ -67,7 +67,7 @@ export class StaticPageLevelChoice extends PageBase {
         cfg.x * p.width,
         bottomRowY * p.height,
         () => {
-          this.eventBus.publish(EventTypes.LOAD_LEVEL, `level${cfg.num}`);
+          this.eventBus.publish(EventTypes.LOAD_LEVEL, `demo2_level${cfg.num}`);
         },
         cfg.cls,
       );
@@ -91,7 +91,7 @@ export class StaticPageLevelChoice extends PageBase {
       60,
     );
 
-    // 关卡信息悬浮面板（FollowImage 左右两侧）
+    // 关卡信息悬浮面板
     this.levelInfo = new LevelInfo(
       p,
       followerX,

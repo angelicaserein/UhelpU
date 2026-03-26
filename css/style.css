@@ -376,19 +376,23 @@ canvas {
 
 /* back按钮 */
 .back-button {
+  font-family: "HYPixel11", "PixelFont", sans-serif;
   font-size: 18px;
-  border-radius: 50%;
-  background: rgba(55, 20, 85, 0.45);
-  border: 1.5px solid rgba(255, 236, 169, 0.35);
-  color: rgba(255, 248, 223, 0.75);
-  backdrop-filter: blur(4px);
-  transform: translateX(-5px);
-  transition: all 0.3s ease;
+  font-weight: bold;
+  color: #21043b;
+  border-radius: 8px;
+  background: rgba(220, 180, 220, 0.75);
+  border: 3px solid #4a1a6b;
+  box-shadow: 0 0 0 2.5px #000000;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
 }
 .back-button:hover {
-  background: rgba(75, 30, 115, 0.6);
-  border-color: rgba(255, 236, 165, 0.7);
-  color: #fff1c0;
+  box-shadow:
+    0 0 0 2.5px #ffffff,
+    0 6px 16px rgba(53, 0, 51, 0.4);
+  transform: translateY(-3px);
 }
 
 /* 胜利结算页按钮 */
@@ -1317,6 +1321,56 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   50% {
     transform: translateY(-2px);
   }
+}
+
+/* ═══ World Select Page ═══════════════════════════════════════════════ */
+.world-button {
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff3fd;
+  -webkit-text-stroke: 1px rgba(255, 236, 252, 0.6);
+  border: 3px solid rgba(76, 23, 69, 0.8);
+  border-radius: 18px;
+  background: rgba(60, 30, 90, 0.65);
+  backdrop-filter: blur(6px);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.4s ease,
+    border-color 0.4s ease,
+    transform 0.25s ease,
+    box-shadow 0.4s ease;
+  box-shadow: 0 4px 20px rgba(80, 20, 120, 0.3);
+}
+.world-button:hover {
+  background: rgba(120, 60, 160, 0.55);
+  border-color: rgba(255, 236, 165, 0.7);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(140, 60, 200, 0.45);
+}
+.world-button-1 {
+  text-shadow: 0 0 12px rgba(130, 200, 255, 0.6);
+}
+.world-button-1:hover {
+  border-color: rgba(130, 200, 255, 0.8);
+  box-shadow: 0 8px 30px rgba(130, 200, 255, 0.35);
+}
+.world-button-2 {
+  text-shadow: 0 0 12px rgba(180, 130, 255, 0.6);
+}
+.world-button-2:hover {
+  border-color: rgba(180, 130, 255, 0.8);
+  box-shadow: 0 8px 30px rgba(180, 130, 255, 0.35);
+}
+.world-button-3 {
+  text-shadow: 0 0 12px rgba(255, 180, 130, 0.6);
+}
+.world-button-3:hover {
+  border-color: rgba(255, 180, 130, 0.8);
+  box-shadow: 0 8px 30px rgba(255, 180, 130, 0.35);
 }
 
 /* ── Achievement Toast ──────────────────────────────────────────── */

@@ -1,13 +1,23 @@
-import { Level1 } from "./Level1.js";
-import { Level2 } from "./Level2.js";
-import { Level3 } from "./Level3.js";
-import { Level4 } from "./Level4.js";
-import { Level5 } from "./Level5.js";
-import { Level6 } from "./Level6.js";
-import { Level7 } from "./Level7.js";
-import { Level8 } from "./Level8.js";
-import { Level9 } from "./Level9.js";
-import { Level10 } from "./Level10.js";
+import { Level1 } from "./demo1/Level1.js";
+import { Level2 } from "./demo1/Level2.js";
+import { Level3 } from "./demo1/Level3.js";
+import { Level4 } from "./demo1/Level4.js";
+import { Level5 } from "./demo1/Level5.js";
+import { Level6 } from "./demo1/Level6.js";
+import { Level7 } from "./demo1/Level7.js";
+import { Level8 } from "./demo1/Level8.js";
+import { Level9 } from "./demo1/Level9.js";
+import { Level10 } from "./demo1/Level10.js";
+import { Level1 as Demo2Level1 } from "./demo2/Level1.js";
+import { Level2 as Demo2Level2 } from "./demo2/Level2.js";
+import { Level3 as Demo2Level3 } from "./demo2/Level3.js";
+import { Level4 as Demo2Level4 } from "./demo2/Level4.js";
+import { Level5 as Demo2Level5 } from "./demo2/Level5.js";
+import { Level6 as Demo2Level6 } from "./demo2/Level6.js";
+import { Level7 as Demo2Level7 } from "./demo2/Level7.js";
+import { Level8 as Demo2Level8 } from "./demo2/Level8.js";
+import { Level9 as Demo2Level9 } from "./demo2/Level9.js";
+import { Level10 as Demo2Level10 } from "./demo2/Level10.js";
 import { setGamePaused, isGamePaused } from "../game-runtime/GamePauseState.js";
 import { EventTypes } from "../event-system/EventTypes.js";
 import { Assets } from "../AssetsManager.js";
@@ -29,6 +39,16 @@ export class LevelManager {
       level8: Level8,
       level9: Level9,
       level10: Level10,
+      demo2_level1: Demo2Level1,
+      demo2_level2: Demo2Level2,
+      demo2_level3: Demo2Level3,
+      demo2_level4: Demo2Level4,
+      demo2_level5: Demo2Level5,
+      demo2_level6: Demo2Level6,
+      demo2_level7: Demo2Level7,
+      demo2_level8: Demo2Level8,
+      demo2_level9: Demo2Level9,
+      demo2_level10: Demo2Level10,
     };
     this.level = null;
     this.currentLevelIndex = null;

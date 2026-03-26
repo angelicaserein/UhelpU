@@ -1,8 +1,8 @@
 import { PageBase } from "../PageBase.js";
-import { ButtonBase } from "../../components/ButtonBase.js";
+import { BackButton } from "../../components/BackButton.js";
 import { Assets } from "../../../AssetsManager.js";
 import { WindowSettingSidebar } from "../../windows/WindowSettingSidebar.js";
-import { AudioManager } from '../../../AudioManager.js';
+import { AudioManager } from "../../../AudioManager.js";
 
 export class StaticPageSetting extends PageBase {
   constructor(switcher, p) {
@@ -14,24 +14,26 @@ export class StaticPageSetting extends PageBase {
   enter() {
     const p = this.p;
 
-    AudioManager.playBGM('setting');
+    AudioManager.playBGM("setting");
 
-    // 返回按钮
-    const backBtn = new ButtonBase(p, '◀', 0.02 * p.width, 0.03 * p.height, () => {
-      this.switcher.showMainMenu(p);
-    }, 'back-button');
-    backBtn.btn.style('width', 0.040 * p.width + 'px');
-    backBtn.btn.style('height', 0.065 * p.height + 'px');
-    this.addElement(backBtn);
+    this.addElement(new BackButton(p, () => this.switcher.showMainMenu(p)));
 
     const sidebarWidth = Math.round(p.width * 0.8);
     const sidebarHeight = Math.round(p.height * 0.8);
     const sidebarX = Math.round((p.width - sidebarWidth) / 2);
     const sidebarY = Math.round((p.height - sidebarHeight) / 2);
 
-    this.settingSidebar = new WindowSettingSidebar(p, sidebarX, sidebarY, sidebarWidth, sidebarHeight);
-    this.settingSidebar.onBGMChange = (value) => AudioManager.setBGMVolume(value);
-    this.settingSidebar.onSFXChange = (value) => AudioManager.setSFXVolume(value);
+    this.settingSidebar = new WindowSettingSidebar(
+      p,
+      sidebarX,
+      sidebarY,
+      sidebarWidth,
+      sidebarHeight,
+    );
+    this.settingSidebar.onBGMChange = (value) =>
+      AudioManager.setBGMVolume(value);
+    this.settingSidebar.onSFXChange = (value) =>
+      AudioManager.setSFXVolume(value);
     this.settingSidebar.setBGMVolume(AudioManager.getBGMVolume());
     this.settingSidebar.setSFXVolume(AudioManager.getSFXVolume());
     this.settingSidebar.open();

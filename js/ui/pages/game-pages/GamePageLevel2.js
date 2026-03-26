@@ -1,7 +1,0 @@
-import { GamePageBase } from "./GamePageBase.js";
-
-export class GamePageLevel2 extends GamePageBase {
-    constructor(switcher, p) {
-        super(switcher, p, 2, "hint_level2");
-    }
-}

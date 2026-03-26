@@ -1,5 +1,6 @@
 import { PageBase } from "../PageBase.js";
 import { ButtonBase } from "../../components/ButtonBase.js";
+import { BackButton } from "../../components/BackButton.js";
 import { HintButton } from "../../components/HintButton.js";
 import { WindowPause } from "../../windows/WindowPause.js";
 import { WindowSetting } from "../../windows/WindowSetting.js";
@@ -18,27 +19,19 @@ import { i18n } from "../../../i18n.js";
  *   _resumeGame()   — extend with super._resumeGame() to add level-specific resume logic
  */
 export class GamePageBase extends PageBase {
-  constructor(switcher, p, hintLevel, hintKey) {
+  constructor(switcher, p, hintLevel, hintKey, levelIndex) {
     super(switcher);
     this._p = p;
     this._isPaused = false;
+    this._levelIndex = levelIndex || `level${hintLevel}`;
 
-    // Back button
-    const backBtn = new ButtonBase(
-      p,
-      "◀",
-      0.02 * p.width,
-      0.03 * p.height,
-      () => {
+    this.addElement(
+      new BackButton(p, () => {
         this._resumeGame();
         this.switcher.eventBus &&
           this.switcher.eventBus.publish(EventTypes.RETURN_LEVEL_CHOICE);
-      },
-      "back-button",
+      }),
     );
-    backBtn.btn.style("width", 0.03 * p.width + "px");
-    backBtn.btn.style("height", 0.055 * p.height + "px");
-    this.addElement(backBtn);
 
     // Pause button
     const pauseBtn = new ButtonBase(
@@ -63,7 +56,10 @@ export class GamePageBase extends PageBase {
       onRestartLevel: () => {
         this._resumeGame();
         this.switcher.eventBus &&
-          this.switcher.eventBus.publish(EventTypes.LOAD_LEVEL, `level${hintLevel}`);
+          this.switcher.eventBus.publish(
+            EventTypes.LOAD_LEVEL,
+            this._levelIndex,
+          );
       },
       onBackLevelChoice: () => {
         this._resumeGame();

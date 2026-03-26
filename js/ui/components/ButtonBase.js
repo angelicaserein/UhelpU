@@ -1,18 +1,22 @@
-import { AudioManager } from '../../AudioManager.js';
+import { AudioManager } from "../../AudioManager.js";
 
 export class ButtonBase {
-  constructor(p, label, x, y, callback, customClass = '') {
+  constructor(p, label, x, y, callback, customClass = "") {
     this.btn = p.createButton(label);
+    this.btn.style("visibility", "hidden");
     if (x !== undefined && y !== undefined) {
       this.btn.position(x, y);
     }
-    this.btn.addClass('my-button');
+    this.btn.addClass("my-button");
     if (customClass) {
       this.btn.addClass(customClass);
     }
+    requestAnimationFrame(() => {
+      this.btn.style("visibility", "visible");
+    });
     // 使用箭头函数保留 this 上下文
     this.btn.mousePressed(() => {
-      AudioManager.playSFX('click');
+      AudioManager.playSFX("click");
       callback();
     });
   }
@@ -29,14 +33,14 @@ export class ButtonBase {
 
   // 禁用
   disable() {
-    this.btn.attribute('disabled', true);
-    this.btn.addClass('disabled');
+    this.btn.attribute("disabled", true);
+    this.btn.addClass("disabled");
   }
 
   // 启用
   enable() {
-    this.btn.removeAttribute('disabled');
-    this.btn.removeClass('disabled');
+    this.btn.removeAttribute("disabled");
+    this.btn.removeClass("disabled");
   }
 
   // 移除 DOM 元素

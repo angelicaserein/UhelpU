@@ -10,6 +10,9 @@ import {
   GRID_SIZE,
   PORTAL_SIZE,
   PREVIEW_ALPHA,
+  PLATFORM_DEFAULTS,
+  SPIKE_DEFAULTS,
+  WALL_DEFAULTS,
 } from "./EditorConfig.js";
 
 export class EditorPreview {
@@ -34,7 +37,16 @@ export class EditorPreview {
    * @param {number} groundH    当前 Ground 高度（仅 Ground 模式有效）
    * @param {boolean} insideToolbar 鼠标是否在工具栏上
    */
-  update(screenMX, screenMY, canvasH, cameraX, tool, groundW, groundH, insideToolbar) {
+  update(
+    screenMX,
+    screenMY,
+    canvasH,
+    cameraX,
+    tool,
+    groundW,
+    groundH,
+    insideToolbar,
+  ) {
     if (insideToolbar) {
       this.visible = false;
       return;
@@ -47,6 +59,15 @@ export class EditorPreview {
     if (tool === EntityTool.GROUND) {
       this.previewW = groundW;
       this.previewH = groundH;
+    } else if (tool === EntityTool.PLATFORM) {
+      this.previewW = PLATFORM_DEFAULTS.width;
+      this.previewH = PLATFORM_DEFAULTS.height;
+    } else if (tool === EntityTool.SPIKE) {
+      this.previewW = SPIKE_DEFAULTS.width;
+      this.previewH = SPIKE_DEFAULTS.height;
+    } else if (tool === EntityTool.WALL) {
+      this.previewW = WALL_DEFAULTS.width;
+      this.previewH = WALL_DEFAULTS.height;
     } else {
       this.previewW = PORTAL_SIZE.width;
       this.previewH = PORTAL_SIZE.height;
@@ -72,15 +93,66 @@ export class EditorPreview {
 
     if (tool === EntityTool.GROUND) {
       p.stroke(120, 200, 120, PREVIEW_ALPHA);
-      // 虚线效果：用多段短线模拟
-      this._dashedRect(p, this.previewX, this.previewY, this.previewW, this.previewH, 8);
-      // 半透明填充
+      this._dashedRect(
+        p,
+        this.previewX,
+        this.previewY,
+        this.previewW,
+        this.previewH,
+        8,
+      );
       p.noStroke();
       p.fill(120, 200, 120, PREVIEW_ALPHA * 0.4);
       p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
+    } else if (tool === EntityTool.PLATFORM) {
+      p.stroke(180, 180, 100, PREVIEW_ALPHA);
+      this._dashedRect(
+        p,
+        this.previewX,
+        this.previewY,
+        this.previewW,
+        this.previewH,
+        8,
+      );
+      p.noStroke();
+      p.fill(180, 180, 100, PREVIEW_ALPHA * 0.4);
+      p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
+    } else if (tool === EntityTool.SPIKE) {
+      p.stroke(220, 80, 80, PREVIEW_ALPHA);
+      this._dashedRect(
+        p,
+        this.previewX,
+        this.previewY,
+        this.previewW,
+        this.previewH,
+        8,
+      );
+      p.noStroke();
+      p.fill(220, 80, 80, PREVIEW_ALPHA * 0.4);
+      p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
+    } else if (tool === EntityTool.WALL) {
+      p.stroke(140, 140, 160, PREVIEW_ALPHA);
+      this._dashedRect(
+        p,
+        this.previewX,
+        this.previewY,
+        this.previewW,
+        this.previewH,
+        8,
+      );
+      p.noStroke();
+      p.fill(140, 140, 160, PREVIEW_ALPHA * 0.4);
+      p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
     } else {
       p.stroke(100, 160, 255, PREVIEW_ALPHA);
-      this._dashedRect(p, this.previewX, this.previewY, this.previewW, this.previewH, 8);
+      this._dashedRect(
+        p,
+        this.previewX,
+        this.previewY,
+        this.previewW,
+        this.previewH,
+        8,
+      );
       p.noStroke();
       p.fill(100, 160, 255, PREVIEW_ALPHA * 0.4);
       p.rect(this.previewX, this.previewY, this.previewW, this.previewH);

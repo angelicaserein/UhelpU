@@ -47,24 +47,42 @@ export class Level10 extends BaseLevel {
   _buildRooms(p) {
     const wallThickness = 20;
 
+    // room0: 左墙 + 地面，右侧出口
     const room0 = new Room(
       [new Wall(0, 0, wallThickness, p.height), new Ground(0, 0, p.width, 80)],
       { right: { targetRoomIndex: 1 } },
     );
 
+    // room1–room3: 只有地面，无墙，左右出口
+    const room1 = new Room([new Ground(0, 0, p.width, 80)], {
+      left: { targetRoomIndex: 0 },
+      right: { targetRoomIndex: 2 },
+    });
+
+    const room2 = new Room([new Ground(0, 0, p.width, 80)], {
+      left: { targetRoomIndex: 1 },
+      right: { targetRoomIndex: 3 },
+    });
+
+    const room3 = new Room([new Ground(0, 0, p.width, 80)], {
+      left: { targetRoomIndex: 2 },
+      right: { targetRoomIndex: 4 },
+    });
+
+    // room4: 右墙 + 地面 + 传送门，左侧出口
     const portal = new Portal(p.width - 100, 80, 50, 50);
     portal.openPortal();
 
-    const room1 = new Room(
+    const room4 = new Room(
       [
         new Wall(p.width - wallThickness, 0, wallThickness, p.height),
         new Ground(0, 0, p.width, 80),
         portal,
       ],
-      { left: { targetRoomIndex: 0 } },
+      { left: { targetRoomIndex: 3 } },
     );
 
-    return [room0, room1];
+    return [room0, room1, room2, room3, room4];
   }
 
   _applyWorldOffsetsToRooms(p) {

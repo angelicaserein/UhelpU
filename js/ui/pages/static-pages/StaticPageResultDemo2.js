@@ -12,11 +12,9 @@ export class StaticPageResultDemo2 extends PageBase {
     this.p = p;
     this.eventBus = eventBus;
 
-    const levelNum = parseInt(this.levelIndex.replace("level", ""), 10);
-
     this._onKeyDown = (e) => {
       if (e.code === "KeyR") {
-        this.eventBus.publish(EventTypes.LOAD_LEVEL, `level${levelNum}`);
+        this.eventBus.publish(EventTypes.LOAD_LEVEL, this.levelIndex);
       }
     };
   }
@@ -56,7 +54,7 @@ export class StaticPageResultDemo2 extends PageBase {
     p.textSize(76);
     p.text(t("result_lose"), p.width / 2, p.height / 2 - 10);
 
-    const levelNum = parseInt(this.levelIndex.replace("level", ""), 10);
+    const levelNum = parseInt(this.levelIndex.replace(/.*level/, ""), 10);
     p.fill(255, 180, 180, 180);
     p.textSize(20);
     p.text(`- Level ${levelNum} -`, p.width / 2, p.height / 2 + 40);

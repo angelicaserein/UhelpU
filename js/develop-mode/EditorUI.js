@@ -12,7 +12,7 @@
 import {
   EntityTool,
   TOOLBAR_HEIGHT,
-  GROUND_DEFAULTS,
+  CAMERA_MOVE_SPEED,
 } from "./EditorConfig.js";
 
 // ── 内部布局常量 ──────────────────────────────────────────────
@@ -21,13 +21,11 @@ const BTN_H = 36;
 const BTN_GAP = 14;
 const BTN_Y_OFFSET = 12; // 按钮距工具栏顶部
 
-const SLIDER_W = 160;
-const SLIDER_H = 8;
-const SLIDER_HANDLE = 14;
-const SLIDER_LABEL_OFFSET = 16;
-
 const SAVE_BTN_W = 90;
 const SAVE_BTN_H = 36;
+
+const CAM_BTN_W = 44;
+const CAM_BTN_H = 44;
 
 export class EditorUI {
   /**
@@ -41,15 +39,15 @@ export class EditorUI {
     /** 当前选中的工具 */
     this.activeTool = EntityTool.GROUND;
 
-    /** Ground 当前宽度/高度 */
-    this.groundWidth = GROUND_DEFAULTS.width;
-    this.groundHeight = GROUND_DEFAULTS.height;
-
     /** 保存按钮点击回调（由 MapEditor 注入） */
     this.onSave = null;
 
     /** toast 提示 */
     this._toast = null; // { text, endTime }
+
+    /** 摄像机方向按钮按住状态 */
+    this._camLeftPressed = false;
+    this._camRightPressed = false;
 
     // ── 预计算按钮矩形 ──────────────────────────────────────
     const toolbarTop = this._ch - TOOLBAR_HEIGHT;
@@ -67,31 +65,23 @@ export class EditorUI {
       w: BTN_W,
       h: BTN_H,
     };
-
-    // 滑块 — 位于两个按钮右侧
-    const sliderStartX = this._btnPortal.x + BTN_W + 30;
-    const sliderRow1Y = toolbarTop + BTN_Y_OFFSET + 6;
-    const sliderRow2Y = sliderRow1Y + 34;
-
-    this._sliderWidth = {
-      x: sliderStartX + 60,
-      y: sliderRow1Y,
-      w: SLIDER_W,
-      h: SLIDER_H,
-      label: "宽度",
-      min: GROUND_DEFAULTS.minWidth,
-      max: GROUND_DEFAULTS.maxWidth,
-      _dragging: false,
+    this._btnPlatform = {
+      x: startX + (BTN_W + BTN_GAP) * 2,
+      y: toolbarTop + BTN_Y_OFFSET,
+      w: BTN_W,
+      h: BTN_H,
     };
-    this._sliderHeight = {
-      x: sliderStartX + 60,
-      y: sliderRow2Y,
-      w: SLIDER_W,
-      h: SLIDER_H,
-      label: "高度",
-      min: GROUND_DEFAULTS.minHeight,
-      max: GROUND_DEFAULTS.maxHeight,
-      _dragging: false,
+    this._btnSpike = {
+      x: startX + (BTN_W + BTN_GAP) * 3,
+      y: toolbarTop + BTN_Y_OFFSET,
+      w: BTN_W,
+      h: BTN_H,
+    };
+    this._btnWall = {
+      x: startX + (BTN_W + BTN_GAP) * 4,
+      y: toolbarTop + BTN_Y_OFFSET,
+      w: BTN_W,
+      h: BTN_H,
     };
 
     // 保存按钮 — 右侧
@@ -101,6 +91,43 @@ export class EditorUI {
       w: SAVE_BTN_W,
       h: BTN_H,
     };
+
+    // 摄像机左/右移动按钮 — 屏幕左右两侧垂直居中（在工具栏上方区域）
+    const camBtnY = (this._ch - TOOLBAR_HEIGHT) / 2 - CAM_BTN_H / 2;
+    this._btnCamLeft = {
+      x: 6,
+      y: camBtnY,
+      w: CAM_BTN_W,
+      h: CAM_BTN_H,
+    };
+    this._btnCamRight = {
+      x: this._cw - CAM_BTN_W - 6,
+      y: camBtnY,
+      w: CAM_BTN_W,
+      h: CAM_BTN_H,
+    };
+
+    // 房间管理按钮 — 保存按钮左侧
+    const ROOM_BTN_W = 80;
+    this._btnDelRoom = {
+      x: this._btnSave.x - ROOM_BTN_W - BTN_GAP,
+      y: toolbarTop + BTN_Y_OFFSET,
+      w: ROOM_BTN_W,
+      h: BTN_H,
+    };
+    this._btnAddRoom = {
+      x: this._btnDelRoom.x - ROOM_BTN_W - BTN_GAP,
+      y: toolbarTop + BTN_Y_OFFSET,
+      w: ROOM_BTN_W,
+      h: BTN_H,
+    };
+
+    /** 房间管理回调（由 MapEditor 注入） */
+    this.onAddRoom = null;
+    this.onDelRoom = null;
+
+    /** 当前房间数量（用于显示，由 MapEditor 设置） */
+    this.roomCount = 2;
   }
 
   // ══════════════════════════════════════════════════════════════
@@ -135,26 +162,70 @@ export class EditorUI {
       "Portal",
       this.activeTool === EntityTool.PORTAL,
     );
+    // Platform 按钮
+    this._drawButton(
+      p,
+      this._btnPlatform,
+      "Platform",
+      this.activeTool === EntityTool.PLATFORM,
+    );
+    // Spike 按钮
+    this._drawButton(
+      p,
+      this._btnSpike,
+      "Spike",
+      this.activeTool === EntityTool.SPIKE,
+      [180, 60, 60],
+    );
+    // Wall 按钮
+    this._drawButton(
+      p,
+      this._btnWall,
+      "Wall",
+      this.activeTool === EntityTool.WALL,
+      [100, 100, 120],
+    );
 
     // 状态提示
-    const statusX = this._btnPortal.x + BTN_W + 30;
-    const statusY = toolbarTop + TOOLBAR_HEIGHT - 10;
+    const statusX = this._btnWall.x + BTN_W + 20;
+    const statusY = toolbarTop + TOOLBAR_HEIGHT / 2 + 8;
     p.fill(200);
     p.noStroke();
     p.textSize(13);
-    p.textAlign(p.LEFT, p.BOTTOM);
+    p.textAlign(p.LEFT, p.CENTER);
     const toolLabel =
-      this.activeTool === EntityTool.GROUND ? "平台 (Ground)" : "传送门 (Portal)";
+      this.activeTool === EntityTool.GROUND
+        ? "地面 (Ground)"
+        : this.activeTool === EntityTool.PLATFORM
+          ? "平台 (Platform)"
+          : this.activeTool === EntityTool.SPIKE
+            ? "地刺 (Spike)"
+            : this.activeTool === EntityTool.WALL
+              ? "墙壁 (Wall)"
+              : "传送门 (Portal)";
     p.text(`正在放置：${toolLabel}`, statusX, statusY);
-
-    // 滑块 — 仅 Ground 模式显示
-    if (this.activeTool === EntityTool.GROUND) {
-      this._drawSlider(p, this._sliderWidth, this.groundWidth);
-      this._drawSlider(p, this._sliderHeight, this.groundHeight);
-    }
 
     // 保存按钮
     this._drawButton(p, this._btnSave, "💾 保存", false, [60, 180, 100]);
+
+    // 房间管理按钮
+    this._drawButton(p, this._btnAddRoom, "+ Room", false, [60, 140, 180]);
+    this._drawButton(p, this._btnDelRoom, "- Room", false, [180, 100, 60]);
+
+    // 房间数量标签
+    p.fill(180, 220, 255);
+    p.noStroke();
+    p.textSize(11);
+    p.textAlign(p.CENTER, p.BOTTOM);
+    p.text(
+      `Rooms: ${this.roomCount}`,
+      (this._btnAddRoom.x + this._btnDelRoom.x + this._btnDelRoom.w) / 2,
+      this._btnAddRoom.y - 2,
+    );
+
+    // 摄像机左右移动按钮
+    this._drawCamButton(p, this._btnCamLeft, "◀", this._camLeftPressed);
+    this._drawCamButton(p, this._btnCamRight, "▶", this._camRightPressed);
 
     // toast
     if (this._toast && Date.now() < this._toast.endTime) {
@@ -189,37 +260,22 @@ export class EditorUI {
     p.text(label, rect.x + rect.w / 2, rect.y + rect.h / 2);
   }
 
-  _drawSlider(p, slider, value) {
-    // label
-    p.fill(180);
+  /** 绘制摄像机方向按钮 */
+  _drawCamButton(p, rect, label, pressed) {
+    const hover = this._insideRect(p.mouseX, p.mouseY, rect);
+    if (pressed) {
+      p.fill(70, 140, 220, 200);
+    } else {
+      p.fill(hover ? 80 : 45, hover ? 80 : 45, hover ? 85 : 50, 180);
+    }
+    p.stroke(120, 120, 130);
+    p.strokeWeight(1);
+    p.rect(rect.x, rect.y, rect.w, rect.h, 8);
+    p.fill(240);
     p.noStroke();
-    p.textSize(12);
-    p.textAlign(p.RIGHT, p.CENTER);
-    p.text(slider.label, slider.x - 8, slider.y + slider.h / 2);
-
-    // track
-    p.fill(60);
-    p.noStroke();
-    p.rect(slider.x, slider.y, slider.w, slider.h, 4);
-
-    // filled portion
-    const ratio = (value - slider.min) / (slider.max - slider.min);
-    p.fill(70, 140, 220);
-    p.rect(slider.x, slider.y, slider.w * ratio, slider.h, 4);
-
-    // handle
-    const hx = slider.x + slider.w * ratio;
-    const hy = slider.y + slider.h / 2;
-    p.fill(slider._dragging ? 255 : 220);
-    p.stroke(100);
-    p.ellipse(hx, hy, SLIDER_HANDLE, SLIDER_HANDLE);
-
-    // value text
-    p.fill(180);
-    p.noStroke();
-    p.textSize(11);
-    p.textAlign(p.LEFT, p.CENTER);
-    p.text(Math.round(value), slider.x + slider.w + 10, slider.y + slider.h / 2);
+    p.textSize(20);
+    p.textAlign(p.CENTER, p.CENTER);
+    p.text(label, rect.x + rect.w / 2, rect.y + rect.h / 2);
   }
 
   _drawToast(p, text) {
@@ -244,6 +300,16 @@ export class EditorUI {
 
   /** 鼠标按下事件（屏幕坐标）。返回 true 表示事件被工具栏消费。 */
   handleMousePressed(mx, my) {
+    // 摄像机左移按钮
+    if (this._insideRect(mx, my, this._btnCamLeft)) {
+      this._camLeftPressed = true;
+      return true;
+    }
+    // 摄像机右移按钮
+    if (this._insideRect(mx, my, this._btnCamRight)) {
+      this._camRightPressed = true;
+      return true;
+    }
     // Ground 按钮
     if (this._insideRect(mx, my, this._btnGround)) {
       this.activeTool = EntityTool.GROUND;
@@ -254,23 +320,35 @@ export class EditorUI {
       this.activeTool = EntityTool.PORTAL;
       return true;
     }
+    // Platform 按钮
+    if (this._insideRect(mx, my, this._btnPlatform)) {
+      this.activeTool = EntityTool.PLATFORM;
+      return true;
+    }
+    // Spike 按钮
+    if (this._insideRect(mx, my, this._btnSpike)) {
+      this.activeTool = EntityTool.SPIKE;
+      return true;
+    }
+    // Wall 按钮
+    if (this._insideRect(mx, my, this._btnWall)) {
+      this.activeTool = EntityTool.WALL;
+      return true;
+    }
+    // 添加房间按钮
+    if (this._insideRect(mx, my, this._btnAddRoom)) {
+      if (this.onAddRoom) this.onAddRoom();
+      return true;
+    }
+    // 删除房间按钮
+    if (this._insideRect(mx, my, this._btnDelRoom)) {
+      if (this.onDelRoom) this.onDelRoom();
+      return true;
+    }
     // 保存按钮
     if (this._insideRect(mx, my, this._btnSave)) {
       if (this.onSave) this.onSave();
       return true;
-    }
-    // 滑块
-    if (this.activeTool === EntityTool.GROUND) {
-      if (this._hitSlider(mx, my, this._sliderWidth)) {
-        this._sliderWidth._dragging = true;
-        this._updateSliderValue(mx, this._sliderWidth, "groundWidth");
-        return true;
-      }
-      if (this._hitSlider(mx, my, this._sliderHeight)) {
-        this._sliderHeight._dragging = true;
-        this._updateSliderValue(mx, this._sliderHeight, "groundHeight");
-        return true;
-      }
     }
     // 点击在工具栏区域内 → 消费事件但不做动作
     if (my >= this._ch - TOOLBAR_HEIGHT) return true;
@@ -278,22 +356,24 @@ export class EditorUI {
   }
 
   /** 鼠标拖拽（屏幕坐标） */
-  handleMouseDragged(mx, _my) {
-    if (this._sliderWidth._dragging) {
-      this._updateSliderValue(mx, this._sliderWidth, "groundWidth");
-      return true;
-    }
-    if (this._sliderHeight._dragging) {
-      this._updateSliderValue(mx, this._sliderHeight, "groundHeight");
-      return true;
-    }
+  handleMouseDragged(_mx, _my) {
     return false;
   }
 
   /** 鼠标释放 */
   handleMouseReleased() {
-    this._sliderWidth._dragging = false;
-    this._sliderHeight._dragging = false;
+    this._camLeftPressed = false;
+    this._camRightPressed = false;
+  }
+
+  /**
+   * 获取当前摄像机移动方向（每帧调用）
+   * @returns {number} -1 左移, +1 右移, 0 无
+   */
+  getCameraMoveDirection() {
+    if (this._camLeftPressed) return -1;
+    if (this._camRightPressed) return 1;
+    return 0;
   }
 
   /** 显示 toast 提示 */
@@ -315,21 +395,5 @@ export class EditorUI {
       my >= rect.y &&
       my <= rect.y + rect.h
     );
-  }
-
-  _hitSlider(mx, my, slider) {
-    const margin = 10;
-    return (
-      mx >= slider.x - margin &&
-      mx <= slider.x + slider.w + margin &&
-      my >= slider.y - margin &&
-      my <= slider.y + slider.h + margin
-    );
-  }
-
-  _updateSliderValue(mx, slider, prop) {
-    const ratio = Math.max(0, Math.min(1, (mx - slider.x) / slider.w));
-    const raw = slider.min + ratio * (slider.max - slider.min);
-    this[prop] = Math.round(raw / 10) * 10; // snap to 10
   }
 }

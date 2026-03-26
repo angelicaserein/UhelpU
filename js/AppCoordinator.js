@@ -93,6 +93,13 @@ export class AppCoordinator {
       this.switcher.setOverlay(resultPage, this.p);
     });
 
+    this.eventBus.subscribe("activateDevMode", () => {
+      const level = this.levelManager.level;
+      if (level && level._mapEditor) {
+        level._mapEditor.activate();
+      }
+    });
+
     this.eventBus.subscribe(EventTypes.PAUSE_GAME, () => {
       this.levelManager.setPaused(true);
     });

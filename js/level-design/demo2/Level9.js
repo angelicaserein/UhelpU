@@ -4,6 +4,7 @@
   Ground,
   Wall,
   Portal,
+  Button,
 } from "../../game-entity-model/index.js";
 import { CollisionSystem } from "../../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../../physics-system/PhysicsSystem.js";
@@ -11,6 +12,7 @@ import { RecordSystem } from "../../record-system/RecordSystem.js";
 import { BaseLevel } from "../BaseLevel.js";
 import { Assets } from "../../AssetsManager.js";
 import { Room } from "../Room.js";
+import { BtnWirePortalSystem } from "../../mechanism-system/demo2/BtnWirePortalSystem.js";
 
 export class Level9 extends BaseLevel {
   constructor(p, eventBus) {
@@ -38,17 +40,38 @@ export class Level9 extends BaseLevel {
 
     this.physicsSystem = new PhysicsSystem(this.entities);
     this.collisionSystem = new CollisionSystem(this.entities, eventBus);
+
+    // 按钮-电线-传送门联动系统（电线路径自动计算）
+    this._btnWirePortalSystem = new BtnWirePortalSystem({
+      button: this._room0Button,
+      portal: this._room0Portal,
+    });
   }
 
   _buildRooms(p) {
     const wallThickness = 20;
 
+    // ── room0（左侧房间）：按钮 + 电线控制的传送门 ──────────
+    this._room0Button = new Button(
+      100,
+      80,
+      BtnWirePortalSystem.BUTTON_W,
+      BtnWirePortalSystem.BUTTON_H,
+    );
+    this._room0Portal = new Portal(p.width - 120, 80);
+    // 门初始关闭，由 BtnWirePortalSystem 控制
+
     const room0 = new Room(
-      [new Wall(0, 0, wallThickness, p.height), new Ground(0, 0, p.width, 80)],
+      [
+        new Wall(0, 0, wallThickness, p.height),
+        new Ground(0, 0, p.width, 80),
+        this._room0Button,
+        this._room0Portal,
+      ],
       { right: { targetRoomIndex: 1 } },
     );
 
-    const portal = new Portal(p.width - 100, 80, 50, 50);
+    const portal = new Portal(p.width - 100, 80);
     portal.openPortal();
 
     const room1 = new Room(
@@ -209,6 +232,7 @@ export class Level9 extends BaseLevel {
       if (entity.update && typeof entity.update === "function")
         entity.update(this.p);
     }
+    this._btnWirePortalSystem.update();
   }
 
   updateCollision(p = this.p, eventBus = this.eventBus) {
@@ -230,6 +254,7 @@ export class Level9 extends BaseLevel {
     for (const entity of this.entities) {
       if (entity.type === "ground") entity.draw(p);
     }
+    this._btnWirePortalSystem.draw(p);
     for (const entity of this.entities) {
       if (entity.type !== "spike" && entity.type !== "ground") entity.draw(p);
     }

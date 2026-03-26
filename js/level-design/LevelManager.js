@@ -208,7 +208,13 @@ export class LevelManager {
       return;
     }
 
-    this.updateCameraNudge();
+    // 编辑器激活时禁用镜头微移，避免鼠标坐标与渲染位置不一致
+    const editorActive = this.level?._mapEditor?.active;
+    if (!editorActive) {
+      this.updateCameraNudge();
+    } else {
+      this.cameraNudgeX = 0;
+    }
     const renderNudgeX = Math.round(this.cameraNudgeX);
     this.flipY(p);
     this.level.clearCanvas &&

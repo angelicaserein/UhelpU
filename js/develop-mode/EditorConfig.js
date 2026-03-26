@@ -9,6 +9,12 @@ export const EntityTool = Object.freeze({
   PLATFORM: "platform",
   SPIKE: "spike",
   WALL: "wall",
+  WIRE_PORTAL: "wirePortal",
+  BTN_SPIKE: "btnSpike",
+  NPC: "npc",
+  SIGNBOARD: "signboard",
+  CHECKPOINT: "checkpoint",
+  SPAWN: "spawn",
 });
 
 /** 网格吸附大小 */
@@ -60,11 +66,47 @@ export const WALL_DEFAULTS = {
   maxHeight: 800,
 };
 
+/** BtnWirePortalSystem 默认值（按钮 + 传送门） */
+export const WIRE_PORTAL_DEFAULTS = {
+  buttonWidth: 34,
+  buttonHeight: 16,
+  portalWidth: 50,
+  portalHeight: 50,
+  offsetX: 200,
+};
+
+/** BtnSpikeLinkSystem 默认值（按钮 + 地刺） */
+export const BTN_SPIKE_DEFAULTS = {
+  buttonWidth: 34,
+  buttonHeight: 16,
+  spikeWidth: 100,
+  spikeHeight: 20,
+  offsetX: 200,
+};
+
+/** NPC 固定大小 */
+export const NPC_SIZE = {
+  width: 40,
+  height: 40,
+};
+
+/** Signboard 固定大小 */
+export const SIGNBOARD_SIZE = {
+  width: 100,
+  height: 65,
+};
+
+/** Checkpoint 固定大小 */
+export const CHECKPOINT_SIZE = {
+  width: 40,
+  height: 70,
+};
+
 /** 预览半透明度 (0–255) */
 export const PREVIEW_ALPHA = 100;
 
 /** 工具栏高度 */
-export const TOOLBAR_HEIGHT = 60;
+export const TOOLBAR_HEIGHT = 80;
 
 /** 拖拽手柄大小（世界坐标像素） */
 export const HANDLE_SIZE = 12;
@@ -80,3 +122,14 @@ export const DEFAULT_ROOM_COUNT = 2;
 
 /** 自动墙壁厚度（像素） */
 export const WALL_THICKNESS = 20;
+
+/** 出生点标记大小（世界坐标像素） */
+export const SPAWN_MARKER_SIZE = 20;
+
+/** 出生点默认位置 */
+export const SPAWN_DEFAULTS = {
+  x: 50,
+  y: 450,
+  playerW: 40,
+  playerH: 40,
+};

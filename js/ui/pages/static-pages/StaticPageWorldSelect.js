@@ -24,7 +24,7 @@ export class StaticPageWorldSelect extends PageBase {
       {
         num: 1,
         x: 0.18,
-        label: "Demo 2",
+        label: t("world_1"),
         action: () => this.switcher.showLevelChoiceDemo2(p),
       },
       {
@@ -36,8 +36,8 @@ export class StaticPageWorldSelect extends PageBase {
       {
         num: 3,
         x: 0.7,
-        label: "Demo 1",
-        action: () => this.switcher.showLevelChoice(p),
+        label: t("world_3"),
+        action: () => this.switcher.showOpeningSceneDemo1(p),
       },
     ];
 

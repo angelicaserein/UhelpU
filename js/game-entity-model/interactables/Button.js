@@ -9,6 +9,7 @@ export class Button extends GameEntity {
   constructor(x, y, w, h, options = {}) {
     super(x, y);
     this.type = "button";
+    this.zIndex = 0;
     this.movementComponent = null;
     this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
     this.isPressed = false;

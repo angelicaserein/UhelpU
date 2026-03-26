@@ -10,6 +10,7 @@ export class Home extends GameEntity {
   constructor(x, y, w, h) {
     super(x, y);
     this.type = "home";
+    this.zIndex = 0;
     this.movementComponent = null;
     this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
   }

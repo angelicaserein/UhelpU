@@ -15,7 +15,7 @@ export class KeyPrompt extends GameEntity {
     super(x, y);
     this.type = "keyprompt";
     this.level = level;
-    this.zIndex = -1; // 在木牌上方，玩家下方
+    this.zIndex = -3; // 在木牌上方，交互物下方
 
     // 透明度相关
     this._currentAlpha = 0;

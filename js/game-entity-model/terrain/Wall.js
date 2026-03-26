@@ -10,6 +10,7 @@ export class Wall extends GameEntity {
   constructor(x, y, w, h) {
     super(x, y);
     this.type = "wall";
+    this.zIndex = -10;
     this.movementComponent = null;
     this.collider = new RectangleCollider(ColliderType.STATIC, w, h);
   }

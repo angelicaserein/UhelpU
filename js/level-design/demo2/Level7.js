@@ -3,7 +3,13 @@
   Replayer,
   Ground,
   Wall,
+  Platform,
   Portal,
+  NPC,
+  Signboard,
+  Checkpoint,
+  Button,
+  Spike,
 } from "../../game-entity-model/index.js";
 import { CollisionSystem } from "../../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../../physics-system/PhysicsSystem.js";
@@ -11,6 +17,8 @@ import { RecordSystem } from "../../record-system/RecordSystem.js";
 import { BaseLevel } from "../BaseLevel.js";
 import { Assets } from "../../AssetsManager.js";
 import { Room } from "../Room.js";
+import { BtnWirePortalSystem } from "../../mechanism-system/demo2/BtnWirePortalSystem.js";
+import { ButtonSpikeLinkSystem } from "../../mechanism-system/demo2/ButtonSpikeLinkSystem.js";
 
 export class Level7 extends BaseLevel {
   constructor(p, eventBus) {
@@ -22,6 +30,17 @@ export class Level7 extends BaseLevel {
 
     this.rooms = this._buildRooms(p);
     this._applyWorldOffsetsToRooms(p);
+
+    // BtnWirePortalSystem
+    this._btnWirePortalSystem = new BtnWirePortalSystem({
+      button: this._wpBtn_0,
+      portal: this._wpPortal_0,
+    });
+
+    // ButtonSpikeLinkSystem
+    this._buttonSpikeLinkSystem = new ButtonSpikeLinkSystem([
+      { button: this._bsBtn_0, spikes: [this._bsSpike_0] },
+    ]);
 
     this._player = new Player(50, 450, 40, 40);
     this._player.createListeners();
@@ -43,19 +62,36 @@ export class Level7 extends BaseLevel {
   _buildRooms(p) {
     const wallThickness = 20;
 
+    // BtnWirePortalSystem entities
+    this._wpBtn_0 = new Button(760, 270, 34, 16);
+    this._wpPortal_0 = new Portal(960, 270, 50, 50);
+
+    // ButtonSpikeLinkSystem entities
+    this._bsBtn_0 = new Button(1040, 80, 34, 16);
+    this._bsSpike_0 = new Spike(1240, 80, 100, 20);
+
     const room0 = new Room(
-      [new Wall(0, 0, wallThickness, p.height), new Ground(0, 0, p.width, 80)],
+      [
+        new Wall(0, 0, wallThickness, 768),
+        new Ground(0, 0, p.width, 80),
+        new Ground(450, 170, 200, 40),
+        new Platform(220, 85, 160, 30),
+        new Portal(970, 120, 50, 50),
+        new NPC(290, 130, 40, 40),
+        new Signboard(620, 90, 100, 65),
+        new Checkpoint(480, 70, 40, 70),
+        this._wpBtn_0,
+        this._wpPortal_0,
+        this._bsBtn_0,
+        this._bsSpike_0,
+      ],
       { right: { targetRoomIndex: 1 } },
     );
 
-    const portal = new Portal(p.width - 100, 80, 50, 50);
-    portal.openPortal();
-
     const room1 = new Room(
       [
-        new Wall(p.width - wallThickness, 0, wallThickness, p.height),
+        new Wall(p.width - wallThickness, 0, wallThickness, 768),
         new Ground(0, 0, p.width, 80),
-        portal,
       ],
       { left: { targetRoomIndex: 0 } },
     );
@@ -209,6 +245,8 @@ export class Level7 extends BaseLevel {
       if (entity.update && typeof entity.update === "function")
         entity.update(this.p);
     }
+    this._btnWirePortalSystem.update();
+    this._buttonSpikeLinkSystem.update();
   }
 
   updateCollision(p = this.p, eventBus = this.eventBus) {
@@ -230,6 +268,7 @@ export class Level7 extends BaseLevel {
     for (const entity of this.entities) {
       if (entity.type === "ground") entity.draw(p);
     }
+    this._btnWirePortalSystem.draw(p);
     for (const entity of this.entities) {
       if (entity.type !== "spike" && entity.type !== "ground") entity.draw(p);
     }

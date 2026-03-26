@@ -12,6 +12,7 @@ export class Portal extends GameEntity {
   constructor(x, y, w = Portal.DEFAULT_SIZE, h = Portal.DEFAULT_SIZE) {
     super(x, y);
     this.type = "portal";
+    this.zIndex = 0;
     this.movementComponent = null;
     this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
     this.isOpen = false;

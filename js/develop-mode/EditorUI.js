@@ -16,10 +16,15 @@ import {
 } from "./EditorConfig.js";
 
 // ── 内部布局常量 ──────────────────────────────────────────────
+// ── 第一行按钮尺寸
+// ── 第二行按钮尺寸稍小
 const BTN_W = 110;
 const BTN_H = 36;
+const BTN_W2 = 100;
+const BTN_H2 = 30;
 const BTN_GAP = 14;
-const BTN_Y_OFFSET = 12; // 按钮距工具栏顶部
+const BTN_GAP2 = 10;
+const BTN_Y_OFFSET = 4; // 第一行按钮距工具栏顶部
 
 const SAVE_BTN_W = 90;
 const SAVE_BTN_H = 36;
@@ -82,6 +87,45 @@ export class EditorUI {
       y: toolbarTop + BTN_Y_OFFSET,
       w: BTN_W,
       h: BTN_H,
+    };
+    this._btnWirePortal = {
+      x: startX + (BTN_W + BTN_GAP) * 5,
+      y: toolbarTop + BTN_Y_OFFSET,
+      w: BTN_W,
+      h: BTN_H,
+    };
+    this._btnBtnSpike = {
+      x: startX + (BTN_W + BTN_GAP) * 6,
+      y: toolbarTop + BTN_Y_OFFSET,
+      w: BTN_W,
+      h: BTN_H,
+    };
+
+    // 第二行按钮
+    const row2Top = toolbarTop + BTN_Y_OFFSET + BTN_H + 4;
+    this._btnNpc = {
+      x: startX,
+      y: row2Top,
+      w: BTN_W2,
+      h: BTN_H2,
+    };
+    this._btnSignboard = {
+      x: startX + BTN_W2 + BTN_GAP2,
+      y: row2Top,
+      w: BTN_W2,
+      h: BTN_H2,
+    };
+    this._btnCheckpoint = {
+      x: startX + (BTN_W2 + BTN_GAP2) * 2,
+      y: row2Top,
+      w: BTN_W2,
+      h: BTN_H2,
+    };
+    this._btnSpawn = {
+      x: startX + (BTN_W2 + BTN_GAP2) * 3,
+      y: row2Top,
+      w: BTN_W2,
+      h: BTN_H2,
     };
 
     // 保存按钮 — 右侧
@@ -185,9 +229,57 @@ export class EditorUI {
       this.activeTool === EntityTool.WALL,
       [100, 100, 120],
     );
+    // WirePortal 按钮
+    this._drawButton(
+      p,
+      this._btnWirePortal,
+      "WirePortal",
+      this.activeTool === EntityTool.WIRE_PORTAL,
+      [180, 100, 240],
+    );
+    // BtnSpike 按钮
+    this._drawButton(
+      p,
+      this._btnBtnSpike,
+      "BtnSpike",
+      this.activeTool === EntityTool.BTN_SPIKE,
+      [240, 160, 30],
+    );
+    // NPC 按钮
+    this._drawButton(
+      p,
+      this._btnNpc,
+      "NPC",
+      this.activeTool === EntityTool.NPC,
+      [60, 200, 220],
+    );
+    // Signboard 按钮
+    this._drawButton(
+      p,
+      this._btnSignboard,
+      "Signboard",
+      this.activeTool === EntityTool.SIGNBOARD,
+      [200, 160, 80],
+    );
+    // Checkpoint 按钮
+    this._drawButton(
+      p,
+      this._btnCheckpoint,
+      "Checkpoint",
+      this.activeTool === EntityTool.CHECKPOINT,
+      [200, 80, 180],
+    );
+    // Spawn 按钮
+    this._drawButton(
+      p,
+      this._btnSpawn,
+      "⌖ Spawn",
+      this.activeTool === EntityTool.SPAWN,
+      [255, 180, 0],
+    );
 
     // 状态提示
-    const statusX = this._btnWall.x + BTN_W + 20;
+    const statusX = this._btnSpawn.x + BTN_W2 + 20;
     const statusY = toolbarTop + TOOLBAR_HEIGHT / 2 + 8;
     p.fill(200);
     p.noStroke();
@@ -202,7 +294,19 @@ export class EditorUI {
             ? "地刺 (Spike)"
             : this.activeTool === EntityTool.WALL
               ? "墙壁 (Wall)"
-              : "传送门 (Portal)";
+              : this.activeTool === EntityTool.WIRE_PORTAL
+                ? "按钮传送门 (WirePortal)"
+                : this.activeTool === EntityTool.BTN_SPIKE
+                  ? "按钮地刺 (BtnSpike)"
+                  : this.activeTool === EntityTool.NPC
+                  ? "NPC"
+                  : this.activeTool === EntityTool.SIGNBOARD
+                    ? "木牌 (Signboard)"
+                    : this.activeTool === EntityTool.CHECKPOINT
+                      ? "存档点 (Checkpoint)"
+                      : this.activeTool === EntityTool.SPAWN
+                        ? "出生点 (Spawn)"
+                        : "传送门 (Portal)";
     p.text(`正在放置：${toolLabel}`, statusX, statusY);
 
     // 保存按钮
@@ -333,6 +437,36 @@ export class EditorUI {
     // Wall 按钮
     if (this._insideRect(mx, my, this._btnWall)) {
       this.activeTool = EntityTool.WALL;
+      return true;
+    }
+    // WirePortal 按钮
+    if (this._insideRect(mx, my, this._btnWirePortal)) {
+      this.activeTool = EntityTool.WIRE_PORTAL;
+      return true;
+    }
+    // BtnSpike 按钮
+    if (this._insideRect(mx, my, this._btnBtnSpike)) {
+      this.activeTool = EntityTool.BTN_SPIKE;
+      return true;
+    }
+    // NPC 按钮
+    if (this._insideRect(mx, my, this._btnNpc)) {
+      this.activeTool = EntityTool.NPC;
+      return true;
+    }
+    // Signboard 按钮
+    if (this._insideRect(mx, my, this._btnSignboard)) {
+      this.activeTool = EntityTool.SIGNBOARD;
+      return true;
+    }
+    // Checkpoint 按钮
+    if (this._insideRect(mx, my, this._btnCheckpoint)) {
+      this.activeTool = EntityTool.CHECKPOINT;
+      return true;
+    }
+    // Spawn 按钮
+    if (this._insideRect(mx, my, this._btnSpawn)) {
+      this.activeTool = EntityTool.SPAWN;
       return true;
     }
     // 添加房间按钮

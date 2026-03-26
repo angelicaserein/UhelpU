@@ -26,6 +26,10 @@ import {
   CAMERA_MOVE_SPEED,
   DEFAULT_ROOM_COUNT,
   WALL_THICKNESS,
+  SPAWN_MARKER_SIZE,
+  SPAWN_DEFAULTS,
+  GRID_SIZE,
+  EntityTool,
 } from "./EditorConfig.js";
 
 export class MapEditor {
@@ -43,6 +47,17 @@ export class MapEditor {
 
     /** 编辑器手动摄像机偏移（叠加在关卡摄像机之上，单位：世界像素） */
     this._cameraOffset = 0;
+
+    // 玩家出生点（从关卡的 _player 读取初始值，若无则使用默认值）
+    const player = level._player;
+    this._spawnX = player ? player._startX : SPAWN_DEFAULTS.x;
+    this._spawnY = player ? player._startY : SPAWN_DEFAULTS.y;
+    this._spawnPlayerW = player && player.collider ? player.collider.w : SPAWN_DEFAULTS.playerW;
+    this._spawnPlayerH = player && player.collider ? player.collider.h : SPAWN_DEFAULTS.playerH;
+    /** 是否正在拖拽出生点标记 */
+    this._draggingSpawn = false;
+    this._spawnDragOffsetX = 0;
+    this._spawnDragOffsetY = 0;
 
     // 劫持关卡的 _getCameraX，让关卡自身的 draw/clearCanvas 也应用编辑器偏移
     this._originalGetCameraX =
@@ -122,6 +137,8 @@ export class MapEditor {
       GROUND_DEFAULTS.height,
       this._ui.isInsideToolbar(p.mouseX, p.mouseY) ||
         this._entityMgr.isResizing() ||
+        this._entityMgr.isBtnSpikeResizing() ||
+        this._entityMgr.isMoving() ||
         this._entityMgr.selected !== null,
     );
 
@@ -133,6 +150,9 @@ export class MapEditor {
 
     // 绘制房间边界和自动墙壁指示
     this._drawRoomBoundaries(p);
+
+    // 绘制出生点标记
+    this._drawSpawnMarker(p);
 
     // 绘制已放置的实体
     this._entityMgr.draw(p);
@@ -204,6 +224,30 @@ export class MapEditor {
       this._ui.activeTool = "wall";
       return;
     }
+    if (e.key === "6") {
+      this._ui.activeTool = "wirePortal";
+      return;
+    }
+    if (e.key === "7") {
+      this._ui.activeTool = "btnSpike";
+      return;
+    }
+    if (e.key === "8") {
+      this._ui.activeTool = "npc";
+      return;
+    }
+    if (e.key === "9") {
+      this._ui.activeTool = "signboard";
+      return;
+    }
+    if (e.key === "0") {
+      this._ui.activeTool = "checkpoint";
+      return;
+    }
+    if (e.key === "-") {
+      this._ui.activeTool = EntityTool.SPAWN;
+      return;
+    }
   }
 
   _onMousePressed() {
@@ -224,6 +268,24 @@ export class MapEditor {
     const worldX = mx + cameraX;
     const worldY = p.height - my;
 
+    // 0) 检查是否点击了出生点标记 → 开始拖拽
+    if (this._isInsideSpawnMarker(worldX, worldY)) {
+      this._draggingSpawn = true;
+      this._spawnDragOffsetX = worldX - this._spawnX;
+      this._spawnDragOffsetY = worldY - this._spawnY;
+      this._entityMgr.deselect();
+      return;
+    }
+
+    // 0.5) Spawn 工具模式：点击空白区域重新设置出生点
+    if (this._ui.activeTool === EntityTool.SPAWN) {
+      this._spawnX = Math.round(worldX / GRID_SIZE) * GRID_SIZE;
+      this._spawnY = Math.round(worldY / GRID_SIZE) * GRID_SIZE;
+      this._applySpawnToPlayer();
+      this._ui.showToast(`出生点已设置为 (${this._spawnX}, ${this._spawnY})`);
+      return;
+    }
+
     // 1) 检查是否点击了某个实体的删除按钮
     const delTarget = this._entityMgr.getDeleteBtnHit(worldX, worldY);
     if (delTarget) {
@@ -236,6 +298,27 @@ export class MapEditor {
     const handle = this._entityMgr.getHandleAt(worldX, worldY);
     if (handle) {
       this._entityMgr.startResize(handle);
+      return;
+    }
+
+    // 2.5) 检查是否点击了 WirePortal 的子实体（按钮或传送门） → 开始拖动
+    const wpHit = this._entityMgr.findWirePortalSubEntity(worldX, worldY);
+    if (wpHit) {
+      this._entityMgr.startMove(wpHit.record, wpHit.entity, worldX, worldY);
+      return;
+    }
+
+    // 2.6) 检查是否点击了 BtnSpike 地刺的调整手柄 → 开始调整大小
+    const bsHandleHit = this._entityMgr.getBtnSpikeHandleAt(worldX, worldY);
+    if (bsHandleHit) {
+      this._entityMgr.startBtnSpikeResize(bsHandleHit.record, bsHandleHit.handle);
+      return;
+    }
+
+    // 2.7) 检查是否点击了 BtnSpike 的子实体（按钮或地刺） → 开始拖动
+    const bsHit = this._entityMgr.findBtnSpikeSubEntity(worldX, worldY);
+    if (bsHit) {
+      this._entityMgr.startMove(bsHit.record, bsHit.entity, worldX, worldY);
       return;
     }
 
@@ -268,6 +351,17 @@ export class MapEditor {
     if (!this._active) return;
     if (this._ui.handleMouseDragged(this._p.mouseX, this._p.mouseY)) return;
 
+    // 拖拽出生点标记
+    if (this._draggingSpawn) {
+      const cameraX = this._getCameraX(this._p);
+      const worldX = this._p.mouseX + cameraX;
+      const worldY = this._p.height - this._p.mouseY;
+      this._spawnX = Math.round((worldX - this._spawnDragOffsetX) / GRID_SIZE) * GRID_SIZE;
+      this._spawnY = Math.round((worldY - this._spawnDragOffsetY) / GRID_SIZE) * GRID_SIZE;
+      this._applySpawnToPlayer();
+      return;
+    }
+
     // 拖拽调整大小
     if (this._entityMgr.isResizing()) {
       const cameraX = this._getCameraX(this._p);
@@ -275,12 +369,33 @@ export class MapEditor {
       const worldY = this._p.height - this._p.mouseY;
       this._entityMgr.updateResize(worldX, worldY);
     }
+
+    // 拖拽调整 BtnSpike 地刺大小
+    if (this._entityMgr.isBtnSpikeResizing()) {
+      const cameraX = this._getCameraX(this._p);
+      const worldX = this._p.mouseX + cameraX;
+      const worldY = this._p.height - this._p.mouseY;
+      this._entityMgr.updateBtnSpikeResize(worldX, worldY);
+    }
+
+    // 拖动 WirePortal / BtnSpike 子实体
+    if (this._entityMgr.isMoving()) {
+      const cameraX = this._getCameraX(this._p);
+      const worldX = this._p.mouseX + cameraX;
+      const worldY = this._p.height - this._p.mouseY;
+      this._entityMgr.updateMove(worldX, worldY);
+    }
   }
 
   _onMouseReleased() {
     if (!this._active) return;
     this._ui.handleMouseReleased();
+    if (this._draggingSpawn) {
+      this._draggingSpawn = false;
+    }
     this._entityMgr.endResize();
+    this._entityMgr.endBtnSpikeResize();
+    this._entityMgr.endMove();
   }
 
   // ══════════════════════════════════════════════════════════════
@@ -289,18 +404,88 @@ export class MapEditor {
 
   async _handleSave() {
     const entities = this._entityMgr.getAll();
-    if (entities.length === 0) {
-      this._ui.showToast("没有放置任何实体");
-      return;
-    }
     const code = await EditorExporter.copyToClipboard(
       entities,
       this._roomCount,
       this._p.width,
       this._p.height,
+      { x: this._spawnX, y: this._spawnY, w: this._spawnPlayerW, h: this._spawnPlayerH },
     );
-    this._ui.showToast(`✅ 已复制 ${entities.length} 个实体的代码到剪贴板`);
+    this._ui.showToast(`✅ 已复制代码到剪贴板（含出生点）`);
     console.log("[MapEditor] 导出代码:\n" + code);
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // 出生点管理
+  // ══════════════════════════════════════════════════════════════
+
+  /** 判断世界坐标是否在出生点标记范围内 */
+  _isInsideSpawnMarker(worldX, worldY) {
+    const half = SPAWN_MARKER_SIZE + 6;
+    return (
+      worldX >= this._spawnX - half &&
+      worldX <= this._spawnX + this._spawnPlayerW + half &&
+      worldY >= this._spawnY - half &&
+      worldY <= this._spawnY + this._spawnPlayerH + half
+    );
+  }
+
+  /** 将出生点应用到关卡的 Player 实体 */
+  _applySpawnToPlayer() {
+    const player = this._level._player;
+    if (!player) return;
+    player.x = this._spawnX;
+    player.y = this._spawnY;
+    player._startX = this._spawnX;
+    player._startY = this._spawnY;
+  }
+
+  /** 绘制出生点标记（世界空间，已在 push/translate 内） */
+  _drawSpawnMarker(p) {
+    const sx = this._spawnX;
+    const sy = this._spawnY;
+    const pw = this._spawnPlayerW;
+    const ph = this._spawnPlayerH;
+    const m = SPAWN_MARKER_SIZE;
+
+    // 玩家轮廓虚线框
+    p.stroke(255, 180, 0, 200);
+    p.strokeWeight(2);
+    p.noFill();
+    this._drawDashedRect(p, sx, sy, pw, ph);
+
+    // 十字线标记（中心在玩家底部中点）
+    const cx = sx + pw / 2;
+    const cy = sy;
+    p.stroke(255, 100, 0, 240);
+    p.strokeWeight(3);
+    p.line(cx - m, cy, cx + m, cy);
+    p.line(cx, cy - m, cx, cy + m);
+
+    // 小圆圈
+    p.noFill();
+    p.stroke(255, 180, 0, 200);
+    p.strokeWeight(2);
+    p.ellipse(cx, cy, m * 1.4, m * 1.4);
+
+    // 坐标标签（需要翻转 Y 回来让文字正常显示）
+    p.push();
+    p.translate(sx, sy + ph + 14);
+    p.scale(1, -1);
+    p.fill(255, 180, 0);
+    p.noStroke();
+    p.textSize(11);
+    p.textAlign(p.LEFT, p.CENTER);
+    p.text(`Spawn (${sx}, ${sy})`, 0, 0);
+    p.pop();
+  }
+
+  /** 绘制虚线矩形（世界空间） */
+  _drawDashedRect(p, x, y, w, h) {
+    this._drawDashedLine(p, x, y, x + w, y);
+    this._drawDashedLine(p, x + w, y, x + w, y + h);
+    this._drawDashedLine(p, x + w, y + h, x, y + h);
+    this._drawDashedLine(p, x, y + h, x, y);
   }
 
   // ══════════════════════════════════════════════════════════════

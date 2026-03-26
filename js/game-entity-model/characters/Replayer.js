@@ -23,6 +23,7 @@ export class Replayer extends Character {
   constructor(x, y, w, h) {
     super(x, y);
     this.type = "replayer";
+    this.zIndex = 10;
     this._startX = x;
     this._startY = y;
     this.isReplaying = false;

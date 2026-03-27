@@ -2,6 +2,7 @@
 // 特点：在画布居中显示，点击关闭
 
 import { i18n, t } from "../../i18n.js";
+import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
 
 export class WindowPrompt {
   /**
@@ -85,7 +86,7 @@ export class WindowPrompt {
     if (!this.contentKey) {
       return "这是一个占位符提示框，等会会改成真正的提示框内容。";
     }
-    return t(this.contentKey);
+    return KeyBindingManager.resolveKeyPlaceholders(t(this.contentKey));
   }
 
   _refreshContent() {

@@ -36,11 +36,11 @@ registerTranslations({
     level3_signboard_prompt: "Which key was it to interact again?",
     level4_button_hint: "Do I have to use these two buttons?",
     level4_checkpoint_hint:
-      "You have successfully activated the checkpoint!<br>P.S. Press B to return to the checkpoint at any time.",
+      "You have successfully activated the checkpoint!<br>P.S. Press {key:teleportCheckpoint} to return to the checkpoint at any time.",
     level4_selfjump_hint_window:
       'Congratulations!\n You\'ve unlocked the achievement: \n"<span class="rainbow-wave">S</span><span class="rainbow-wave">e</span><span class="rainbow-wave">l</span><span class="rainbow-wave">f</span><span class="rainbow-wave">-</span><span class="rainbow-wave">J</span><span class="rainbow-wave">u</span><span class="rainbow-wave">m</span><span class="rainbow-wave">p</span>"!',
     level5_jail_prompt:
-      "Huh?\nRemember to press B when checkpoint is activated!",
+      "Huh?\nRemember to press {key:teleportCheckpoint} when checkpoint is activated!",
     level5_pause_hint:
       "Someone told me once\nIf you're stuck, try pressing pause.",
     level5_jail_hint_window:
@@ -178,10 +178,11 @@ registerTranslations({
     level3_signboard_prompt: "我记得按哪个键可以交互来着？",
     level4_button_hint: "我必须要用这两个按钮吗",
     level4_checkpoint_hint:
-      "你成功激活了存档点！<br>p.s. 按B键可以随时返回存档点",
+      "你成功激活了存档点！<br>p.s. 按{key:teleportCheckpoint}键可以随时返回存档点",
     level4_selfjump_hint_window:
       '恭喜你解锁"<span class="rainbow-wave">S</span><span class="rainbow-wave">e</span><span class="rainbow-wave">l</span><span class="rainbow-wave">f</span><span class="rainbow-wave">-</span><span class="rainbow-wave">J</span><span class="rainbow-wave">u</span><span class="rainbow-wave">m</span><span class="rainbow-wave">p</span>"的成就！',
-    level5_jail_prompt: "咦？\n记得存档点激活后按B键哦！",
+    level5_jail_prompt:
+      "咦？\n记得存档点激活后按{key:teleportCheckpoint}键哦！",
     level5_pause_hint: "好像有人告诉过我\n卡关了的话应该按暂停看看。",
     level5_jail_hint_window:
       '恭喜你解锁"<span class="rainbow-wave">囚</span><span class="rainbow-wave">犯</span>"的成就！',

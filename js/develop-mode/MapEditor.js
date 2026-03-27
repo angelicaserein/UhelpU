@@ -52,8 +52,10 @@ export class MapEditor {
     const player = level._player;
     this._spawnX = player ? player._startX : SPAWN_DEFAULTS.x;
     this._spawnY = player ? player._startY : SPAWN_DEFAULTS.y;
-    this._spawnPlayerW = player && player.collider ? player.collider.w : SPAWN_DEFAULTS.playerW;
-    this._spawnPlayerH = player && player.collider ? player.collider.h : SPAWN_DEFAULTS.playerH;
+    this._spawnPlayerW =
+      player && player.collider ? player.collider.w : SPAWN_DEFAULTS.playerW;
+    this._spawnPlayerH =
+      player && player.collider ? player.collider.h : SPAWN_DEFAULTS.playerH;
     /** 是否正在拖拽出生点标记 */
     this._draggingSpawn = false;
     this._spawnDragOffsetX = 0;
@@ -138,9 +140,15 @@ export class MapEditor {
       this._ui.isInsideToolbar(p.mouseX, p.mouseY) ||
         this._entityMgr.isResizing() ||
         this._entityMgr.isBtnSpikeResizing() ||
+        this._entityMgr.isBtnPlatformResizing() ||
         this._entityMgr.isMoving() ||
         this._entityMgr.selected !== null,
     );
+
+    // ── 更新编辑器放置的机制系统 ───────────────────────────
+    for (const rec of this._entityMgr.getAll()) {
+      if (rec.platformLinkSystem) rec.platformLinkSystem.update();
+    }
 
     // ── 世界空间绘制 ────────────────────────────────────
     // 此时 LevelManager 已经做了 flipY（Y 轴已翻转），
@@ -156,6 +164,11 @@ export class MapEditor {
 
     // 绘制已放置的实体
     this._entityMgr.draw(p);
+
+    // 绘制消失平台的半透明效果
+    for (const rec of this._entityMgr.getAll()) {
+      if (rec.platformLinkSystem) rec.platformLinkSystem.draw(p);
+    }
 
     // 绘制预览
     this._preview.draw(p, this._ui.activeTool);
@@ -233,11 +246,11 @@ export class MapEditor {
       return;
     }
     if (e.key === "8") {
-      this._ui.activeTool = "npc";
+      this._ui.activeTool = "btnPlatform";
       return;
     }
     if (e.key === "9") {
-      this._ui.activeTool = "signboard";
+      this._ui.activeTool = "npc";
       return;
     }
     if (e.key === "0") {
@@ -311,7 +324,10 @@ export class MapEditor {
     // 2.6) 检查是否点击了 BtnSpike 地刺的调整手柄 → 开始调整大小
     const bsHandleHit = this._entityMgr.getBtnSpikeHandleAt(worldX, worldY);
     if (bsHandleHit) {
-      this._entityMgr.startBtnSpikeResize(bsHandleHit.record, bsHandleHit.handle);
+      this._entityMgr.startBtnSpikeResize(
+        bsHandleHit.record,
+        bsHandleHit.handle,
+      );
       return;
     }
 
@@ -319,6 +335,24 @@ export class MapEditor {
     const bsHit = this._entityMgr.findBtnSpikeSubEntity(worldX, worldY);
     if (bsHit) {
       this._entityMgr.startMove(bsHit.record, bsHit.entity, worldX, worldY);
+      return;
+    }
+
+    // 2.8) 检查是否点击了 BtnPlatform 平台的调整手柄 → 开始调整大小
+    const bpHandleHit = this._entityMgr.getBtnPlatformHandleAt(worldX, worldY);
+    if (bpHandleHit) {
+      this._entityMgr.startBtnPlatformResize(
+        bpHandleHit.record,
+        bpHandleHit.handle,
+        bpHandleHit.platformIdx,
+      );
+      return;
+    }
+
+    // 2.9) 检查是否点击了 BtnPlatform 的子实体（按钮或平台） → 开始拖动
+    const bpHit = this._entityMgr.findBtnPlatformSubEntity(worldX, worldY);
+    if (bpHit) {
+      this._entityMgr.startMove(bpHit.record, bpHit.entity, worldX, worldY);
       return;
     }
 
@@ -337,12 +371,17 @@ export class MapEditor {
 
     // 5) 没有选中实体时，点击空白区域 → 放置新实体
     if (this._preview.visible) {
+      const options = {};
+      if (this._ui.activeTool === EntityTool.BTN_PLATFORM) {
+        options.platformCount = this._ui.btnPlatformCount;
+      }
       this._entityMgr.place(
         this._ui.activeTool,
         this._preview.previewX,
         this._preview.previewY,
         this._preview.previewW,
         this._preview.previewH,
+        options,
       );
     }
   }
@@ -356,8 +395,10 @@ export class MapEditor {
       const cameraX = this._getCameraX(this._p);
       const worldX = this._p.mouseX + cameraX;
       const worldY = this._p.height - this._p.mouseY;
-      this._spawnX = Math.round((worldX - this._spawnDragOffsetX) / GRID_SIZE) * GRID_SIZE;
-      this._spawnY = Math.round((worldY - this._spawnDragOffsetY) / GRID_SIZE) * GRID_SIZE;
+      this._spawnX =
+        Math.round((worldX - this._spawnDragOffsetX) / GRID_SIZE) * GRID_SIZE;
+      this._spawnY =
+        Math.round((worldY - this._spawnDragOffsetY) / GRID_SIZE) * GRID_SIZE;
       this._applySpawnToPlayer();
       return;
     }
@@ -378,6 +419,14 @@ export class MapEditor {
       this._entityMgr.updateBtnSpikeResize(worldX, worldY);
     }
 
+    // 拖拽调整 BtnPlatform 平台大小
+    if (this._entityMgr.isBtnPlatformResizing()) {
+      const cameraX = this._getCameraX(this._p);
+      const worldX = this._p.mouseX + cameraX;
+      const worldY = this._p.height - this._p.mouseY;
+      this._entityMgr.updateBtnPlatformResize(worldX, worldY);
+    }
+
     // 拖动 WirePortal / BtnSpike 子实体
     if (this._entityMgr.isMoving()) {
       const cameraX = this._getCameraX(this._p);
@@ -395,6 +444,7 @@ export class MapEditor {
     }
     this._entityMgr.endResize();
     this._entityMgr.endBtnSpikeResize();
+    this._entityMgr.endBtnPlatformResize();
     this._entityMgr.endMove();
   }
 
@@ -409,7 +459,12 @@ export class MapEditor {
       this._roomCount,
       this._p.width,
       this._p.height,
-      { x: this._spawnX, y: this._spawnY, w: this._spawnPlayerW, h: this._spawnPlayerH },
+      {
+        x: this._spawnX,
+        y: this._spawnY,
+        w: this._spawnPlayerW,
+        h: this._spawnPlayerH,
+      },
     );
     this._ui.showToast(`✅ 已复制代码到剪贴板（含出生点）`);
     console.log("[MapEditor] 导出代码:\n" + code);

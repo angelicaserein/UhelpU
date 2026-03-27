@@ -54,6 +54,9 @@ export class EditorUI {
     this._camLeftPressed = false;
     this._camRightPressed = false;
 
+    /** BtnPlatform 平台数量（1~8） */
+    this.btnPlatformCount = 1;
+
     // ── 预计算按钮矩形 ──────────────────────────────────────
     const toolbarTop = this._ch - TOOLBAR_HEIGHT;
     const startX = 20;
@@ -100,6 +103,12 @@ export class EditorUI {
       w: BTN_W,
       h: BTN_H,
     };
+    this._btnBtnPlatform = {
+      x: startX + (BTN_W + BTN_GAP) * 7,
+      y: toolbarTop + BTN_Y_OFFSET,
+      w: BTN_W,
+      h: BTN_H,
+    };
 
     // 第二行按钮
     const row2Top = toolbarTop + BTN_Y_OFFSET + BTN_H + 4;
@@ -127,6 +136,24 @@ export class EditorUI {
       w: BTN_W2,
       h: BTN_H2,
     };
+
+    // BtnPlatform 平台数量 +/- 按钮（第二行，Spawn 按钮右侧）
+    const PLAT_COUNT_BTN_W = 28;
+    const platCountStartX = this._btnSpawn.x + BTN_W2 + BTN_GAP2 + 10;
+    this._btnPlatCountMinus = {
+      x: platCountStartX,
+      y: row2Top,
+      w: PLAT_COUNT_BTN_W,
+      h: BTN_H2,
+    };
+    this._btnPlatCountPlus = {
+      x: platCountStartX + PLAT_COUNT_BTN_W + 4 + 30 + 4,
+      y: row2Top,
+      w: PLAT_COUNT_BTN_W,
+      h: BTN_H2,
+    };
+    this._platCountLabelX = platCountStartX + PLAT_COUNT_BTN_W + 4 + 15;
+    this._platCountLabelY = row2Top + BTN_H2 / 2;
 
     // 保存按钮 — 右侧
     this._btnSave = {
@@ -245,6 +272,14 @@ export class EditorUI {
       this.activeTool === EntityTool.BTN_SPIKE,
       [240, 160, 30],
     );
+    // BtnPlatform 按钮
+    this._drawButton(
+      p,
+      this._btnBtnPlatform,
+      "BtnPlat",
+      this.activeTool === EntityTool.BTN_PLATFORM,
+      [60, 180, 140],
+    );
     // NPC 按钮
     this._drawButton(
       p,
@@ -278,6 +313,31 @@ export class EditorUI {
       [255, 180, 0],
     );
 
+    // BtnPlatform 平台数量控制（仅在 BtnPlatform 工具激活时显示）
+    if (this.activeTool === EntityTool.BTN_PLATFORM) {
+      // 标题
+      p.fill(180, 220, 255);
+      p.noStroke();
+      p.textSize(11);
+      p.textAlign(p.CENTER, p.BOTTOM);
+      p.text("平台数量", this._platCountLabelX, this._btnPlatCountMinus.y - 2);
+
+      // - 按钮
+      this._drawButton(p, this._btnPlatCountMinus, "−", false, [180, 80, 80]);
+      // 数量显示
+      p.fill(255);
+      p.noStroke();
+      p.textSize(15);
+      p.textAlign(p.CENTER, p.CENTER);
+      p.text(
+        this.btnPlatformCount,
+        this._platCountLabelX,
+        this._platCountLabelY,
+      );
+      // + 按钮
+      this._drawButton(p, this._btnPlatCountPlus, "+", false, [80, 180, 80]);
+    }
+
     // 状态提示
     const statusX = this._btnSpawn.x + BTN_W2 + 20;
     const statusY = toolbarTop + TOOLBAR_HEIGHT / 2 + 8;
@@ -298,15 +358,17 @@ export class EditorUI {
                 ? "按钮传送门 (WirePortal)"
                 : this.activeTool === EntityTool.BTN_SPIKE
                   ? "按钮地刺 (BtnSpike)"
-                  : this.activeTool === EntityTool.NPC
-                  ? "NPC"
-                  : this.activeTool === EntityTool.SIGNBOARD
-                    ? "木牌 (Signboard)"
-                    : this.activeTool === EntityTool.CHECKPOINT
-                      ? "存档点 (Checkpoint)"
-                      : this.activeTool === EntityTool.SPAWN
-                        ? "出生点 (Spawn)"
-                        : "传送门 (Portal)";
+                  : this.activeTool === EntityTool.BTN_PLATFORM
+                    ? `按钮消失平台 ×${this.btnPlatformCount} (BtnPlatform)`
+                    : this.activeTool === EntityTool.NPC
+                      ? "NPC"
+                      : this.activeTool === EntityTool.SIGNBOARD
+                        ? "木牌 (Signboard)"
+                        : this.activeTool === EntityTool.CHECKPOINT
+                          ? "存档点 (Checkpoint)"
+                          : this.activeTool === EntityTool.SPAWN
+                            ? "出生点 (Spawn)"
+                            : "传送门 (Portal)";
     p.text(`正在放置：${toolLabel}`, statusX, statusY);
 
     // 保存按钮
@@ -447,6 +509,26 @@ export class EditorUI {
     // BtnSpike 按钮
     if (this._insideRect(mx, my, this._btnBtnSpike)) {
       this.activeTool = EntityTool.BTN_SPIKE;
+      return true;
+    }
+    // BtnPlatform 按钮
+    if (this._insideRect(mx, my, this._btnBtnPlatform)) {
+      this.activeTool = EntityTool.BTN_PLATFORM;
+      return true;
+    }
+    // BtnPlatform 平台数量 +/- 按钮
+    if (
+      this.activeTool === EntityTool.BTN_PLATFORM &&
+      this._insideRect(mx, my, this._btnPlatCountMinus)
+    ) {
+      if (this.btnPlatformCount > 1) this.btnPlatformCount--;
+      return true;
+    }
+    if (
+      this.activeTool === EntityTool.BTN_PLATFORM &&
+      this._insideRect(mx, my, this._btnPlatCountPlus)
+    ) {
+      if (this.btnPlatformCount < 8) this.btnPlatformCount++;
       return true;
     }
     // NPC 按钮

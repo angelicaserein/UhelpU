@@ -1,15 +1,20 @@
 import { GameEntity } from "../base/GameEntity.js";
+import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
 
 /**
  * 按键提示 — 显示按键镂空白色提示
  * 根据与玩家的距离计算透明度（靠近显现，远离渐隐）
+ *
+ * 支持两种模式：
+ * 1. 手动指定 keys 数组（固定标签）
+ * 2. 指定 intent（自动从 KeyBindingManager 获取并跟随绑定变更）
  */
 export class KeyPrompt extends GameEntity {
   /**
    * @param {number} x - 游戏坐标 x
    * @param {number} y - 游戏坐标 y
    * @param {BaseLevel} level - 所属关卡
-   * @param {{keys?: Array<{col:number,row:number,label:string}>}} options - 提示布局配置
+   * @param {{keys?: Array<{col:number,row:number,label:string}>, intent?: string}} options
    */
   constructor(x, y, level = null, options = {}) {
     super(x, y);
@@ -32,15 +37,47 @@ export class KeyPrompt extends GameEntity {
     this._keyStrokeWeight = 2;
     this._keyColor = [255, 255, 255]; // 白色
 
-    // 默认布局：
-    //  ASD
-    //   W
-    this.keys = options.keys || [
-      { col: 0, row: 0, label: "A" },
-      { col: 1, row: 0, label: "S" },
-      { col: 2, row: 0, label: "D" },
-      { col: 1, row: 1, label: "W" },
-    ];
+    // intent 模式：从 KeyBindingManager 自动获取标签并跟随绑定变更
+    this._intent = options.intent || null;
+    this._onBindingChange = null;
+
+    if (this._intent) {
+      this._keyBindingManager = KeyBindingManager.getInstance();
+      this.keys = [{ col: 0, row: 0, label: "" }];
+      this._updateLabelFromBinding();
+      this._onBindingChange = () => this._updateLabelFromBinding();
+      this._keyBindingManager.onChange(this._onBindingChange);
+    } else {
+      // 默认布局：
+      //  ASD
+      //   W
+      this.keys = options.keys || [
+        { col: 0, row: 0, label: "A" },
+        { col: 1, row: 0, label: "S" },
+        { col: 2, row: 0, label: "D" },
+        { col: 1, row: 1, label: "W" },
+      ];
+    }
+  }
+
+  /**
+   * 从 KeyBindingManager 更新 label（intent 模式）
+   */
+  _updateLabelFromBinding() {
+    const keyCode = this._keyBindingManager.getKeyByIntent(this._intent);
+    if (this.keys.length > 0) {
+      this.keys[0].label = KeyBindingManager.keyCodeToLabel(keyCode);
+    }
+  }
+
+  /**
+   * 清理绑定变更监听
+   */
+  clearListeners() {
+    if (this._onBindingChange && this._keyBindingManager) {
+      this._keyBindingManager.offChange(this._onBindingChange);
+      this._onBindingChange = null;
+    }
   }
 
   /**

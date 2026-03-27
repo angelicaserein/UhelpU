@@ -1,6 +1,6 @@
 /**
  * KeyBindingManager.js — 按键管理器（单例）
- * 
+ *
  * 职责：
  * - 维护当前的按键配置
  * - 提供查询接口（按键<->意图的双向映射）
@@ -8,7 +8,7 @@
  * - 通知监听器配置已变更
  */
 
-import { KeyBindingConfig, DEFAULT_KEYBINDING } from './KeyBindingConfig.js';
+import { KeyBindingConfig, DEFAULT_KEYBINDING } from "./KeyBindingConfig.js";
 
 export class KeyBindingManager {
   static _instance = null;
@@ -18,17 +18,17 @@ export class KeyBindingManager {
     if (KeyBindingManager._instance) {
       return KeyBindingManager._instance;
     }
-    
+
     // 加载已保存的配置（或使用默认值）
     this._config = KeyBindingConfig.load();
-    
+
     // 反向映射：按键码 -> 意图
     // 例：{ "KeyW": "jump", "KeyA": "moveLeft", "KeyD": "moveRight" }
     this._reverseMap = this._buildReverseMap();
-    
+
     // 变更监听器数组
     this._listeners = [];
-    
+
     KeyBindingManager._instance = this;
   }
 
@@ -85,11 +85,11 @@ export class KeyBindingManager {
       console.warn(`[KeyBindingManager] Unknown intent: ${intent}`);
       return false;
     }
-    
+
     this._config[intent] = newKeyCode;
     this._reverseMap = this._buildReverseMap();
     KeyBindingConfig.save(this._config);
-    
+
     // 通知所有监听器
     this._notifyListeners(intent, newKeyCode);
     return true;
@@ -102,7 +102,7 @@ export class KeyBindingManager {
     this._config = { ...DEFAULT_KEYBINDING };
     this._reverseMap = this._buildReverseMap();
     KeyBindingConfig.save(this._config);
-    
+
     // 通知监听器：完全重置（传 null）
     this._notifyListeners(null, null);
   }
@@ -151,12 +151,46 @@ export class KeyBindingManager {
    * @private
    */
   _notifyListeners(intent, newKeyCode) {
-    this._listeners.forEach(fn => {
+    this._listeners.forEach((fn) => {
       try {
         fn(intent, newKeyCode);
       } catch (e) {
-        console.error('[KeyBindingManager] Listener error:', e);
+        console.error("[KeyBindingManager] Listener error:", e);
       }
+    });
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // 工具方法
+  // ──────────────────────────────────────────────────────────────────────────
+
+  /**
+   * 将 keyCode（如 "KeyE"）转换为显示标签（如 "E"）
+   * @param {string} keyCode
+   * @returns {string}
+   */
+  static keyCodeToLabel(keyCode) {
+    if (!keyCode) return "?";
+    if (keyCode.startsWith("Key")) return keyCode.slice(3);
+    if (keyCode.startsWith("Digit")) return keyCode.slice(5);
+    if (keyCode === "Space") return "SPACE";
+    if (keyCode === "ShiftLeft" || keyCode === "ShiftRight") return "SHIFT";
+    if (keyCode === "ControlLeft" || keyCode === "ControlRight") return "CTRL";
+    return keyCode;
+  }
+
+  /**
+   * 解析文本中的 {key:intent} 占位符，替换为当前绑定的按键标签。
+   * 例："{key:teleportCheckpoint}" → "B"
+   * @param {string} text
+   * @returns {string}
+   */
+  static resolveKeyPlaceholders(text) {
+    if (!text || typeof text !== "string") return text;
+    const mgr = KeyBindingManager.getInstance();
+    return text.replace(/\{key:(\w+)\}/g, (_, intent) => {
+      const keyCode = mgr.getKeyByIntent(intent);
+      return KeyBindingManager.keyCodeToLabel(keyCode);
     });
   }
 

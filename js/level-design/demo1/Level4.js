@@ -6,7 +6,7 @@ import {
   Portal,
   Button,
   Spike,
-  NPC,
+  NPCDemo1,
   TextPrompt,
   Checkpoint,
   KeyPrompt,
@@ -119,7 +119,7 @@ export class Level4 extends BaseLevel {
       color: [255, 60, 60],
     });
 
-    this._room0NPC = new NPC(600, 80, 40, 40, {
+    this._room0NPC = new NPCDemo1(600, 80, 40, 40, {
       //每个参数分别是 NPC 的 x, y, width, height
       getPlayer: () => this._player,
       eventBus: this.eventBus,
@@ -129,7 +129,7 @@ export class Level4 extends BaseLevel {
       maxDialogueCount: 2,
       dialogueScale: 1.5,
     });
-    this._room0NPC2 = new NPC(680, 80, 40, 40, {
+    this._room0NPC2 = new NPCDemo1(680, 80, 40, 40, {
       getPlayer: () => this._player,
       eventBus: this.eventBus,
       npcId: "guide2",
@@ -142,7 +142,7 @@ export class Level4 extends BaseLevel {
       maxDialogueCount: 2,
       dialogueScale: 1.5,
     });
-    this._room0NPC3 = new NPC(760, 80, 40, 40, {
+    this._room0NPC3 = new NPCDemo1(760, 80, 40, 40, {
       getPlayer: () => this._player,
       eventBus: this.eventBus,
       npcId: "guide3",
@@ -155,7 +155,7 @@ export class Level4 extends BaseLevel {
       maxDialogueCount: 2,
       dialogueScale: 1.5,
     });
-    this._room0NPC4 = new NPC(840, 80, 40, 40, {
+    this._room0NPC4 = new NPCDemo1(840, 80, 40, 40, {
       getPlayer: () => this._player,
       eventBus: this.eventBus,
       npcId: "guide4",
@@ -188,7 +188,7 @@ export class Level4 extends BaseLevel {
       950 + 20 - 14,
       80 + 70 + 8,
       this,
-      { keys: [{ col: 0, row: 0, label: "E" }] },
+      { intent: "interaction" },
     );
 
     const room0 = new Room(

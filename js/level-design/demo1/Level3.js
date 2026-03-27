@@ -4,7 +4,7 @@ import {
   Wall,
   Portal,
   Button,
-  Signboard,
+  SignboardDemo1,
   TextPrompt,
 } from "../../game-entity-model/index.js";
 import { BaseLevel } from "../BaseLevel.js";
@@ -30,7 +30,7 @@ export class Level3 extends BaseLevel {
     this.entities.add(this._button1);
     this.entities.add(this._button2);
 
-    const signboard = new Signboard(
+    const signboard = new SignboardDemo1(
       800,
       80,
       200,

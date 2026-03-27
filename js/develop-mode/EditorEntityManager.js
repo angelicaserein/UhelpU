@@ -16,6 +16,7 @@ import {
   WALL_DEFAULTS,
   WIRE_PORTAL_DEFAULTS,
   BTN_SPIKE_DEFAULTS,
+  BTN_PLATFORM_DEFAULTS,
   NPC_SIZE,
   SIGNBOARD_SIZE,
   CHECKPOINT_SIZE,
@@ -29,8 +30,9 @@ import { Wall } from "../game-entity-model/terrain/Wall.js";
 import { Button } from "../game-entity-model/interactables/Button.js";
 import { BtnWirePortalSystem } from "../mechanism-system/demo2/BtnWirePortalSystem.js";
 import { ButtonSpikeLinkSystem } from "../mechanism-system/demo2/ButtonSpikeLinkSystem.js";
-import { NPC } from "../game-entity-model/interactables/NPC.js";
-import { Signboard } from "../game-entity-model/interactables/Signboard.js";
+import { ButtonPlatformLinkSystem } from "../mechanism-system/demo1/ButtonPlatformLinkSystem.js";
+import { NPCDemo1 } from "../game-entity-model/interactables/NPCDemo1.js";
+import { SignboardDemo2 } from "../game-entity-model/interactables/SignboardDemo2.js";
 import { Checkpoint } from "../game-entity-model/interactables/Checkpoint.js";
 
 /**
@@ -65,12 +67,18 @@ export class EditorEntityManager {
     this._bsResizeRecord = null;
     this._bsResizeHandle = null;
     this._bsResizeAnchor = null;
+
+    /** BtnPlatform 平台调整大小状态 */
+    this._bpResizeRecord = null;
+    this._bpResizeHandle = null;
+    this._bpResizeAnchor = null;
+    this._bpResizePlatformIdx = 0;
   }
 
   /**
    * 放置一个新实体（创建真实游戏实体并加入关卡）
    */
-  place(tool, x, y, w, h) {
+  place(tool, x, y, w, h, options = {}) {
     let gameEntity;
     if (tool === EntityTool.GROUND) {
       gameEntity = new Ground(x, y, w, h);
@@ -133,10 +141,46 @@ export class EditorEntityManager {
       };
       this._records.push(record);
       return record;
+    } else if (tool === EntityTool.BTN_PLATFORM) {
+      const btn = new Button(
+        x,
+        y,
+        BTN_PLATFORM_DEFAULTS.buttonWidth,
+        BTN_PLATFORM_DEFAULTS.buttonHeight,
+      );
+      const count = options.platformCount || 1;
+      const platGapY = 50; // 每个平台之间的垂直间距
+      const platforms = [];
+      const platformLinks = [];
+      for (let i = 0; i < count; i++) {
+        const plat = new Platform(
+          x + BTN_PLATFORM_DEFAULTS.offsetX,
+          y + i * platGapY,
+          BTN_PLATFORM_DEFAULTS.platformWidth,
+          BTN_PLATFORM_DEFAULTS.platformHeight,
+        );
+        platforms.push(plat);
+        platformLinks.push({ platform: plat, mode: "disappear" });
+        this._level.entities.add(plat);
+      }
+      const system = new ButtonPlatformLinkSystem(
+        [{ button: btn, platforms: platformLinks }],
+        this._level.collisionSystem,
+      );
+      this._level.entities.add(btn);
+      this._syncSystems();
+      const record = {
+        tool,
+        gameEntity: btn,
+        platformEntities: platforms,
+        platformLinkSystem: system,
+      };
+      this._records.push(record);
+      return record;
     } else if (tool === EntityTool.NPC) {
-      gameEntity = new NPC(x, y, NPC_SIZE.width, NPC_SIZE.height);
+      gameEntity = new NPCDemo1(x, y, NPC_SIZE.width, NPC_SIZE.height);
     } else if (tool === EntityTool.SIGNBOARD) {
-      gameEntity = new Signboard(
+      gameEntity = new SignboardDemo2(
         x,
         y,
         SIGNBOARD_SIZE.width,
@@ -170,6 +214,10 @@ export class EditorEntityManager {
     this._level.entities.delete(record.gameEntity);
     if (record.portalEntity) this._level.entities.delete(record.portalEntity);
     if (record.spikeEntity) this._level.entities.delete(record.spikeEntity);
+    if (record.platformEntities) {
+      for (const plt of record.platformEntities)
+        this._level.entities.delete(plt);
+    }
     this._syncSystems();
     return record;
   }
@@ -180,6 +228,10 @@ export class EditorEntityManager {
       this._level.entities.delete(record.gameEntity);
       if (record.portalEntity) this._level.entities.delete(record.portalEntity);
       if (record.spikeEntity) this._level.entities.delete(record.spikeEntity);
+      if (record.platformEntities) {
+        for (const plt of record.platformEntities)
+          this._level.entities.delete(plt);
+      }
     }
     this._records.length = 0;
     this._syncSystems();
@@ -192,6 +244,10 @@ export class EditorEntityManager {
     this._level.entities.delete(record.gameEntity);
     if (record.portalEntity) this._level.entities.delete(record.portalEntity);
     if (record.spikeEntity) this._level.entities.delete(record.spikeEntity);
+    if (record.platformEntities) {
+      for (const plt of record.platformEntities)
+        this._level.entities.delete(plt);
+    }
     this._records.splice(idx, 1);
     if (this._selected === record) this.deselect();
     this._syncSystems();
@@ -260,6 +316,23 @@ export class EditorEntityManager {
           return rec;
         }
       }
+      // BtnPlatform: 也检查所有平台侧的删除按钮
+      if (rec.platformEntities) {
+        for (const plt of rec.platformEntities) {
+          const plw = plt.collider ? plt.collider.w : 160;
+          const plh = plt.collider ? plt.collider.h : 30;
+          const plbx = plt.x + plw - bs / 2;
+          const plby = plt.y + plh + 2;
+          if (
+            worldX >= plbx &&
+            worldX <= plbx + bs &&
+            worldY >= plby &&
+            worldY <= plby + bs
+          ) {
+            return rec;
+          }
+        }
+      }
     }
     return null;
   }
@@ -272,6 +345,7 @@ export class EditorEntityManager {
         rec.tool === EntityTool.PORTAL ||
         rec.tool === EntityTool.WIRE_PORTAL ||
         rec.tool === EntityTool.BTN_SPIKE ||
+        rec.tool === EntityTool.BTN_PLATFORM ||
         rec.tool === EntityTool.NPC ||
         rec.tool === EntityTool.SIGNBOARD ||
         rec.tool === EntityTool.CHECKPOINT
@@ -391,6 +465,51 @@ export class EditorEntityManager {
     return null;
   }
 
+  /**
+   * 查找世界坐标处的 BtnPlatform 子实体
+   * @returns {{ record, entity, isPlatform: boolean, platformIdx?: number }|null}
+   */
+  findBtnPlatformSubEntity(worldX, worldY) {
+    for (let i = this._records.length - 1; i >= 0; i--) {
+      const rec = this._records[i];
+      if (rec.tool !== EntityTool.BTN_PLATFORM) continue;
+      // 检查所有 platform
+      if (rec.platformEntities) {
+        for (let pi = 0; pi < rec.platformEntities.length; pi++) {
+          const plt = rec.platformEntities[pi];
+          const pw = plt.collider ? plt.collider.w : 160;
+          const ph = plt.collider ? plt.collider.h : 30;
+          if (
+            worldX >= plt.x &&
+            worldX <= plt.x + pw &&
+            worldY >= plt.y &&
+            worldY <= plt.y + ph
+          ) {
+            return {
+              record: rec,
+              entity: plt,
+              isPlatform: true,
+              platformIdx: pi,
+            };
+          }
+        }
+      }
+      // 检查 button
+      const btn = rec.gameEntity;
+      const bw = btn.collider ? btn.collider.w : 34;
+      const bh = btn.collider ? btn.collider.h : 16;
+      if (
+        worldX >= btn.x &&
+        worldX <= btn.x + bw &&
+        worldY >= btn.y &&
+        worldY <= btn.y + bh
+      ) {
+        return { record: rec, entity: btn, isPlatform: false };
+      }
+    }
+    return null;
+  }
+
   /** 开始拖拽 WirePortal 子实体 */
   startMove(record, entity, worldX, worldY) {
     this._movingRecord = record;
@@ -409,7 +528,10 @@ export class EditorEntityManager {
 
   /** 结束拖拽并重建电线路径 */
   endMove() {
-    if (this._movingRecord && this._movingRecord.tool === EntityTool.WIRE_PORTAL) {
+    if (
+      this._movingRecord &&
+      this._movingRecord.tool === EntityTool.WIRE_PORTAL
+    ) {
       this._rebuildWirePath(this._movingRecord);
     }
     this._movingEntity = null;
@@ -618,6 +740,106 @@ export class EditorEntityManager {
     this._bsResizeAnchor = null;
   }
 
+  // ══════════════════════════════════════════════════════════════
+  // BtnPlatform 平台调整大小
+  // ══════════════════════════════════════════════════════════════
+
+  /** 是否正在调整 BtnPlatform 平台大小 */
+  isBtnPlatformResizing() {
+    return this._bpResizeHandle !== null;
+  }
+
+  /**
+   * 检测世界坐标是否落在某个 BtnPlatform 平台的手柄上
+   * @returns {{ record, handle: string, platformIdx: number }|null}
+   */
+  getBtnPlatformHandleAt(worldX, worldY) {
+    for (let i = this._records.length - 1; i >= 0; i--) {
+      const rec = this._records[i];
+      if (rec.tool !== EntityTool.BTN_PLATFORM) continue;
+      if (!rec.platformEntities) continue;
+      for (let pi = 0; pi < rec.platformEntities.length; pi++) {
+        const plt = rec.platformEntities[pi];
+        const w = plt.collider ? plt.collider.w : 160;
+        const h = plt.collider ? plt.collider.h : 30;
+        const handles = {
+          bl: { x: plt.x, y: plt.y },
+          br: { x: plt.x + w, y: plt.y },
+          tl: { x: plt.x, y: plt.y + h },
+          tr: { x: plt.x + w, y: plt.y + h },
+        };
+        for (const [id, pos] of Object.entries(handles)) {
+          if (
+            Math.abs(worldX - pos.x) <= HANDLE_SIZE &&
+            Math.abs(worldY - pos.y) <= HANDLE_SIZE
+          ) {
+            return { record: rec, handle: id, platformIdx: pi };
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /** 开始调整 BtnPlatform 平台大小 */
+  startBtnPlatformResize(record, handle, platformIdx = 0) {
+    const plt = record.platformEntities
+      ? record.platformEntities[platformIdx]
+      : null;
+    if (!plt) return;
+    const w = plt.collider.w;
+    const h = plt.collider.h;
+    const anchors = {
+      bl: { x: plt.x + w, y: plt.y + h },
+      br: { x: plt.x, y: plt.y + h },
+      tl: { x: plt.x + w, y: plt.y },
+      tr: { x: plt.x, y: plt.y },
+    };
+    this._bpResizeRecord = record;
+    this._bpResizeHandle = handle;
+    this._bpResizeAnchor = anchors[handle];
+    this._bpResizePlatformIdx = platformIdx;
+  }
+
+  /** 调整 BtnPlatform 平台大小中 */
+  updateBtnPlatformResize(worldX, worldY) {
+    if (!this._bpResizeHandle || !this._bpResizeRecord) return;
+    const sx = this._snap(worldX);
+    const sy = this._snap(worldY);
+    const limits = PLATFORM_DEFAULTS;
+
+    let newW = Math.abs(this._bpResizeAnchor.x - sx);
+    let newH = Math.abs(this._bpResizeAnchor.y - sy);
+    newW = Math.max(limits.minWidth, Math.min(limits.maxWidth, newW));
+    newH = Math.max(limits.minHeight, Math.min(limits.maxHeight, newH));
+
+    const plt = this._bpResizeRecord.platformEntities
+      ? this._bpResizeRecord.platformEntities[this._bpResizePlatformIdx]
+      : null;
+    if (!plt) return;
+    if (sx <= this._bpResizeAnchor.x) {
+      plt.x = this._bpResizeAnchor.x - newW;
+    } else {
+      plt.x = this._bpResizeAnchor.x;
+    }
+    if (sy <= this._bpResizeAnchor.y) {
+      plt.y = this._bpResizeAnchor.y - newH;
+    } else {
+      plt.y = this._bpResizeAnchor.y;
+    }
+    plt.collider.w = newW;
+    plt.collider.h = newH;
+    this._syncSystems();
+  }
+
+  /** 结束 BtnPlatform 平台大小调整 */
+  endBtnPlatformResize() {
+    this._bpResizeRecord = null;
+    this._bpResizeHandle = null;
+    this._bpResizeAnchor = null;
+    this._bpResizePlatformIdx = 0;
+  }
+
   _snap(v) {
     return Math.round(v / GRID_SIZE) * GRID_SIZE;
   }
@@ -752,6 +974,79 @@ export class EditorEntityManager {
         p.textAlign(p.LEFT, p.TOP);
         p.text(`BS-Spk ${sw}×${sh}`, 3, 3);
         p.pop();
+
+        p.pop();
+        continue;
+      }
+
+      // BTN_PLATFORM: 特殊处理 — 绘制按钮+所有平台+连线+手柄
+      if (rec.tool === EntityTool.BTN_PLATFORM) {
+        const btn = rec.gameEntity;
+        const platforms = rec.platformEntities || [];
+        const bw = btn.collider ? btn.collider.w : 34;
+        const bh = btn.collider ? btn.collider.h : 16;
+        const btnMoving = this._movingEntity === btn;
+
+        p.push();
+        p.noFill();
+
+        // Button 边框（青绿色系）
+        p.strokeWeight(btnMoving ? 3 : 2);
+        p.stroke(60, btnMoving ? 255 : 180, 140, btnMoving ? 255 : 180);
+        p.rect(btn.x, btn.y, bw, bh);
+
+        // 删除按钮（Button 侧）
+        this._drawDeleteBtn(p, btn.x + bw, btn.y + bh);
+
+        // 标签
+        p.push();
+        p.translate(btn.x, btn.y + bh);
+        p.scale(1, -1);
+        p.fill(255, 255, 255, 220);
+        p.noStroke();
+        p.textSize(10);
+        p.textAlign(p.LEFT, p.TOP);
+        p.text(`BP-Btn ${bw}×${bh}`, 3, 3);
+        p.pop();
+
+        // 绘制每个平台
+        for (let pi = 0; pi < platforms.length; pi++) {
+          const plt = platforms[pi];
+          const pw = plt.collider ? plt.collider.w : 160;
+          const ph = plt.collider ? plt.collider.h : 30;
+          const pltMoving = this._movingEntity === plt;
+
+          // Platform 边框（青绿色系）
+          p.strokeWeight(pltMoving ? 3 : 2);
+          p.stroke(60, pltMoving ? 255 : 180, 140, pltMoving ? 255 : 180);
+          p.rect(plt.x, plt.y, pw, ph);
+
+          // 连接线
+          p.stroke(60, 180, 140, 100);
+          p.strokeWeight(1);
+          p.line(btn.x + bw / 2, btn.y + bh, plt.x + pw / 2, plt.y + ph);
+
+          // 平台调整手柄
+          this._drawHandles(p, plt.x, plt.y, pw, ph);
+
+          // 删除按钮（Platform 侧）
+          this._drawDeleteBtn(p, plt.x + pw, plt.y + ph);
+
+          // 标签
+          p.push();
+          p.translate(plt.x, plt.y + ph);
+          p.scale(1, -1);
+          p.fill(255, 255, 255, 220);
+          p.noStroke();
+          p.textSize(10);
+          p.textAlign(p.LEFT, p.TOP);
+          const platLabel =
+            platforms.length > 1
+              ? `BP-Plt${pi + 1} ${pw}×${ph}`
+              : `BP-Plt ${pw}×${ph}`;
+          p.text(platLabel, 3, 3);
+          p.pop();
+        }
 
         p.pop();
         continue;

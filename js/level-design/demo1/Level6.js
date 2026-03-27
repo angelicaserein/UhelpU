@@ -18,7 +18,7 @@ import { Assets } from "../../AssetsManager.js";
 import { Room } from "../Room.js";
 import { ButtonPlatformLinkSystem } from "../../mechanism-system/demo1/ButtonPlatformLinkSystem.js";
 import { t } from "../../i18n.js";
-import { Signboard } from "../../game-entity-model/interactables/Signboard.js";
+import { SignboardDemo2 } from "../../game-entity-model/interactables/SignboardDemo2.js";
 import { WindowPrompt } from "../../ui/windows/WindowPrompt.js";
 
 export class Level6 extends BaseLevel {
@@ -172,10 +172,18 @@ export class Level6 extends BaseLevel {
         // 桥（从悬崖右边延伸，与悬崖同高）
         new Platform(200, 520, 200, 20),
         // Jump signboard 放在桥上
-        new Signboard(220, 540, 65, 65, () => this._player, this.eventBus, {
-          imageKey: "tileImage_Jump",
-          onInteract: () => this._jumpSignWindow.open(),
-        }),
+        new SignboardDemo2(
+          220,
+          540,
+          65,
+          65,
+          () => this._player,
+          this.eventBus,
+          {
+            imageKey: "tileImage_Jump",
+            onInteract: () => this._jumpSignWindow.open(),
+          },
+        ),
         ...portalEntities,
       ],
       { left: { targetRoomIndex: 0 } },

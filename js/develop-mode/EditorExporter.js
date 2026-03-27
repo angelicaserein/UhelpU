@@ -136,7 +136,7 @@ export class EditorExporter {
           `const bsSpike_${idx} = new Spike(${spk.x}, ${spk.y}, ${sw}, ${sh});`,
         );
         lines.push(
-          `const bsSys_${idx} = new ButtonSpikeLinkSystem([{ button: bsBtn_${idx}, spikes: [bsSpike_${idx}] }]);`,
+          `const bsSys_${idx} = new ButtonSpikeLinkSystem({ button: bsBtn_${idx}, spikes: [bsSpike_${idx}] }, { startColorIndex: ${r.startColorIndex ?? idx} });`,
         );
       });
       lines.push("// bsBtn / bsSpike 需要加入 Room 实体列表");

@@ -179,8 +179,7 @@ export class Level4 extends BaseLevel {
   clearCanvas(p = this.p, cameraNudgeX = 0, bgParallaxFactor = 1) {
     const cameraX = this._getCameraX(p);
     const bgOffsetX = cameraNudgeX * bgParallaxFactor;
-    // const bg = Assets.bgImageDemo2Level4;
-    const bg = null;
+    const bg = Assets.bgImageDemo2Level;
     if (bg) {
       p.push();
       p.translate(-cameraX - bgOffsetX, 0);

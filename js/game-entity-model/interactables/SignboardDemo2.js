@@ -4,6 +4,7 @@ import { ColliderType } from "../../collision-system/enumerator.js";
 import { EventTypes } from "../../event-system/EventTypes.js";
 import { Assets } from "../../AssetsManager.js";
 import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
+import { t } from "../../i18n.js";
 
 /**
  * SignboardContent — 木牌交互弹出内容
@@ -133,7 +134,11 @@ export class SignboardDemo2 extends GameEntity {
     h = SignboardDemo2.DEFAULT_H,
     getPlayer = null,
     eventBus = null,
-    { imageKey = "tileImage_signboard", onInteract = null } = {},
+    {
+      imageKey = "tileImage_signboard",
+      onInteract = null,
+      textKey = null,
+    } = {},
   ) {
     super(x, y);
     this.type = "signboard";
@@ -143,6 +148,7 @@ export class SignboardDemo2 extends GameEntity {
     this.eventBus = eventBus;
     this._imageKey = imageKey;
     this._onInteract = onInteract;
+    this._textKey = textKey;
     this.zIndex = -5; // 木牌在地形上层、交互物下层
 
     this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
@@ -260,6 +266,18 @@ export class SignboardDemo2 extends GameEntity {
   /**
    * 尝试交互：仅在玩家与木牌 AABB 重叠时触发
    */
+  _applyText() {
+    if (!this._signboardContent || !this._textKey) return;
+    const raw = t(this._textKey);
+    const sep = raw.indexOf("\n---\n");
+    if (sep !== -1) {
+      this._signboardContent.setTitle(raw.slice(0, sep).replace(/\n/g, "<br>"));
+      this._signboardContent.setBody(raw.slice(sep + 5).replace(/\n/g, "<br>"));
+    } else {
+      this._signboardContent.setBody(raw.replace(/\n/g, "<br>"));
+    }
+  }
+
   tryInteract() {
     if (this.isPlayerOverlapping()) {
       // 切换木牌内容显示
@@ -267,6 +285,7 @@ export class SignboardDemo2 extends GameEntity {
         if (!this._signboardContent) {
           this._signboardContent = new SignboardContent(this._p);
         }
+        this._applyText();
         this._signboardContent.toggle();
       }
 

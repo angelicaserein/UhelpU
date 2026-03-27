@@ -34,6 +34,7 @@ export const Assets = {
   bgImageLevel8: null,
   bgImageLevel9: null,
   bgImageLevel10: null,
+  bgImageDemo2Level: null,
 
   // 本体贴图（5方向）
   playerImg_right: null,
@@ -242,6 +243,10 @@ export const Assets = {
         p.loadImage("assets/images/tiles/doorclose.png"),
         "门关贴图",
       ),
+      this._safeLoad(
+        p.loadImage("assets/images/bg/demo2levelbg.png"),
+        "Demo2关卡背景",
+      ),
     ]);
 
     // 按顺序赋值
@@ -314,6 +319,7 @@ export const Assets = {
     this.tileImage_Jump = results[66];
     this.tileImage_doorOpen = results[67];
     this.tileImage_doorClose = results[68];
+    this.bgImageDemo2Level = results[69];
     this.achieveImgs = [
       results[56],
       results[57],

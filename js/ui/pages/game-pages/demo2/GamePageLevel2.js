@@ -2,6 +2,6 @@
 
 export class GamePageLevel2 extends GamePageBase {
   constructor(switcher, p) {
-    super(switcher, p, 2, "hint_level2", "demo2_level2");
+    super(switcher, p, 2, "d2_hint_level2", "demo2_level2");
   }
 }

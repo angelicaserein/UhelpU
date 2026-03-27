@@ -224,6 +224,11 @@ export class RecordSystem {
       const remaining = Math.max(0, this.maxRecordTime - elapsed);
       this.recordStartTime = performance.now() - elapsed;
 
+      // Keep Clip's recordStartTime in sync so post-resume event timestamps are correct
+      if (this.clip) {
+        this.clip.recordStartTime = this.recordStartTime;
+      }
+
       this.recordTimer = setTimeout(() => {
         this.transition("RecordTimeout");
       }, remaining);

@@ -1,4 +1,5 @@
 import "./i18nDemo1.js"; // 注册 Demo1 关卡专属文案
+import "./i18nDemo2.js"; // 注册 Demo2 关卡专属文案
 import { SwitcherMain } from "./switchers/SwitcherMain.js";
 import { EventBus } from "./event-system/EventBus.js";
 import { EventTypes } from "./event-system/EventTypes.js";

@@ -127,9 +127,13 @@ export class EditorEntityManager {
         BTN_SPIKE_DEFAULTS.spikeHeight,
         { color: [220, 50, 50] },
       );
-      const system = new ButtonSpikeLinkSystem([
+      const btnSpikeCount = this._records.filter(
+        (record) => record.tool === EntityTool.BTN_SPIKE,
+      ).length;
+      const system = new ButtonSpikeLinkSystem(
         { button: btn, spikes: [spike] },
-      ]);
+        { startColorIndex: btnSpikeCount },
+      );
       this._level.entities.add(btn);
       this._level.entities.add(spike);
       this._syncSystems();
@@ -138,6 +142,7 @@ export class EditorEntityManager {
         gameEntity: btn,
         spikeEntity: spike,
         spikeLinkSystem: system,
+        startColorIndex: btnSpikeCount,
       };
       this._records.push(record);
       return record;

@@ -324,6 +324,15 @@ export class NPC extends GameEntity {
       bubbleW - 16 * s,
       bubbleH - 12 * s,
     );
+    this._drawDialogueRainbowOverlay(
+      p,
+      lineKey,
+      line,
+      -(bubbleW - 16 * s) / 2,
+      -(bubbleH - 12 * s) / 2,
+      bubbleW - 16 * s,
+      bubbleH - 12 * s,
+    );
     p.pop();
 
     // "按交互键继续"提示 — 右下角
@@ -340,6 +349,96 @@ export class NPC extends GameEntity {
       p.textSize(9 * s);
       p.text(hintText, 0, 0);
       p.pop();
+    }
+  }
+
+  _drawDialogueRainbowOverlay(p, lineKey, line, x, y, width, height) {
+    const overlaySpec = this._getDialogueRainbowOverlaySpec(lineKey);
+    if (!overlaySpec) return;
+
+    const textLines = String(line).split("\n");
+    const targetLine = textLines[overlaySpec.lineIndex] || "";
+    const overlayIndex = this._findOverlayStartIndex(targetLine, overlaySpec);
+    if (overlayIndex < 0) return;
+
+    const lineHeight = p.textLeading() || p.textSize() * 1.2;
+    const totalHeight = textLines.length * lineHeight;
+    const targetY =
+      y +
+      height / 2 -
+      totalHeight / 2 +
+      lineHeight / 2 +
+      overlaySpec.lineIndex * lineHeight -
+      10;
+
+    const lineWidth = p.textWidth(targetLine);
+    const lineStartX = x + (width - lineWidth) / 2;
+    const overlayX =
+      lineStartX + p.textWidth(targetLine.slice(0, overlayIndex)) + 28;
+
+    this._drawSplitRainbowWaveText(p, overlaySpec, overlayX, targetY);
+  }
+
+  _getDialogueRainbowOverlaySpec(lineKey) {
+    if (lineKey !== "d2_npc_level1_line1") return null;
+
+    return {
+      text: "U help U",
+      parts: ["U", "help", "U"],
+      gapWidths: [15, 13],
+      lineIndex: 0,
+      prefixes: ["Welcome to ", "嘿，欢迎来到 "],
+    };
+  }
+
+  _findOverlayStartIndex(targetLine, overlaySpec) {
+    const directIndex = targetLine.indexOf(overlaySpec.text);
+    if (directIndex >= 0) return directIndex;
+
+    for (const prefix of overlaySpec.prefixes) {
+      const prefixIndex = targetLine.indexOf(prefix);
+      if (prefixIndex >= 0) {
+        return prefixIndex + prefix.length;
+      }
+    }
+
+    return -1;
+  }
+
+  _drawRainbowWaveText(p, text, startX, baselineY) {
+    const waveAmplitude = 1.5 * this._dialogueScale;
+    const time = p.millis() * 0.005; // 时间参数控制波动速度,越大波动越快
+    let currentX = startX;
+
+    p.push();
+    p.colorMode(p.HSB, 360, 100, 100, 255);
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const phase = time + i * 0.7;
+      const hue = (time * 60 + i * 32) % 360;
+      const charY = baselineY + Math.sin(phase) * waveAmplitude;
+
+      p.fill(hue, 80, 100, 255);
+      p.text(char, currentX, charY);
+      currentX += p.textWidth(char);
+    }
+
+    p.pop();
+  }
+
+  _drawSplitRainbowWaveText(p, overlaySpec, startX, baselineY) {
+    const parts = overlaySpec.parts || [overlaySpec.text || ""];
+    const gapWidths = overlaySpec.gapWidths || [];
+    let currentX = startX;
+
+    for (let i = 0; i < parts.length; i++) {
+      this._drawRainbowWaveText(p, parts[i], currentX, baselineY);
+      currentX += p.textWidth(parts[i]);
+
+      if (i < gapWidths.length) {
+        currentX += gapWidths[i];
+      }
     }
   }
 

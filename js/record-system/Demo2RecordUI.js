@@ -47,16 +47,16 @@ export class Demo2RecordUI {
     };
     switch (state) {
       case "Recording": {
-        const elapsedMs =
-          paused && pausedRecordElapsed !== null
-            ? pausedRecordElapsed
-            : Math.max(0, performance.now() - recordStartTime);
+        const isPausedRecording = paused && pausedRecordElapsed !== null;
+        const elapsedMs = isPausedRecording
+          ? pausedRecordElapsed
+          : Math.max(0, performance.now() - recordStartTime);
         const elapsedSec = (elapsedMs / 1000).toFixed(1);
         return {
           ...chrome,
           title: t("rec_title_recording"),
           subtitle: `${t("rec_sub_press_e_end").replace("{KEY}", recordKey)}  ${elapsedSec}s / ${maxSec}s`,
-          badge: "REC",
+          badge: isPausedRecording ? "PAUSED" : "REC",
           accentA: p.color(175, 38, 88),
           accentB: p.color(105, 18, 50),
           panelFill: p.color(42, 16, 55),
@@ -65,8 +65,12 @@ export class Demo2RecordUI {
           textMain: p.color(240, 215, 235),
           textSub: p.color(195, 148, 175),
           progress: Math.min(1, elapsedMs / maxRecordTime),
-          showBlinkDot: Math.floor(performance.now() / 450) % 2 === 0,
-          pulse: (Math.sin(performance.now() / 200) + 1) / 2,
+          showBlinkDot: isPausedRecording
+            ? false
+            : Math.floor(performance.now() / 450) % 2 === 0,
+          pulse: isPausedRecording
+            ? 0
+            : (Math.sin(performance.now() / 200) + 1) / 2,
           hudLabel: t("rec_hud_label"),
           airBlockText: t("rec_blocked_air"),
         };
@@ -95,21 +99,18 @@ export class Demo2RecordUI {
         };
       }
       case "Replaying": {
+        const isPausedReplaying = paused && pausedReplayElapsed !== null;
         const totalMs = Math.max(1, recordEndTime - recordStartTime);
-        const replayElapsedMs =
-          paused && pausedReplayElapsed !== null
-            ? pausedReplayElapsed
-            : Math.min(
-                Math.max(0, performance.now() - replayStartTime),
-                totalMs,
-              );
+        const replayElapsedMs = isPausedReplaying
+          ? pausedReplayElapsed
+          : Math.min(Math.max(0, performance.now() - replayStartTime), totalMs);
         const replayElapsedSec = (replayElapsedMs / 1000).toFixed(1);
         const totalReplaySec = (totalMs / 1000).toFixed(1);
         return {
           ...chrome,
           title: t("rec_title_replaying"),
           subtitle: `${t("rec_sub_press_replay_end").replace("{KEY}", replayKey)}  ${replayElapsedSec}s / ${totalReplaySec}s`,
-          badge: "PLAY",
+          badge: isPausedReplaying ? "PAUSED" : "PLAY",
           accentA: p.color(115, 75, 155),
           accentB: p.color(72, 42, 105),
           panelFill: p.color(36, 20, 62),
@@ -118,7 +119,9 @@ export class Demo2RecordUI {
           textMain: p.color(218, 200, 240),
           textSub: p.color(155, 128, 185),
           progress: Math.min(1, replayElapsedMs / totalMs),
-          showBlinkDot: Math.floor(performance.now() / 700) % 2 === 0,
+          showBlinkDot: isPausedReplaying
+            ? false
+            : Math.floor(performance.now() / 700) % 2 === 0,
           pulse: 0,
           hudLabel: t("rec_hud_label"),
           airBlockText: t("rec_blocked_air"),

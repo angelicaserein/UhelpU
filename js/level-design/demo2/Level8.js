@@ -45,7 +45,7 @@ export class Level8 extends BaseLevel {
     this.collisionSystem = new CollisionSystem(this.entities, eventBus);
 
     // ── 按钮-地刺联动系统（2 组） ──
-    this._buttonSpikeLinkSystem = new ButtonSpikeLinkSystem([
+    this._buttonSpikeLinkSystem0 = new ButtonSpikeLinkSystem(
       {
         button: this._spikeBtn0,
         spikes: [
@@ -53,6 +53,9 @@ export class Level8 extends BaseLevel {
           { spike: this._spike0b, retractDistance: 40 },
         ],
       },
+      { startColorIndex: 0 },
+    );
+    this._buttonSpikeLinkSystem1 = new ButtonSpikeLinkSystem(
       {
         button: this._spikeBtn1,
         spikes: [
@@ -60,27 +63,31 @@ export class Level8 extends BaseLevel {
           { spike: this._spike1b, retractDistance: 40 },
         ],
       },
-    ]);
+      { startColorIndex: 1 },
+    );
 
     // ── 按钮-消失平台联动系统（2 组） ──
-    this._buttonPlatformLinkSystem = new ButtonPlatformLinkSystem(
-      [
-        {
-          button: this._platBtn0,
-          platforms: [
-            { platform: this._platform0a, mode: "disappear" },
-            { platform: this._platform0b, mode: "disappear" },
-          ],
-        },
-        {
-          button: this._platBtn1,
-          platforms: [
-            { platform: this._platform1a, mode: "disappear" },
-            { platform: this._platform1b, mode: "disappear" },
-          ],
-        },
-      ],
+    this._buttonPlatformLinkSystem0 = new ButtonPlatformLinkSystem(
+      {
+        button: this._platBtn0,
+        platforms: [
+          { platform: this._platform0a, mode: "disappear" },
+          { platform: this._platform0b, mode: "disappear" },
+        ],
+      },
       this.collisionSystem,
+      { startColorIndex: 0 },
+    );
+    this._buttonPlatformLinkSystem1 = new ButtonPlatformLinkSystem(
+      {
+        button: this._platBtn1,
+        platforms: [
+          { platform: this._platform1a, mode: "disappear" },
+          { platform: this._platform1b, mode: "disappear" },
+        ],
+      },
+      this.collisionSystem,
+      { startColorIndex: 1 },
     );
   }
 
@@ -260,8 +267,7 @@ export class Level8 extends BaseLevel {
   clearCanvas(p = this.p, cameraNudgeX = 0, bgParallaxFactor = 1) {
     const cameraX = this._getCameraX(p);
     const bgOffsetX = cameraNudgeX * bgParallaxFactor;
-    // const bg = Assets.bgImageDemo2Level4;
-    const bg = null;
+    const bg = Assets.bgImageDemo2Level;
     if (bg) {
       p.push();
       p.translate(-cameraX - bgOffsetX, 0);
@@ -290,8 +296,10 @@ export class Level8 extends BaseLevel {
       if (entity.update && typeof entity.update === "function")
         entity.update(this.p);
     }
-    this._buttonSpikeLinkSystem.update();
-    this._buttonPlatformLinkSystem.update();
+    this._buttonSpikeLinkSystem0.update();
+    this._buttonSpikeLinkSystem1.update();
+    this._buttonPlatformLinkSystem0.update();
+    this._buttonPlatformLinkSystem1.update();
   }
 
   updateCollision(p = this.p, eventBus = this.eventBus) {
@@ -313,7 +321,8 @@ export class Level8 extends BaseLevel {
     for (const entity of this.entities) {
       if (entity.type === "ground") entity.draw(p);
     }
-    this._buttonPlatformLinkSystem.draw(p);
+    this._buttonPlatformLinkSystem0.draw(p);
+    this._buttonPlatformLinkSystem1.draw(p);
     for (const entity of this.entities) {
       if (entity.type !== "spike" && entity.type !== "ground") entity.draw(p);
     }

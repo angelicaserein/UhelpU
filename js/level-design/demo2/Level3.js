@@ -4,8 +4,7 @@ import { BaseLevel } from "../BaseLevel.js";
 export class Level3 extends BaseLevel {
   constructor(p, eventBus) {
     super(p, eventBus);
-
-    // this.bgAssetKey = "bgImageDemo2Level3";
+    this.bgAssetKey = "bgImageDemo2Level";
 
     const wallThickness = 20;
     this.entities.add(new Wall(0, 0, wallThickness, p.height));

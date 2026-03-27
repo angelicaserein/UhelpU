@@ -48,53 +48,51 @@ const COLOR_PALETTE = [
 
 export class ButtonPlatformLinkSystem {
   /**
-   * @param {Array<{button: Button, platforms: Array<{platform: BasePlatform, mode?: string}>}>} links
-   *   每组联动：一个按钮控制一组平台
+   * @param {{button: Button, platforms: Array<{platform: BasePlatform, mode?: string}>}} link
+   *   单组联动：一个按钮控制一组平台
    *   - platform: 平台实体
    *   - mode: "disappear"(默认) 踩下按钮时平台消失 | "appear" 踩下按钮时平台出现
-   *   系统会自动为每组分配不同颜色，同组 button 和 platform 轮廓颜色一致
+   *   系统会自动按起始配色索引分配颜色，同组 button 和 platform 轮廓颜色一致
    * @param {CollisionSystem} collisionSystem - 碰撞系统引用，用于 colliderType 切换后自动重新分区
+   * @param {Object} [options]
+   * @param {number} [options.startColorIndex] - 配色起始索引，默认 0
    */
-  constructor(links, collisionSystem) {
+  constructor(link, collisionSystem, options = {}) {
     this._collisionSystem = collisionSystem;
-    this._links = links.map(({ button, platforms }, groupIndex) => {
-      // 自动分配颜色（循环使用调色板）
-      const palette = COLOR_PALETTE[groupIndex % COLOR_PALETTE.length];
+    const paletteIndex =
+      (((options.startColorIndex || 0) % COLOR_PALETTE.length) +
+        COLOR_PALETTE.length) %
+      COLOR_PALETTE.length;
+    const palette = COLOR_PALETTE[paletteIndex];
+    const { button, platforms } = link;
 
-      // 仅在 button 没有手动设置颜色时才自动赋色
-      if (!button.color) {
-        button.color = {
-          unpressed: palette.unpressed,
-          pressed: palette.pressed,
-        };
+    if (!button.color) {
+      button.color = {
+        unpressed: palette.unpressed,
+        pressed: palette.pressed,
+      };
+    }
+
+    this._button = button;
+    this._outlineColor = palette.outline;
+    this._platforms = platforms.map((item) => {
+      const platform = item.platform || item;
+      const mode = item.mode || "disappear";
+      const gone = mode === "appear";
+      const origColliderType = platform.collider.colliderType;
+      platform._hidden = gone;
+      if (gone) {
+        platform.collider.colliderType = "TRIGGER";
       }
+      const originalDraw = platform.draw.bind(platform);
+      platform.draw = () => {};
 
       return {
-        button,
-        outlineColor: palette.outline,
-        platforms: platforms.map((item) => {
-          const platform = item.platform || item;
-          const mode = item.mode || "disappear";
-          const gone = mode === "appear";
-          // 记录原始碰撞类型（在修改之前）
-          const origColliderType = platform.collider.colliderType;
-          // 初始化时立即同步碰撞和绘制状态
-          platform._hidden = gone;
-          if (gone) {
-            platform.collider.colliderType = "TRIGGER";
-          }
-          // 接管平台的 draw，防止关卡主循环重复绘制
-          const originalDraw = platform.draw.bind(platform);
-          platform.draw = () => {};
-
-          return {
-            platform,
-            mode,
-            gone,
-            _origColliderType: origColliderType,
-            _originalDraw: originalDraw,
-          };
-        }),
+        platform,
+        mode,
+        gone,
+        _origColliderType: origColliderType,
+        _originalDraw: originalDraw,
       };
     });
     // 初始化后立即重新分区，确保 appear 模式的平台一开始就没有碰撞
@@ -108,22 +106,20 @@ export class ButtonPlatformLinkSystem {
    */
   update() {
     let changed = false;
-    for (const link of this._links) {
-      const pressed = link.button.isPressed;
-      for (const entry of link.platforms) {
-        const wasGone = entry.gone;
-        entry.gone =
-          (entry.mode === "disappear" && pressed) ||
-          (entry.mode === "appear" && !pressed);
+    const pressed = this._button.isPressed;
+    for (const entry of this._platforms) {
+      const wasGone = entry.gone;
+      entry.gone =
+        (entry.mode === "disappear" && pressed) ||
+        (entry.mode === "appear" && !pressed);
 
-        entry.platform._hidden = entry.gone;
-        if (entry.gone) {
-          entry.platform.collider.colliderType = "TRIGGER";
-        } else {
-          entry.platform.collider.colliderType = entry._origColliderType;
-        }
-        if (wasGone !== entry.gone) changed = true;
+      entry.platform._hidden = entry.gone;
+      if (entry.gone) {
+        entry.platform.collider.colliderType = "TRIGGER";
+      } else {
+        entry.platform.collider.colliderType = entry._origColliderType;
       }
+      if (wasGone !== entry.gone) changed = true;
     }
     // colliderType 发生变化时自动重新分区，保证碰撞系统下一帧正确
     if (changed && this._collisionSystem) {
@@ -139,34 +135,29 @@ export class ButtonPlatformLinkSystem {
    * @param {p5} p - p5 实例
    */
   draw(p) {
-    for (const link of this._links) {
-      const [r, g, b] = link.outlineColor;
-      for (const entry of link.platforms) {
-        const plat = entry.platform;
-        const w = plat.collider.w;
-        const h = plat.collider.h;
+    const [r, g, b] = this._outlineColor;
+    for (const entry of this._platforms) {
+      const plat = entry.platform;
+      const w = plat.collider.w;
+      const h = plat.collider.h;
 
-        if (entry.gone) {
-          // 消失的平台以 20% 透明度绘制贴图
-          p.push();
-          p.tint(255, 51);
-          entry._originalDraw(p);
-          p.noTint();
-          p.pop();
-        } else {
-          // 正常状态：原样绘制
-          entry._originalDraw(p);
-        }
-
-        // 绘制彩色轮廓
+      if (entry.gone) {
         p.push();
-        p.noFill();
-        const alpha = entry.gone ? 51 : 200;
-        p.stroke(r, g, b, alpha);
-        p.strokeWeight(3);
-        p.rect(plat.x, plat.y, w, h);
+        p.tint(255, 51);
+        entry._originalDraw(p);
+        p.noTint();
         p.pop();
+      } else {
+        entry._originalDraw(p);
       }
+
+      p.push();
+      p.noFill();
+      const alpha = entry.gone ? 51 : 200;
+      p.stroke(r, g, b, alpha);
+      p.strokeWeight(3);
+      p.rect(plat.x, plat.y, w, h);
+      p.pop();
     }
   }
 
@@ -174,12 +165,10 @@ export class ButtonPlatformLinkSystem {
    * 重置所有平台到初始状态
    */
   reset() {
-    for (const link of this._links) {
-      for (const entry of link.platforms) {
-        entry.gone = entry.mode === "appear";
-        entry.platform._hidden = entry.gone;
-        entry.platform.collider.colliderType = entry._origColliderType;
-      }
+    for (const entry of this._platforms) {
+      entry.gone = entry.mode === "appear";
+      entry.platform._hidden = entry.gone;
+      entry.platform.collider.colliderType = entry._origColliderType;
     }
     if (this._collisionSystem) {
       this._collisionSystem.partitionEntitiesByType();

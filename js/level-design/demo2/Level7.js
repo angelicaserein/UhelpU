@@ -38,9 +38,10 @@ export class Level7 extends BaseLevel {
     });
 
     // ButtonSpikeLinkSystem
-    this._buttonSpikeLinkSystem = new ButtonSpikeLinkSystem([
+    this._buttonSpikeLinkSystem = new ButtonSpikeLinkSystem(
       { button: this._bsBtn_0, spikes: [this._bsSpike_0] },
-    ]);
+      { startColorIndex: 0 },
+    );
 
     this._player = new Player(50, 450, 40, 40);
     this._player.createListeners();
@@ -219,8 +220,7 @@ export class Level7 extends BaseLevel {
   clearCanvas(p = this.p, cameraNudgeX = 0, bgParallaxFactor = 1) {
     const cameraX = this._getCameraX(p);
     const bgOffsetX = cameraNudgeX * bgParallaxFactor;
-    // const bg = Assets.bgImageDemo2Level4;
-    const bg = null;
+    const bg = Assets.bgImageDemo2Level;
     if (bg) {
       p.push();
       p.translate(-cameraX - bgOffsetX, 0);

@@ -9,9 +9,9 @@ import { t } from "../../i18n.js";
 
 /**
  * NPC — 可交互对话角色
- * 玩家进入范围后按 E 键触发对话事件
+ * 玩家进入范围后按交互键触发对话事件
  */
-export class NPC extends GameEntity {
+export class NPCDemo1 extends GameEntity {
   static DEFAULT_W = 40;
   static DEFAULT_H = 40;
 
@@ -28,7 +28,13 @@ export class NPC extends GameEntity {
    * @param {string} options.imageKey - 图片资源键名
    * @param {number[]} options.color - 没有图片时的填充颜色 [r, g, b]
    */
-  constructor(x, y, w = NPC.DEFAULT_W, h = NPC.DEFAULT_H, options = {}) {
+  constructor(
+    x,
+    y,
+    w = NPCDemo1.DEFAULT_W,
+    h = NPCDemo1.DEFAULT_H,
+    options = {},
+  ) {
     super(x, y);
     this.type = "npc";
     this.w = w;

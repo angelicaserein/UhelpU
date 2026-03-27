@@ -1,6 +1,7 @@
 import { t } from "../../i18n.js";
 import { Assets } from "../../AssetsManager.js";
 import { KeyPrompt } from "./KeyPrompt.js";
+import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
 
 export class TextPrompt extends KeyPrompt {
   /**
@@ -47,7 +48,7 @@ export class TextPrompt extends KeyPrompt {
     if (this._currentAlpha < 0.01 || !this.textKey) return;
 
     const alpha = Math.floor(this._currentAlpha * 255);
-    const label = t(this.textKey);
+    const label = KeyBindingManager.resolveKeyPlaceholders(t(this.textKey));
 
     p.push();
     p.translate(this.x, this.y + this._boxHeight);

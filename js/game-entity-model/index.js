@@ -16,9 +16,10 @@ export { Platform } from "./terrain/Platform.js";
 export { Spike } from "./interactables/Spike.js";
 export { Portal } from "./interactables/Portal.js";
 export { Button } from "./interactables/Button.js";
-export { Home } from "./interactables/Home.js";
-export { Signboard } from "./interactables/Signboard.js";
-export { NPC } from "./interactables/NPC.js";
+export { SignboardDemo2 } from "./interactables/SignboardDemo2.js";
+export { SignboardDemo1 } from "./interactables/SignboardDemo1.js";
+export { NPCDemo1 } from "./interactables/NPCDemo1.js";
+export { NPC as NPCDemo2 } from "./interactables/NPCDemo2.js";
 export { Checkpoint } from "./interactables/Checkpoint.js";
 
 // prompts

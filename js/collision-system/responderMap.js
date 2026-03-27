@@ -52,11 +52,6 @@ function dynDynBlockResponse(a, b, msg) {
     return;
 }
 function dynTriResponse(a, b, eventBus) {
-    //level1
-    if(a.type === "player" && b.type === "home") {
-        eventBus && eventBus.publish(EventTypes.AUTO_RESULT, "autoResult1");
-        return;
-    }
     //level2
     if((a.type === "player" || (a.type === "replayer" && a.isReplaying)) && b.type === "button") {
         b.pressButton();

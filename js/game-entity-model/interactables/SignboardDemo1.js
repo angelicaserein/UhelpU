@@ -9,7 +9,7 @@ import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js
  * 游戏场景互动木牌 — 游戏实体
  * 在游戏坐标系中绘制，支持与玩家交互
  */
-export class Signboard extends GameEntity {
+export class SignboardDemo1 extends GameEntity {
   static DEFAULT_W = 100;
   static DEFAULT_H = 65;
 
@@ -24,8 +24,8 @@ export class Signboard extends GameEntity {
   constructor(
     x,
     y,
-    w = Signboard.DEFAULT_W,
-    h = Signboard.DEFAULT_H,
+    w = SignboardDemo1.DEFAULT_W,
+    h = SignboardDemo1.DEFAULT_H,
     getPlayer = null,
     eventBus = null,
     { imageKey = "tileImage_signboard", onInteract = null } = {},

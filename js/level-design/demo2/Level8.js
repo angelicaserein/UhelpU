@@ -95,8 +95,8 @@ export class Level8 extends BaseLevel {
 
     // 消失平台系统 1：按钮在地面右侧，平台悬浮在中上方
     this._platBtn0 = new Button(550, 80, 34, 16);
-    this._platform0a = new Platform(200, 220, 100, 20);
-    this._platform0b = new Platform(360, 300, 100, 20);
+    this._platform0a = new Platform(200, 80, 100, 20);
+    this._platform0b = new Platform(360, 80, 100, 20);
 
     const room0 = new Room(
       [
@@ -120,8 +120,8 @@ export class Level8 extends BaseLevel {
 
     // 消失平台系统 2：按钮在地面右侧，平台悬浮
     this._platBtn1 = new Button(600, 80, 34, 16);
-    this._platform1a = new Platform(250, 200, 120, 20);
-    this._platform1b = new Platform(450, 280, 100, 20);
+    this._platform1a = new Platform(250, 80, 120, 20);
+    this._platform1b = new Platform(450, 80, 100, 20);
 
     const portal = new Portal(p.width - 100, 80, 50, 50);
     portal.openPortal();

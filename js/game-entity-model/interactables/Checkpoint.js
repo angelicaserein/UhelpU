@@ -18,7 +18,7 @@ export class Checkpoint extends GameEntity {
   constructor(x, y, w = 40, h = 70, getPlayer = null, options = {}) {
     super(x, y);
     this.type = "checkpoint";
-    this.zIndex = 0;
+    this.zIndex = -15;
     this.movementComponent = null;
     this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
     this.activated = false;
@@ -185,6 +185,39 @@ export class Checkpoint extends GameEntity {
         p.pop();
       }
     }
+
+    // 进入范围且未激活时显示交互键提示
+    if (this._inRange && !this.activated) {
+      this._drawInteractHint(p);
+    }
+  }
+
+  /**
+   * 玩家在范围内时，在存档点上方显示 [E] 提示（与 NPC 一致）
+   */
+  _drawInteractHint(p) {
+    const hintText = "E";
+    const hintSize = 24;
+    const hintY = this.y + this.collider.h + 16;
+    const hintX = this.x + this.collider.w / 2;
+
+    p.push();
+    // 绘制按键框
+    p.stroke(255, 255, 255, 200);
+    p.strokeWeight(2);
+    p.noFill();
+    p.rect(hintX - hintSize / 2, hintY, hintSize, hintSize, 3);
+
+    // 文字（补偿 y 轴翻转）
+    p.translate(hintX, hintY + hintSize / 2);
+    p.scale(1, -1);
+    p.fill(255, 255, 255, 200);
+    p.noStroke();
+    p.textAlign(p.CENTER, p.CENTER);
+    p.textSize(14);
+    p.textStyle(p.BOLD);
+    p.text(hintText, 0, 0);
+    p.pop();
   }
 
   clearListeners() {

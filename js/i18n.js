@@ -71,6 +71,12 @@ const _dict = {
     world_1: "Demo 2",
     world_2: "World 2",
     world_3: "Demo 1",
+
+    // ── NPC Default Dialogue ─────────────────────────────────────────
+    npc_default_line1: "Hi there! Nice to meet you!",
+    npc_default_line2: "Good luck on your adventure!",
+    npc_default_exhausted: "I've already told you everything I know.",
+    npc_continue_hint: "[{KEY}] Continue",
   },
 
   zh: {
@@ -140,6 +146,12 @@ const _dict = {
     world_1: "Demo 2",
     world_2: "世界 2",
     world_3: "初代 Demo",
+
+    // ── NPC 默认对话 ─────────────────────────────────────────────────
+    npc_default_line1: "你好呀！很高兴认识你！",
+    npc_default_line2: "祝你冒险顺利！",
+    npc_default_exhausted: "我已经把知道的都告诉你了。",
+    npc_continue_hint: "[{KEY}] 继续",
   },
 };
 

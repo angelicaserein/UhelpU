@@ -3,7 +3,7 @@ import {
   Ground,
   Wall,
   Portal,
-  Signboard,
+  SignboardDemo1,
   KeyPrompt,
   TextPrompt,
 } from "../../game-entity-model/index.js";
@@ -38,11 +38,11 @@ export class Level1 extends BaseLevel {
     this.entities.add(player);
 
     // 场景内可交互木牌（固定尺寸 100×65，贴合 ground 顶部 y=80）
-    const signboard = new Signboard(
+    const signboard = new SignboardDemo1(
       250,
       80,
-      Signboard.DEFAULT_W,
-      Signboard.DEFAULT_H,
+      SignboardDemo1.DEFAULT_W,
+      SignboardDemo1.DEFAULT_H,
       () => this.getPlayer(),
       eventBus,
     );
@@ -53,14 +53,14 @@ export class Level1 extends BaseLevel {
     this.entities.add(keyPrompt);
 
     // 木牌正上方按键提示（仅 C 键）
-    const signboardKeyPromptX = signboard.x + Signboard.DEFAULT_W / 2 - 14;
-    const signboardKeyPromptY = signboard.y + Signboard.DEFAULT_H + 8;
+    const signboardKeyPromptX = signboard.x + SignboardDemo1.DEFAULT_W / 2 - 14;
+    const signboardKeyPromptY = signboard.y + SignboardDemo1.DEFAULT_H + 8;
     const cKeyPrompt = new KeyPrompt(
       signboardKeyPromptX,
       signboardKeyPromptY,
       this,
       {
-        keys: [{ col: 0, row: 0, label: "E" }],
+        intent: "interaction",
       },
     );
     this.entities.add(cKeyPrompt);

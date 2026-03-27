@@ -5,8 +5,8 @@
   Wall,
   Platform,
   Portal,
-  NPC,
-  Signboard,
+  NPCDemo2,
+  SignboardDemo2,
   Checkpoint,
   Button,
   Spike,
@@ -77,9 +77,13 @@ export class Level7 extends BaseLevel {
         new Ground(450, 170, 200, 40),
         new Platform(220, 85, 160, 30),
         new Portal(970, 120, 50, 50),
-        new NPC(290, 130, 40, 40),
-        new Signboard(620, 90, 100, 65),
-        new Checkpoint(480, 70, 40, 70),
+        new NPCDemo2(290, 130, 40, 40, {
+          getPlayer: () => this._player,
+          eventBus: this.eventBus,
+          npcId: "level7_npc",
+        }),
+        new SignboardDemo2(620, 90, 100, 65, () => this._player, this.eventBus),
+        new Checkpoint(480, 70, 40, 70, () => this._player),
         this._wpBtn_0,
         this._wpPortal_0,
         this._bsBtn_0,
@@ -266,11 +270,19 @@ export class Level7 extends BaseLevel {
       if (entity.type === "spike") entity.draw(p);
     }
     for (const entity of this.entities) {
+      if (entity.type === "checkpoint") entity.draw(p);
+    }
+    for (const entity of this.entities) {
       if (entity.type === "ground") entity.draw(p);
     }
     this._btnWirePortalSystem.draw(p);
     for (const entity of this.entities) {
-      if (entity.type !== "spike" && entity.type !== "ground") entity.draw(p);
+      if (
+        entity.type !== "spike" &&
+        entity.type !== "ground" &&
+        entity.type !== "checkpoint"
+      )
+        entity.draw(p);
     }
     p.pop();
     this.recordSystem.draw && this.recordSystem.draw(p);

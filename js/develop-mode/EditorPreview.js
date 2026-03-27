@@ -15,6 +15,7 @@ import {
   WALL_DEFAULTS,
   WIRE_PORTAL_DEFAULTS,
   BTN_SPIKE_DEFAULTS,
+  BTN_PLATFORM_DEFAULTS,
   NPC_SIZE,
   SIGNBOARD_SIZE,
   CHECKPOINT_SIZE,
@@ -79,6 +80,9 @@ export class EditorPreview {
     } else if (tool === EntityTool.BTN_SPIKE) {
       this.previewW = BTN_SPIKE_DEFAULTS.buttonWidth;
       this.previewH = BTN_SPIKE_DEFAULTS.buttonHeight;
+    } else if (tool === EntityTool.BTN_PLATFORM) {
+      this.previewW = BTN_PLATFORM_DEFAULTS.buttonWidth;
+      this.previewH = BTN_PLATFORM_DEFAULTS.buttonHeight;
     } else if (tool === EntityTool.NPC) {
       this.previewW = NPC_SIZE.width;
       this.previewH = NPC_SIZE.height;
@@ -236,6 +240,44 @@ export class EditorPreview {
         this.previewY + this.previewH,
         spikeX + spikeW / 2,
         spikeY + spikeH,
+        6,
+      );
+      p.strokeWeight(2);
+    } else if (tool === EntityTool.BTN_PLATFORM) {
+      // 按钮预览（青绿色）
+      p.stroke(60, 180, 140, PREVIEW_ALPHA);
+      this._dashedRect(
+        p,
+        this.previewX,
+        this.previewY,
+        this.previewW,
+        this.previewH,
+        8,
+      );
+      p.noStroke();
+      p.fill(60, 180, 140, PREVIEW_ALPHA * 0.4);
+      p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
+
+      // 平台预览（偏移位置）
+      const platX = this.previewX + BTN_PLATFORM_DEFAULTS.offsetX;
+      const platY = this.previewY;
+      const platW = BTN_PLATFORM_DEFAULTS.platformWidth;
+      const platH = BTN_PLATFORM_DEFAULTS.platformHeight;
+      p.stroke(60, 180, 140, PREVIEW_ALPHA);
+      this._dashedRect(p, platX, platY, platW, platH, 8);
+      p.noStroke();
+      p.fill(60, 180, 140, PREVIEW_ALPHA * 0.3);
+      p.rect(platX, platY, platW, platH);
+
+      // 连接线
+      p.stroke(60, 180, 140, PREVIEW_ALPHA * 0.6);
+      p.strokeWeight(1);
+      this._dashedLine(
+        p,
+        this.previewX + this.previewW / 2,
+        this.previewY + this.previewH,
+        platX + platW / 2,
+        platY + platH,
         6,
       );
       p.strokeWeight(2);

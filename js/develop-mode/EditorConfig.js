@@ -11,6 +11,7 @@ export const EntityTool = Object.freeze({
   WALL: "wall",
   WIRE_PORTAL: "wirePortal",
   BTN_SPIKE: "btnSpike",
+  BTN_PLATFORM: "btnPlatform",
   NPC: "npc",
   SIGNBOARD: "signboard",
   CHECKPOINT: "checkpoint",
@@ -81,6 +82,15 @@ export const BTN_SPIKE_DEFAULTS = {
   buttonHeight: 16,
   spikeWidth: 100,
   spikeHeight: 20,
+  offsetX: 200,
+};
+
+/** BtnPlatformLinkSystem 默认值（按钮 + 消失平台） */
+export const BTN_PLATFORM_DEFAULTS = {
+  buttonWidth: 34,
+  buttonHeight: 16,
+  platformWidth: 160,
+  platformHeight: 30,
   offsetX: 200,
 };
 

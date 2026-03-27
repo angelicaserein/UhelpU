@@ -24,7 +24,9 @@ export class EditorExporter {
     spawn = null,
   ) {
     const lines = [];
-    lines.push("// ── 编辑器导出的实体 ───────────────────────────────────────");
+    lines.push(
+      "// ── 编辑器导出的实体 ───────────────────────────────────────",
+    );
     lines.push("//");
     lines.push(`// 房间数量: ${roomCount}`);
     for (let i = 0; i < roomCount; i++) {
@@ -37,7 +39,9 @@ export class EditorExporter {
     if (spawn) {
       lines.push("//");
       lines.push("// 玩家出生点:");
-      lines.push(`this._player = new Player(${spawn.x}, ${spawn.y}, ${spawn.w}, ${spawn.h});`);
+      lines.push(
+        `this._player = new Player(${spawn.x}, ${spawn.y}, ${spawn.w}, ${spawn.h});`,
+      );
     }
     lines.push("//");
     lines.push("// 自动墙壁（左/右边界）:");
@@ -137,6 +141,49 @@ export class EditorExporter {
       });
       lines.push("// bsBtn / bsSpike 需要加入 Room 实体列表");
       lines.push("// bsSys 需要在 update() 中调用");
+    }
+
+    // ButtonPlatformLinkSystem 复合实体导出
+    const bpItems = records.filter((r) => r.tool === EntityTool.BTN_PLATFORM);
+    if (bpItems.length > 0) {
+      lines.push("");
+      lines.push("// ButtonPlatformLinkSystem");
+      lines.push(
+        '// import { Button } from "../game-entity-model/interactables/Button.js";',
+      );
+      lines.push(
+        '// import { Platform } from "../game-entity-model/terrain/Platform.js";',
+      );
+      lines.push(
+        '// import { ButtonPlatformLinkSystem } from "../mechanism-system/demo1/ButtonPlatformLinkSystem.js";',
+      );
+      bpItems.forEach((r, idx) => {
+        const btn = r.gameEntity;
+        const platforms = r.platformEntities || [];
+        const bw = btn.collider ? btn.collider.w : 34;
+        const bh = btn.collider ? btn.collider.h : 16;
+        lines.push(
+          `const bpBtn_${idx} = new Button(${btn.x}, ${btn.y}, ${bw}, ${bh});`,
+        );
+        const platVarNames = [];
+        platforms.forEach((plt, pi) => {
+          const pw = plt.collider ? plt.collider.w : 160;
+          const ph = plt.collider ? plt.collider.h : 30;
+          const varName = `bpPlat_${idx}_${pi}`;
+          platVarNames.push(varName);
+          lines.push(
+            `const ${varName} = new Platform(${plt.x}, ${plt.y}, ${pw}, ${ph});`,
+          );
+        });
+        const platformsArray = platVarNames
+          .map((v) => `{ platform: ${v}, mode: "disappear" }`)
+          .join(", ");
+        lines.push(
+          `const bpSys_${idx} = new ButtonPlatformLinkSystem([{ button: bpBtn_${idx}, platforms: [${platformsArray}] }], collisionSystem);`,
+        );
+      });
+      lines.push("// bpBtn / bpPlat 需要加入 Room 实体列表");
+      lines.push("// bpSys 需要在 update() 和 draw() 中调用");
     }
 
     return lines.join("\n");

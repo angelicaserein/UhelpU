@@ -155,11 +155,12 @@ export class EditorExporter {
         '// import { Platform } from "../game-entity-model/terrain/Platform.js";',
       );
       lines.push(
-        '// import { ButtonPlatformLinkSystem } from "../mechanism-system/demo1/ButtonPlatformLinkSystem.js";',
+        '// import { ButtonPlatformLinkSystem } from "../mechanism-system/demo2/ButtonPlatformLinkSystem.js";',
       );
       bpItems.forEach((r, idx) => {
         const btn = r.gameEntity;
         const platforms = r.platformEntities || [];
+        const platformLinks = r.platformLinks || [];
         const bw = btn.collider ? btn.collider.w : 34;
         const bh = btn.collider ? btn.collider.h : 16;
         lines.push(
@@ -176,10 +177,13 @@ export class EditorExporter {
           );
         });
         const platformsArray = platVarNames
-          .map((v) => `{ platform: ${v}, mode: "disappear" }`)
+          .map((v, pi) => {
+            const mode = platformLinks[pi]?.mode || "disappear";
+            return `{ platform: ${v}, mode: "${mode}" }`;
+          })
           .join(", ");
         lines.push(
-          `const bpSys_${idx} = new ButtonPlatformLinkSystem([{ button: bpBtn_${idx}, platforms: [${platformsArray}] }], collisionSystem);`,
+          `const bpSys_${idx} = new ButtonPlatformLinkSystem({ button: bpBtn_${idx}, platforms: [${platformsArray}] }, collisionSystem, { startColorIndex: ${r.startColorIndex ?? idx} });`,
         );
       });
       lines.push("// bpBtn / bpPlat 需要加入 Room 实体列表");

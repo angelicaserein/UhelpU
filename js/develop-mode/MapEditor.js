@@ -32,6 +32,8 @@ import {
   EntityTool,
 } from "./EditorConfig.js";
 
+const EDITOR_SESSION_STORE = new Map();
+
 export class MapEditor {
   /**
    * @param {object} level  — 宿主关卡实例（需要有 p, _getCameraX 等属性/方法）
@@ -44,6 +46,7 @@ export class MapEditor {
     this._ui = new EditorUI(this._p.width, this._p.height);
     this._preview = new EditorPreview();
     this._entityMgr = new EditorEntityManager(level);
+    this._sessionKey = this._getSessionKey();
 
     /** 编辑器手动摄像机偏移（叠加在关卡摄像机之上，单位：世界像素） */
     this._cameraOffset = 0;
@@ -79,6 +82,8 @@ export class MapEditor {
     this._ui.roomCount = this._roomCount;
     this._ui.onAddRoom = () => this._addRoom();
     this._ui.onDelRoom = () => this._deleteRoom();
+    this._ui.onToggleBtnPlatformMode = (platformIdx) =>
+      this._toggleSelectedBtnPlatformMode(platformIdx);
 
     // 注入保存回调
     this._ui.onSave = () => this._handleSave();
@@ -97,6 +102,8 @@ export class MapEditor {
       canvas.addEventListener("mousemove", this._boundMouseDragged);
       canvas.addEventListener("mouseup", this._boundMouseReleased);
     }
+
+    this._restoreSessionSnapshot();
   }
 
   /** 编辑器是否激活 */
@@ -179,6 +186,7 @@ export class MapEditor {
     p.pop();
 
     // ── 屏幕空间绘制 UI ──────────────────────────────────
+    this._ui.setBtnPlatformInspector(this._entityMgr.selected);
     this._ui.draw(p);
 
     // 编辑模式标识
@@ -270,9 +278,14 @@ export class MapEditor {
     const mx = p.mouseX;
     const my = p.mouseY;
 
+    this._ui.setBtnPlatformInspector(this._entityMgr.selected);
+
     // 先让 UI 处理（按钮）
+    const preserveSelection = this._ui.isInsideBtnPlatformInspector(mx, my);
     if (this._ui.handleMousePressed(mx, my)) {
-      this._entityMgr.deselect();
+      if (!preserveSelection) {
+        this._entityMgr.deselect();
+      }
       return;
     }
 
@@ -341,6 +354,7 @@ export class MapEditor {
     // 2.8) 检查是否点击了 BtnPlatform 平台的调整手柄 → 开始调整大小
     const bpHandleHit = this._entityMgr.getBtnPlatformHandleAt(worldX, worldY);
     if (bpHandleHit) {
+      this._entityMgr.select(bpHandleHit.record);
       this._entityMgr.startBtnPlatformResize(
         bpHandleHit.record,
         bpHandleHit.handle,
@@ -352,6 +366,7 @@ export class MapEditor {
     // 2.9) 检查是否点击了 BtnPlatform 的子实体（按钮或平台） → 开始拖动
     const bpHit = this._entityMgr.findBtnPlatformSubEntity(worldX, worldY);
     if (bpHit) {
+      this._entityMgr.select(bpHit.record);
       this._entityMgr.startMove(bpHit.record, bpHit.entity, worldX, worldY);
       return;
     }
@@ -468,6 +483,15 @@ export class MapEditor {
     );
     this._ui.showToast(`✅ 已复制代码到剪贴板（含出生点）`);
     console.log("[MapEditor] 导出代码:\n" + code);
+  }
+
+  _toggleSelectedBtnPlatformMode(platformIdx) {
+    const record = this._entityMgr.selected;
+    if (!record || record.tool !== EntityTool.BTN_PLATFORM) return;
+    const mode = this._entityMgr.toggleBtnPlatformMode(record, platformIdx);
+    if (!mode) return;
+    this._ui.setBtnPlatformInspector(record);
+    this._ui.showToast(`平台 ${platformIdx + 1} 已切换为 ${mode}`);
   }
 
   // ══════════════════════════════════════════════════════════════
@@ -666,6 +690,8 @@ export class MapEditor {
   // ══════════════════════════════════════════════════════════════
 
   destroy() {
+    this._saveSessionSnapshot();
+
     // 恢复关卡原始的 _getCameraX
     if (this._originalGetCameraX) {
       this._level._getCameraX = this._originalGetCameraX;
@@ -677,5 +703,50 @@ export class MapEditor {
       canvas.removeEventListener("mousemove", this._boundMouseDragged);
       canvas.removeEventListener("mouseup", this._boundMouseReleased);
     }
+  }
+
+  _getSessionKey() {
+    return (
+      this._level.__editorPersistenceKey ||
+      this._level.__levelIndex ||
+      this._level.constructor.name
+    );
+  }
+
+  _saveSessionSnapshot() {
+    if (!this._sessionKey) return;
+    EDITOR_SESSION_STORE.set(this._sessionKey, {
+      active: this._active,
+      cameraOffset: this._cameraOffset,
+      roomCount: this._roomCount,
+      spawn: {
+        x: this._spawnX,
+        y: this._spawnY,
+        w: this._spawnPlayerW,
+        h: this._spawnPlayerH,
+      },
+      records: this._entityMgr.serializeRecords(),
+    });
+  }
+
+  _restoreSessionSnapshot() {
+    if (!this._sessionKey) return;
+    const snapshot = EDITOR_SESSION_STORE.get(this._sessionKey);
+    if (!snapshot) return;
+
+    this._active = !!snapshot.active;
+    this._cameraOffset = snapshot.cameraOffset || 0;
+    this._roomCount = snapshot.roomCount || this._roomCount;
+    this._ui.roomCount = this._roomCount;
+
+    if (snapshot.spawn) {
+      this._spawnX = snapshot.spawn.x;
+      this._spawnY = snapshot.spawn.y;
+      this._spawnPlayerW = snapshot.spawn.w;
+      this._spawnPlayerH = snapshot.spawn.h;
+      this._applySpawnToPlayer();
+    }
+
+    this._entityMgr.restoreRecords(snapshot.records || []);
   }
 }

@@ -57,6 +57,12 @@ export class EditorUI {
     /** BtnPlatform 平台数量（1~8） */
     this.btnPlatformCount = 1;
 
+    /** 当前选中的 BtnPlatform 复合实体模式列表 */
+    this.btnPlatformModes = null;
+    this._btnPlatformModeButtons = [];
+    this._btnPlatformModePanel = null;
+    this.onToggleBtnPlatformMode = null;
+
     // ── 预计算按钮矩形 ──────────────────────────────────────
     const toolbarTop = this._ch - TOOLBAR_HEIGHT;
     const startX = 20;
@@ -199,6 +205,8 @@ export class EditorUI {
 
     /** 当前房间数量（用于显示，由 MapEditor 设置） */
     this.roomCount = 2;
+
+    this._rebuildBtnPlatformModeButtons();
   }
 
   // ══════════════════════════════════════════════════════════════
@@ -338,6 +346,10 @@ export class EditorUI {
       this._drawButton(p, this._btnPlatCountPlus, "+", false, [80, 180, 80]);
     }
 
+    if (this.btnPlatformModes && this.btnPlatformModes.length > 0) {
+      this._drawBtnPlatformModePanel(p);
+    }
+
     // 状态提示
     const statusX = this._btnSpawn.x + BTN_W2 + 20;
     const statusY = toolbarTop + TOOLBAR_HEIGHT / 2 + 8;
@@ -466,6 +478,20 @@ export class EditorUI {
 
   /** 鼠标按下事件（屏幕坐标）。返回 true 表示事件被工具栏消费。 */
   handleMousePressed(mx, my) {
+    if (this._btnPlatformModePanel) {
+      for (const btn of this._btnPlatformModeButtons) {
+        if (this._insideRect(mx, my, btn.rect)) {
+          if (this.onToggleBtnPlatformMode) {
+            this.onToggleBtnPlatformMode(btn.platformIdx);
+          }
+          return true;
+        }
+      }
+      if (this._insideRect(mx, my, this._btnPlatformModePanel)) {
+        return true;
+      }
+    }
+
     // 摄像机左移按钮
     if (this._insideRect(mx, my, this._btnCamLeft)) {
       this._camLeftPressed = true;
@@ -611,5 +637,99 @@ export class EditorUI {
       my >= rect.y &&
       my <= rect.y + rect.h
     );
+  }
+
+  isInsideBtnPlatformInspector(mx, my) {
+    return !!(
+      this._btnPlatformModePanel &&
+      this._insideRect(mx, my, this._btnPlatformModePanel)
+    );
+  }
+
+  setBtnPlatformInspector(record) {
+    if (record && record.tool === EntityTool.BTN_PLATFORM) {
+      this.btnPlatformModes = (record.platformLinks || []).map(
+        (link) => link.mode || "disappear",
+      );
+    } else {
+      this.btnPlatformModes = null;
+    }
+    this._rebuildBtnPlatformModeButtons();
+  }
+
+  _rebuildBtnPlatformModeButtons() {
+    this._btnPlatformModeButtons = [];
+    this._btnPlatformModePanel = null;
+    if (!this.btnPlatformModes || this.btnPlatformModes.length === 0) return;
+
+    const columns = 4;
+    const btnW = 120;
+    const btnH = 26;
+    const gap = 8;
+    const padding = 12;
+    const rows = Math.ceil(this.btnPlatformModes.length / columns);
+    const panelW =
+      Math.min(this.btnPlatformModes.length, columns) * btnW +
+      Math.max(0, Math.min(this.btnPlatformModes.length, columns) - 1) * gap +
+      padding * 2;
+    const panelH = rows * btnH + Math.max(0, rows - 1) * gap + 34 + padding * 2;
+    const panelX = 20;
+    const panelY = this._ch - TOOLBAR_HEIGHT - panelH - 12;
+
+    this._btnPlatformModePanel = {
+      x: panelX,
+      y: panelY,
+      w: panelW,
+      h: panelH,
+    };
+
+    this.btnPlatformModes.forEach((mode, index) => {
+      const col = index % columns;
+      const row = Math.floor(index / columns);
+      this._btnPlatformModeButtons.push({
+        platformIdx: index,
+        mode,
+        rect: {
+          x: panelX + padding + col * (btnW + gap),
+          y: panelY + padding + 28 + row * (btnH + gap),
+          w: btnW,
+          h: btnH,
+        },
+      });
+    });
+  }
+
+  _drawBtnPlatformModePanel(p) {
+    p.fill(24, 28, 34, 230);
+    p.stroke(70, 110, 130, 220);
+    p.strokeWeight(1);
+    p.rect(
+      this._btnPlatformModePanel.x,
+      this._btnPlatformModePanel.y,
+      this._btnPlatformModePanel.w,
+      this._btnPlatformModePanel.h,
+      10,
+    );
+
+    p.fill(190, 225, 255);
+    p.noStroke();
+    p.textSize(12);
+    p.textAlign(p.LEFT, p.TOP);
+    p.text(
+      "BtnPlatform Mode",
+      this._btnPlatformModePanel.x + 12,
+      this._btnPlatformModePanel.y + 10,
+    );
+
+    for (const btn of this._btnPlatformModeButtons) {
+      const active = btn.mode === "appear";
+      this._drawButton(
+        p,
+        btn.rect,
+        `P${btn.platformIdx + 1}: ${btn.mode}`,
+        false,
+        active ? [110, 95, 210] : [60, 180, 140],
+      );
+    }
   }
 }

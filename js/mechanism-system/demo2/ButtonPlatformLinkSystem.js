@@ -5,6 +5,11 @@
 // 预定义颜色调色板，同组 button 和 platform 颜色主色调一致
 const COLOR_PALETTE = [
   {
+    unpressed: [230, 210, 40],
+    pressed: [255, 240, 120],
+    outline: [230, 210, 40],
+  }, // 黄
+  {
     unpressed: [230, 80, 160],
     pressed: [255, 150, 200],
     outline: [230, 80, 160],
@@ -39,11 +44,6 @@ const COLOR_PALETTE = [
     pressed: [100, 240, 240],
     outline: [30, 200, 200],
   }, // 青
-  {
-    unpressed: [230, 210, 40],
-    pressed: [255, 240, 120],
-    outline: [230, 210, 40],
-  }, // 黄
 ];
 
 export class ButtonPlatformLinkSystem {

@@ -30,7 +30,7 @@ import { Wall } from "../game-entity-model/terrain/Wall.js";
 import { Button } from "../game-entity-model/interactables/Button.js";
 import { BtnWirePortalSystem } from "../mechanism-system/demo2/BtnWirePortalSystem.js";
 import { ButtonSpikeLinkSystem } from "../mechanism-system/demo2/ButtonSpikeLinkSystem.js";
-import { ButtonPlatformLinkSystem } from "../mechanism-system/demo1/ButtonPlatformLinkSystem.js";
+import { ButtonPlatformLinkSystem } from "../mechanism-system/demo2/ButtonPlatformLinkSystem.js";
 import { NPCDemo1 } from "../game-entity-model/interactables/NPCDemo1.js";
 import { SignboardDemo2 } from "../game-entity-model/interactables/SignboardDemo2.js";
 import { Checkpoint } from "../game-entity-model/interactables/Checkpoint.js";
@@ -154,6 +154,10 @@ export class EditorEntityManager {
         BTN_PLATFORM_DEFAULTS.buttonHeight,
       );
       const count = options.platformCount || 1;
+      const btnPlatformCount = this._records.filter(
+        (record) => record.tool === EntityTool.BTN_PLATFORM,
+      ).length;
+      const startColorIndex = options.startColorIndex ?? btnPlatformCount;
       const platGapY = 50; // 每个平台之间的垂直间距
       const platforms = [];
       const platformLinks = [];
@@ -165,12 +169,16 @@ export class EditorEntityManager {
           BTN_PLATFORM_DEFAULTS.platformHeight,
         );
         platforms.push(plat);
-        platformLinks.push({ platform: plat, mode: "disappear" });
+        platformLinks.push({
+          platform: plat,
+          mode: options.platformModes?.[i] || "disappear",
+        });
         this._level.entities.add(plat);
       }
       const system = new ButtonPlatformLinkSystem(
-        [{ button: btn, platforms: platformLinks }],
+        { button: btn, platforms: platformLinks },
         this._level.collisionSystem,
+        { startColorIndex },
       );
       this._level.entities.add(btn);
       this._syncSystems();
@@ -178,7 +186,9 @@ export class EditorEntityManager {
         tool,
         gameEntity: btn,
         platformEntities: platforms,
+        platformLinks,
         platformLinkSystem: system,
+        startColorIndex,
       };
       this._records.push(record);
       return record;
@@ -262,6 +272,168 @@ export class EditorEntityManager {
   /** 获取所有放置记录 */
   getAll() {
     return this._records;
+  }
+
+  serializeRecords() {
+    return this._records.map((record) => {
+      const base = {
+        tool: record.tool,
+        gameEntity: this._serializeEntity(record.gameEntity),
+      };
+
+      if (record.portalEntity) {
+        base.portalEntity = this._serializeEntity(record.portalEntity);
+      }
+      if (record.spikeEntity) {
+        base.spikeEntity = this._serializeEntity(record.spikeEntity);
+      }
+      if (record.platformEntities) {
+        base.platformEntities = record.platformEntities.map((entity) =>
+          this._serializeEntity(entity),
+        );
+      }
+      if (record.platformLinks) {
+        base.platformLinks = record.platformLinks.map((link, index) => ({
+          mode: link.mode || "disappear",
+          platform: base.platformEntities?.[index] || null,
+        }));
+      }
+      if (record.startColorIndex !== undefined) {
+        base.startColorIndex = record.startColorIndex;
+      }
+
+      return base;
+    });
+  }
+
+  restoreRecords(records = []) {
+    this._records = [];
+    for (const record of records) {
+      const gameEntity = record.gameEntity;
+      if (!gameEntity) continue;
+
+      if (record.tool === EntityTool.WIRE_PORTAL) {
+        const restored = this.place(
+          record.tool,
+          gameEntity.x,
+          gameEntity.y,
+          gameEntity.w,
+          gameEntity.h,
+        );
+        if (restored.portalEntity && record.portalEntity) {
+          this._applySerializedEntity(
+            restored.portalEntity,
+            record.portalEntity,
+          );
+          this._rebuildWirePath(restored);
+        }
+        continue;
+      }
+
+      if (record.tool === EntityTool.BTN_SPIKE) {
+        const restored = this.place(
+          record.tool,
+          gameEntity.x,
+          gameEntity.y,
+          gameEntity.w,
+          gameEntity.h,
+        );
+        restored.startColorIndex =
+          record.startColorIndex ?? restored.startColorIndex;
+        if (record.spikeEntity && restored.spikeEntity) {
+          this._applySerializedEntity(restored.spikeEntity, record.spikeEntity);
+        }
+        continue;
+      }
+
+      if (record.tool === EntityTool.BTN_PLATFORM) {
+        const platformModes = (record.platformLinks || []).map(
+          (link) => link.mode || "disappear",
+        );
+        const restored = this.place(
+          record.tool,
+          gameEntity.x,
+          gameEntity.y,
+          gameEntity.w,
+          gameEntity.h,
+          {
+            platformCount: record.platformEntities?.length || 1,
+            platformModes,
+            startColorIndex: record.startColorIndex,
+          },
+        );
+        restored.startColorIndex =
+          record.startColorIndex ?? restored.startColorIndex;
+        (record.platformEntities || []).forEach((entity, index) => {
+          const platform = restored.platformEntities?.[index];
+          if (platform) {
+            this._applySerializedEntity(platform, entity);
+          }
+          if (restored.platformLinks?.[index]) {
+            restored.platformLinks[index].mode =
+              record.platformLinks?.[index]?.mode || "disappear";
+          }
+          if (restored.platformLinkSystem?._platforms?.[index]) {
+            restored.platformLinkSystem._platforms[index].mode =
+              restored.platformLinks[index].mode;
+          }
+        });
+        if (typeof restored.platformLinkSystem?.reset === "function") {
+          restored.platformLinkSystem.reset();
+        }
+        continue;
+      }
+
+      const restored = this.place(
+        record.tool,
+        gameEntity.x,
+        gameEntity.y,
+        gameEntity.w,
+        gameEntity.h,
+      );
+      if (restored?.gameEntity) {
+        this._applySerializedEntity(restored.gameEntity, gameEntity);
+      }
+    }
+
+    this._syncSystems();
+  }
+
+  toggleBtnPlatformMode(record, platformIdx) {
+    if (
+      !record ||
+      record.tool !== EntityTool.BTN_PLATFORM ||
+      !record.platformLinks ||
+      !record.platformLinks[platformIdx] ||
+      !record.platformLinkSystem
+    ) {
+      return null;
+    }
+
+    const link = record.platformLinks[platformIdx];
+    const nextMode = link.mode === "appear" ? "disappear" : "appear";
+    link.mode = nextMode;
+
+    const entry = record.platformLinkSystem._platforms?.[platformIdx];
+    if (entry) {
+      entry.mode = nextMode;
+      const pressed = record.gameEntity?.isPressed || false;
+      entry.gone =
+        (nextMode === "disappear" && pressed) ||
+        (nextMode === "appear" && !pressed);
+      entry.platform._hidden = entry.gone;
+      entry.platform.collider.colliderType = entry.gone
+        ? "TRIGGER"
+        : entry._origColliderType;
+    }
+
+    if (
+      typeof this._level.collisionSystem?.partitionEntitiesByType === "function"
+    ) {
+      this._level.collisionSystem.partitionEntitiesByType();
+    }
+    this._syncSystems();
+    return nextMode;
   }
 
   // ══════════════════════════════════════════════════════════════
@@ -849,6 +1021,28 @@ export class EditorEntityManager {
     return Math.round(v / GRID_SIZE) * GRID_SIZE;
   }
 
+  _serializeEntity(entity) {
+    if (!entity) return null;
+    return {
+      x: entity.x,
+      y: entity.y,
+      w: entity.collider?.w ?? entity.w ?? 0,
+      h: entity.collider?.h ?? entity.h ?? 0,
+    };
+  }
+
+  _applySerializedEntity(entity, snapshot) {
+    if (!entity || !snapshot) return;
+    entity.x = snapshot.x;
+    entity.y = snapshot.y;
+    if (entity.collider) {
+      entity.collider.w = snapshot.w;
+      entity.collider.h = snapshot.h;
+    }
+    if ("w" in entity) entity.w = snapshot.w;
+    if ("h" in entity) entity.h = snapshot.h;
+  }
+
   /** 同步物理和碰撞系统的实体引用 */
   _syncSystems() {
     if (this._level.physicsSystem?.setEntities) {
@@ -1047,8 +1241,8 @@ export class EditorEntityManager {
           p.textAlign(p.LEFT, p.TOP);
           const platLabel =
             platforms.length > 1
-              ? `BP-Plt${pi + 1} ${pw}×${ph}`
-              : `BP-Plt ${pw}×${ph}`;
+              ? `BP-Plt${pi + 1} ${pw}×${ph} ${rec.platformLinks?.[pi]?.mode || "disappear"}`
+              : `BP-Plt ${pw}×${ph} ${rec.platformLinks?.[pi]?.mode || "disappear"}`;
           p.text(platLabel, 3, 3);
           p.pop();
         }

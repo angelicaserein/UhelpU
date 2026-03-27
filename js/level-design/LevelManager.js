@@ -164,6 +164,8 @@ export class LevelManager {
     if (!this.level) {
       const LevelClass = this.levelMap[levelIndex];
       this.level = new LevelClass(p, eventBus);
+      this.level.__levelIndex = levelIndex;
+      this.level.__editorPersistenceKey = levelIndex;
       this.currentLevelIndex = levelIndex;
       this.cameraNudgeX = 0;
       this.startLevelTitleOverlay(levelIndex, p);

@@ -9,7 +9,8 @@ registerTranslations({
     d2_npc_level1_line1:
       "Welcome to           !\nYou could check the tutorial on the notice board.",
     d2_npc_level1_line2: "Press ESC or the button to pause and see more hints!",
-    d2_npc_level1_line3: "Remember, you're recording actions, not positions!",
+    d2_npc_level1_line3:
+      "Remember, you're recording your starting point and keyboard actions!",
     d2_npc_level1_exhausted:
       "If you missed the three lines I said, you'll have to restart to see them again~",
 
@@ -45,6 +46,12 @@ registerTranslations({
     // ── Level 2 — Signboard ─────────────────────────────────────────
     d2_signboard_level2_front:
       "Notice\n---\nAll paths ahead can lead to the end.\nSee how far you can jump?\nMaking good use of your ability to let you jump farther.",
+
+    // ── Level 4 — NPC Dialogue ───────────────────────────────────────
+    d2_npc_level4_line1: "I can give you hints!",
+    d2_npc_level4_line2: "Come find me when you need a hint~",
+    d2_npc_level4_exhausted:
+      "Let your phantom fall down! Press Pause for more hints~",
   },
 
   zh: {
@@ -52,7 +59,7 @@ registerTranslations({
     d2_npc_level1_line1:
       "嘿，欢迎来到            ！\n你可以查看公告板上的教程。",
     d2_npc_level1_line2: "按esc或者按钮暂停，可以查看更多提示！",
-    d2_npc_level1_line3: "你录制的是操作而不是位置哦！",
+    d2_npc_level1_line3: "你录制的是你的起始点和键盘操作！",
     d2_npc_level1_exhausted: "如果你错过了我说的三句话，那你只能重开来看了~",
 
     // ── 第一关 — 提示（暂停菜单） ────────────────────────────────────
@@ -86,5 +93,10 @@ registerTranslations({
     // ── 第二关 — 告示板 ─────────────────────────────────────────────
     d2_signboard_level2_front:
       "注意\n---\n前方每条路都可以到达终点哦。\n试试看你最远能跳多远吧？\n利用好你的能力似乎可以跳得更远？",
+
+    // ── 第四关 — NPC 对话 ────────────────────────────────────────────
+    d2_npc_level4_line1: "我可以给你提示哦！",
+    d2_npc_level4_line2: "等你需要提示的时候来找我吧~",
+    d2_npc_level4_exhausted: "让你的幻影掉下去吧！更多提示请按暂停哦~",
   },
 });

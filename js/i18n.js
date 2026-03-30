@@ -61,6 +61,18 @@ const _dict = {
     rec_blocked_air: "Land first to record!",
     click_to_close: "Click anywhere to close",
 
+    // ── Demo2 Record UI ──────────────────────────────────────────────
+    rec_demo2_ready_to_record: "Ready to Record",
+    rec_demo2_recording: "Recording...",
+    rec_demo2_recording_sub: "Your actions are being recorded",
+    rec_demo2_ready_to_replay: "Ready to Replay",
+    rec_demo2_replaying: "Replaying...",
+    rec_demo2_press_record_to_start: "Press {KEY} to start recording",
+    rec_demo2_press_record_to_stop: "Press {KEY} again to stop early",
+    rec_demo2_press_replay_to_start: "Press {KEY} to start",
+    rec_demo2_press_record_to_rerecord: "Press {KEY} to re-record",
+    rec_demo2_press_replay_to_exit: "Press {KEY} again to exit early",
+
     // ── Achievement ─────────────────────────────────────────────────
     achievement_unlocked: "New Achievement Unlocked!",
     achiev_title: "Achievements",
@@ -135,6 +147,18 @@ const _dict = {
     rec_hud_label: "录制面板",
     rec_blocked_air: "落地后才能录制！",
     click_to_close: "点击任意处关闭",
+
+    // ── Demo2 录制 UI ──────────────────────────────────────────────
+    rec_demo2_ready_to_record: "准备录制",
+    rec_demo2_recording: "录制中...",
+    rec_demo2_recording_sub: "现在你的操作正在被记录",
+    rec_demo2_ready_to_replay: "准备回放",
+    rec_demo2_replaying: "回放中...",
+    rec_demo2_press_record_to_start: "按 {KEY} 开始录制",
+    rec_demo2_press_record_to_stop: "按 {KEY} 提前结束录制",
+    rec_demo2_press_replay_to_start: "按 {KEY} 开始回放",
+    rec_demo2_press_record_to_rerecord: "按 {KEY} 重新录制",
+    rec_demo2_press_replay_to_exit: "按 {KEY} 提前结束回放",
 
     // ── 成就 ──────────────────────────────────────────────────────────
     achievement_unlocked: "新的成就已解锁！",

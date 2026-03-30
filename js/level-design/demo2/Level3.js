@@ -11,6 +11,7 @@ import {
 import { BaseLevel } from "../BaseLevel.js";
 import { BtnWirePortalSystem } from "../../mechanism-system/demo2/BtnWirePortalSystem.js";
 import { ButtonSpikeLinkSystem } from "../../mechanism-system/demo2/ButtonSpikeLinkSystem.js";
+import { Demo2RecordUI } from "../../record-system/Demo2RecordUI.js";
 
 export class Level3 extends BaseLevel {
   constructor(p, eventBus) {
@@ -81,7 +82,7 @@ export class Level3 extends BaseLevel {
     this.entities.add(bsBtn_2);
     this.entities.add(bsSpike_2);
 
-    this.initSystems(this._player);
+    this.initSystems(this._player, 5000, { uiClass: Demo2RecordUI });
   }
 
   updatePhysics() {

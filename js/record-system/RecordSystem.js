@@ -454,6 +454,10 @@ export class RecordSystem {
 
   draw(p) {
     if (!this._hudVisible) return;
+
+    // 提取录制的操作（用于Demo2RecordUI的时间轴）
+    const recordedActions = this._extractRecordedActions();
+
     this._uiClass.draw(p, {
       state: this.state,
       maxRecordTime: this.maxRecordTime,
@@ -464,6 +468,49 @@ export class RecordSystem {
       pausedReplayElapsed: this._pausedReplayElapsed,
       airBlockFlashMs: this._airBlockFlashMs,
       player: this.player,
+      recordedActions: recordedActions,
     });
+  }
+
+  /**
+   * 从当前录制的Clip中提取操作（moveLeft, moveRight, jump）
+   * 返回格式: [{ time: ms, action: "moveLeft"|"moveRight"|"jump" }, ...]
+   */
+  _extractRecordedActions() {
+    if (!this.clip || !this.clip.records) {
+      return [];
+    }
+
+    const kbm = KeyBindingManager.getInstance();
+    const moveLeftKey = kbm.getKeyByIntent("moveLeft");
+    const moveRightKey = kbm.getKeyByIntent("moveRight");
+    const jumpKey = kbm.getKeyByIntent("jump");
+
+    const actions = [];
+
+    // 仅处理keydown事件，记录首次按下
+    this.clip.records.forEach(record => {
+      if (record.keyType !== "keydown") {
+        return;
+      }
+
+      let action = null;
+      if (record.code === moveLeftKey) {
+        action = "moveLeft";
+      } else if (record.code === moveRightKey) {
+        action = "moveRight";
+      } else if (record.code === jumpKey) {
+        action = "jump";
+      }
+
+      if (action) {
+        actions.push({
+          time: record.time,
+          action: action,
+        });
+      }
+    });
+
+    return actions;
   }
 }

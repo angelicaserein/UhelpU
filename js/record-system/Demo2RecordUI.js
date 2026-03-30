@@ -1,5 +1,5 @@
-// Demo2RecordUI.js
-// Demo2 专用录制系统 UI — 占位副本，后续自行修改风格
+// Demo2RecordUI.js - 复古像素硬边风格 RECORD HUD + 操作时间轴
+// 核心色系：深紫黑 #2A1433 + 中深紫 #6B4A7A + 浅紫灰 #8A6A99 + 淡紫/极浅紫背景
 import { keyCodeToLabel } from "./RecordKeyUtil.js";
 import { KeyBindingManager } from "../key-binding-system/KeyBindingManager.js";
 import { t } from "../i18n.js";
@@ -7,6 +7,24 @@ import { isGamePaused } from "../game-runtime/GamePauseState.js";
 import { Assets } from "../AssetsManager.js";
 
 export class Demo2RecordUI {
+  // 核心色板（RGB值）
+  static COLOR_PALETTE = {
+    deepPurpleBlack: { r: 42, g: 20, b: 51 },      // #2A1433
+    midPurple: { r: 107, g: 74, b: 122 },          // #6B4A7A
+    lightPurpleGray: { r: 138, g: 106, b: 153 },   // #8A6A99
+    softPurple: { r: 212, g: 190, b: 224 },
+    veryLightPurple: { r: 232, g: 216, b: 240 },
+
+    recordRed: { r: 255, g: 100, b: 150 },
+    replayBlue: { r: 120, g: 180, b: 255 },
+    standbyPurple: { r: 160, g: 120, b: 180 },
+
+    // 操作颜色
+    moveLeftColor: { r: 100, g: 200, b: 255 },     // 蓝色左
+    moveRightColor: { r: 100, g: 200, b: 255 },    // 蓝色右
+    jumpColor: { r: 255, g: 200, b: 100 },         // 橙色跳
+  };
+
   static getRecordUiState(
     p,
     state,
@@ -21,30 +39,20 @@ export class Demo2RecordUI {
     const kbm = KeyBindingManager.getInstance();
     const recordKey = keyCodeToLabel(kbm.getKeyByIntent("record"));
     const replayKey = keyCodeToLabel(kbm.getKeyByIntent("replay"));
-    const maxSec = (maxRecordTime / 1000).toFixed(1);
-    // Steampunk dark-purple chrome shared by all states
-    const chrome = {
-      frameLight: p.color(68, 38, 100),
-      frameDark: p.color(12, 6, 24),
-      panelFill: p.color(34, 18, 58),
-      panelShade: p.color(22, 11, 40),
-      textMain: p.color(218, 198, 238),
-      textSub: p.color(148, 122, 175),
-    };
+
     const base = {
-      ...chrome,
-      title: t("rec_title_standby"),
-      subtitle: `${t("rec_sub_max").replace("{KEY}", recordKey)} ${maxSec}s`,
-      badge: "STANDBY",
-      accentA: p.color(72, 48, 105),
-      accentB: p.color(44, 26, 70),
-      dotColor: p.color(100, 72, 138),
+      title: t("rec_demo2_ready_to_record"),
+      subtitle: "",
+      stateLabel: "STANDBY",
       progress: 0,
-      showBlinkDot: false,
-      pulse: 0,
-      hudLabel: t("rec_hud_label"),
-      airBlockText: t("rec_blocked_air"),
+      timeStr: "0.0s",
+      isRecording: false,
+      isReplaying: false,
+      isPaused: false,
+      recordKey,
+      replayKey,
     };
+
     switch (state) {
       case "Recording": {
         const isPausedRecording = paused && pausedRecordElapsed !== null;
@@ -53,49 +61,27 @@ export class Demo2RecordUI {
           : Math.max(0, performance.now() - recordStartTime);
         const elapsedSec = (elapsedMs / 1000).toFixed(1);
         return {
-          ...chrome,
-          title: t("rec_title_recording"),
-          subtitle: `${t("rec_sub_press_e_end").replace("{KEY}", recordKey)}  ${elapsedSec}s / ${maxSec}s`,
-          badge: isPausedRecording ? "PAUSED" : "REC",
-          accentA: p.color(175, 38, 88),
-          accentB: p.color(105, 18, 50),
-          panelFill: p.color(42, 16, 55),
-          panelShade: p.color(28, 10, 40),
-          dotColor: p.color(240, 65, 115),
-          textMain: p.color(240, 215, 235),
-          textSub: p.color(195, 148, 175),
+          ...base,
+          title: t("rec_demo2_recording"),
+          subtitle: t("rec_demo2_recording_sub"),
+          stateLabel: isPausedRecording ? "◼ PAUSED" : "● REC",
           progress: Math.min(1, elapsedMs / maxRecordTime),
-          showBlinkDot: isPausedRecording
-            ? false
-            : Math.floor(performance.now() / 450) % 2 === 0,
-          pulse: isPausedRecording
-            ? 0
-            : (Math.sin(performance.now() / 200) + 1) / 2,
-          hudLabel: t("rec_hud_label"),
-          airBlockText: t("rec_blocked_air"),
+          timeStr: `${elapsedSec}s`,
+          isRecording: true,
+          isPaused: isPausedRecording,
+          isBlinking: !isPausedRecording,
         };
       }
       case "ReadyToReplay": {
-        const recordedSec = ((recordEndTime - recordStartTime) / 1000).toFixed(
-          1,
-        );
+        const recordedMs = recordEndTime - recordStartTime;
+        const recordedSec = (recordedMs / 1000).toFixed(1);
         return {
-          ...chrome,
-          title: t("rec_title_ready"),
-          subtitle: `${t("rec_sub_ready_prefix").replace("{REPLAY}", replayKey).replace("{RECORD}", recordKey)}  ${recordedSec}s`,
-          badge: "READY",
-          accentA: p.color(58, 98, 130),
-          accentB: p.color(34, 62, 90),
-          panelFill: p.color(28, 22, 55),
-          panelShade: p.color(18, 14, 40),
-          dotColor: p.color(105, 165, 210),
-          textMain: p.color(210, 215, 240),
-          textSub: p.color(138, 148, 185),
+          ...base,
+          title: t("rec_demo2_ready_to_replay"),
+          subtitle: "",
+          stateLabel: "✓ READY",
           progress: 1,
-          showBlinkDot: false,
-          pulse: 0,
-          hudLabel: t("rec_hud_label"),
-          airBlockText: t("rec_blocked_air"),
+          timeStr: `${recordedSec}s`,
         };
       }
       case "Replaying": {
@@ -107,46 +93,36 @@ export class Demo2RecordUI {
         const replayElapsedSec = (replayElapsedMs / 1000).toFixed(1);
         const totalReplaySec = (totalMs / 1000).toFixed(1);
         return {
-          ...chrome,
-          title: t("rec_title_replaying"),
-          subtitle: `${t("rec_sub_press_replay_end").replace("{KEY}", replayKey)}  ${replayElapsedSec}s / ${totalReplaySec}s`,
-          badge: isPausedReplaying ? "PAUSED" : "PLAY",
-          accentA: p.color(115, 75, 155),
-          accentB: p.color(72, 42, 105),
-          panelFill: p.color(36, 20, 62),
-          panelShade: p.color(22, 12, 44),
-          dotColor: p.color(175, 138, 215),
-          textMain: p.color(218, 200, 240),
-          textSub: p.color(155, 128, 185),
+          ...base,
+          title: t("rec_demo2_replaying"),
+          subtitle: "",
+          stateLabel: isPausedReplaying ? "◼ PAUSED" : "▶ PLAY",
           progress: Math.min(1, replayElapsedMs / totalMs),
-          showBlinkDot: isPausedReplaying
-            ? false
-            : Math.floor(performance.now() / 700) % 2 === 0,
-          pulse: 0,
-          hudLabel: t("rec_hud_label"),
-          airBlockText: t("rec_blocked_air"),
+          timeStr: `${replayElapsedSec}s/${totalReplaySec}s`,
+          isReplaying: true,
+          isPaused: isPausedReplaying,
+          isBlinking: !isPausedReplaying,
         };
       }
       default:
-        return {
-          ...base,
-        };
+        return base;
     }
   }
 
   /**
-   * 绘制录制系统 HUD
-   * @param {object} p - p5 实例
-   * @param {object} params
-   * @param {string}  params.state
-   * @param {number}  params.maxRecordTime
-   * @param {number}  params.recordStartTime
-   * @param {number}  params.recordEndTime
-   * @param {number}  params.replayStartTime
-   * @param {number|null} params.pausedRecordElapsed
-   * @param {number|null} params.pausedReplayElapsed
-   * @param {number}  params.airBlockFlashMs
-   * @param {object}  params.player
+   * 绘制 RECORD HUD + 操作时间轴
+   * @param {object} p - p5实例
+   * @param {object} params - 绘制参数
+   * @param {string} params.state - 状态
+   * @param {number} params.maxRecordTime - 最大录制时长
+   * @param {number} params.recordStartTime - 录制开始时间
+   * @param {number} params.recordEndTime - 录制结束时间
+   * @param {number} params.replayStartTime - 回放开始时间
+   * @param {number|null} params.pausedRecordElapsed - 暂停时的录制经过时间
+   * @param {number|null} params.pausedReplayElapsed - 暂停时的回放经过时间
+   * @param {number} params.airBlockFlashMs - 空中被挡的时间戳
+   * @param {object} params.player - 玩家对象
+   * @param {array} params.recordedActions - [{ time: ms, action: "moveLeft"|"moveRight"|"jump" }, ...]
    */
   static draw(
     p,
@@ -160,6 +136,7 @@ export class Demo2RecordUI {
       pausedReplayElapsed,
       airBlockFlashMs,
       player,
+      recordedActions = [],
     },
   ) {
     const ui = Demo2RecordUI.getRecordUiState(
@@ -174,170 +151,487 @@ export class Demo2RecordUI {
       pausedReplayElapsed,
     );
 
-    const panelW = Math.min(630, p.width - 32);
-    const panelH = 92;
-    const panelX = Math.floor((p.width - panelW) / 2);
-    const panelY = 14;
-    const badgeW = 104;
-    const progressW = panelW - 32;
-    const progressH = 8;
-    const progressX = panelX + 16;
-    const progressY = panelY + panelH - 16;
-    const pulseSize = 14 + ui.pulse * 8;
+    // === 布局尺寸 ===
+    const baseHeight = 100;
+    const timelineHeight = 26; // 操作时间轴高度（包含图例）
+    const totalHeight = state === "Recording" ? baseHeight + timelineHeight + padding * 2 : baseHeight;
+    const padding = 12;
+    const borderWidth = 2;
 
-    // Air-block state
+    // 空中检测
     const _cc = player?.controllerManager?.currentControlComponent;
     const _isOnGround = _cc?.abilityCondition?.["isOnGround"] ?? true;
     const isAirBlocked =
       (state === "ReadyToRecord" || state === "ReadyToReplay") && !_isOnGround;
     const airBlockAge = performance.now() - airBlockFlashMs;
-    // Shake: brief horizontal oscillation decaying over 350ms
-    const shakeX =
-      airBlockAge < 350
-        ? Math.sin((airBlockAge / 350) * Math.PI * 6) *
-          5 *
-          (1 - airBlockAge / 350)
-        : 0;
 
     p.push();
     p.resetMatrix();
-    p.translate(shakeX, 0);
     p.noStroke();
     if (Assets.customFont) {
       p.textFont(Assets.customFont);
     }
 
-    // === PANEL CHROME ===
-    // Outermost near-black border
-    p.fill(ui.frameDark);
-    p.rect(panelX - 4, panelY - 4, panelW + 8, panelH + 8);
-    // Metallic purple inner border
-    p.fill(ui.frameLight);
-    p.rect(panelX - 2, panelY - 2, panelW + 4, panelH + 4);
-    // Panel body layers
-    p.fill(ui.panelShade);
-    p.rect(panelX, panelY, panelW, panelH);
-    p.fill(ui.panelFill);
-    p.rect(panelX + 2, panelY + 2, panelW - 4, panelH - 4);
-    // Subtle cool-purple shimmer strip at top
-    p.fill(155, 95, 210, 16);
-    p.rect(panelX + 4, panelY + 4, panelW - 8, 7);
+    // === 背景 ===
+    Demo2RecordUI._drawBackground(p, totalHeight);
 
-    // === CORNER RIVETS (pixel steampunk detail) ===
-    p.fill(72, 40, 108);
-    p.rect(panelX + 4, panelY + 4, 5, 5);
-    p.rect(panelX + panelW - 9, panelY + 4, 5, 5);
-    p.rect(panelX + 4, panelY + panelH - 9, 5, 5);
-    p.rect(panelX + panelW - 9, panelY + panelH - 9, 5, 5);
-    // Rivet glint pixel
-    p.fill(148, 98, 195, 200);
-    p.rect(panelX + 5, panelY + 5, 2, 2);
-    p.rect(panelX + panelW - 8, panelY + 5, 2, 2);
-    p.rect(panelX + 5, panelY + panelH - 8, 2, 2);
-    p.rect(panelX + panelW - 8, panelY + panelH - 8, 2, 2);
+    // === 主容器（双层硬边描边） ===
+    Demo2RecordUI._drawContainer(
+      p,
+      padding,
+      padding,
+      p.width - padding * 2,
+      baseHeight - padding * 2,
+      borderWidth
+    );
 
-    // === BADGE AREA ===
-    p.fill(ui.frameDark);
-    p.rect(panelX + 12, panelY + 12, badgeW + 4, 38);
-    p.fill(ui.accentB);
-    p.rect(panelX + 14, panelY + 14, badgeW, 34);
-    // Top accent stripe
-    p.fill(ui.accentA);
-    p.rect(panelX + 16, panelY + 16, badgeW - 4, 8);
-    // Badge rivets on stripe
-    p.fill(ui.frameDark);
-    p.rect(panelX + 20, panelY + 18, 3, 3);
-    p.rect(panelX + 108, panelY + 18, 3, 3);
+    // === 内部布局 ===
+    const innerX = padding + borderWidth + 2;
+    const innerY = padding + borderWidth + 2;
+    const innerW = p.width - padding * 2 - (borderWidth + 2) * 2;
+    const innerH = baseHeight - padding * 2 - (borderWidth + 2) * 2;
 
-    // Recording crimson-rose pulse glow
-    if (ui.badge === "REC") {
-      p.fill(205, 38, 95, 36 + ui.pulse * 44);
-      p.circle(panelX + 40, panelY + 33, pulseSize + 10);
-      p.fill(205, 38, 95, 22 + ui.pulse * 24);
-      p.circle(panelX + 40, panelY + 33, pulseSize);
-    }
+    // 左：状态指示器
+    Demo2RecordUI._drawStateIndicator(p, innerX, innerY, ui, state, innerH);
 
-    // Indicator diamond (rotated square — pixel-art style)
-    p.fill(ui.showBlinkDot ? ui.dotColor : p.color(38, 20, 60));
-    p.push();
-    p.translate(panelX + 40, panelY + 33);
-    p.rotate(Math.PI / 4);
-    p.rect(-5, -5, 10, 10);
-    p.pop();
-    if (ui.showBlinkDot) {
-      p.fill(255, 225);
-      p.push();
-      p.translate(panelX + 40, panelY + 33);
-      p.rotate(Math.PI / 4);
-      p.rect(-2, -2, 4, 4);
-      p.pop();
-    }
+    // 中：进度条区域
+    const progressAreaX = innerX + 100;
+    const progressAreaW = innerW - 100 - 180;
+    Demo2RecordUI._drawProgressArea(p, progressAreaX, innerY, progressAreaW, innerH, ui);
 
-    // Badge label
-    p.fill(ui.textMain);
-    p.textAlign(p.LEFT, p.CENTER);
-    p.textSize(15);
-    p.textStyle(p.BOLD);
-    p.text(ui.badge, panelX + 52, panelY + 33);
+    // 右：操作提示
+    Demo2RecordUI._drawActionHints(
+      p,
+      innerX + innerW - 170,
+      innerY,
+      170,
+      innerH,
+      ui,
+      state
+    );
 
-    // Title + subtitle
-    p.textStyle(p.BOLD);
-    p.textSize(23);
-    p.text(ui.title, panelX + 136, panelY + 31);
+    // === 操作时间轴（仅在录制时显示） ===
+    if (state === "Recording") {
+      const timelineContainerX = padding;
+      const timelineContainerY = baseHeight + padding;
+      const timelineContainerW = p.width - padding * 2;
+      const timelineContainerH = timelineHeight;
 
-    p.textStyle(p.NORMAL);
-    p.fill(ui.textSub);
-    p.textSize(15);
-    p.text(ui.subtitle, panelX + 136, panelY + 54);
+      // 时间轴背景容器
+      Demo2RecordUI._drawContainer(
+        p,
+        timelineContainerX,
+        timelineContainerY,
+        timelineContainerW,
+        timelineContainerH,
+        borderWidth
+      );
 
-    // === PROGRESS BAR ===
-    p.fill(ui.frameDark);
-    p.rect(progressX - 2, progressY - 2, progressW + 4, progressH + 4);
-    // Dark purple track
-    p.fill(14, 7, 28);
-    p.rect(progressX, progressY, progressW, progressH);
-    // Filled portion
-    p.fill(ui.accentA);
-    const barFillW = Math.max(0, progressW * ui.progress - 2);
-    if (barFillW > 0) {
-      p.rect(progressX + 1, progressY + 1, barFillW, progressH - 2);
-    }
-    // Quarter tick marks (industrial gauge look)
-    p.fill(ui.frameDark);
-    for (let i = 1; i < 4; i++) {
-      p.rect(
-        progressX + Math.floor((progressW * i) / 4),
-        progressY,
-        1,
-        progressH,
+      // 绘制操作时间轴
+      const timelineX = timelineContainerX + borderWidth + 2;
+      const timelineY = timelineContainerY + borderWidth + 2;
+      const timelineW = timelineContainerW - (borderWidth + 2) * 2;
+      const timelineH = timelineContainerH - (borderWidth + 2) * 2 - 14; // 留出图例空间
+
+      Demo2RecordUI._drawActionTimeline(
+        p,
+        timelineX,
+        timelineY,
+        timelineW,
+        timelineH,
+        ui,
+        recordedActions,
+        recordStartTime,
+        maxRecordTime
       );
     }
 
-    // HUD label
-    p.fill(ui.textSub);
-    p.textAlign(p.RIGHT, p.CENTER);
-    p.textSize(15);
-    p.text(t("rec_hud_label"), panelX + panelW - 14, panelY + 20);
-
-    // === AIR BLOCK OVERLAY ===
+    // === 空中被挡住警告 ===
     if (isAirBlocked) {
-      p.fill(10, 5, 28, 135);
-      p.rect(panelX + 2, panelY + 2, panelW - 4, panelH - 4);
-      p.fill(185, 155, 220, 200);
-      p.textAlign(p.CENTER, p.CENTER);
-      p.textSize(15);
-      p.textStyle(p.BOLD);
-      p.text(t("rec_blocked_air"), panelX + panelW / 2, panelY + panelH / 2);
-      p.textStyle(p.NORMAL);
-    }
-
-    // Crimson-purple flash on blocked attempt
-    if (airBlockAge < 380) {
-      const flashAlpha = (1 - airBlockAge / 380) * 140;
-      p.fill(185, 28, 80, flashAlpha);
-      p.rect(panelX + 2, panelY + 2, panelW - 4, panelH - 4);
+      Demo2RecordUI._drawAirBlockWarning(p, baseHeight, airBlockAge);
     }
 
     p.pop();
+  }
+
+  // ========== 绘制辅助函数 ==========
+
+  static _drawBackground(p, totalHeight) {
+    const C = Demo2RecordUI.COLOR_PALETTE;
+
+    // 纵向渐变背景：极浅紫 → 淡紫
+    for (let i = 0; i < totalHeight; i++) {
+      const ratio = i / totalHeight;
+      const r = Math.round(
+        C.veryLightPurple.r * (1 - ratio * 0.3) + C.softPurple.r * ratio * 0.3
+      );
+      const g = Math.round(
+        C.veryLightPurple.g * (1 - ratio * 0.3) + C.softPurple.g * ratio * 0.3
+      );
+      const b = Math.round(
+        C.veryLightPurple.b * (1 - ratio * 0.3) + C.softPurple.b * ratio * 0.3
+      );
+      p.fill(r, g, b, 255);
+      p.rect(0, i, p.width, 1);
+    }
+
+    // 雾化光斑：3个径向渐变
+    const spots = [
+      { x: p.width * 0.15, y: 50, size: 140, alpha: 30 },
+      { x: p.width * 0.85, y: 40, size: 120, alpha: 25 },
+      { x: p.width * 0.5, y: 10, size: 100, alpha: 20 },
+    ];
+
+    spots.forEach(spot => {
+      for (let i = spot.size; i > 0; i--) {
+        const alpha = (1 - i / spot.size) * spot.alpha;
+        p.fill(C.lightPurpleGray.r, C.lightPurpleGray.g, C.lightPurpleGray.b, alpha);
+        p.circle(spot.x, spot.y, i);
+      }
+    });
+
+    // 顶部亮线
+    p.fill(255, 255, 255, 50);
+    p.rect(0, 0, p.width, 1);
+  }
+
+  static _drawContainer(p, x, y, w, h, bw) {
+    const C = Demo2RecordUI.COLOR_PALETTE;
+
+    // 外边框（中深紫）
+    p.stroke(C.midPurple.r, C.midPurple.g, C.midPurple.b);
+    p.strokeWeight(bw);
+    p.noFill();
+    p.rect(x, y, w, h);
+
+    // 内高光（上和左）
+    p.stroke(C.lightPurpleGray.r, C.lightPurpleGray.g, C.lightPurpleGray.b, 180);
+    p.strokeWeight(1);
+    p.line(x + bw, y + bw, x + w - bw, y + bw);
+    p.line(x + bw, y + bw, x + bw, y + h - bw);
+
+    // 内阴影（下和右）
+    p.stroke(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 120);
+    p.line(x + bw, y + h - bw, x + w - bw, y + h - bw);
+    p.line(x + w - bw, y + bw, x + w - bw, y + h - bw);
+  }
+
+  static _drawStateIndicator(p, x, y, ui, state, h) {
+    const C = Demo2RecordUI.COLOR_PALETTE;
+
+    // 选择状态颜色
+    let stateColor = C.standbyPurple;
+    if (state === "Recording") stateColor = C.recordRed;
+    else if (state === "Replaying") stateColor = C.replayBlue;
+    else if (state === "ReadyToReplay") stateColor = C.standbyPurple;
+
+    // 状态徽章（圆形）
+    const badgeX = x + 20;
+    const badgeY = y + h / 2;
+    const badgeR = 16;
+
+    // 徽章外光晕
+    if (ui.isRecording && ui.isBlinking) {
+      p.fill(stateColor.r, stateColor.g, stateColor.b, 40);
+      p.circle(badgeX, badgeY, badgeR * 2.5);
+    }
+
+    // 徽章圆圈（硬边）
+    p.fill(stateColor.r, stateColor.g, stateColor.b, 220);
+    p.stroke(C.midPurple.r, C.midPurple.g, C.midPurple.b);
+    p.strokeWeight(1.5);
+    p.circle(badgeX, badgeY, badgeR);
+
+    // 徽章状态标签（大号字）
+    p.noStroke();
+    p.fill(255, 255, 255);
+    p.textAlign(p.CENTER, p.CENTER);
+    p.textSize(12);
+    p.textStyle(p.BOLD);
+
+    // 投影
+    p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 160);
+    p.text(ui.stateLabel.charAt(0), badgeX + 0.5, badgeY + 0.5);
+
+    // 主色
+    p.fill(255, 255, 255);
+    p.text(ui.stateLabel.charAt(0), badgeX, badgeY);
+
+    // 标题文字（右侧）
+    const titleX = x + 60;
+    const titleY = y + 8;
+
+    // 标题（大号）
+    p.textSize(18);
+    p.textStyle(p.BOLD);
+    p.textAlign(p.LEFT, p.TOP);
+    p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 180);
+    p.text(ui.title, titleX + 1, titleY + 1);
+    p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b);
+    p.text(ui.title, titleX, titleY);
+
+    // 副标题（如有）
+    if (ui.subtitle) {
+      p.textSize(10);
+      p.textStyle(p.NORMAL);
+      p.fill(C.midPurple.r, C.midPurple.g, C.midPurple.b, 180);
+      p.text(ui.subtitle.substring(0, 25), titleX, titleY + 20);
+    }
+  }
+
+  static _drawProgressArea(p, x, y, w, h, ui) {
+    const C = Demo2RecordUI.COLOR_PALETTE;
+
+    // 进度条（大而清晰）
+    const progH = 14;
+    const progX = x;
+    const progY = y + h / 2 - progH / 2;
+
+    // 背景轨道
+    p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 80);
+    p.stroke(C.midPurple.r, C.midPurple.g, C.midPurple.b);
+    p.strokeWeight(1);
+    p.rect(progX, progY, w, progH);
+
+    // 进度条填充
+    const fillW = w * ui.progress;
+    if (fillW > 1) {
+      let fillColor = C.standbyPurple;
+      if (ui.isRecording) fillColor = C.recordRed;
+      else if (ui.isReplaying) fillColor = C.replayBlue;
+
+      // 填充
+      p.fill(fillColor.r, fillColor.g, fillColor.b, 200);
+      p.stroke(fillColor.r, fillColor.g, fillColor.b, 255);
+      p.strokeWeight(0.5);
+      p.rect(progX, progY, fillW, progH);
+
+      // 亮光条（梯度）
+      for (let i = 0; i < fillW; i += 4) {
+        const lightAlpha = 50 * (1 - i / fillW);
+        p.fill(255, 255, 255, lightAlpha);
+        p.rect(progX + i, progY, 2, progH);
+      }
+    }
+
+    // 时间显示（中央下方，超大号）
+    p.textSize(20);
+    p.textStyle(p.BOLD);
+    p.textAlign(p.CENTER, p.TOP);
+
+    // 投影
+    p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 180);
+    p.text(ui.timeStr, x + w / 2 + 1, progY + progH + 4);
+
+    // 主色
+    p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b);
+    p.text(ui.timeStr, x + w / 2, progY + progH + 2);
+  }
+
+  static _drawActionHints(p, x, y, w, h, ui, state) {
+    const C = Demo2RecordUI.COLOR_PALETTE;
+
+    let hints = [];
+    if (state === "Recording") {
+      hints = [
+        { key: ui.recordKey, desc: t("rec_demo2_press_record_to_stop") },
+      ];
+    } else if (state === "ReadyToRecord") {
+      hints = [
+        { key: ui.recordKey, desc: t("rec_demo2_press_record_to_start") },
+      ];
+    } else if (state === "ReadyToReplay") {
+      hints = [
+        { key: ui.replayKey, desc: t("rec_demo2_press_replay_to_start") },
+        { key: ui.recordKey, desc: t("rec_demo2_press_record_to_rerecord") },
+      ];
+    } else if (state === "Replaying") {
+      hints = [
+        { key: ui.replayKey, desc: t("rec_demo2_press_replay_to_exit") },
+      ];
+    }
+
+    // 绘制每个操作提示
+    let startY = y + 8;
+    const hintSpacing = h / Math.max(1, hints.length);
+
+    hints.forEach((hint, idx) => {
+      const hintY = startY + idx * hintSpacing;
+
+      // 按键框（硬边，像素风）
+      const keyBoxW = 42;
+      const keyBoxH = 16;
+
+      p.fill(C.softPurple.r, C.softPurple.g, C.softPurple.b, 180);
+      p.stroke(C.midPurple.r, C.midPurple.g, C.midPurple.b);
+      p.strokeWeight(1.5);
+      p.rect(x, hintY, keyBoxW, keyBoxH);
+
+      // 内高光
+      p.stroke(C.lightPurpleGray.r, C.lightPurpleGray.g, C.lightPurpleGray.b, 160);
+      p.strokeWeight(0.5);
+      p.line(x + 1.5, hintY + 1.5, x + keyBoxW - 1.5, hintY + 1.5);
+      p.line(x + 1.5, hintY + 1.5, x + 1.5, hintY + keyBoxH - 1.5);
+
+      // 按键文字（大号）
+      p.noStroke();
+      p.textSize(11);
+      p.textStyle(p.BOLD);
+      p.textAlign(p.CENTER, p.CENTER);
+
+      p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 180);
+      p.text(hint.key, x + keyBoxW / 2 + 0.5, hintY + keyBoxH / 2 + 0.5);
+
+      p.fill(255, 255, 255);
+      p.text(hint.key, x + keyBoxW / 2, hintY + keyBoxH / 2);
+
+      // 操作说明（右侧，清晰）
+      const descText = hint.desc.replace("{KEY}", "").trim();
+      p.textSize(9);
+      p.textStyle(p.NORMAL);
+      p.textAlign(p.LEFT, p.CENTER);
+
+      p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 160);
+      p.text(descText, x + keyBoxW + 8, hintY + keyBoxH / 2 + 0.5);
+
+      p.fill(C.midPurple.r, C.midPurple.g, C.midPurple.b);
+      p.text(descText, x + keyBoxW + 8, hintY + keyBoxH / 2);
+    });
+  }
+
+  /**
+   * 绘制操作时间轴
+   * 展示录制过程中的移动/跳跃操作时间点
+   */
+  static _drawActionTimeline(
+    p,
+    x,
+    y,
+    w,
+    h,
+    ui,
+    recordedActions,
+    recordStartTime,
+    maxRecordTime
+  ) {
+    const C = Demo2RecordUI.COLOR_PALETTE;
+
+    // 时间轴背景（半透明）
+    p.fill(C.softPurple.r, C.softPurple.g, C.softPurple.b, 120);
+    p.rect(x, y, w, h);
+
+    // 时间轴刻度线和标签
+    const tickCount = 5;
+    p.stroke(C.midPurple.r, C.midPurple.g, C.midPurple.b, 100);
+    p.strokeWeight(1);
+    for (let i = 0; i <= tickCount; i++) {
+      const tickX = x + (w / tickCount) * i;
+      p.line(tickX, y + 2, tickX, y + 6);
+    }
+
+    // 绘制操作标记
+    const now = performance.now();
+    const recordedMs = now - recordStartTime;
+
+    recordedActions.forEach(action => {
+      // 根据操作时间映射到进度条位置
+      const actionProgress = action.time / maxRecordTime;
+      const actionX = x + w * actionProgress;
+
+      // 检查是否在可见范围内（仅显示已录制的部分）
+      if (action.time <= recordedMs && actionX >= x && actionX <= x + w) {
+        let actionColor = C.moveLeftColor;
+        let icon = "←";
+
+        if (action.action === "moveRight") {
+          actionColor = C.moveRightColor;
+          icon = "→";
+        } else if (action.action === "jump") {
+          actionColor = C.jumpColor;
+          icon = "↑";
+        }
+
+        // 操作标记圆圈
+        p.fill(actionColor.r, actionColor.g, actionColor.b, 200);
+        p.stroke(C.midPurple.r, C.midPurple.g, C.midPurple.b);
+        p.strokeWeight(1);
+        const iconR = 4;
+        p.circle(actionX, y + 14, iconR * 2);
+
+        // 操作图标
+        p.noStroke();
+        p.fill(255, 255, 255);
+        p.textSize(9);
+        p.textStyle(p.BOLD);
+        p.textAlign(p.CENTER, p.CENTER);
+        p.text(icon, actionX, y + 14);
+      }
+    });
+
+    // 时间轴标签（左右）
+    p.textSize(8);
+    p.textStyle(p.NORMAL);
+    p.textAlign(p.LEFT, p.BOTTOM);
+    p.fill(C.midPurple.r, C.midPurple.g, C.midPurple.b, 180);
+    p.text("0s", x + 2, y + h - 2);
+
+    p.textAlign(p.RIGHT, p.BOTTOM);
+    const maxSec = (maxRecordTime / 1000).toFixed(1);
+    p.text(`${maxSec}s`, x + w - 2, y + h - 2);
+
+    // 图例（操作颜色说明）
+    const legendStartY = y + h + 2;
+    const legendX = x;
+    const legendItemW = 45;
+
+    const legends = [
+      { icon: "←", label: "Left", color: C.moveLeftColor },
+      { icon: "→", label: "Right", color: C.moveRightColor },
+      { icon: "↑", label: "Jump", color: C.jumpColor },
+    ];
+
+    legends.forEach((leg, idx) => {
+      const legX = legendX + idx * (legendItemW + 4);
+
+      // 彩色圆点
+      p.fill(leg.color.r, leg.color.g, leg.color.b, 180);
+      p.stroke(C.midPurple.r, C.midPurple.g, C.midPurple.b);
+      p.strokeWeight(0.5);
+      p.circle(legX + 4, legendStartY + 4, 3);
+
+      // 标签
+      p.noStroke();
+      p.fill(C.midPurple.r, C.midPurple.g, C.midPurple.b);
+      p.textSize(7);
+      p.textStyle(p.NORMAL);
+      p.textAlign(p.LEFT, p.CENTER);
+      p.text(leg.label, legX + 10, legendStartY + 4);
+    });
+  }
+
+  static _drawAirBlockWarning(p, hudHeight, airBlockAge) {
+    const C = Demo2RecordUI.COLOR_PALETTE;
+
+    // 半透明覆盖
+    p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 200);
+    p.rect(0, 0, p.width, hudHeight);
+
+    // 警告文字（大号）
+    p.textSize(18);
+    p.textStyle(p.BOLD);
+    p.textAlign(p.CENTER, p.CENTER);
+
+    p.fill(C.recordRed.r, C.recordRed.g, C.recordRed.b, 200);
+    p.text(t("rec_blocked_air"), p.width / 2 + 1, hudHeight / 2 + 1);
+
+    p.fill(255, 255, 255);
+    p.text(t("rec_blocked_air"), p.width / 2, hudHeight / 2);
+
+    // 闪烁
+    if (airBlockAge < 300) {
+      const flashAlpha = (1 - airBlockAge / 300) * 80;
+      p.fill(C.recordRed.r, C.recordRed.g, C.recordRed.b, flashAlpha);
+      p.rect(0, 0, p.width, hudHeight);
+    }
   }
 }

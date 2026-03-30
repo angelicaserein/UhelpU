@@ -10,6 +10,7 @@ import {
 } from "../../game-entity-model/index.js";
 import { BaseLevel } from "../BaseLevel.js";
 import { ButtonSpikeLinkSystem } from "../../mechanism-system/demo2/ButtonSpikeLinkSystem.js";
+import { Demo2RecordUI } from "../../record-system/Demo2RecordUI.js";
 
 export class Level1 extends BaseLevel {
   constructor(p, eventBus) {
@@ -81,7 +82,7 @@ export class Level1 extends BaseLevel {
     this.entities.add(this._player);
 
     // ── 系统初始化（录制 / 物理 / 碰撞） ─────────────────────
-    this.initSystems(this._player);
+    this.initSystems(this._player, 5000, { uiClass: Demo2RecordUI });
   }
 
   updatePhysics() {

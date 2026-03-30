@@ -13,6 +13,7 @@ import {
 import { CollisionSystem } from "../../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../../physics-system/PhysicsSystem.js";
 import { RecordSystem } from "../../record-system/RecordSystem.js";
+import { Demo2RecordUI } from "../../record-system/Demo2RecordUI.js";
 import { Assets } from "../../AssetsManager.js";
 import { BaseLevel } from "../BaseLevel.js";
 import { Room } from "../Room.js";
@@ -62,6 +63,7 @@ export class Level2 extends BaseLevel {
       5000,
       (x, y) => this.addReplayer(x, y),
       () => this.removeReplayer(),
+      { uiClass: Demo2RecordUI }
     );
     this.recordSystem.createListeners();
 

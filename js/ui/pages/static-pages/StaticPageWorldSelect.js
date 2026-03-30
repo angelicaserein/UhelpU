@@ -80,7 +80,7 @@ export class StaticPageWorldSelect extends PageBase {
       ],
       {
         layout: "horizontal",
-        onEsc: () => this.switcher.showMainMenu(p),
+        onEsc: () => this.switcher.showLanguageChoice(p),
       },
     );
   }

@@ -61,7 +61,7 @@ export class LanguageChoice extends PageBase {
       ],
       {
         layout: "horizontal",
-        onEsc: () => this.switcher.showWorldSelect(p),
+        onEsc: () => this.switcher.showMainMenu(p),
       },
     );
 

@@ -110,6 +110,7 @@ export class StaticPageWinDemo1 extends PageBase {
     if (this._winButtons.length > 0) {
       this.registerNavButtons(this._winButtons, {
         layout: "vertical",
+        onEsc: () => this.switcher.staticSwitcher.showMainMenu(this._p),
       });
     }
   }

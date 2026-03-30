@@ -151,8 +151,16 @@ export class KeyboardNavigationManager {
       return;
     }
 
-    // 注意：移除了 Esc 处理，让 GamePageBase 完全控制 Esc
-    // Esc 键由父窗口和 GamePageBase 全局处理
+    // ESC 键：返回/关闭（仅当 onEsc 回调存在时）
+    if (e.code === "Escape") {
+      e.preventDefault();
+      console.log("[KeyboardNavigationManager] ESC pressed");
+      if (this.onEsc && typeof this.onEsc === "function") {
+        console.log("[KeyboardNavigationManager] Calling onEsc callback");
+        this.onEsc();
+      }
+      return;
+    }
   }
 
   /**

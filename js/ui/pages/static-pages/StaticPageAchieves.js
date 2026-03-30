@@ -68,6 +68,7 @@ export class StaticPageAchieves extends PageBase {
       ],
       {
         layout: "vertical",
+        onEsc: () => this.switcher.showMainMenu(p),
       },
     );
 

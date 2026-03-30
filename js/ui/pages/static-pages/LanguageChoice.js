@@ -61,16 +61,17 @@ export class LanguageChoice extends PageBase {
       ],
       {
         layout: "horizontal",
+        onEsc: () => this.switcher.showWorldSelect(p),
       },
     );
 
     // 底部呼吸灯提示条
     const hint = p.createDiv(
       `<div class="lang-hint-text">` +
-      `You can change the language anytime in Settings.` +
-      `<br>` +
-      `可以在设置界面随时调整语言。` +
-      `</div>`
+        `You can change the language anytime in Settings.` +
+        `<br>` +
+        `可以在设置界面随时调整语言。` +
+        `</div>`,
     );
     hint.addClass("lang-hint-bar");
     this.addElement(hint);
@@ -87,13 +88,13 @@ export class LanguageChoice extends PageBase {
   }
 
   _drawTitleBanner(p) {
-    const centerY   = p.height * 0.13;
-    const bandH     = Math.max(72, p.height * 0.115);
+    const centerY = p.height * 0.13;
+    const bandH = Math.max(72, p.height * 0.115);
     const coreBandW = p.width * 0.52;
     const sideFadeW = p.width * 0.36;
-    const bandY     = centerY - bandH * 0.5;
+    const bandY = centerY - bandH * 0.5;
     const coreBandX = (p.width - coreBandW) * 0.5;
-    const leftOuterX  = coreBandX - sideFadeW;
+    const leftOuterX = coreBandX - sideFadeW;
     const rightOuterX = coreBandX + coreBandW + sideFadeW - 1;
 
     p.push();
@@ -104,7 +105,7 @@ export class LanguageChoice extends PageBase {
     for (let i = 0; i < sideFadeW; i++) {
       const t = i / Math.max(1, sideFadeW - 1);
       p.fill(255, 255, 255, (1 - t) * 108);
-      p.rect(leftOuterX + i,  bandY, 1, bandH);
+      p.rect(leftOuterX + i, bandY, 1, bandH);
       p.rect(rightOuterX - i, bandY, 1, bandH);
     }
 

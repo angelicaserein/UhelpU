@@ -102,6 +102,7 @@ export class StaticPageOpeningStory extends PageBase {
       ],
       {
         layout: "horizontal",
+        onEsc: () => this.switcher.showMainMenu(p),
       },
     );
 

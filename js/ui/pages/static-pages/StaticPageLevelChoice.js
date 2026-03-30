@@ -107,6 +107,7 @@ export class StaticPageLevelChoice extends PageBase {
         layout: "grid",
         cols: 5,
         rows: 2,
+        onEsc: () => this.switcher.showWorldSelect(p),
       },
     );
 

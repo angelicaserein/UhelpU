@@ -31,6 +31,7 @@ export class StaticPageSetting extends PageBase {
       ],
       {
         layout: "vertical",
+        onEsc: () => this.switcher.showMainMenu(p),
       },
     );
 

@@ -102,6 +102,7 @@ export class StaticPageOpeningStoryDemo1 extends PageBase {
       ],
       {
         layout: "horizontal",
+        onEsc: () => this.switcher.showWorldSelect(p),
       },
     );
 

@@ -16,7 +16,21 @@ export class StaticPageSetting extends PageBase {
 
     AudioManager.playBGM("setting");
 
-    this.addElement(new BackButton(p, () => this.switcher.showMainMenu(p)));
+    const backBtn = new BackButton(p, () => this.switcher.showMainMenu(p));
+    this.addElement(backBtn);
+
+    // 注册键盘导航（仅 BackButton）
+    this.registerNavButtons(
+      [
+        {
+          btn: backBtn.btn,
+          callback: () => this.switcher.showMainMenu(p),
+        },
+      ],
+      {
+        layout: "vertical",
+      },
+    );
 
     const sidebarWidth = Math.round(p.width * 0.8);
     const sidebarHeight = Math.round(p.height * 0.8);

@@ -19,7 +19,7 @@ export class PageBase {
   /**
    * 为页面注册键盘导航按钮
    * @param {Array} buttons - [{ btn: p5Button, callback: fn }, ...]
-   * @param {Object} options - { layout: 'vertical', onEsc: callback }
+   * @param {Object} options - { layout: 'vertical', onEsc: callback, initialFocus: 0 }
    */
   registerNavButtons(buttons, options = {}) {
     this._navButtons = buttons;
@@ -28,6 +28,7 @@ export class PageBase {
       onEsc: options.onEsc || null,
       rows: options.rows || 1,
       cols: options.cols || 1,
+      initialFocus: options.initialFocus || 0,  // 默认焦点索引
     };
 
     // 立即启动键盘导航（不用等 _enablePageNavigation）
@@ -50,6 +51,12 @@ export class PageBase {
     });
 
     this._navManager.activate();
+
+    // 设置初始焦点
+    if (this._navOptions.initialFocus > 0) {
+      this._navManager.setFocus(this._navOptions.initialFocus);
+    }
+
     console.log(
       `[PageBase] Keyboard navigation enabled with ${this._navButtons.length} buttons`,
     );

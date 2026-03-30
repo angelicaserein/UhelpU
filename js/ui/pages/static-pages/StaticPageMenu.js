@@ -69,23 +69,23 @@ export class StaticPageMenu extends PageBase {
     achievesBtn.btn.style("height", 0.11 * p.height + "px");
     this.addElement(achievesBtn);
 
-    // 注册键盘导航（水平排列 - 按视觉顺序从左到右）
+    // 注册键盘导航（水平排列 - 按视觉顺序从左到右，Play是默认焦点）
     this.registerNavButtons(
       [
         {
-          btn: settingsBtn.btn,  // 左
+          btn: settingsBtn.btn,  // Settings（索引0 - 左）
           callback: () => {
             this.switcher.showSettings(p);
           },
         },
         {
-          btn: startBtn.btn,  // 中
+          btn: startBtn.btn,  // Play （索引1 - 中间 - 默认焦点）
           callback: () => {
             this.switcher.showLanguageChoice(p);
           },
         },
         {
-          btn: achievesBtn.btn,  // 右
+          btn: achievesBtn.btn,  // Achieves（索引2 - 右）
           callback: () => {
             this.switcher.showAchieves(p);
           },
@@ -93,6 +93,7 @@ export class StaticPageMenu extends PageBase {
       ],
       {
         layout: "horizontal",
+        initialFocus: 1,  // Play 按钮是默认焦点
       },
     );
 

@@ -1730,16 +1730,16 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
 
 /* 通用键盘焦点高亮 */
 .kb-focused {
-  outline: 2px solid #ffeb3b !important;
+  outline: 2px solid #fff7fd !important;
   outline-offset: 2px;
-  box-shadow: 0 0 12px rgba(255, 235, 59, 0.6) !important;
+  box-shadow: 0 0 12px rgba(167, 151, 181, 0.6) !important;
 }
 
 /* 暂停窗口按钮焦点 */
 .pause-btn.kb-focused {
   background: rgba(120, 70, 160, 0.95) !important;
-  border-color: #ffeb3b !important;
-  box-shadow: 0 0 16px rgba(255, 235, 59, 0.8) !important;
+  border-color: #420942 !important;
+  box-shadow: 0 0 16px rgba(41, 0, 48, 0.8) !important;
 }
 
 /* 鼠标悬停效果 */

@@ -240,14 +240,33 @@ export class KeyboardNavigationManager {
    * 激活当前焦点按钮
    */
   _activateCurrentButton() {
+    console.log(
+      `[KeyboardNavigationManager] _activateCurrentButton: currentIndex=${this.currentIndex}`,
+    );
+
     const btn = this.getFocusedButton();
-    if (!btn || !btn.btn) {
-      console.warn("[KeyboardNavigationManager] No button to activate");
+    if (!btn) {
+      console.warn(
+        "[KeyboardNavigationManager] getFocusedButton returned null/undefined",
+      );
+      return;
+    }
+
+    console.log("[KeyboardNavigationManager] Focused button object:", btn);
+
+    if (!btn.btn) {
+      console.warn(
+        "[KeyboardNavigationManager] btn.btn is null/undefined, button structure:",
+        btn,
+      );
       return;
     }
 
     const p5Btn = btn.btn;
     const buttonElement = p5Btn.elt || p5Btn;
+
+    console.log("[KeyboardNavigationManager] p5Btn:", p5Btn);
+    console.log("[KeyboardNavigationManager] buttonElement:", buttonElement);
 
     if (!buttonElement) {
       console.warn("[KeyboardNavigationManager] Button element not found");
@@ -260,14 +279,19 @@ export class KeyboardNavigationManager {
     // 方式1: 使用存储的回调函数（最可靠）
     if (btn.callback && typeof btn.callback === "function") {
       try {
-        console.log("[KeyboardNavigationManager] Executing direct callback...");
+        console.log(
+          "[KeyboardNavigationManager] Executing direct callback...",
+        );
         btn.callback();
         console.log(
           "[KeyboardNavigationManager] Direct callback executed successfully!",
         );
         return;
       } catch (e) {
-        console.warn("[KeyboardNavigationManager] Direct callback failed:", e);
+        console.warn(
+          "[KeyboardNavigationManager] Direct callback failed:",
+          e.message,
+        );
       }
     }
 
@@ -293,7 +317,10 @@ export class KeyboardNavigationManager {
       );
       return;
     } catch (e) {
-      console.warn("[KeyboardNavigationManager] Event dispatch failed:", e);
+      console.warn(
+        "[KeyboardNavigationManager] Event dispatch failed:",
+        e.message,
+      );
     }
 
     // 方式3: 直接调用 click()
@@ -304,23 +331,46 @@ export class KeyboardNavigationManager {
         console.log("[KeyboardNavigationManager] HTML click() succeeded");
         return;
       } catch (e) {
-        console.warn("[KeyboardNavigationManager] HTML click() failed:", e);
+        console.warn(
+          "[KeyboardNavigationManager] HTML click() failed:",
+          e.message,
+        );
       }
     }
+
+    console.error(
+      "[KeyboardNavigationManager] All activation methods failed for button:",
+      p5Btn,
+    );
   }
 
   /**
    * 更新焦点显示
    */
   _updateFocus() {
+    console.log(
+      `[KeyboardNavigationManager] _updateFocus: currentIndex=${this.currentIndex}, totalButtons=${this.buttons.length}`,
+    );
     this.buttons.forEach((btn, idx) => {
       if (btn && btn.btn) {
         const isFocused = idx === this.currentIndex;
+        const btnElement = btn.btn.elt || btn.btn;
+        console.log(
+          `  [${idx}] Focus: ${isFocused}, btn.btn:`,
+          btn.btn,
+          `btElement:`,
+          btnElement,
+        );
         if (isFocused) {
           btn.btn.addClass("kb-focused");
+          console.log(`    → Added kb-focused class`);
         } else {
           btn.btn.removeClass("kb-focused");
         }
+      } else {
+        console.warn(
+          `[${idx}] Button is invalid: btn=${btn}, btn.btn=${btn?.btn}`,
+        );
       }
     });
   }

@@ -29,6 +29,11 @@ export class PageBase {
       rows: options.rows || 1,
       cols: options.cols || 1,
     };
+
+    // 立即启动键盘导航（不用等 _enablePageNavigation）
+    if (this._navButtons.length > 0 && !this._navManager) {
+      this._enablePageNavigation();
+    }
   }
 
   /**

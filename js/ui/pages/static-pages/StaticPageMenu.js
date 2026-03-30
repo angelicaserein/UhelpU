@@ -69,23 +69,23 @@ export class StaticPageMenu extends PageBase {
     achievesBtn.btn.style("height", 0.11 * p.height + "px");
     this.addElement(achievesBtn);
 
-    // 注册键盘导航（水平排列）
+    // 注册键盘导航（水平排列 - 按视觉顺序从左到右）
     this.registerNavButtons(
       [
         {
-          btn: startBtn.btn,
-          callback: () => {
-            this.switcher.showLanguageChoice(p);
-          },
-        },
-        {
-          btn: settingsBtn.btn,
+          btn: settingsBtn.btn,  // 左
           callback: () => {
             this.switcher.showSettings(p);
           },
         },
         {
-          btn: achievesBtn.btn,
+          btn: startBtn.btn,  // 中
+          callback: () => {
+            this.switcher.showLanguageChoice(p);
+          },
+        },
+        {
+          btn: achievesBtn.btn,  // 右
           callback: () => {
             this.switcher.showAchieves(p);
           },

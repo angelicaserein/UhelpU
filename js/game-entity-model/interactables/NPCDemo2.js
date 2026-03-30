@@ -406,20 +406,54 @@ export class NPC extends GameEntity {
   }
 
   _drawRainbowWaveText(p, text, startX, baselineY) {
-    const waveAmplitude = 1.5 * this._dialogueScale;
-    const time = p.millis() * 0.005; // 时间参数控制波动速度,越大波动越快
-    let currentX = startX;
+    // 与成就页面 .rainbow-wave CSS 动画保持一致：
+    // - rainbow-color 3s linear infinite：所有字符同时共享同一颜色
+    // - wave 2.4s ease-in-out infinite：振幅 2px，每个字符延迟 0.15s
+    const waveAmplitude = 2;
+    const wavePeriodMs = 2400;
+    const colorPeriodMs = 3000;
+    const charDelayMs = 150;
 
+    // CSS rainbow-color 关键帧颜色停靠点
+    const colorStops = [
+      [0.00, [255, 78,  80 ]],  // #ff4e50
+      [0.16, [255, 159, 67 ]],  // #ff9f43
+      [0.33, [254, 202, 87 ]],  // #feca57
+      [0.50, [72,  219, 251]],  // #48dbfb
+      [0.66, [162, 155, 254]],  // #a29bfe
+      [0.83, [253, 121, 168]],  // #fd79a8
+      [1.00, [255, 78,  80 ]],  // #ff4e50（回到起点）
+    ];
+
+    const timeMs = p.millis();
+    const colorT = (timeMs % colorPeriodMs) / colorPeriodMs;
+    let cr, cg, cb;
+    for (let j = 0; j < colorStops.length - 1; j++) {
+      const [t0, c0] = colorStops[j];
+      const [t1, c1] = colorStops[j + 1];
+      if (colorT >= t0 && colorT < t1) {
+        const f = (colorT - t0) / (t1 - t0);
+        cr = c0[0] + (c1[0] - c0[0]) * f;
+        cg = c0[1] + (c1[1] - c0[1]) * f;
+        cb = c0[2] + (c1[2] - c0[2]) * f;
+        break;
+      }
+    }
+    if (cr === undefined) [cr, cg, cb] = colorStops[colorStops.length - 1][1];
+
+    let currentX = startX;
     p.push();
-    p.colorMode(p.HSB, 360, 100, 100, 255);
+    p.colorMode(p.RGB, 255);
+    p.noStroke();
 
     for (let i = 0; i < text.length; i++) {
       const char = text[i];
-      const phase = time + i * 0.7;
-      const hue = (time * 60 + i * 32) % 360;
-      const charY = baselineY + Math.sin(phase) * waveAmplitude;
+      // wave：每个字符延迟 charDelayMs，形状对应 CSS 0%→50%(-2px)→100% 的半弧
+      const rawPhase = (timeMs - i * charDelayMs) / wavePeriodMs;
+      const wavePhase = ((rawPhase % 1) + 1) % 1;
+      const charY = baselineY - waveAmplitude * Math.sin(Math.PI * wavePhase);
 
-      p.fill(hue, 80, 100, 255);
+      p.fill(cr, cg, cb);
       p.text(char, currentX, charY);
       currentX += p.textWidth(char);
     }

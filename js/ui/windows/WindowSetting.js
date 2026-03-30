@@ -3,6 +3,7 @@
 import { WindowBase } from "./WindowBase.js";
 import { i18n, t } from "../../i18n.js";
 import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
+import { KEY_ALIASES } from "../../key-binding-system/KeyBindingConfig.js";
 
 export class WindowSetting extends WindowBase {
   /**
@@ -213,16 +214,29 @@ export class WindowSetting extends WindowBase {
     labelEl.parent(row);
     this._keyBindLabels[intent] = labelEl;
 
-    // 按键显示按钮
+    // 主键 + 别名 chip 容器
+    const keyGroup = p.createDiv("");
+    keyGroup.addClass("window-keybind-key-group");
+    keyGroup.parent(row);
+
+    // 主键显示按钮
     const button = p.createButton(this._getKeyLabel(keyCode));
     button.addClass("window-keybind-btn");
-    button.parent(row);
+    button.parent(keyGroup);
     this._keyBindButtons[intent] = button;
-
-    // 绑定点击事件：开始监听新按键
     button.mousePressed(() => {
       this._startListeningForKey(intent, button);
     });
+
+    // 固定别名 chip（只读）
+    const aliasKeys = Object.entries(KEY_ALIASES)
+      .filter(([, aliasIntent]) => aliasIntent === intent)
+      .map(([key]) => key);
+    for (const aliasKey of aliasKeys) {
+      const chip = p.createSpan("+" + this._getKeyLabel(aliasKey));
+      chip.addClass("window-keybind-alias");
+      chip.parent(keyGroup);
+    }
 
     // 重置按钮
     const resetBtn = p.createButton("↩");
@@ -230,8 +244,6 @@ export class WindowSetting extends WindowBase {
     resetBtn.elt.title = t("keybind_reset_title");
     resetBtn.parent(row);
     this._keyBindResets[intent] = resetBtn;
-
-    // 绑定重置事件
     resetBtn.mousePressed(() => {
       this._keyBindingManager.reset();
     });

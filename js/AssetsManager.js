@@ -21,6 +21,7 @@ export const Assets = {
   bgImageOpeningScene: null,
   bgImageAchieves: null,
   bgImageWorldSelect: null,
+  bgImageLanguageChoice: null,
   bgImageLevel1: null,
 
   // 成就图标（1.png ~ 10.png）
@@ -247,6 +248,10 @@ export const Assets = {
         p.loadImage("assets/images/bg/demo2levelbg.png"),
         "Demo2关卡背景",
       ),
+      this._safeLoad(
+        p.loadImage("assets/images/bg/languagechoice.png"),
+        "语言选择页背景",
+      ),
     ]);
 
     // 按顺序赋值
@@ -320,6 +325,7 @@ export const Assets = {
     this.tileImage_doorOpen = results[67];
     this.tileImage_doorClose = results[68];
     this.bgImageDemo2Level = results[69];
+    this.bgImageLanguageChoice = results[70];
     this.achieveImgs = [
       results[56],
       results[57],

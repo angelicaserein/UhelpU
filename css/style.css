@@ -8,8 +8,18 @@
 body {
   margin: 0;
   padding: 0;
-  background: #f0f0f0;
+  background: #1a1a2e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
+
+#game-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
 canvas {
   display: block;
 }
@@ -835,9 +845,18 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   flex: 0 0 auto;
 }
 
+/* 主键 + alias chip 的容器 */
+.window-keybind-key-group {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 /* 按键显示按钮 */
 .window-keybind-btn {
-  flex: 1;
+  min-width: 44px;
+  flex: 0 0 auto;
   padding: 6px 12px;
   height: 28px;
   background: rgba(30, 12, 50, 0.85);
@@ -878,6 +897,23 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   50% {
     box-shadow: 0 0 20px rgba(160, 80, 220, 0.9);
   }
+}
+
+/* 固定别名按键 chip（只读） */
+.window-keybind-alias {
+  flex: 0 0 auto;
+  padding: 2px 5px;
+  height: 22px;
+  background: rgba(30, 15, 50, 0.5);
+  border: 1px solid rgba(100, 60, 130, 0.35);
+  border-radius: 4px;
+  color: #7050a0;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* 按键重置按钮 */
@@ -1191,6 +1227,13 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   height: 40px;
   font-size: 16px;
   border-radius: 10px;
+}
+
+.window-setting-sidebar .window-keybind-alias {
+  height: 32px;
+  padding: 4px 8px;
+  font-size: 13px;
+  border-radius: 8px;
 }
 
 /* ========== 木牌内容弹窗 (Signboard Content) ========== */
@@ -1544,4 +1587,132 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   color: #b8a0d0;
   font-size: 12px;
   line-height: 1.5;
+}
+
+/* ========== Language Choice Page ========== */
+
+/* ── 面板外层定位容器 ── */
+.language-panel {
+  position: absolute;
+  width: 38%;
+  height: 60%;
+  top: 26%;
+  cursor: pointer;
+  z-index: 100;
+  user-select: none;
+  image-rendering: pixelated;
+  transition:
+    filter 0.14s ease,
+    transform 0.14s ease;
+}
+
+.lang-panel-left {
+  left: 8%;
+}
+.lang-panel-right {
+  right: 8%;
+}
+
+.language-panel:hover {
+  filter: brightness(1.12) saturate(1.08);
+  transform: scale(1.018);
+}
+
+/* ── 内框：像素风硬边 + 双层描边 ── */
+.lang-frame-inner {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  border: 8px solid #6b4a7a;
+  box-shadow:
+    inset 0 0 0 2px #8a6a99,
+    /* 内高光描边 */ inset 0 0 0 4px #2a1433; /* 内阴影描边 */
+
+  background: linear-gradient(
+    180deg,
+    rgba(232, 216, 240, 0.72) 0%,
+    rgba(212, 190, 224, 0.68) 50%,
+    rgba(138, 106, 153, 0.65) 100%
+  );
+}
+
+/* ── 雾化渐变层 ── */
+.lang-fog {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(232, 216, 240, 0.18), transparent 55%),
+    radial-gradient(circle at 50% 75%, rgba(42, 20, 51, 0.06), transparent 60%);
+}
+
+/* ── 大字 ── */
+.lang-panel-text {
+  position: relative;
+  z-index: 5;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 110px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  text-align: center;
+  color: #2a1433;
+  text-shadow:
+    0 2px 0 rgba(232, 216, 240, 0.5),
+    3px 5px 12px rgba(42, 20, 51, 0.4);
+  image-rendering: pixelated;
+}
+
+/* ── 提示小字 ── */
+.lang-panel-hint {
+  position: relative;
+  z-index: 5;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 24px;
+  margin-top: 1.8em;
+  text-align: center;
+  letter-spacing: 0.07em;
+  color: #ffffff;
+  text-shadow:
+    0 0 8px rgba(42, 20, 51, 0.9),
+    0 2px 0 rgba(42, 20, 51, 0.8),
+    0 4px 12px rgba(0, 0, 0, 0.7);
+  image-rendering: pixelated;
+}
+
+/* ── 底部提示条 ── */
+@keyframes lang-hint-breathe {
+  0%, 100% { opacity: 0.45; }
+  50%       { opacity: 1.0;  }
+}
+
+.lang-hint-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 13px 0 15px;
+  background: rgba(0, 0, 0, 0.52);
+  text-align: center;
+  z-index: 150;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.lang-hint-text {
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 17px;
+  color: #ffffff;
+  letter-spacing: 0.07em;
+  line-height: 1.7;
+  animation: lang-hint-breathe 2.8s ease-in-out infinite;
+  image-rendering: pixelated;
 }

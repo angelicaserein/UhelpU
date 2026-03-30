@@ -20,4 +20,4 @@ new p5((p) => {
     }
     app.updateFrame();
   };
-});
+}, document.getElementById('game-container'));

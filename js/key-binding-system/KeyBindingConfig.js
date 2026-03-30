@@ -3,6 +3,15 @@
  * 负责读写 localStorage 中的按键绑定配置
  */
 
+// 额外按键别名（不可重绑定，始终有效）
+// 多个按键映射到同一意图
+export const KEY_ALIASES = {
+  ArrowLeft: "moveLeft",
+  ArrowRight: "moveRight",
+  ArrowUp: "jump",
+  Space: "jump",
+};
+
 // 默认按键配置
 export const DEFAULT_KEYBINDING = {
   // 游戏控制

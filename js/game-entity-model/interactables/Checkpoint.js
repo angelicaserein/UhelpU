@@ -4,7 +4,6 @@ import {
   ColliderShape,
   ColliderType,
 } from "../../collision-system/enumerator.js";
-import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
 
 export class Checkpoint extends GameEntity {
   /**
@@ -24,8 +23,6 @@ export class Checkpoint extends GameEntity {
     this.activated = false;
     this._getPlayer = getPlayer;
     this._inRange = false;
-    this._interactionKeyPressed = false;
-    this._keyBindingManager = KeyBindingManager.getInstance();
 
     // 旗杆和旗帜颜色
     this.poleColor = options.poleColor || [80, 80, 80];
@@ -38,33 +35,13 @@ export class Checkpoint extends GameEntity {
 
     // 激活回调
     this._onActivate = options.onActivate || null;
-
-    // 键盘监听
-    this._onKeyDown = (e) => {
-      const interactionKey =
-        this._keyBindingManager.getKeyByIntent("interaction");
-      if (
-        interactionKey &&
-        e.code === interactionKey &&
-        !this._interactionKeyPressed
-      ) {
-        this._interactionKeyPressed = true;
-        this._tryActivate();
-      }
-    };
-    this._onKeyUp = (e) => {
-      const interactionKey =
-        this._keyBindingManager.getKeyByIntent("interaction");
-      if (interactionKey && e.code === interactionKey) {
-        this._interactionKeyPressed = false;
-      }
-    };
-    document.addEventListener("keydown", this._onKeyDown);
-    document.addEventListener("keyup", this._onKeyUp);
   }
 
   update(_p) {
     this._inRange = this._isPlayerOverlapping();
+    if (this._inRange && !this.activated) {
+      this.activate();
+    }
     if (this.activated) {
       this._haloTime += 0.04;
       // 每几帧生成一个小粒子
@@ -130,28 +107,6 @@ export class Checkpoint extends GameEntity {
     const flagH = h * 0.4;
     const flagTop = this.y + h; // y轴向上：杆顶
     const flagColor = this.activated ? this.activatedFlagColor : this.flagColor;
-    const showOutline = this._inRange && !this.activated;
-
-    // --- 玩家在范围内且未激活时，先画一层白色描边轮廓（旗杆+旗帜整体外轮廓） ---
-    if (showOutline) {
-      p.push();
-      p.stroke(255, 255, 255, 200);
-      p.strokeWeight(7);
-      p.strokeJoin(p.ROUND);
-      // 旗杆描边
-      p.line(poleX, this.y, poleX, this.y + h);
-      // 旗帜描边
-      p.noFill();
-      p.triangle(
-        poleX,
-        flagTop,
-        poleX + flagW,
-        flagTop - flagH / 2,
-        poleX,
-        flagTop - flagH,
-      );
-      p.pop();
-    }
 
     // --- 旗杆 ---
     p.stroke(...this.poleColor);
@@ -186,46 +141,5 @@ export class Checkpoint extends GameEntity {
       }
     }
 
-    // 进入范围且未激活时显示交互键提示
-    if (this._inRange && !this.activated) {
-      this._drawInteractHint(p);
-    }
-  }
-
-  /**
-   * 玩家在范围内时，在存档点上方显示 [E] 提示（与 NPC 一致）
-   */
-  _drawInteractHint(p) {
-    const hintText = "E";
-    const hintSize = 24;
-    const hintY = this.y + this.collider.h + 16;
-    const hintX = this.x + this.collider.w / 2;
-
-    p.push();
-    // 绘制按键框
-    p.stroke(255, 255, 255, 200);
-    p.strokeWeight(2);
-    p.noFill();
-    p.rect(hintX - hintSize / 2, hintY, hintSize, hintSize, 3);
-
-    // 文字（补偿 y 轴翻转）
-    p.translate(hintX, hintY + hintSize / 2);
-    p.scale(1, -1);
-    p.fill(255, 255, 255, 200);
-    p.noStroke();
-    p.textAlign(p.CENTER, p.CENTER);
-    p.textSize(14);
-    p.textStyle(p.BOLD);
-    p.text(hintText, 0, 0);
-    p.pop();
-  }
-
-  clearListeners() {
-    document.removeEventListener("keydown", this._onKeyDown);
-    document.removeEventListener("keyup", this._onKeyUp);
-  }
-
-  onDestroy() {
-    this.clearListeners();
   }
 }

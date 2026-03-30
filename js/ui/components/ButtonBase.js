@@ -14,10 +14,22 @@ export class ButtonBase {
     requestAnimationFrame(() => {
       this.btn.style("visibility", "visible");
     });
-    // 使用箭头函数保留 this 上下文
+
+    // 存储原始回调
+    this._callback = callback;
+
+    // 鼠标点击处理
     this.btn.mousePressed(() => {
       AudioManager.playSFX("click");
-      callback();
+      this._callback();
+    });
+
+    // 鼠标悬停效果（为键盘焦点铺垫）
+    this.btn.mouseOver(() => {
+      this.btn.addClass("mouse-hover");
+    });
+    this.btn.mouseOut(() => {
+      this.btn.removeClass("mouse-hover");
     });
   }
 

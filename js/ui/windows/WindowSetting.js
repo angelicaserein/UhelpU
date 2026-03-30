@@ -64,6 +64,26 @@ export class WindowSetting extends WindowBase {
         this._onKeyBindChange(intent, newKeyCode);
       this._keyBindingManager.onChange(this._keyBindHandler);
     }
+
+    // 启用键盘导航：收集所有按键绑定按钮
+    const navButtons = [];
+    const intents = this._getIntentOrder().filter(
+      (intent) => !!this._keyBindButtons[intent],
+    );
+    for (const intent of intents) {
+      if (this._keyBindButtons[intent]) {
+        navButtons.push(this._keyBindButtons[intent]);
+      }
+      if (this._keyBindResets[intent]) {
+        navButtons.push(this._keyBindResets[intent]);
+      }
+    }
+    if (navButtons.length > 0) {
+      this.enableKeyboardNavigation(navButtons, {
+        layout: "vertical",
+        onEsc: () => this.close(),
+      });
+    }
   }
 
   open() {

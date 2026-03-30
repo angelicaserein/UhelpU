@@ -2,6 +2,6 @@
 
 export class GamePageLevel8 extends GamePageBase {
   constructor(switcher, p) {
-    super(switcher, p, 8, "hint_level8", "demo2_level8");
+    super(switcher, p, 8, "hint_level8", "demo2_level8", { showButtons: false });
   }
 }

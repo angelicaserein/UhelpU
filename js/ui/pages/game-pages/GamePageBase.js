@@ -19,34 +19,57 @@ import { i18n } from "../../../i18n.js";
  *   _resumeGame()   — extend with super._resumeGame() to add level-specific resume logic
  */
 export class GamePageBase extends PageBase {
-  constructor(switcher, p, hintLevel, hintKey, levelIndex) {
+  constructor(switcher, p, hintLevel, hintKey, levelIndex, options = {}) {
     super(switcher);
     this._p = p;
     this._isPaused = false;
     this._levelIndex = levelIndex || `level${hintLevel}`;
+    const showButtons = options.showButtons !== false;
 
-    this.addElement(
-      new BackButton(p, () => {
+    // 收集页面上的可导航按钮（会在子类中由 addElement 添加）
+    this._pageNavButtons = [];
+
+    if (showButtons) {
+      const backBtn = new BackButton(p, () => {
         this._resumeGame();
         this.switcher.eventBus &&
           this.switcher.eventBus.publish(EventTypes.RETURN_LEVEL_CHOICE);
-      }),
-    );
+      });
+      this.addElement(backBtn);
 
-    // Pause button
-    const pauseBtn = new ButtonBase(
-      p,
-      "⏸",
-      0.95 * p.width,
-      0.03 * p.height,
-      () => {
-        this._togglePause();
-      },
-      "pause-button",
-    );
-    pauseBtn.btn.style("width", 0.03 * p.width + "px");
-    pauseBtn.btn.style("height", 0.055 * p.height + "px");
-    this.addElement(pauseBtn);
+      // 添加到导航列表（带回调）
+      this._pageNavButtons.push({
+        btn: backBtn.btn,
+        callback:
+          backBtn.btn._onMousePressed ||
+          (() => {
+            this._resumeGame();
+            this.switcher.eventBus &&
+              this.switcher.eventBus.publish(EventTypes.RETURN_LEVEL_CHOICE);
+          }),
+      });
+
+      // Pause button
+      const pauseBtn = new ButtonBase(
+        p,
+        "⏸",
+        0.95 * p.width,
+        0.03 * p.height,
+        () => {
+          this._togglePause();
+        },
+        "pause-button",
+      );
+      pauseBtn.btn.style("width", 0.03 * p.width + "px");
+      pauseBtn.btn.style("height", 0.055 * p.height + "px");
+      this.addElement(pauseBtn);
+
+      // 添加到导航列表
+      this._pageNavButtons.push({
+        btn: pauseBtn.btn,
+        callback: () => this._togglePause(),
+      });
+    }
 
     // Pause window
     this._windowPause = new WindowPause(p, {
@@ -90,11 +113,19 @@ export class GamePageBase extends PageBase {
     const hintY = Math.round(p.height * 0.16);
     this._windowHint = new WindowHint(p, hintLevel, hintKey, hintX, hintY);
 
-    // ESC key handler
+    // ESC key handler（独立于 showButtons，始终启用）
     this._onKeyDown = (e) => {
       if (e.code === "Escape") this._togglePause();
     };
     document.addEventListener("keydown", this._onKeyDown);
+
+    // 注册页面的键盘导航按钮
+    if (this._pageNavButtons.length > 0) {
+      this.registerNavButtons(this._pageNavButtons, {
+        layout: "vertical",
+        onEsc: null, // ESC 由全局处理，不需要特殊处理
+      });
+    }
   }
 
   // Override in subclasses that need extra behaviour when hint is pressed

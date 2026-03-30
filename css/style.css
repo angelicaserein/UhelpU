@@ -1650,7 +1650,11 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   pointer-events: none;
   z-index: 1;
   background:
-    radial-gradient(circle at 50% 30%, rgba(232, 216, 240, 0.18), transparent 55%),
+    radial-gradient(
+      circle at 50% 30%,
+      rgba(232, 216, 240, 0.18),
+      transparent 55%
+    ),
     radial-gradient(circle at 50% 75%, rgba(42, 20, 51, 0.06), transparent 60%);
 }
 
@@ -1690,8 +1694,13 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
 
 /* ── 底部提示条 ── */
 @keyframes lang-hint-breathe {
-  0%, 100% { opacity: 0.45; }
-  50%       { opacity: 1.0;  }
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .lang-hint-bar {
@@ -1715,4 +1724,35 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   line-height: 1.7;
   animation: lang-hint-breathe 2.8s ease-in-out infinite;
   image-rendering: pixelated;
+}
+
+/* ========== 键盘导航焦点样式 ========== */
+
+/* 通用键盘焦点高亮 */
+.kb-focused {
+  outline: 2px solid #ffeb3b !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 12px rgba(255, 235, 59, 0.6) !important;
+}
+
+/* 暂停窗口按钮焦点 */
+.pause-btn.kb-focused {
+  background: rgba(120, 70, 160, 0.95) !important;
+  border-color: #ffeb3b !important;
+  box-shadow: 0 0 16px rgba(255, 235, 59, 0.8) !important;
+}
+
+/* 鼠标悬停效果 */
+.my-button.mouse-hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* 禁用按钮样式 */
+.my-button.disabled,
+.my-button[disabled],
+.pause-btn.disabled,
+.pause-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: #888;
 }

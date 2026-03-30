@@ -17,6 +17,8 @@ export class StaticPageLevelChoice extends PageBase {
   }
 
   enter() {
+    super.enter();
+
     const p = this.p;
 
     AudioManager.playBGM("levelChoice");

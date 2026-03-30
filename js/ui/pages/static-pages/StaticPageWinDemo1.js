@@ -102,6 +102,8 @@ export class StaticPageWinDemo1 extends PageBase {
   }
 
   enter() {
+    super.enter();
+
     AudioManager.playBGM("gameWin");
 
     // 注册键盘导航（竖直排列）

@@ -19,6 +19,8 @@ export class LanguageChoice extends PageBase {
   }
 
   enter() {
+    super.enter();
+
     const p = this.p;
 
     // 左侧：英语

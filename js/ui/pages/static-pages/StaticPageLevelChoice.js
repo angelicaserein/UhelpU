@@ -94,15 +94,9 @@ export class StaticPageLevelChoice extends PageBase {
       });
     }
 
-    // 注册键盘导航（BackButton + 10个关卡按钮，网格布局）
+    // 注册键盘导航（仅10个关卡按钮使用网格布局，BackButton不参与导航但可通过ESC和鼠标点击）
     this.registerNavButtons(
-      [
-        {
-          btn: backBtn.btn,
-          callback: () => this.switcher.showWorldSelect(p),
-        },
-        ...levelBtns,
-      ],
+      levelBtns,  // 只有10个关卡按钮，不包括BackButton
       {
         layout: "grid",
         cols: 5,

@@ -22,14 +22,14 @@ export class StaticPageMenu extends PageBase {
     subtitle.position(0.5 * p.width, 0.45 * p.height);
     this.addElement(subtitle);
 
-    // PLAY 按钮 → 进入世界选择
+    // PLAY 按钮 → 进入语言选择
     const startBtn = new ButtonBase(
       p,
       t("btn_play"),
       0.456 * p.width,
       0.794 * p.height,
       () => {
-        this.switcher.showWorldSelect(p);
+        this.switcher.showLanguageChoice(p);
       },
       "start-button",
     );

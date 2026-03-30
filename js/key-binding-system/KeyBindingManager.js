@@ -8,7 +8,7 @@
  * - 通知监听器配置已变更
  */
 
-import { KeyBindingConfig, DEFAULT_KEYBINDING } from "./KeyBindingConfig.js";
+import { KeyBindingConfig, DEFAULT_KEYBINDING, KEY_ALIASES } from "./KeyBindingConfig.js";
 
 export class KeyBindingManager {
   static _instance = null;
@@ -59,7 +59,7 @@ export class KeyBindingManager {
    * @returns {Set<string>} 按键码集合
    */
   getAllowedKeys() {
-    return new Set(Object.values(this._config));
+    return new Set([...Object.values(this._config), ...Object.keys(KEY_ALIASES)]);
   }
 
   /**
@@ -141,6 +141,9 @@ export class KeyBindingManager {
   _buildReverseMap() {
     const map = {};
     for (const [intent, keyCode] of Object.entries(this._config)) {
+      map[keyCode] = intent;
+    }
+    for (const [keyCode, intent] of Object.entries(KEY_ALIASES)) {
       map[keyCode] = intent;
     }
     return map;

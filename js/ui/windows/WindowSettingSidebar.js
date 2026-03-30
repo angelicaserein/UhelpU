@@ -2,6 +2,7 @@
 import { WindowSidebarBase } from "./WindowSidebarBase.js";
 import { i18n, t } from "../../i18n.js";
 import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
+import { KEY_ALIASES } from "../../key-binding-system/KeyBindingConfig.js";
 
 export class WindowSettingSidebar extends WindowSidebarBase {
   constructor(p, x, y, width, height) {
@@ -272,18 +273,32 @@ export class WindowSettingSidebar extends WindowSidebarBase {
     labelEl.parent(row);
     this._keyBindLabels[intent] = labelEl;
 
+    // 主键 + 别名 chip 容器
+    const keyGroup = this.p.createDiv("");
+    keyGroup.addClass("window-keybind-key-group");
+    keyGroup.parent(row);
+
     const button = this.p.createButton(this._getKeyLabel(keyCode));
     button.addClass("window-keybind-btn");
-    button.parent(row);
+    button.parent(keyGroup);
     this._keyBindButtons[intent] = button;
     button.mousePressed(() => this._startListeningForKey(intent, button));
+
+    // 固定别名 chip（只读）
+    const aliasKeys = Object.entries(KEY_ALIASES)
+      .filter(([, aliasIntent]) => aliasIntent === intent)
+      .map(([key]) => key);
+    for (const aliasKey of aliasKeys) {
+      const chip = this.p.createSpan("+" + this._getKeyLabel(aliasKey));
+      chip.addClass("window-keybind-alias");
+      chip.parent(keyGroup);
+    }
 
     const resetBtn = this.p.createButton("↩");
     resetBtn.addClass("window-keybind-reset");
     resetBtn.elt.title = t("keybind_reset_title");
     resetBtn.parent(row);
     this._keyBindResets[intent] = resetBtn;
-
     resetBtn.mousePressed(() => {
       this._keyBindingManager.reset();
     });

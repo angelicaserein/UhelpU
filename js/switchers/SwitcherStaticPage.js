@@ -7,6 +7,7 @@ import { StaticPageOpeningStoryDemo1 } from "../ui/pages/static-pages/StaticPage
 import { StaticPageLevelChoice } from "../ui/pages/static-pages/StaticPageLevelChoice.js";
 import { StaticPageLevelChoiceDemo2 } from "../ui/pages/static-pages/StaticPageLevelChoiceDemo2.js";
 import { StaticPageWorldSelect } from "../ui/pages/static-pages/StaticPageWorldSelect.js";
+import { LanguageChoice } from "../ui/pages/static-pages/LanguageChoice.js";
 
 export class SwitcherStaticPage extends SwitcherBase {
   constructor(mainSwitcher, p) {
@@ -38,6 +39,11 @@ export class SwitcherStaticPage extends SwitcherBase {
 
   showOpeningSceneDemo1(p = this.p) {
     const page = new StaticPageOpeningStoryDemo1(this, p);
+    this.main.switchToStatic(page, p);
+  }
+
+  showLanguageChoice(p = this.p) {
+    const page = new LanguageChoice(this, p);
     this.main.switchToStatic(page, p);
   }
 

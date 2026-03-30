@@ -13,6 +13,8 @@ export class StaticPageWorldSelect extends PageBase {
   }
 
   enter() {
+    super.enter();
+
     const p = this.p;
 
     AudioManager.playBGM("levelChoice");

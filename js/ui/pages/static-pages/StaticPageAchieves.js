@@ -50,6 +50,8 @@ export class StaticPageAchieves extends PageBase {
   }
 
   enter() {
+    super.enter();
+
     const p = this.p;
     AudioManager.playBGM("achieves");
 

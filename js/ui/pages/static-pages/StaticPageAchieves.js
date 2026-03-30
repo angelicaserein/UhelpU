@@ -53,7 +53,21 @@ export class StaticPageAchieves extends PageBase {
     const p = this.p;
     AudioManager.playBGM("achieves");
 
-    this.addElement(new BackButton(p, () => this.switcher.showMainMenu(p)));
+    const backBtn = new BackButton(p, () => this.switcher.showMainMenu(p));
+    this.addElement(backBtn);
+
+    // 注册键盘导航（仅 BackButton）
+    this.registerNavButtons(
+      [
+        {
+          btn: backBtn.btn,
+          callback: () => this.switcher.showMainMenu(p),
+        },
+      ],
+      {
+        layout: "vertical",
+      },
+    );
 
     // 悬浮提示框
     this.tooltip = p.createDiv("");

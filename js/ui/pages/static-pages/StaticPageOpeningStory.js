@@ -40,7 +40,8 @@ export class StaticPageOpeningStory extends PageBase {
     AudioManager.playBGM("openingStory");
 
     // 返回按钮
-    this.addElement(new BackButton(p, () => this.switcher.showMainMenu(p)));
+    const backBtn = new BackButton(p, () => this.switcher.showMainMenu(p));
+    this.addElement(backBtn);
 
     // 提示按钮
     const hintBtn = new ButtonBase(
@@ -82,6 +83,25 @@ export class StaticPageOpeningStory extends PageBase {
     `);
     this._hintBtn = hintBtnFlip;
     this.addElement(hintBtnFlip);
+
+    // 注册键盘导航（BackButton + Skip 按钮）
+    this.registerNavButtons(
+      [
+        {
+          btn: backBtn.btn,
+          callback: () => this.switcher.showMainMenu(p),
+        },
+        {
+          btn: hintBtn.btn,
+          callback: () => {
+            this.switcher.showWorldSelect(p);
+          },
+        },
+      ],
+      {
+        layout: "horizontal",
+      },
+    );
 
     // 滚动字幕（根据当前语言选择对应文本）
     const storyTexts =

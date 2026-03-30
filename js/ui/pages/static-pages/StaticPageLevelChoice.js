@@ -21,7 +21,8 @@ export class StaticPageLevelChoice extends PageBase {
 
     AudioManager.playBGM("levelChoice");
 
-    this.addElement(new BackButton(p, () => this.switcher.showWorldSelect(p)));
+    const backBtn = new BackButton(p, () => this.switcher.showWorldSelect(p));
+    this.addElement(backBtn);
 
     // 关卡按钮配置 — 上排 1-5，下排 6-10
     const topRowConfigs = [
@@ -42,6 +43,7 @@ export class StaticPageLevelChoice extends PageBase {
     const topRowY = 0.441;
     const bottomRowY = 0.815;
 
+    const levelBtns = [];
     for (const cfg of topRowConfigs) {
       const btn = new ButtonBase(
         p,
@@ -58,6 +60,12 @@ export class StaticPageLevelChoice extends PageBase {
       btn.btn.mouseOver(() => this.levelInfo?.setActiveLevel(cfg.num));
       btn.btn.mouseOut(() => this.levelInfo?.setActiveLevel(null));
       this.addElement(btn);
+      levelBtns.push({
+        btn: btn.btn,
+        callback: () => {
+          this.eventBus.publish(EventTypes.LOAD_LEVEL, `level${cfg.num}`);
+        },
+      });
     }
 
     for (const cfg of bottomRowConfigs) {
@@ -76,7 +84,29 @@ export class StaticPageLevelChoice extends PageBase {
       btn.btn.mouseOver(() => this.levelInfo?.setActiveLevel(cfg.num));
       btn.btn.mouseOut(() => this.levelInfo?.setActiveLevel(null));
       this.addElement(btn);
+      levelBtns.push({
+        btn: btn.btn,
+        callback: () => {
+          this.eventBus.publish(EventTypes.LOAD_LEVEL, `level${cfg.num}`);
+        },
+      });
     }
+
+    // 注册键盘导航（BackButton + 10个关卡按钮，网格布局）
+    this.registerNavButtons(
+      [
+        {
+          btn: backBtn.btn,
+          callback: () => this.switcher.showWorldSelect(p),
+        },
+        ...levelBtns,
+      ],
+      {
+        layout: "grid",
+        cols: 5,
+        rows: 2,
+      },
+    );
 
     // 跟随鼠标的动图
     const followerX = p.width * 0.5;

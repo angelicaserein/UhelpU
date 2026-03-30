@@ -39,6 +39,29 @@ export class LanguageChoice extends PageBase {
     });
     this.addElement(zhPanel);
 
+    // 注册键盘导航（支持 Left/Right 箭键选择语言）
+    this.registerNavButtons(
+      [
+        {
+          btn: enPanel,
+          callback: () => {
+            i18n.setLang("en");
+            this.switcher.showWorldSelect(p);
+          },
+        },
+        {
+          btn: zhPanel,
+          callback: () => {
+            i18n.setLang("zh");
+            this.switcher.showWorldSelect(p);
+          },
+        },
+      ],
+      {
+        layout: "horizontal",
+      },
+    );
+
     // 底部呼吸灯提示条
     const hint = p.createDiv(
       `<div class="lang-hint-text">` +

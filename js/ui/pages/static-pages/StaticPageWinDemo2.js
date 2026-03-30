@@ -23,6 +23,9 @@ export class StaticPageWinDemo2 extends PageBase {
     const btnX = p.width / 2 - btnW / 2;
     const btnY0 = p.height / 2 + 50;
 
+    // 存储按钮引用以用于键盘导航
+    this._winButtons = [];
+
     const backBtn = new ButtonBase(
       p,
       t("btn_back_menu"),
@@ -36,6 +39,12 @@ export class StaticPageWinDemo2 extends PageBase {
     backBtn.btn.style("width", btnW + "px");
     backBtn.btn.style("height", btnH + "px");
     this.addElement(backBtn);
+    this._winButtons.push({
+      btn: backBtn.btn,
+      callback: () => {
+        this.switcher.staticSwitcher.showMainMenu(p);
+      },
+    });
 
     const restartBtn = new ButtonBase(
       p,
@@ -50,6 +59,12 @@ export class StaticPageWinDemo2 extends PageBase {
     restartBtn.btn.style("width", btnW + "px");
     restartBtn.btn.style("height", btnH + "px");
     this.addElement(restartBtn);
+    this._winButtons.push({
+      btn: restartBtn.btn,
+      callback: () => {
+        this.eventBus.publish(EventTypes.LOAD_LEVEL, this.levelIndex);
+      },
+    });
 
     if (levelNum < TOTAL_LEVELS) {
       const nextBtn = new ButtonBase(
@@ -68,6 +83,15 @@ export class StaticPageWinDemo2 extends PageBase {
       nextBtn.btn.style("width", btnW + "px");
       nextBtn.btn.style("height", btnH + "px");
       this.addElement(nextBtn);
+      this._winButtons.push({
+        btn: nextBtn.btn,
+        callback: () => {
+          this.eventBus.publish(
+            EventTypes.LOAD_LEVEL,
+            `${levelPrefix}${levelNum + 1}`,
+          );
+        },
+      });
     }
 
     // decorative star particles spawned once
@@ -87,6 +111,13 @@ export class StaticPageWinDemo2 extends PageBase {
 
   enter() {
     AudioManager.playBGM("gameWin");
+
+    // 注册键盘导航（竖直排列）
+    if (this._winButtons.length > 0) {
+      this.registerNavButtons(this._winButtons, {
+        layout: "vertical",
+      });
+    }
   }
 
   draw() {

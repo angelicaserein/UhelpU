@@ -40,7 +40,8 @@ export class StaticPageOpeningStoryDemo1 extends PageBase {
     AudioManager.playBGM("openingStory");
 
     // 返回按钮 → 回到世界选择
-    this.addElement(new BackButton(p, () => this.switcher.showWorldSelect(p)));
+    const backBtn = new BackButton(p, () => this.switcher.showWorldSelect(p));
+    this.addElement(backBtn);
 
     // 跳过按钮 → 进入 Demo1 关卡选择
     const hintBtn = new ButtonBase(
@@ -82,6 +83,25 @@ export class StaticPageOpeningStoryDemo1 extends PageBase {
     `);
     this._hintBtn = hintBtnFlip;
     this.addElement(hintBtnFlip);
+
+    // 注册键盘导航（BackButton + Skip 按钮）
+    this.registerNavButtons(
+      [
+        {
+          btn: backBtn.btn,
+          callback: () => this.switcher.showWorldSelect(p),
+        },
+        {
+          btn: hintBtn.btn,
+          callback: () => {
+            this.switcher.showLevelChoice(p);
+          },
+        },
+      ],
+      {
+        layout: "horizontal",
+      },
+    );
 
     // 滚动字幕（根据当前语言选择对应文本）
     const storyTexts =

@@ -67,6 +67,33 @@ export class StaticPageMenu extends PageBase {
     achievesBtn.btn.style("height", 0.11 * p.height + "px");
     this.addElement(achievesBtn);
 
+    // 注册键盘导航（水平排列）
+    this.registerNavButtons(
+      [
+        {
+          btn: startBtn.btn,
+          callback: () => {
+            this.switcher.showLanguageChoice(p);
+          },
+        },
+        {
+          btn: settingsBtn.btn,
+          callback: () => {
+            this.switcher.showSettings(p);
+          },
+        },
+        {
+          btn: achievesBtn.btn,
+          callback: () => {
+            this.switcher.showAchieves(p);
+          },
+        },
+      ],
+      {
+        layout: "horizontal",
+      },
+    );
+
     // 跟随鼠标的动图
     this.follower = new FollowImage(
       p,

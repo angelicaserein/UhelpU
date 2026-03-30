@@ -17,7 +17,8 @@ export class StaticPageWorldSelect extends PageBase {
 
     AudioManager.playBGM("levelChoice");
 
-    this.addElement(new BackButton(p, () => this.switcher.showMainMenu(p)));
+    const backBtn = new BackButton(p, () => this.switcher.showMainMenu(p));
+    this.addElement(backBtn);
 
     // 世界按钮配置
     const worlds = [
@@ -45,6 +46,7 @@ export class StaticPageWorldSelect extends PageBase {
     const btnW = 0.2 * p.width;
     const btnH = 0.35 * p.height;
 
+    const worldBtns = [];
     for (const w of worlds) {
       const btn = new ButtonBase(
         p,
@@ -59,7 +61,25 @@ export class StaticPageWorldSelect extends PageBase {
       btn.btn.style("width", btnW + "px");
       btn.btn.style("height", btnH + "px");
       this.addElement(btn);
+      worldBtns.push({
+        btn: btn.btn,
+        callback: () => w.action(),
+      });
     }
+
+    // 注册键盘导航（BackButton + 3个世界按钮）
+    this.registerNavButtons(
+      [
+        {
+          btn: backBtn.btn,
+          callback: () => this.switcher.showMainMenu(p),
+        },
+        ...worldBtns,
+      ],
+      {
+        layout: "horizontal",
+      },
+    );
   }
 
   update() {}

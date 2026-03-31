@@ -194,26 +194,21 @@ export class LevelManager {
       return;
     }
 
-    // Check if we should pause during portal transition (sucked_in phase only)
+    // Only pause completely during EXIT phase
     let shouldPause = false;
     if (this.portalTransition && this.portalTransition.isActive && this.portalTransition.mode === 'exit') {
-      const elapsed = performance.now() - this.portalTransition.startTime;
-      shouldPause = elapsed < this.portalTransition.PHASE_SUCKED_IN;
+      shouldPause = true; // Entire 1500ms is paused
     }
 
     if (!isGamePaused() && !shouldPause) {
       this.level.updatePhysics && this.level.updatePhysics(p);
       this.level.updateCollision && this.level.updateCollision(p, eventBus);
-      // 检测死亡的玩家是否超出画面
       this.checkDeadPlayerOutOfBounds(p, eventBus);
     }
 
-    // 死亡结算等事件可能在同一帧中卸载关卡，后续不应继续访问 this.level
-    if (!this.level) {
-      return;
-    }
+    if (!this.level) return;
 
-    // Update portal transition vignette to follow player during EXIT mode
+    // Update vignette center to follow player during EXIT mode
     if (this.portalTransition && this.portalTransition.isActive && this.portalTransition.mode === 'exit') {
       const player = this.level.getPlayer();
       if (player) {
@@ -222,28 +217,28 @@ export class LevelManager {
       }
     }
 
-    // 编辑器激活时禁用镜头微移，避免鼠标坐标与渲染位置不一致
+    // Render game with vignette mask
     const editorActive = this.level?._mapEditor?.active;
     if (!editorActive) {
       this.updateCameraNudge();
     } else {
       this.cameraNudgeX = 0;
     }
+
     const renderNudgeX = Math.round(this.cameraNudgeX);
     this.flipY(p);
-    this.level.clearCanvas &&
-      this.level.clearCanvas(p, renderNudgeX, this.bgParallaxFactor);
+    this.level.clearCanvas && this.level.clearCanvas(p, renderNudgeX, this.bgParallaxFactor);
 
+    // Draw game normally
     p.push();
     p.translate(-renderNudgeX, 0);
     this.level.draw && this.level.draw(p);
-
-    // Draw portal transition vignette (in same coordinate system as game)
-    if (this.portalTransition && this.portalTransition.isActive) {
-      this.portalTransition.draw(p, p.width, p.height);
-    }
-
     p.pop();
+
+    // Apply vignette mask on top (black vignette)
+    if (this.portalTransition && this.portalTransition.isActive) {
+      this.portalTransition.drawOverlay(p, p.width, p.height);
+    }
 
     this.drawLevelTitleOverlay(p);
   }

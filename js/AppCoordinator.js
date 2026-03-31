@@ -132,21 +132,21 @@ export class AppCoordinator {
   }
 
   updateFrame() {
-    // Update portal transition if active
+    // Update port transition
     if (this.portalTransition.isActive) {
       const phase = this.portalTransition.update();
 
-      // When EXIT transition completes fade_out, auto-load next level
+      // When EXIT transition completes (vignette shrunk to point, screen all black)
       if (this.portalTransition.mode === 'exit' && phase === 'done' && !this._exitTransitionDone) {
         this._exitTransitionDone = true;
 
-        // Determine next level
         const levelIndex = this._transitionLevelIndex;
         const levelNum = parseInt(levelIndex.replace(/.*level/, ""), 10);
         const isDemo2 = levelIndex.startsWith("demo2_");
         const levelPrefix = isDemo2 ? "demo2_level" : "level";
         const TOTAL_LEVELS = 10;
 
+        // Determine next level or return to level choice
         let nextLevelIndex;
         if (levelNum < TOTAL_LEVELS) {
           nextLevelIndex = `${levelPrefix}${levelNum + 1}`;
@@ -159,7 +159,7 @@ export class AppCoordinator {
           return;
         }
 
-        // Load next level
+        // UNLOAD old level, LOAD new level
         this.switcher.clearOverlay(this.p);
         this.levelManager.unloadLevel(this.p, this.eventBus);
         this.switcher.gameSwitcher.runtimeLevelManager = null;
@@ -171,15 +171,18 @@ export class AppCoordinator {
         const gamePage = this.switcher.gameSwitcher.createLevelPage(nextLevelIndex, this.p);
         this.switcher.switchToGame(gamePage, this.p);
 
-        // Start ENTER transition at new player position
+        // START ENTER transition: vignette expands from player spawn point
         const newPlayer = this.levelManager.level?.getPlayer();
         if (newPlayer) {
-          this.portalTransition.startEnter(newPlayer.x, newPlayer.y);
+          const maxRadius = Math.max(this.p.width, this.p.height) * 0.8;
+          this.portalTransition.startEnter(newPlayer.x + newPlayer.collider.w / 2,
+                                           newPlayer.y + newPlayer.collider.h / 2,
+                                           maxRadius);
           this.levelManager.portalTransition = this.portalTransition;
         }
       }
 
-      // Reset transition when ENTER phase completes
+      // When ENTER transition completes (vignette expanded to full screen)
       if (this.portalTransition.mode === 'enter' && phase === 'done') {
         this.portalTransition = new PortalTransition();
         this.levelManager.portalTransition = null;
@@ -190,7 +193,8 @@ export class AppCoordinator {
     this.switcher.update(this.p);
     this.switcher.draw(this.p);
     this.levelManager.update(this.p, this.eventBus);
-    // Draw overlay after level rendering (game over, etc.)
+
+    // Draw overlay after level rendering
     if (this.switcher.overlay) {
       this.p.push();
       this.p.resetMatrix();

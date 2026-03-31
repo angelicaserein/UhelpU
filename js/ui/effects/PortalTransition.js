@@ -1,34 +1,31 @@
 /**
  * PortalTransition - Manages the portal win-state transition effect
  *
- * Phases:
- * 1. SUCKED_IN (0-1000ms): Player rotates, shrinks, gets pulled into portal
- *    - Circular vignette follows player center, stays at full size
- *    - Sound effect plays at start
- *    - Game continues to display
+ * Three phases:
+ * 1. SUCKED_IN_AND_SHRINK (0-1500ms):
+ *    - Player rotates and shrinks, moving towards portal center
+ *    - Circular vignette appears, center follows player
+ *    - Vignette shrinks from full screen to a point
+ *    - Circle interior shows game, exterior is black
  *
- * 2. FADE_OUT (1000-1500ms): Circular vignette shrinks from player center to point
- *    - Screen transitions to full black
- *    - Game still displays but is covered by shrinking mask
+ * 2. BLACK_SCREEN (1500-duration):
+ *    - Complete black screen (vignette is now a point)
+ *    - Next level loads
  *
- * 3. FADE_IN (TRANSITION_FINISHED-TRANSITION_FINISHED+1000ms):
- *    - Vignette expands from point at new player spawn
- *    - Used when loading next level from WinPage
+ * 3. EXPAND (next level active):
+ *    - From a point at new player spawn, vignette expands outward
+ *    - Circle interior shows new game, exterior is black
+ *    - Expands until full screen is visible
  */
 export class PortalTransition {
   constructor() {
-    // Transition states
     this.isActive = false;
     this.startTime = null;
     this.mode = null; // 'exit' or 'enter'
 
-    // Timings (ms)
-    this.PHASE_SUCKED_IN = 1000;    // Portal sucking in phase
-    this.PHASE_FADE_OUT = 500;      // Vignette shrinking phase (1000-1500)
-    this.SUCKED_OUT_DURATION = this.PHASE_SUCKED_IN + this.PHASE_FADE_OUT; // Total for exit (1500ms)
-
-    // Enter phase duration
-    this.PHASE_FADE_IN = 1000;      // Vignette expanding phase for new level
+    // Phase timings
+    this.TOTAL_EXIT_DURATION = 1500; // SUCKED_IN + SHRINK both happen during this
+    this.PHASE_FADE_IN = 1000;       // For ENTER mode
 
     // Vignette state
     this.vignetteCenter = { x: 0, y: 0 };
@@ -37,10 +34,10 @@ export class PortalTransition {
   }
 
   /**
-   * Start the transition when player reaches portal (EXIT mode)
-   * @param {number} playerX - Player's x position at portal contact
-   * @param {number} playerY - Player's y position at portal contact
-   * @param {number} maxRadius - Maximum vignette radius (usually screen diagonal / 2)
+   * Start EXIT transition (player reaches portal)
+   * @param {number} playerX - Player center x
+   * @param {number} playerY - Player center y
+   * @param {number} maxRadius - Full-screen radius
    */
   startExit(playerX, playerY, maxRadius) {
     this.isActive = true;
@@ -52,23 +49,23 @@ export class PortalTransition {
   }
 
   /**
-   * Start the enter transition when loading new level (ENTER mode)
+   * Start ENTER transition (new level loaded)
    * @param {number} newPlayerX - New player spawn x
    * @param {number} newPlayerY - New player spawn y
+   * @param {number} maxRadius - Full-screen radius
    */
-  startEnter(newPlayerX, newPlayerY) {
+  startEnter(newPlayerX, newPlayerY, maxRadius) {
     this.isActive = true;
     this.mode = 'enter';
     this.startTime = performance.now();
     this.vignetteCenter = { x: newPlayerX, y: newPlayerY };
-    this.vignetteRadius = 0;
-    this.maxVignetteRadius = Math.max(800,
-      Math.hypot(newPlayerX - 400, newPlayerY - 300) * 1.5);
+    this.vignetteRadius = 0; // Start from a point
+    this.maxVignetteRadius = maxRadius;
   }
 
   /**
-   * Update transition state
-   * @returns {string} Current phase: 'sucked_in', 'fade_out', 'fade_in', or 'done'
+   * Update and return current phase
+   * @returns {string} 'exit_active', 'enter_active', or 'done'
    */
   update() {
     if (!this.isActive || !this.startTime) return 'done';
@@ -77,25 +74,25 @@ export class PortalTransition {
     const elapsed = now - this.startTime;
 
     if (this.mode === 'exit') {
-      if (elapsed < this.PHASE_SUCKED_IN) {
-        return 'sucked_in';
-      } else if (elapsed < this.SUCKED_OUT_DURATION) {
-        // Shrink vignette to point
-        const phaseProgress = (elapsed - this.PHASE_SUCKED_IN) / this.PHASE_FADE_OUT;
-        this.vignetteRadius = this.maxVignetteRadius * (1 - phaseProgress);
-        return 'fade_out';
+      if (elapsed < this.TOTAL_EXIT_DURATION) {
+        // Shrink vignette from full to point over 1500ms
+        const progress = elapsed / this.TOTAL_EXIT_DURATION;
+        this.vignetteRadius = this.maxVignetteRadius * (1 - progress);
+        return 'exit_active';
       } else {
         this.isActive = false;
+        this.vignetteRadius = 0;
         return 'done';
       }
     } else if (this.mode === 'enter') {
       if (elapsed < this.PHASE_FADE_IN) {
-        // Expand vignette from point
-        const phaseProgress = elapsed / this.PHASE_FADE_IN;
-        this.vignetteRadius = this.maxVignetteRadius * phaseProgress;
-        return 'fade_in';
+        // Expand vignette from point to full over 1000ms
+        const progress = elapsed / this.PHASE_FADE_IN;
+        this.vignetteRadius = this.maxVignetteRadius * progress;
+        return 'enter_active';
       } else {
         this.isActive = false;
+        this.vignetteRadius = this.maxVignetteRadius;
         return 'done';
       }
     }
@@ -104,52 +101,121 @@ export class PortalTransition {
   }
 
   /**
-   * Check if EXIT transition's fade_out phase has started
+   * Apply vignette mask to game rendering
+   * Call before drawing game: creates circular clip region
+   * Call after with restoreClip() to restore
+   *
+   * Returns true if clipping was applied, false if full screen
    */
-  shouldUnloadLevelSoon() {
-    if (!this.isActive || this.mode !== 'exit' || !this.startTime) return false;
-    const elapsed = performance.now() - this.startTime;
-    return elapsed >= this.PHASE_SUCKED_IN * 0.8; // Start unloading near end of sucked_in
+  applyClip(p) {
+    if (!this.isActive || this.vignetteRadius < 0) {
+      return false; // No clipping needed
+    }
+
+    if (this.vignetteRadius <= 0) {
+      // Complete black - no game visible
+      p.clear(); // Clear to transparent
+      return false;
+    }
+
+    // Create circular clipping region
+    // Game will only render inside this circle
+    p.push();
+    p.resetMatrix();
+
+    // Draw black background first
+    p.background(0);
+
+    p.pop();
+
+    // Now apply circular clip via mask
+    const cx = this.vignetteCenter.x;
+    const cy = this.vignetteCenter.y;
+    const r = this.vignetteRadius;
+
+    // Create a mask graphics to define clipping region
+    const maskGraphics = p.createGraphics(p.width, p.height);
+    maskGraphics.background(0); // Transparent
+
+    // Draw white circle (visible region)
+    maskGraphics.fill(255);
+    maskGraphics.noStroke();
+    maskGraphics.circle(cx, cy, r * 2);
+
+    // Soft edges via alpha
+    const edgeWidth = 50;
+    for (let i = 1; i <= edgeWidth; i++) {
+      const alpha = (edgeWidth - i) / edgeWidth * 255;
+      maskGraphics.fill(255, alpha);
+      maskGraphics.circle(cx, cy, (r + i) * 2);
+    }
+
+    // Apply mask
+    p.image(maskGraphics, 0, 0);
+    maskGraphics.remove();
+
+    return true;
   }
 
   /**
-   * Draw the vignette effect overlay
-   * Assumes it's called within a coordinate system where game is drawn
-   * (after flipY and translate have been applied)
-   * @param {p5} p - p5 instance
-   * @param {number} screenWidth - Canvas width
-   * @param {number} screenHeight - Canvas height
+   * Simple version: just draw black vignette overlay
+   * (for when you don't control the game rendering directly)
    */
-  draw(p, screenWidth, screenHeight) {
+  drawOverlay(p, screenWidth, screenHeight) {
     if (!this.isActive) return;
 
     p.push();
+    p.resetMatrix();
     p.noStroke();
 
-    const radius = this.vignetteRadius;
+    // Only draw the black parts (outside circle)
     const cx = this.vignetteCenter.x;
     const cy = this.vignetteCenter.y;
+    const r = this.vignetteRadius;
 
-    if (radius > 0.5) {
-      // Semi-transparent black vignette
-      p.fill(0, 0, 0, 220);
-
-      // Draw circles with gradient to create soft edge
-      const edgeWidth = 60;
-      for (let i = edgeWidth; i >= 0; i--) {
-        const alpha = (i / edgeWidth) * 220;
-        const currentRadius = radius + i;
-        p.fill(0, 0, 0, alpha);
-        p.circle(cx, cy, currentRadius * 2);
-      }
-    } else {
+    if (r <= 0) {
       // Completely black
       p.fill(0);
+      p.rect(0, 0, screenWidth, screenHeight);
+    } else {
+      // Draw black regions outside circle
+      const edgeWidth = 50;
+
+      // Soft edge circles (darkening towards black)
       p.noStroke();
-      // Draw a large circle to cover everything
-      p.circle(cx, cy, screenWidth * 2);
+      for (let i = edgeWidth; i >= 0; i--) {
+        const alpha = (i / edgeWidth) * 120;
+        const currentRadius = r + i;
+        p.fill(0, alpha);
+        p.circle(cx, cy, currentRadius * 2);
+      }
+
+      // Four black rectangles for corners/edges
+      p.fill(0);
+
+      // Top
+      if (cy - r > 0) {
+        p.rect(0, 0, screenWidth, cy - r);
+      }
+      // Bottom
+      if (cy + r < screenHeight) {
+        p.rect(0, cy + r, screenWidth, screenHeight - (cy + r));
+      }
+      // Left
+      if (cx - r > 0) {
+        const topY = Math.max(0, cy - r);
+        const botY = Math.min(screenHeight, cy + r);
+        p.rect(0, topY, cx - r, botY - topY);
+      }
+      // Right
+      if (cx + r < screenWidth) {
+        const topY = Math.max(0, cy - r);
+        const botY = Math.min(screenHeight, cy + r);
+        p.rect(cx + r, topY, screenWidth - (cx + r), botY - topY);
+      }
     }
 
     p.pop();
   }
 }
+

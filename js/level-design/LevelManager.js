@@ -213,6 +213,15 @@ export class LevelManager {
       return;
     }
 
+    // Update portal transition vignette to follow player during EXIT mode
+    if (this.portalTransition && this.portalTransition.isActive && this.portalTransition.mode === 'exit') {
+      const player = this.level.getPlayer();
+      if (player) {
+        this.portalTransition.vignetteCenter.x = player.x + player.collider.w / 2;
+        this.portalTransition.vignetteCenter.y = player.y + player.collider.h / 2;
+      }
+    }
+
     // 编辑器激活时禁用镜头微移，避免鼠标坐标与渲染位置不一致
     const editorActive = this.level?._mapEditor?.active;
     if (!editorActive) {
@@ -228,12 +237,13 @@ export class LevelManager {
     p.push();
     p.translate(-renderNudgeX, 0);
     this.level.draw && this.level.draw(p);
-    p.pop();
 
-    // Draw portal transition vignette
+    // Draw portal transition vignette (in same coordinate system as game)
     if (this.portalTransition && this.portalTransition.isActive) {
       this.portalTransition.draw(p, p.width, p.height);
     }
+
+    p.pop();
 
     this.drawLevelTitleOverlay(p);
   }

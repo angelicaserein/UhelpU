@@ -113,47 +113,42 @@ export class PortalTransition {
   }
 
   /**
-   * Draw the vignette effect
+   * Draw the vignette effect overlay
+   * Assumes it's called within a coordinate system where game is drawn
+   * (after flipY and translate have been applied)
    * @param {p5} p - p5 instance
    * @param {number} screenWidth - Canvas width
    * @param {number} screenHeight - Canvas height
    */
   draw(p, screenWidth, screenHeight) {
-    if (!this.isActive || this.vignetteRadius < 0.5) {
-      // If vignette is completely gone, fill screen with black
-      if (this.isActive && this.vignetteRadius < 0.5) {
-        p.fill(0);
-        p.noStroke();
-        p.rect(0, 0, screenWidth, screenHeight);
-      }
-      return;
-    }
+    if (!this.isActive) return;
 
     p.push();
-    p.resetMatrix();
+    p.noStroke();
 
-    // Draw black background
-    p.background(0);
-
-    // Draw circular soft-edged vignette (revealed area)
-    const edgeWidth = 40;
     const radius = this.vignetteRadius;
     const cx = this.vignetteCenter.x;
     const cy = this.vignetteCenter.y;
 
-    // Draw concentric circles with gradient edges for smooth transition
-    p.noStroke();
-    for (let i = edgeWidth; i >= 0; i--) {
-      const alpha = Math.floor((i / edgeWidth) * 180);
-      const currentRadius = radius + i;
-      p.fill(0, 0, 0, 255 - alpha);
-      p.circle(cx, cy, currentRadius * 2);
-    }
+    if (radius > 0.5) {
+      // Semi-transparent black vignette
+      p.fill(0, 0, 0, 220);
 
-    // Draw main visible circle (fully transparent inside)
-    p.fill(255, 255, 255, 0);
-    p.noStroke();
-    p.circle(cx, cy, radius * 2);
+      // Draw circles with gradient to create soft edge
+      const edgeWidth = 60;
+      for (let i = edgeWidth; i >= 0; i--) {
+        const alpha = (i / edgeWidth) * 220;
+        const currentRadius = radius + i;
+        p.fill(0, 0, 0, alpha);
+        p.circle(cx, cy, currentRadius * 2);
+      }
+    } else {
+      // Completely black
+      p.fill(0);
+      p.noStroke();
+      // Draw a large circle to cover everything
+      p.circle(cx, cy, screenWidth * 2);
+    }
 
     p.pop();
   }

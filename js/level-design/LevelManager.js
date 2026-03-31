@@ -69,6 +69,7 @@ export class LevelManager {
 
     // Portal transition effect
     this.portalTransition = null;
+  }
 
   startLevelTitleOverlay(levelIndex, p = this.p) {
     const num = String(levelIndex || "").replace("level", "");
@@ -193,9 +194,12 @@ export class LevelManager {
       return;
     }
 
-    // Pause game during portal transition
-    const transitionActive = this.portalTransition && this.portalTransition.isActive;
-    const shouldPause = transitionActive && this.portalTransition.update() === 'sucked_in';
+    // Check if we should pause during portal transition (sucked_in phase only)
+    let shouldPause = false;
+    if (this.portalTransition && this.portalTransition.isActive && this.portalTransition.mode === 'exit') {
+      const elapsed = performance.now() - this.portalTransition.startTime;
+      shouldPause = elapsed < this.portalTransition.PHASE_SUCKED_IN;
+    }
 
     if (!isGamePaused() && !shouldPause) {
       this.level.updatePhysics && this.level.updatePhysics(p);

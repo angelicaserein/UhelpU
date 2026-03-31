@@ -67,14 +67,26 @@ export class AppCoordinator {
       const levelIndex = this.levelManager.currentLevelIndex;
       const isDemo2 = levelIndex.startsWith("demo2_");
 
+      console.log("[PortalTransition] AUTO_RESULT triggered:", result, "level:", levelIndex);
+
       if (result === "autoResult1") {
         // Win - start portal EXIT transition with player position
         const player = this.levelManager.level?.getPlayer();
+        console.log("[PortalTransition] Player position:", player ? {x: player.x, y: player.y} : "not found");
+
         if (player) {
           const maxRadius = Math.max(this.p.width, this.p.height) * 0.7;
-          this.portalTransition.startExit(player.x, player.y, maxRadius);
+          this.portalTransition.startExit(player.x + player.collider.w / 2,
+                                          this.p.height - (player.y + player.collider.h / 2),
+                                          maxRadius);
+          console.log("[PortalTransition] Started EXIT at:", {
+            x: player.x + player.collider.w / 2,
+            y: this.p.height - (player.y + player.collider.h / 2),
+            radius: maxRadius
+          });
         } else {
           this.portalTransition.startExit(this.p.width / 2, this.p.height / 2, 600);
+          console.log("[PortalTransition] Started EXIT (fallback)");
         }
         this.levelManager.portalTransition = this.portalTransition;
         this._transitionLevelIndex = levelIndex;
@@ -132,12 +144,22 @@ export class AppCoordinator {
   }
 
   updateFrame() {
-    // Update port transition
+    // Update portal transition
     if (this.portalTransition.isActive) {
       const phase = this.portalTransition.update();
 
+      if (!this._transitionDebugLogged) {
+        console.log("[Portal] Transition started, mode:", this.portalTransition.mode);
+        this._transitionDebugLogged = true;
+      }
+
+      if (this.portalTransition.isActive) {
+        console.log("[Portal] Mode:", this.portalTransition.mode, "Radius:", this.portalTransition.vignetteRadius, "Center:", this.portalTransition.vignetteCenter);
+      }
+
       // When EXIT transition completes (vignette shrunk to point, screen all black)
       if (this.portalTransition.mode === 'exit' && phase === 'done' && !this._exitTransitionDone) {
+        console.log("[Portal] EXIT phase completed, loading next level");
         this._exitTransitionDone = true;
 
         const levelIndex = this._transitionLevelIndex;
@@ -152,12 +174,16 @@ export class AppCoordinator {
           nextLevelIndex = `${levelPrefix}${levelNum + 1}`;
         } else {
           // Last level - return to level choice
+          console.log("[Portal] Last level, returning to level choice");
           this.switcher.clearOverlay(this.p);
           this.portalTransition = new PortalTransition();
           this._exitTransitionDone = false;
+          this._transitionDebugLogged = false;
           this.switcher.staticSwitcher.showWorldSelect(this.p);
           return;
         }
+
+        console.log("[Portal] Loading next level:", nextLevelIndex);
 
         // UNLOAD old level, LOAD new level
         this.switcher.clearOverlay(this.p);
@@ -175,18 +201,23 @@ export class AppCoordinator {
         const newPlayer = this.levelManager.level?.getPlayer();
         if (newPlayer) {
           const maxRadius = Math.max(this.p.width, this.p.height) * 0.8;
-          this.portalTransition.startEnter(newPlayer.x + newPlayer.collider.w / 2,
-                                           newPlayer.y + newPlayer.collider.h / 2,
-                                           maxRadius);
+          // Convert game coordinates to screen coordinates for vignette center
+          const screenX = newPlayer.x + newPlayer.collider.w / 2;
+          const screenY = this.p.height - (newPlayer.y + newPlayer.collider.h / 2);
+
+          console.log("[Portal] Starting ENTER transition at:", {x: screenX, y: screenY});
+          this.portalTransition.startEnter(screenX, screenY, maxRadius);
           this.levelManager.portalTransition = this.portalTransition;
         }
       }
 
       // When ENTER transition completes (vignette expanded to full screen)
       if (this.portalTransition.mode === 'enter' && phase === 'done') {
+        console.log("[Portal] ENTER phase completed");
         this.portalTransition = new PortalTransition();
         this.levelManager.portalTransition = null;
         this._exitTransitionDone = false;
+        this._transitionDebugLogged = false;
       }
     }
 
@@ -199,6 +230,14 @@ export class AppCoordinator {
       this.p.push();
       this.p.resetMatrix();
       this.switcher.overlay.draw();
+      this.p.pop();
+    }
+
+    // Draw vignette mask on top (in screen coordinates)
+    if (this.portalTransition.isActive) {
+      this.p.push();
+      this.p.resetMatrix();
+      this.portalTransition.drawOverlay(this.p, this.p.width, this.p.height);
       this.p.pop();
     }
   }

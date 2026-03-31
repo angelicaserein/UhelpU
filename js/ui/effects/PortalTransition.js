@@ -158,51 +158,54 @@ export class PortalTransition {
   }
 
   /**
-   * Draw vignette overlay on screen
-   * Circle interior shows game, exterior is black
+   * Draw vignette overlay - black circle mask
+   * Must be called AFTER game is drawn
+   * Game inside circle is visible, outside is black
    */
   drawOverlay(p, screenWidth, screenHeight) {
     if (!this.isActive) return;
-
-    // Debug
-    if (!this._debugLogged) {
-      console.log("[PortalTransition.drawOverlay] Drawing vignette, radius:", this.vignetteRadius, "center:", this.vignetteCenter);
-      this._debugLogged = true;
-    }
-
-    p.push();
-    p.noStroke();
 
     const cx = this.vignetteCenter.x;
     const cy = this.vignetteCenter.y;
     const r = this.vignetteRadius;
 
-    if (r <= 1) {
-      // Completely black
+    console.log("[drawOverlay] r:", r, "cx:", cx, "cy:", cy);
+
+    p.push();
+    p.noStroke();
+
+    if (r <= 5) {
+      // Very small - fill entire screen black
       p.fill(0);
+      p.noStroke();
       p.rect(0, 0, screenWidth, screenHeight);
     } else {
-      // Black background
+      // Draw black regions outside the circle
       p.fill(0);
-      p.rect(0, 0, screenWidth, screenHeight);
 
-      // Clear circle (show the inside) with soft edges
-      const edgeWidth = 50;
+      // Four rectangles for the straight edges
+      const topH = Math.max(0, cy - r);
+      const botH = Math.max(0, screenHeight - (cy + r));
+      const leftW = Math.max(0, cx - r);
+      const rightW = Math.max(0, screenWidth - (cx + r));
 
-      // Draw concentric circles with decreasing opacity
-      // Starting from outermost edge moving inward
-      for (let i = edgeWidth; i >= 0; i--) {
-        // Blend from black (at edge) to transparent (inside circle)
-        const alpha = Math.floor((i / edgeWidth) * 220);
+      // Top
+      if (topH > 0) p.rect(0, 0, screenWidth, topH);
+      // Bottom
+      if (botH > 0) p.rect(0, cy + r, screenWidth, botH);
+      // Left
+      if (leftW > 0) p.rect(0, topH, leftW, screenHeight - topH - botH);
+      // Right
+      if (rightW > 0) p.rect(cx + r, topH, rightW, screenHeight - topH - botH);
+
+      // Soft edge using concentric circles with increasing opacity
+      const edgeWidth = 80;
+      for (let i = 0; i < edgeWidth; i++) {
+        const alpha = (i / edgeWidth) * 200;
         const radius = r + i;
-
         p.fill(0, 0, 0, alpha);
         p.circle(cx, cy, radius * 2);
       }
-
-      // Clear the center completely (show game)
-      p.fill(255, 255, 255, 0); // Transparent
-      p.circle(cx, cy, r * 2);
     }
 
     p.pop();

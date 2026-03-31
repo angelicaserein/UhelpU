@@ -208,22 +208,6 @@ export class LevelManager {
 
     if (!this.level) return;
 
-    // Update vignette center to follow player during EXIT mode
-    // Note: player position is in game world coordinates (after flipY)
-    if (this.portalTransition && this.portalTransition.isActive && this.portalTransition.mode === 'exit') {
-      const player = this.level.getPlayer();
-      if (player) {
-        // Convert game coordinates to screen coordinates
-        const screenX = player.x + player.collider.w / 2;
-        // In p5.js game coordinates: y=0 is at bottom, but screen y=0 is at top
-        // After flipY: screen_y = canvas_height - game_y
-        const screenY = p.height - (player.y + player.collider.h / 2);
-
-        this.portalTransition.vignetteCenter.x = screenX;
-        this.portalTransition.vignetteCenter.y = screenY;
-      }
-    }
-
     // Render game (with flipY and camera nudge)
     const editorActive = this.level?._mapEditor?.active;
     if (!editorActive) {
@@ -242,7 +226,7 @@ export class LevelManager {
     p.pop();
 
     this.drawLevelTitleOverlay(p);
-    // NOTE: vignette overlay is drawn in AppCoordinator after all rendering
+    // NOTE: vignette overlay is drawn in AppCoordinator (after resetMatrix)
   }
 
   setPaused(paused) {

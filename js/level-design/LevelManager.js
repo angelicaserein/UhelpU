@@ -59,8 +59,8 @@ export class LevelManager {
     this.levelTitleOverlay = {
       active: false,
       startedAtMs: 0,
-      totalDurationMs: 2500,
-      fadeStartMs: 1300,
+      totalDurationMs: 3500,
+      fadeStartMs: 1800,
       titleKey: "",
     };
 

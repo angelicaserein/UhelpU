@@ -258,23 +258,20 @@ export class NPC extends GameEntity {
 
   // ── 绘制辅助 ───────────────────────────────────────────────────
 
-  /**
-   * 玩家在范围内时，在 NPC 头顶显示 [E] 提示
-   */
   _drawInteractHint(p) {
-    const hintText = "E";
+    const kbm = KeyBindingManager.getInstance();
+    const interactionKey = kbm.getKeyByIntent("interaction");
+    const hintText = keyCodeToLabel(interactionKey);
     const hintSize = 24;
     const hintY = this.y + this.h + 16;
     const hintX = this.x + this.w / 2;
 
     p.push();
-    // 绘制按键框
     p.stroke(255, 255, 255, 200);
     p.strokeWeight(2);
     p.noFill();
     p.rect(hintX - hintSize / 2, hintY, hintSize, hintSize, 3);
 
-    // 文字（补偿 y 轴翻转）
     p.translate(hintX, hintY + hintSize / 2);
     p.scale(1, -1);
     p.fill(255, 255, 255, 200);
@@ -335,10 +332,14 @@ export class NPC extends GameEntity {
     );
     p.pop();
 
-    // "按交互键继续"提示 — 右下角
-    {
-      const kbm = new KeyBindingManager();
-      const interactKey = keyCodeToLabel(kbm.getKeyByIntent("interaction"));
+    // Continue hint
+    if (
+      !this._useExhaustedLine &&
+      this._dialogueIndex < this.dialogueLines.length - 1
+    ) {
+      const interactKey = keyCodeToLabel(
+        this._keyBindingManager.getKeyByIntent("interaction")
+      );
       const hintText = t("npc_continue_hint").replace("{KEY}", interactKey);
       p.push();
       p.translate(bubbleX + bubbleW - 8 * s, bubbleY + 16 * s);

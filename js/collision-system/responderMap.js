@@ -1,5 +1,6 @@
 import { ColliderShape, ColliderType } from "./enumerator.js";
 import { EventTypes } from "../event-system/EventTypes.js";
+import { AudioManager } from "../AudioManager.js";
 
 export const responderMap = {
     "DYNAMIC-STATIC": (a, msg) => basicBlockResponse(a, msg),
@@ -64,6 +65,19 @@ function dynTriResponse(a, b, eventBus) {
     }
     if(a.type === "player" && b.type === "portal") {
         if(b.isOpen) {
+            // Play victory sound and start suction animation
+            AudioManager.playSFX("victory");
+
+            // Start player suction animation towards portal
+            if (a.startSuckedInAnimation && typeof a.startSuckedInAnimation === 'function') {
+              a.startSuckedInAnimation(
+                null, // p can be passed but not required
+                b.x + b.collider.w / 2,
+                b.y + b.collider.h / 2,
+                1000 // 1 second duration
+              );
+            }
+
             eventBus && eventBus.publish(EventTypes.AUTO_RESULT, "autoResult1");
         }
         return;

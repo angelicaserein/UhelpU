@@ -66,7 +66,9 @@ export class LevelManager {
 
     // 存档点系统
     this._checkpointSystem = new CheckpointSystem(() => this.level);
-  }
+
+    // Portal transition effect
+    this.portalTransition = null;
 
   startLevelTitleOverlay(levelIndex, p = this.p) {
     const num = String(levelIndex || "").replace("level", "");
@@ -191,7 +193,11 @@ export class LevelManager {
       return;
     }
 
-    if (!isGamePaused()) {
+    // Pause game during portal transition
+    const transitionActive = this.portalTransition && this.portalTransition.isActive;
+    const shouldPause = transitionActive && this.portalTransition.update() === 'sucked_in';
+
+    if (!isGamePaused() && !shouldPause) {
       this.level.updatePhysics && this.level.updatePhysics(p);
       this.level.updateCollision && this.level.updateCollision(p, eventBus);
       // 检测死亡的玩家是否超出画面
@@ -219,6 +225,11 @@ export class LevelManager {
     p.translate(-renderNudgeX, 0);
     this.level.draw && this.level.draw(p);
     p.pop();
+
+    // Draw portal transition vignette
+    if (this.portalTransition && this.portalTransition.isActive) {
+      this.portalTransition.draw(p, p.width, p.height);
+    }
 
     this.drawLevelTitleOverlay(p);
   }

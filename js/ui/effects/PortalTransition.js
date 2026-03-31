@@ -158,61 +158,51 @@ export class PortalTransition {
   }
 
   /**
-   * Simple version: just draw black vignette overlay
-   * (for when you don't control the game rendering directly)
+   * Draw vignette overlay on screen
+   * Circle interior shows game, exterior is black
    */
   drawOverlay(p, screenWidth, screenHeight) {
     if (!this.isActive) return;
 
+    // Debug
+    if (!this._debugLogged) {
+      console.log("[PortalTransition.drawOverlay] Drawing vignette, radius:", this.vignetteRadius, "center:", this.vignetteCenter);
+      this._debugLogged = true;
+    }
+
     p.push();
-    p.resetMatrix();
     p.noStroke();
 
-    // Only draw the black parts (outside circle)
     const cx = this.vignetteCenter.x;
     const cy = this.vignetteCenter.y;
     const r = this.vignetteRadius;
 
-    if (r <= 0) {
+    if (r <= 1) {
       // Completely black
       p.fill(0);
       p.rect(0, 0, screenWidth, screenHeight);
     } else {
-      // Draw black regions outside circle
+      // Black background
+      p.fill(0);
+      p.rect(0, 0, screenWidth, screenHeight);
+
+      // Clear circle (show the inside) with soft edges
       const edgeWidth = 50;
 
-      // Soft edge circles (darkening towards black)
-      p.noStroke();
+      // Draw concentric circles with decreasing opacity
+      // Starting from outermost edge moving inward
       for (let i = edgeWidth; i >= 0; i--) {
-        const alpha = (i / edgeWidth) * 120;
-        const currentRadius = r + i;
-        p.fill(0, alpha);
-        p.circle(cx, cy, currentRadius * 2);
+        // Blend from black (at edge) to transparent (inside circle)
+        const alpha = Math.floor((i / edgeWidth) * 220);
+        const radius = r + i;
+
+        p.fill(0, 0, 0, alpha);
+        p.circle(cx, cy, radius * 2);
       }
 
-      // Four black rectangles for corners/edges
-      p.fill(0);
-
-      // Top
-      if (cy - r > 0) {
-        p.rect(0, 0, screenWidth, cy - r);
-      }
-      // Bottom
-      if (cy + r < screenHeight) {
-        p.rect(0, cy + r, screenWidth, screenHeight - (cy + r));
-      }
-      // Left
-      if (cx - r > 0) {
-        const topY = Math.max(0, cy - r);
-        const botY = Math.min(screenHeight, cy + r);
-        p.rect(0, topY, cx - r, botY - topY);
-      }
-      // Right
-      if (cx + r < screenWidth) {
-        const topY = Math.max(0, cy - r);
-        const botY = Math.min(screenHeight, cy + r);
-        p.rect(cx + r, topY, screenWidth - (cx + r), botY - topY);
-      }
+      // Clear the center completely (show game)
+      p.fill(255, 255, 255, 0); // Transparent
+      p.circle(cx, cy, r * 2);
     }
 
     p.pop();

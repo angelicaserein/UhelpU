@@ -149,6 +149,7 @@ export class MapEditor {
         this._entityMgr.isBtnSpikeResizing() ||
         this._entityMgr.isBtnPlatformResizing() ||
         this._entityMgr.isMoving() ||
+        this._entityMgr.isDragging() ||
         this._entityMgr.selected !== null,
     );
 
@@ -371,6 +372,14 @@ export class MapEditor {
       return;
     }
 
+    // 2.10) 检查是否点击了可拖拽的实体（Ground/Platform/Spike/Wall/NPC/Signboard/Checkpoint/Portal）→ 开始拖动
+    const dragTarget = this._entityMgr.findDraggableAt(worldX, worldY);
+    if (dragTarget) {
+      this._entityMgr.select(dragTarget);
+      this._entityMgr.startDrag(dragTarget, worldX, worldY);
+      return;
+    }
+
     // 3) 检查是否点击了已放置的 Ground → 选中
     const found = this._entityMgr.findAt(worldX, worldY);
     if (found) {
@@ -449,6 +458,14 @@ export class MapEditor {
       const worldY = this._p.height - this._p.mouseY;
       this._entityMgr.updateMove(worldX, worldY);
     }
+
+    // 拖拽整体实体
+    if (this._entityMgr.isDragging()) {
+      const cameraX = this._getCameraX(this._p);
+      const worldX = this._p.mouseX + cameraX;
+      const worldY = this._p.height - this._p.mouseY;
+      this._entityMgr.updateDrag(worldX, worldY);
+    }
   }
 
   _onMouseReleased() {
@@ -461,6 +478,7 @@ export class MapEditor {
     this._entityMgr.endBtnSpikeResize();
     this._entityMgr.endBtnPlatformResize();
     this._entityMgr.endMove();
+    this._entityMgr.endDrag();
   }
 
   // ══════════════════════════════════════════════════════════════

@@ -63,6 +63,11 @@ export class EditorEntityManager {
     this._moveOffsetX = 0;
     this._moveOffsetY = 0;
 
+    /** 整体实体拖拽移动状态（Ground/Platform/Spike/Wall/NPC/Signboard/Checkpoint/Portal）*/
+    this._draggingRecord = null; // 正在拖拽的记录
+    this._dragOffsetX = 0;
+    this._dragOffsetY = 0;
+
     /** BtnSpike 地刺调整大小状态 */
     this._bsResizeRecord = null;
     this._bsResizeHandle = null;
@@ -568,6 +573,92 @@ export class EditorEntityManager {
   /** 是否正在移动 WirePortal / BtnSpike 子实体 */
   isMoving() {
     return this._movingEntity !== null;
+  }
+
+  /** 是否正在拖拽整体实体 */
+  isDragging() {
+    return this._draggingRecord !== null;
+  }
+
+  /**
+   * 查找世界坐标处的可拖拽实体（不是删除按钮或调整手柄）
+   * 返回记录或 null
+   */
+  findDraggableAt(worldX, worldY) {
+    // 逆序遍历（后放置的优先）
+    for (let i = this._records.length - 1; i >= 0; i--) {
+      const rec = this._records[i];
+
+      // 跳过通过子实体拖拽处理的类型
+      if (
+        rec.tool === EntityTool.WIRE_PORTAL ||
+        rec.tool === EntityTool.BTN_SPIKE ||
+        rec.tool === EntityTool.BTN_PLATFORM
+      ) {
+        continue;
+      }
+
+      const e = rec.gameEntity;
+
+      // 获取实体尺寸
+      let w = 50; // 默认值
+      let h = 50;
+      if (e.collider) {
+        w = e.collider.w;
+        h = e.collider.h;
+      } else if (e.w !== undefined && e.h !== undefined) {
+        w = e.w;
+        h = e.h;
+      }
+
+      // 检查是否在删除按钮区域（右上角）
+      const bs = DELETE_BTN_SIZE;
+      const delBtnX = e.x + w;
+      const delBtnY = e.y + h;
+      if (
+        worldX >= delBtnX - bs &&
+        worldX <= delBtnX + bs &&
+        worldY >= delBtnY &&
+        worldY <= delBtnY + bs
+      ) {
+        // 在删除按钮区域，不应该拖拽
+        continue;
+      }
+
+      // 检查是否在实体本体内
+      if (
+        worldX >= e.x &&
+        worldX <= e.x + w &&
+        worldY >= e.y &&
+        worldY <= e.y + h
+      ) {
+        return rec;
+      }
+    }
+    return null;
+  }
+
+  /** 开始拖拽整体实体 */
+  startDrag(record, worldX, worldY) {
+    this._draggingRecord = record;
+    this._dragOffsetX = worldX - record.gameEntity.x;
+    this._dragOffsetY = worldY - record.gameEntity.y;
+  }
+
+  /** 拖拽中更新实体位置 */
+  updateDrag(worldX, worldY) {
+    if (!this._draggingRecord) return;
+    const e = this._draggingRecord.gameEntity;
+    e.x = this._snap(worldX - this._dragOffsetX);
+    e.y = this._snap(worldY - this._dragOffsetY);
+    this._syncSystems();
+  }
+
+  /** 结束拖拽 */
+  endDrag() {
+    this._draggingRecord = null;
+    this._dragOffsetX = 0;
+    this._dragOffsetY = 0;
   }
 
   /**

@@ -9,6 +9,7 @@ import { StaticPageResultDemo2 } from "./ui/pages/static-pages/StaticPageResultD
 import { StaticPageWinDemo1 } from "./ui/pages/static-pages/StaticPageWinDemo1.js";
 import { StaticPageWinDemo2 } from "./ui/pages/static-pages/StaticPageWinDemo2.js";
 import { AudioManager } from "./AudioManager.js";
+import { PortalTransition } from "./ui/effects/PortalTransition.js";
 
 export class AppCoordinator {
   constructor(p) {
@@ -16,6 +17,8 @@ export class AppCoordinator {
     this.eventBus = new EventBus();
     this.switcher = new SwitcherMain(p, this.eventBus);
     this.levelManager = new LevelManager(p, this.eventBus);
+    this.portalTransition = new PortalTransition();
+    this._exitTransitionShown = false;
   }
 
   init() {
@@ -42,6 +45,16 @@ export class AppCoordinator {
         this.p,
       );
       this.switcher.switchToGame(gamePage, this.p);
+
+      // If exiting from a win transition, start the enter transition
+      if (this._exitTransitionShown) {
+        this._exitTransitionShown = false;
+        const player = this.levelManager.level?.getPlayer();
+        if (player) {
+          this.portalTransition.startEnter(player.x, player.y);
+          this.levelManager.portalTransition = this.portalTransition;
+        }
+      }
     });
 
     this.eventBus.subscribe(EventTypes.UNLOAD_LEVEL, () => {
@@ -66,16 +79,16 @@ export class AppCoordinator {
       const isDemo2 = levelIndex.startsWith("demo2_");
 
       if (result === "autoResult1") {
-        this.levelManager.unloadLevel(this.p, this.eventBus);
-        this.switcher.gameSwitcher.runtimeLevelManager = null;
-        const WinPage = isDemo2 ? StaticPageWinDemo2 : StaticPageWinDemo1;
-        const winPage = new WinPage(
-          levelIndex,
-          this.switcher,
-          this.p,
-          this.eventBus,
-        );
-        this.switcher.switchToStatic(winPage, this.p);
+        // Win - start portal transition with player position
+        const player = this.levelManager.level?.getPlayer();
+        if (player) {
+          const maxRadius = Math.max(this.p.width, this.p.height) * 0.7;
+          this.portalTransition.startExit(player.x, player.y, maxRadius);
+        } else {
+          // Fallback if player not found
+          this.portalTransition.startExit(this.p.width / 2, this.p.height / 2, 600);
+        }
+        this.levelManager.portalTransition = this.portalTransition;
         return;
       }
 
@@ -155,6 +168,36 @@ export class AppCoordinator {
   }
 
   updateFrame() {
+    // Update portal transition if active
+    if (this.portalTransition.isActive) {
+      const phase = this.portalTransition.update();
+
+      // When exit transition is done (fade_out complete), unload level and show win screen
+      if (this.portalTransition.mode === 'exit' && phase === 'done' && !this._exitTransitionShown) {
+        this._exitTransitionShown = true;
+        const levelIndex = this.levelManager.currentLevelIndex;
+        const isDemo2 = levelIndex.startsWith("demo2_");
+
+        this.levelManager.unloadLevel(this.p, this.eventBus);
+        this.switcher.gameSwitcher.runtimeLevelManager = null;
+        const WinPage = isDemo2 ? StaticPageWinDemo2 : StaticPageWinDemo1;
+        const winPage = new WinPage(
+          levelIndex,
+          this.switcher,
+          this.p,
+          this.eventBus,
+        );
+
+        this.switcher.switchToStatic(winPage, this.p);
+      }
+
+      // When enter transition is done, reset transition for next level
+      if (this.portalTransition.mode === 'enter' && phase === 'done') {
+        this.portalTransition = new PortalTransition();
+        this._enterTransitionDone = false;
+      }
+    }
+
     this.switcher.update(this.p);
     this.switcher.draw(this.p);
     this.levelManager.update(this.p, this.eventBus);

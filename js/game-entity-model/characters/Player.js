@@ -37,6 +37,51 @@ export class Player extends Character {
     // Player-only landing dust particles
     this._landingDustParticles = [];
     this._prevVelY = 0;
+
+    // Portal suction animation state
+    this.suckedInState = null; // { startTime, duration, startX, startY, portalX, portalY }
+  }
+
+  // ── Portal suction animation ────────────────────────────────────
+
+  startSuckedInAnimation(p, portalX, portalY, durationMs = 1000) {
+    const now = (p && p.millis) ? p.millis() : performance.now();
+    this.suckedInState = {
+      startTime: now,
+      duration: durationMs,
+      startX: this.x,
+      startY: this.y,
+      portalX: portalX,
+      portalY: portalY,
+    };
+  }
+
+  _updateSuckedInAnimation(p) {
+    if (!this.suckedInState) return null;
+
+    const now = p.millis ? p.millis() : performance.now();
+    const elapsed = now - this.suckedInState.startTime;
+    const progress = Math.min(1, elapsed / this.suckedInState.duration);
+
+    if (progress >= 1) {
+      this.suckedInState = null;
+      return 1;
+    }
+
+    // Ease in - accelerate towards portal
+    const easeProgress = progress * progress * progress;
+
+    // Update position towards portal
+    this.x = this.suckedInState.startX +
+             (this.suckedInState.portalX - this.suckedInState.startX) * easeProgress;
+    this.y = this.suckedInState.startY +
+             (this.suckedInState.portalY - this.suckedInState.startY) * easeProgress;
+
+    // Stop all movement during suction
+    this.movementComponent.velX = 0;
+    this.movementComponent.velY = 0;
+
+    return progress;
   }
 
   // ── Landing dust (Player-only) ────────────────────────────────
@@ -112,6 +157,9 @@ export class Player extends Character {
         return;
       }
     }
+
+    // Update portal suction animation if active
+    const suckedInProgress = this._updateSuckedInAnimation(p);
 
     const isOnGround =
       this.controllerManager.currentControlComponent.abilityCondition[
@@ -210,6 +258,17 @@ export class Player extends Character {
       p.push();
       p.translate(this.x, this.y + this.collider.h);
       p.scale(1, -1);
+
+      // Apply suction animation: rotate and shrink
+      if (suckedInProgress !== null && suckedInProgress > 0) {
+        const rotationAmount = suckedInProgress * Math.PI * 4; // 2 full rotations
+        const scale = 1 - suckedInProgress * 0.5; // Shrink to 50% size
+        p.translate(this.collider.w / 2, this.collider.h / 2);
+        p.rotate(rotationAmount);
+        p.scale(scale, scale);
+        p.translate(-this.collider.w / 2, -this.collider.h / 2);
+      }
+
       p.image(sprite, 0, 0, this.collider.w, this.collider.h);
       p.pop();
     } else {

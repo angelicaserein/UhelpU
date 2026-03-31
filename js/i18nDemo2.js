@@ -5,14 +5,39 @@ import { registerTranslations } from "./i18n.js";
 
 registerTranslations({
   en: {
+    // ── Record System UI ───────────────────────────────────────────────
+    // 英文
+    rec_system_name: "PHANTOM\nSYSTEM",
+    rec_demo2_ready_to_record: "Ready to Capture",
+    rec_demo2_recording: "Capturing...",
+    rec_demo2_recording_sub: "Capturing your actions",
+    rec_demo2_ready_to_replay: "Phantom Standby",
+    rec_demo2_replaying: "Phantom Awakens",
+    rec_state_paused: "Paused",
+    rec_state_rec: "Capture",
+    rec_state_ready: "Standby",
+    rec_state_play: "Summon",
+
+    // Record/Replay Instructions
+    rec_press_to_stop: "Press {KEY} to stop capturing early",
+    rec_press_to_start: "Press {KEY} to start capturing",
+    rec_press_to_replay: "Press {KEY} to replay your phantom",
+    rec_press_to_rerecord: "Press {KEY} to re-capture",
+    rec_press_to_exit: "Press {KEY} to stop replay early",
+
+    // Operation Labels
+    rec_op_left: "Left",
+    rec_op_right: "Right",
+    rec_op_jump: "Jump",
+
     // ── Level 1 — NPC Dialogue ───────────────────────────────────────
     d2_npc_level1_line1:
       "Welcome to           !\nYou could check the tutorial on the notice board.",
-    d2_npc_level1_line2: "Press ESC or the button to pause and see more hints!",
+    d2_npc_level1_line2: "Press ESC to pause and see more hints!",
     d2_npc_level1_line3:
       "Remember, you're recording your starting point and keyboard actions!",
     d2_npc_level1_exhausted:
-      "If you missed the three lines I said, you'll have to restart to see them again~",
+      "Press ESC to pause and see more hints， and dont forget to check the board!",
 
     // ── Level 1 — Hint (pause menu) ─────────────────────────────────
     d2_hint_level1:
@@ -20,7 +45,8 @@ registerTranslations({
 
     // ── Level 1 — Signboard ─────────────────────────────────────────
     d2_signboard_level1_front:
-      "Record System\n---\nYou could follow the Record System HUD's instructions to record your actions and replay them as a phantom to help your future self pass certain sections.",
+      "Phantom System\n---\nYou could follow the Phantom System HUD's instructions to capture your actions and replay them to help your future self pass certain sections.",
+    signboard_press_to_interact: "Press {KEY} or move away to close",
     // ── Level 2 — NPC Dialogue ───────────────────────────────────────
     d2_npc_level2_0_line1: "You'll need to find a way to jump higher!",
     d2_npc_level2_0_line2: "Remember to use your recording ability.",
@@ -55,19 +81,46 @@ registerTranslations({
   },
 
   zh: {
+    // ── 录制系统 UI ──────────────────────────────────────────────────
+    // 中文
+    rec_system_name: "幻影\n系统",
+    rec_demo2_ready_to_record: "准备捕捉",
+    rec_demo2_recording: "捕捉中",
+    rec_demo2_recording_sub: "正在记录你的行动轨迹",
+    rec_demo2_ready_to_replay: "幻影待命",
+    rec_demo2_replaying: "幻影出现",
+    rec_state_paused: "暂停",
+    rec_state_rec: "捕捉",
+    rec_state_ready: "就绪",
+    rec_state_play: "召唤",
+
+    // 录制回放指令
+    rec_press_to_stop: "按 {KEY} 键提前停止捕捉",
+    rec_press_to_start: "按 {KEY} 键开始捕捉",
+    rec_press_to_replay: "按 {KEY} 键回放幻影",
+    rec_press_to_rerecord: "按 {KEY} 键重新捕捉",
+    rec_press_to_exit: "按 {KEY} 键提前结束回放",
+
+    // 操作标签
+    rec_op_left: "左移",
+    rec_op_right: "右移",
+    rec_op_jump: "跳跃",
+
     // ── 第一关 — NPC 对话 ────────────────────────────────────────────
     d2_npc_level1_line1:
       "嘿，欢迎来到            ！\n你可以查看公告板上的教程。",
-    d2_npc_level1_line2: "按esc或者按钮暂停，可以查看更多提示！",
-    d2_npc_level1_line3: "你录制的是你的起始点和键盘操作！",
-    d2_npc_level1_exhausted: "如果你错过了我说的三句话，那你只能重开来看了~",
+    d2_npc_level1_line2: "按 ESC 可以暂停游戏\n并查看更多提示！",
+    d2_npc_level1_line3: "记住，你捕捉的是\n你的起始位置和键盘操作！",
+    d2_npc_level1_exhausted:
+      "按 ESC 可以暂停游戏并查看更多提示\n别忘了查看公告板哦！",
 
     // ── 第一关 — 提示（暂停菜单） ────────────────────────────────────
     d2_hint_level1: "踩下按钮可以收回地刺，然后到达右侧的传送门即可过关。",
 
     // ── 第一关 — 告示板 ─────────────────────────────────────────────
     d2_signboard_level1_front:
-      "录制系统\n---\n按照录制系统HUD的指示录制你的操作，并以幻影的形式回放，帮助未来的自己通过关卡。",
+      "幻影系统\n---\n按照上方幻影系统HUD的指示捕捉你的操作，并进行回放，帮助未来的自己通过重重障碍。",
+    signboard_press_to_interact: "按 {KEY} 键或离开关闭",
 
     // ── 第二关 — NPC 对话 ────────────────────────────────────────────
     d2_npc_level2_0_line1: "你要想办法跳高了！",

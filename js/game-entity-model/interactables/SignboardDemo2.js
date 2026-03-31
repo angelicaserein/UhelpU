@@ -72,6 +72,53 @@ export class SignboardContent {
     if (this.footerEl) this.footerEl.html(text);
   }
 
+  /**
+   * 设置交互键的底部提示（动态生成，包含当前设置的交互键）
+   * @param {string} interactionKey - 交互键（如 'KeyE'）
+   */
+  setFooterWithKey(interactionKey) {
+    if (!this.footerEl) return;
+    const footerText = t("signboard_press_to_interact");
+    // 将 {KEY} 占位符替换为交互键的显示符号
+    const keyDisplay = this._formatKeyDisplay(interactionKey);
+    const finalText = footerText.replace("{KEY}", keyDisplay);
+    this.footerEl.html(finalText);
+  }
+
+  /**
+   * 将键码转换为显示符号（如 'KeyE' -> 'E'）
+   * @param {string} keyCode - 键码（如 'KeyE', 'Space', 'ArrowUp'）
+   * @returns {string} - 显示符号
+   */
+  _formatKeyDisplay(keyCode) {
+    if (!keyCode) return "?";
+
+    // 处理字母键 (KeyA, KeyB, ...)
+    if (keyCode.startsWith("Key")) {
+      return keyCode.substring(3).toUpperCase();
+    }
+
+    // 处理特殊键
+    const keyDisplayMap = {
+      Space: "Space",
+      Enter: "Enter",
+      ShiftLeft: "Shift",
+      ShiftRight: "Shift",
+      ControlLeft: "Ctrl",
+      ControlRight: "Ctrl",
+      AltLeft: "Alt",
+      AltRight: "Alt",
+      ArrowUp: "↑",
+      ArrowDown: "↓",
+      ArrowLeft: "←",
+      ArrowRight: "→",
+      Tab: "Tab",
+      Escape: "ESC",
+    };
+
+    return keyDisplayMap[keyCode] || keyCode;
+  }
+
   show() {
     if (this.isVisible) return;
     // 同步尺寸和位置到当前画布
@@ -286,6 +333,12 @@ export class SignboardDemo2 extends GameEntity {
           this._signboardContent = new SignboardContent(this._p);
         }
         this._applyText();
+        // 动态更新底部提示文本，包含当前交互键
+        const interactionKey =
+          this._keyBindingManager.getKeyByIntent("interaction");
+        if (interactionKey) {
+          this._signboardContent.setFooterWithKey(interactionKey);
+        }
         this._signboardContent.toggle();
       }
 

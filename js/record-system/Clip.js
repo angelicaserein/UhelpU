@@ -8,14 +8,7 @@ export class Clip {
     this.records = [];
     this.recordStartTime = recordStartTime; //
 
-    const keyBindingManager = KeyBindingManager.getInstance();
-    this._allowedKeys = new Set(
-      [
-        keyBindingManager.getKeyByIntent("jump"),
-        keyBindingManager.getKeyByIntent("moveLeft"),
-        keyBindingManager.getKeyByIntent("moveRight"),
-      ].filter(Boolean),
-    );
+    this._keyBindingManager = KeyBindingManager.getInstance();
     this._pressedKeys = new Set();
 
     this._keydownHandler = (event) => this.eventHandler(event);
@@ -37,8 +30,9 @@ export class Clip {
     }
   }
   injectHeldKeys(heldKeys) {
+    const allowedKeys = this._getAllowedKeys();
     for (const code of heldKeys) {
-      if (this._allowedKeys.has(code)) {
+      if (allowedKeys.has(code)) {
         this._pressedKeys.add(code);
         this.records.push({
           keyType: "keydown",
@@ -73,9 +67,26 @@ export class Clip {
   getRecords() {
     return this.records;
   }
+
+  // 动态获取当前允许的按键
+  _getAllowedKeys() {
+    return new Set(
+      [
+        this._keyBindingManager.getKeyByIntent("jump"),
+        this._keyBindingManager.getKeyByIntent("moveLeft"),
+        this._keyBindingManager.getKeyByIntent("moveRight"),
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowUp",
+        "Space",
+      ].filter(Boolean),
+    );
+  }
+
   process(event) {
-    //输入层
-    if (!this._allowedKeys.has(event.code)) {
+    // 动态获取当前允许的按键，这样当用户改变按键绑定时也能工作
+    const allowedKeys = this._getAllowedKeys();
+    if (!allowedKeys.has(event.code)) {
       return null;
     }
 

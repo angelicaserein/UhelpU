@@ -64,22 +64,29 @@ function dynTriResponse(a, b, eventBus) {
         return;
     }
     if(a.type === "player" && b.type === "portal") {
+        console.log("[Portal Collision] Player hit portal! isOpen:", b.isOpen);
         if(b.isOpen) {
+            console.log("[Portal Collision] Portal is OPEN - triggering victory!");
             // Play victory sound and start suction animation
             AudioManager.playSFX("victory");
 
             // Start player suction animation towards portal
             if (a.startSuckedInAnimation && typeof a.startSuckedInAnimation === 'function') {
+              console.log("[Portal Collision] Starting suction animation");
               a.startSuckedInAnimation(
-                null, // p can be passed but not required
+                null,
                 b.x + b.collider.w / 2,
                 b.y + b.collider.h / 2,
-                1000 // 1 second duration
+                1000
               );
             }
 
+            console.log("[Portal Collision] Publishing AUTO_RESULT");
             eventBus && eventBus.publish(EventTypes.AUTO_RESULT, "autoResult1");
+        } else {
+            console.log("[Portal Collision] Portal is CLOSED - ignoring");
         }
         return;
     }
 }
+

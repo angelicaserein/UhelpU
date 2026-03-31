@@ -333,15 +333,15 @@ export class Demo2RecordUI {
     p.textStyle(p.ITALIC);
 
     // 发光效果（外光晕）
-    p.fill(255, 215, 100, 50);
+    p.fill(240, 215, 235, 50);
     p.text(t("rec_system_name"), labelX + 45 + 1, labelY + 1);
 
     // 投影效果
     p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 160);
     p.text(t("rec_system_name"), labelX + 45 + 0.5, labelY + 0.5);
 
-    // 金色主文本（铭文风格）
-    p.fill(255, 220, 100, 240);
+    // 淡粉色主文本（铭文风格）
+    p.fill(240, 215, 235, 240);
     p.text(t("rec_system_name"), labelX + 45, labelY);
 
     // 标题文字（右侧）

@@ -4,6 +4,7 @@ import { ColliderType } from "../../collision-system/enumerator.js";
 import { EventTypes } from "../../event-system/EventTypes.js";
 import { Assets } from "../../AssetsManager.js";
 import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
+import { keyCodeToLabel } from "../../record-system/RecordKeyUtil.js";
 import { t } from "../../i18n.js";
 
 /**
@@ -283,22 +284,22 @@ export class SignboardDemo2 extends GameEntity {
   }
 
   /**
-   * 玩家在范围内时，在木牌上方显示交互键提示（与 NPC 一致）
+   * Draw interact key hint above signboard
    */
   _drawInteractHint(p) {
-    const hintText = "E";
+    const kbm = KeyBindingManager.getInstance();
+    const interactionKey = kbm.getKeyByIntent("interaction");
+    const hintText = keyCodeToLabel(interactionKey);
     const hintSize = 24;
     const hintY = this.y + this.h + 16;
     const hintX = this.x + this.w / 2;
 
     p.push();
-    // 绘制按键框
     p.stroke(255, 255, 255, 200);
     p.strokeWeight(2);
     p.noFill();
     p.rect(hintX - hintSize / 2, hintY, hintSize, hintSize, 3);
 
-    // 文字（补偿 y 轴翻转）
     p.translate(hintX, hintY + hintSize / 2);
     p.scale(1, -1);
     p.fill(255, 255, 255, 200);

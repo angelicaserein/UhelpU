@@ -9,9 +9,9 @@ import { Assets } from "../AssetsManager.js";
 export class Demo2RecordUI {
   // 核心色板（RGB值）
   static COLOR_PALETTE = {
-    deepPurpleBlack: { r: 42, g: 20, b: 51 },      // #2A1433
-    midPurple: { r: 107, g: 74, b: 122 },          // #6B4A7A
-    lightPurpleGray: { r: 138, g: 106, b: 153 },   // #8A6A99
+    deepPurpleBlack: { r: 42, g: 20, b: 51 }, // #2A1433
+    midPurple: { r: 107, g: 74, b: 122 }, // #6B4A7A
+    lightPurpleGray: { r: 138, g: 106, b: 153 }, // #8A6A99
     softPurple: { r: 212, g: 190, b: 224 },
     veryLightPurple: { r: 232, g: 216, b: 240 },
 
@@ -20,9 +20,9 @@ export class Demo2RecordUI {
     standbyPurple: { r: 160, g: 120, b: 180 },
 
     // 操作颜色
-    moveLeftColor: { r: 100, g: 200, b: 255 },     // 蓝色左
-    moveRightColor: { r: 100, g: 200, b: 255 },    // 蓝色右
-    jumpColor: { r: 255, g: 200, b: 100 },         // 橙色跳
+    moveLeftColor: { r: 100, g: 200, b: 255 }, // 蓝色左
+    moveRightColor: { r: 122, g: 92, b: 67 }, // 哑光棕右 #7A5C43
+    jumpColor: { r: 255, g: 200, b: 100 }, // 橙色跳
   };
 
   static getRecordUiState(
@@ -43,7 +43,7 @@ export class Demo2RecordUI {
     const base = {
       title: t("rec_demo2_ready_to_record"),
       subtitle: "",
-      stateLabel: "STANDBY",
+      stateLabel: t("rec_state_ready"),
       progress: 0,
       timeStr: "0.0s",
       isRecording: false,
@@ -62,9 +62,10 @@ export class Demo2RecordUI {
         const elapsedSec = (elapsedMs / 1000).toFixed(1);
         return {
           ...base,
-          title: t("rec_demo2_recording"),
-          subtitle: t("rec_demo2_recording_sub"),
-          stateLabel: isPausedRecording ? "◼ PAUSED" : "● REC",
+          title:
+            t("rec_demo2_recording") + " - " + t("rec_demo2_recording_sub"),
+          subtitle: "",
+          stateLabel: isPausedRecording ? `◼ ${t("rec_state_paused")}` : `● ${t("rec_state_rec")}`,
           progress: Math.min(1, elapsedMs / maxRecordTime),
           timeStr: `${elapsedSec}s`,
           isRecording: true,
@@ -79,7 +80,7 @@ export class Demo2RecordUI {
           ...base,
           title: t("rec_demo2_ready_to_replay"),
           subtitle: "",
-          stateLabel: "✓ READY",
+          stateLabel: `✓ ${t("rec_state_ready")}`,
           progress: 1,
           timeStr: `${recordedSec}s`,
         };
@@ -96,7 +97,7 @@ export class Demo2RecordUI {
           ...base,
           title: t("rec_demo2_replaying"),
           subtitle: "",
-          stateLabel: isPausedReplaying ? "◼ PAUSED" : "▶ PLAY",
+          stateLabel: isPausedReplaying ? `◼ ${t("rec_state_paused")}` : `▶ ${t("rec_state_play")}`,
           progress: Math.min(1, replayElapsedMs / totalMs),
           timeStr: `${replayElapsedSec}s/${totalReplaySec}s`,
           isReplaying: true,
@@ -152,10 +153,16 @@ export class Demo2RecordUI {
     );
 
     // === 布局尺寸 ===
-    const baseHeight = 100;
-    const timelineHeight = 26; // 操作时间轴高度（包含图例）
-    const totalHeight = state === "Recording" ? baseHeight + timelineHeight + padding * 2 : baseHeight;
     const padding = 12;
+    const baseHeight = 80; // 上部分：状态 + 按键提示
+    const timelineHeight = 50; // 下部分：进度条 + 时间轴 + 操作标记
+    const showTimeline =
+      state === "Recording" ||
+      state === "ReadyToReplay" ||
+      state === "Replaying";
+    const totalHeight = showTimeline
+      ? baseHeight + timelineHeight + padding * 2
+      : baseHeight;
     const borderWidth = 2;
 
     // 空中检测
@@ -173,7 +180,15 @@ export class Demo2RecordUI {
     }
 
     // === 背景 ===
-    Demo2RecordUI._drawBackground(p, totalHeight);
+    // 上半部分：紫色背景
+    Demo2RecordUI._drawBackground(p, baseHeight);
+
+    // 下半部分：20%白色背景（仅在显示时间轴时）
+    if (showTimeline) {
+      p.noStroke();
+      p.fill(255, 255, 255, 51); // 255 * 0.2 ≈ 51
+      p.rect(0, baseHeight, p.width, timelineHeight + padding);
+    }
 
     // === 主容器（双层硬边描边） ===
     Demo2RecordUI._drawContainer(
@@ -182,7 +197,7 @@ export class Demo2RecordUI {
       padding,
       p.width - padding * 2,
       baseHeight - padding * 2,
-      borderWidth
+      borderWidth,
     );
 
     // === 内部布局 ===
@@ -192,46 +207,67 @@ export class Demo2RecordUI {
     const innerH = baseHeight - padding * 2 - (borderWidth + 2) * 2;
 
     // 左：状态指示器
-    Demo2RecordUI._drawStateIndicator(p, innerX, innerY, ui, state, innerH);
-
-    // 中：进度条区域
-    const progressAreaX = innerX + 100;
-    const progressAreaW = innerW - 100 - 180;
-    Demo2RecordUI._drawProgressArea(p, progressAreaX, innerY, progressAreaW, innerH, ui);
-
-    // 右：操作提示
-    Demo2RecordUI._drawActionHints(
+    Demo2RecordUI._drawStateIndicator(
       p,
-      innerX + innerW - 170,
+      innerX + 80,
       innerY,
-      170,
-      innerH,
       ui,
-      state
+      state,
+      innerH,
     );
 
-    // === 操作时间轴（仅在录制时显示） ===
-    if (state === "Recording") {
+    // 中：按键提示（往右边挪动更多）
+    const hintAreaX = innerX + 880;
+    const hintAreaW = innerW - 730 - 100;
+    Demo2RecordUI._drawActionHints(
+      p,
+      hintAreaX,
+      innerY,
+      hintAreaW,
+      innerH,
+      ui,
+      state,
+    );
+
+    // === 操作时间轴（录制/准备回放/回放时都显示） ===
+    if (showTimeline) {
       const timelineContainerX = padding;
       const timelineContainerY = baseHeight + padding;
       const timelineContainerW = p.width - padding * 2;
       const timelineContainerH = timelineHeight;
 
-      // 时间轴背景容器
-      Demo2RecordUI._drawContainer(
+      // 先绘制进度条（上方）
+      const progressH = 10;
+      const progressX = timelineContainerX + borderWidth + 2;
+      const progressY = timelineContainerY + borderWidth + 2;
+      const progressW = timelineContainerW - (borderWidth + 2) * 2 - 150;
+
+      // 计算时间轴y坐标
+      const timelineY = progressY + progressH + 4;
+
+      Demo2RecordUI._drawProgressBar(
         p,
-        timelineContainerX,
-        timelineContainerY,
-        timelineContainerW,
-        timelineContainerH,
-        borderWidth
+        progressX,
+        progressY,
+        progressW,
+        progressH,
+        ui,
+        state,
+        recordStartTime,
+        recordEndTime,
+        replayStartTime,
+        maxRecordTime,
+        timelineY,
+        isGamePaused(),
+        pausedRecordElapsed,
+        pausedReplayElapsed,
       );
 
-      // 绘制操作时间轴
-      const timelineX = timelineContainerX + borderWidth + 2;
-      const timelineY = timelineContainerY + borderWidth + 2;
-      const timelineW = timelineContainerW - (borderWidth + 2) * 2;
-      const timelineH = timelineContainerH - (borderWidth + 2) * 2 - 14; // 留出图例空间
+      // 绘制操作时间轴（下方）
+      const timelineX = progressX;
+      const timelineW = progressW;
+      const timelineH =
+        timelineContainerH - (borderWidth + 2) * 2 - progressH - 4 - 14;
 
       Demo2RecordUI._drawActionTimeline(
         p,
@@ -242,7 +278,12 @@ export class Demo2RecordUI {
         ui,
         recordedActions,
         recordStartTime,
-        maxRecordTime
+        recordEndTime,
+        replayStartTime,
+        maxRecordTime,
+        state,
+        isGamePaused(),
+        pausedRecordElapsed,
       );
     }
 
@@ -259,173 +300,62 @@ export class Demo2RecordUI {
   static _drawBackground(p, totalHeight) {
     const C = Demo2RecordUI.COLOR_PALETTE;
 
-    // 纵向渐变背景：极浅紫 → 淡紫
-    for (let i = 0; i < totalHeight; i++) {
-      const ratio = i / totalHeight;
-      const r = Math.round(
-        C.veryLightPurple.r * (1 - ratio * 0.3) + C.softPurple.r * ratio * 0.3
-      );
-      const g = Math.round(
-        C.veryLightPurple.g * (1 - ratio * 0.3) + C.softPurple.g * ratio * 0.3
-      );
-      const b = Math.round(
-        C.veryLightPurple.b * (1 - ratio * 0.3) + C.softPurple.b * ratio * 0.3
-      );
-      p.fill(r, g, b, 255);
-      p.rect(0, i, p.width, 1);
-    }
-
-    // 雾化光斑：3个径向渐变
-    const spots = [
-      { x: p.width * 0.15, y: 50, size: 140, alpha: 30 },
-      { x: p.width * 0.85, y: 40, size: 120, alpha: 25 },
-      { x: p.width * 0.5, y: 10, size: 100, alpha: 20 },
-    ];
-
-    spots.forEach(spot => {
-      for (let i = spot.size; i > 0; i--) {
-        const alpha = (1 - i / spot.size) * spot.alpha;
-        p.fill(C.lightPurpleGray.r, C.lightPurpleGray.g, C.lightPurpleGray.b, alpha);
-        p.circle(spot.x, spot.y, i);
-      }
-    });
+    // 纯色背景：深紫黑，透明度85%
+    p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 217); // 255 * 0.85 ≈ 217
+    p.rect(0, 0, p.width, totalHeight);
 
     // 顶部亮线
-    p.fill(255, 255, 255, 50);
-    p.rect(0, 0, p.width, 1);
+    p.fill(255, 255, 255, 80);
+    p.rect(0, 0, p.width, 2);
   }
 
   static _drawContainer(p, x, y, w, h, bw) {
     const C = Demo2RecordUI.COLOR_PALETTE;
 
-    // 外边框（中深紫）
-    p.stroke(C.midPurple.r, C.midPurple.g, C.midPurple.b);
-    p.strokeWeight(bw);
+    // 细紫色边框
+    p.stroke(C.midPurple.r, C.midPurple.g, C.midPurple.b, 200);
+    p.strokeWeight(1);
     p.noFill();
     p.rect(x, y, w, h);
-
-    // 内高光（上和左）
-    p.stroke(C.lightPurpleGray.r, C.lightPurpleGray.g, C.lightPurpleGray.b, 180);
-    p.strokeWeight(1);
-    p.line(x + bw, y + bw, x + w - bw, y + bw);
-    p.line(x + bw, y + bw, x + bw, y + h - bw);
-
-    // 内阴影（下和右）
-    p.stroke(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 120);
-    p.line(x + bw, y + h - bw, x + w - bw, y + h - bw);
-    p.line(x + w - bw, y + bw, x + w - bw, y + h - bw);
   }
 
   static _drawStateIndicator(p, x, y, ui, state, h) {
     const C = Demo2RecordUI.COLOR_PALETTE;
 
-    // 选择状态颜色
-    let stateColor = C.standbyPurple;
-    if (state === "Recording") stateColor = C.recordRed;
-    else if (state === "Replaying") stateColor = C.replayBlue;
-    else if (state === "ReadyToReplay") stateColor = C.standbyPurple;
+    // === 铭文风格的幻影系统标签 ===
+    const labelX = x - 90;
+    const labelY = y + h / 2;
 
-    // 状态徽章（圆形）
-    const badgeX = x + 20;
-    const badgeY = y + h / 2;
-    const badgeR = 16;
-
-    // 徽章外光晕
-    if (ui.isRecording && ui.isBlinking) {
-      p.fill(stateColor.r, stateColor.g, stateColor.b, 40);
-      p.circle(badgeX, badgeY, badgeR * 2.5);
-    }
-
-    // 徽章圆圈（硬边）
-    p.fill(stateColor.r, stateColor.g, stateColor.b, 220);
-    p.stroke(C.midPurple.r, C.midPurple.g, C.midPurple.b);
-    p.strokeWeight(1.5);
-    p.circle(badgeX, badgeY, badgeR);
-
-    // 徽章状态标签（大号字）
+    // 幻影系统标签文本（铭文风格：金色、斜体、大号）
     p.noStroke();
-    p.fill(255, 255, 255);
     p.textAlign(p.CENTER, p.CENTER);
-    p.textSize(12);
-    p.textStyle(p.BOLD);
+    p.textSize(16);
+    p.textStyle(p.ITALIC);
 
-    // 投影
+    // 发光效果（外光晕）
+    p.fill(255, 215, 100, 50);
+    p.text(t("rec_system_name"), labelX + 45 + 1, labelY + 1);
+
+    // 投影效果
     p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 160);
-    p.text(ui.stateLabel.charAt(0), badgeX + 0.5, badgeY + 0.5);
+    p.text(t("rec_system_name"), labelX + 45 + 0.5, labelY + 0.5);
 
-    // 主色
-    p.fill(255, 255, 255);
-    p.text(ui.stateLabel.charAt(0), badgeX, badgeY);
+    // 金色主文本（铭文风格）
+    p.fill(255, 220, 100, 240);
+    p.text(t("rec_system_name"), labelX + 45, labelY);
 
     // 标题文字（右侧）
-    const titleX = x + 60;
-    const titleY = y + 8;
+    const titleX = x + 45;
+    const titleY = labelY;
 
-    // 标题（大号）
-    p.textSize(18);
-    p.textStyle(p.BOLD);
-    p.textAlign(p.LEFT, p.TOP);
-    p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 180);
+    // 标题（更大的字体，白色）
+    p.textSize(28);
+    p.textStyle(p.NORMAL);
+    p.textAlign(p.LEFT, p.CENTER);
+    p.fill(255, 255, 255, 220);
     p.text(ui.title, titleX + 1, titleY + 1);
-    p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b);
+    p.fill(255, 255, 255);
     p.text(ui.title, titleX, titleY);
-
-    // 副标题（如有）
-    if (ui.subtitle) {
-      p.textSize(10);
-      p.textStyle(p.NORMAL);
-      p.fill(C.midPurple.r, C.midPurple.g, C.midPurple.b, 180);
-      p.text(ui.subtitle.substring(0, 25), titleX, titleY + 20);
-    }
-  }
-
-  static _drawProgressArea(p, x, y, w, h, ui) {
-    const C = Demo2RecordUI.COLOR_PALETTE;
-
-    // 进度条（大而清晰）
-    const progH = 14;
-    const progX = x;
-    const progY = y + h / 2 - progH / 2;
-
-    // 背景轨道
-    p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 80);
-    p.stroke(C.midPurple.r, C.midPurple.g, C.midPurple.b);
-    p.strokeWeight(1);
-    p.rect(progX, progY, w, progH);
-
-    // 进度条填充
-    const fillW = w * ui.progress;
-    if (fillW > 1) {
-      let fillColor = C.standbyPurple;
-      if (ui.isRecording) fillColor = C.recordRed;
-      else if (ui.isReplaying) fillColor = C.replayBlue;
-
-      // 填充
-      p.fill(fillColor.r, fillColor.g, fillColor.b, 200);
-      p.stroke(fillColor.r, fillColor.g, fillColor.b, 255);
-      p.strokeWeight(0.5);
-      p.rect(progX, progY, fillW, progH);
-
-      // 亮光条（梯度）
-      for (let i = 0; i < fillW; i += 4) {
-        const lightAlpha = 50 * (1 - i / fillW);
-        p.fill(255, 255, 255, lightAlpha);
-        p.rect(progX + i, progY, 2, progH);
-      }
-    }
-
-    // 时间显示（中央下方，超大号）
-    p.textSize(20);
-    p.textStyle(p.BOLD);
-    p.textAlign(p.CENTER, p.TOP);
-
-    // 投影
-    p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 180);
-    p.text(ui.timeStr, x + w / 2 + 1, progY + progH + 4);
-
-    // 主色
-    p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b);
-    p.text(ui.timeStr, x + w / 2, progY + progH + 2);
   }
 
   static _drawActionHints(p, x, y, w, h, ui, state) {
@@ -433,70 +363,207 @@ export class Demo2RecordUI {
 
     let hints = [];
     if (state === "Recording") {
-      hints = [
-        { key: ui.recordKey, desc: t("rec_demo2_press_record_to_stop") },
-      ];
+      hints = [{ key: ui.recordKey, desc: t("rec_press_to_stop").replace("{KEY}", ui.recordKey) }];
     } else if (state === "ReadyToRecord") {
-      hints = [
-        { key: ui.recordKey, desc: t("rec_demo2_press_record_to_start") },
-      ];
+      hints = [{ key: ui.recordKey, desc: t("rec_press_to_start").replace("{KEY}", ui.recordKey) }];
     } else if (state === "ReadyToReplay") {
       hints = [
-        { key: ui.replayKey, desc: t("rec_demo2_press_replay_to_start") },
-        { key: ui.recordKey, desc: t("rec_demo2_press_record_to_rerecord") },
+        { key: ui.replayKey, desc: t("rec_press_to_replay").replace("{KEY}", ui.replayKey) },
+        { key: ui.recordKey, desc: t("rec_press_to_rerecord").replace("{KEY}", ui.recordKey) },
       ];
     } else if (state === "Replaying") {
-      hints = [
-        { key: ui.replayKey, desc: t("rec_demo2_press_replay_to_exit") },
-      ];
+      hints = [{ key: ui.replayKey, desc: t("rec_press_to_exit").replace("{KEY}", ui.replayKey) }];
     }
 
     // 绘制每个操作提示
-    let startY = y + 8;
+    let startY = y + 6;
     const hintSpacing = h / Math.max(1, hints.length);
 
     hints.forEach((hint, idx) => {
       const hintY = startY + idx * hintSpacing;
 
-      // 按键框（硬边，像素风）
+      // 按键框（硬边，像素风，更大）
       const keyBoxW = 42;
       const keyBoxH = 16;
 
       p.fill(C.softPurple.r, C.softPurple.g, C.softPurple.b, 180);
       p.stroke(C.midPurple.r, C.midPurple.g, C.midPurple.b);
-      p.strokeWeight(1.5);
+      p.strokeWeight(1);
       p.rect(x, hintY, keyBoxW, keyBoxH);
 
-      // 内高光
-      p.stroke(C.lightPurpleGray.r, C.lightPurpleGray.g, C.lightPurpleGray.b, 160);
-      p.strokeWeight(0.5);
-      p.line(x + 1.5, hintY + 1.5, x + keyBoxW - 1.5, hintY + 1.5);
-      p.line(x + 1.5, hintY + 1.5, x + 1.5, hintY + keyBoxH - 1.5);
-
-      // 按键文字（大号）
+      // 按键文字
       p.noStroke();
-      p.textSize(11);
+      p.textSize(12);
       p.textStyle(p.BOLD);
       p.textAlign(p.CENTER, p.CENTER);
-
-      p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 180);
-      p.text(hint.key, x + keyBoxW / 2 + 0.5, hintY + keyBoxH / 2 + 0.5);
 
       p.fill(255, 255, 255);
       p.text(hint.key, x + keyBoxW / 2, hintY + keyBoxH / 2);
 
-      // 操作说明（右侧，清晰）
-      const descText = hint.desc.replace("{KEY}", "").trim();
-      p.textSize(9);
+      // 操作说明（右侧）
+      p.textSize(18);
       p.textStyle(p.NORMAL);
       p.textAlign(p.LEFT, p.CENTER);
 
-      p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 160);
-      p.text(descText, x + keyBoxW + 8, hintY + keyBoxH / 2 + 0.5);
-
-      p.fill(C.midPurple.r, C.midPurple.g, C.midPurple.b);
-      p.text(descText, x + keyBoxW + 8, hintY + keyBoxH / 2);
+      p.fill(255, 255, 255);
+      p.text(hint.desc, x + keyBoxW + 6, hintY + keyBoxH / 2);
     });
+  }
+
+  /**
+   * 绘制操作颜色图例（左、右、跳） - KeyPrompt 样式
+   */
+  static _drawOperationLegend(p, x, y, w, h) {
+    const C = Demo2RecordUI.COLOR_PALETTE;
+
+    const legends = [
+      { icon: "←", label: t("rec_op_left"), color: C.moveLeftColor },
+      { icon: "→", label: t("rec_op_right"), color: C.moveRightColor },
+      { icon: "↑", label: t("rec_op_jump"), color: C.jumpColor },
+    ];
+
+    // 竖向排列
+    const itemH = h / legends.length;
+    const startX = x + 8;
+    const keySize = 28; // KeyPrompt 大小
+
+    legends.forEach((leg, idx) => {
+      const itemY = y + idx * itemH + itemH / 2;
+
+      // 镂空方形框（KeyPrompt 风格）
+      p.push();
+      p.stroke(255, 255, 255, 255);
+      p.strokeWeight(2);
+      p.noFill();
+      p.rect(startX - keySize / 2, itemY - keySize / 2, keySize, keySize, 2);
+      p.pop();
+
+      // 图标
+      p.noStroke();
+      p.fill(255, 255, 255);
+      p.textSize(13);
+      p.textStyle(p.BOLD);
+      p.textAlign(p.CENTER, p.CENTER);
+      p.text(leg.icon, startX + 5, itemY);
+
+      // 标签
+      p.textSize(10);
+      p.textStyle(p.NORMAL);
+      p.textAlign(p.LEFT, p.CENTER);
+      p.fill(255, 255, 255);
+      p.text(leg.label, startX + 20, itemY);
+    });
+  }
+
+  /**
+   * 绘制进度条
+   */
+  static _drawProgressBar(
+    p,
+    x,
+    y,
+    w,
+    h,
+    ui,
+    state,
+    recordStartTime,
+    recordEndTime,
+    replayStartTime,
+    maxRecordTime,
+    timelineY,
+    isPaused,
+    pausedRecordElapsed,
+    pausedReplayElapsed,
+  ) {
+    const C = Demo2RecordUI.COLOR_PALETTE;
+    const now = performance.now();
+
+    // 重置所有文本状态
+    p.noStroke();
+    p.textStyle(p.NORMAL);
+    p.fill(255, 255, 255);
+
+    // 计算进度 - 考虑暂停状态
+    let currentProgress = 0;
+    if (state === "Recording") {
+      const isPausedRecording = isPaused && pausedRecordElapsed !== null;
+      const recordedMs = isPausedRecording
+        ? pausedRecordElapsed
+        : Math.max(0, now - recordStartTime);
+      currentProgress = Math.min(1, recordedMs / maxRecordTime);
+    } else if (state === "ReadyToReplay") {
+      currentProgress = 1;
+    } else if (state === "Replaying") {
+      const isPausedReplaying = isPaused && pausedReplayElapsed !== null;
+      const totalMs = Math.max(1, recordEndTime - recordStartTime);
+      const replayElapsedMs = isPausedReplaying
+        ? pausedReplayElapsed
+        : Math.min(Math.max(0, now - replayStartTime), totalMs);
+      currentProgress = Math.min(1, replayElapsedMs / totalMs);
+    }
+
+    // 进度条轨道
+    p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 120);
+    p.stroke(255, 255, 255, 255);
+    p.strokeWeight(1.5);
+    p.rect(x, y, w, h);
+
+    // 进度条填充
+    const fillW = w * currentProgress;
+    if (fillW > 1) {
+      let fillColor = C.standbyPurple;
+      if (state === "Recording") fillColor = C.recordRed;
+      else if (state === "Replaying") fillColor = C.replayBlue;
+
+      p.fill(fillColor.r, fillColor.g, fillColor.b, 220);
+      p.stroke(fillColor.r, fillColor.g, fillColor.b, 255);
+      p.strokeWeight(0.5);
+      p.rect(x, y, fillW, h);
+
+      // 亮光条
+      for (let i = 0; i < fillW; i += 5) {
+        const lightAlpha = 80 * (1 - i / fillW);
+        p.fill(255, 255, 255, lightAlpha);
+        p.rect(x + i, y, 2, h);
+      }
+    }
+
+    // 进度指示线
+    if (state !== "ReadyToReplay") {
+      const progressX = x + w * currentProgress;
+      p.stroke(255, 255, 255, 255);
+      p.strokeWeight(2);
+      p.line(progressX, y - 2, progressX, y + h + 2);
+    }
+
+    // 时间显示（放在进度条上方）- 清晰无加粗 - 考虑暂停状态
+    let timeStr = "";
+    const maxSec = (maxRecordTime / 1000).toFixed(1);
+
+    if (state === "Recording") {
+      const isPausedRecording = isPaused && pausedRecordElapsed !== null;
+      const recordedMs = isPausedRecording
+        ? pausedRecordElapsed
+        : Math.max(0, now - recordStartTime);
+      const currentSec = (recordedMs / 1000).toFixed(1);
+      timeStr = `${currentSec}s/${maxSec}s`;
+    } else if (state === "ReadyToReplay") {
+      const recordedMs = recordEndTime - recordStartTime;
+      const recordedSec = (recordedMs / 1000).toFixed(1);
+      timeStr = `${recordedSec}s/${maxSec}s`;
+    } else if (state === "Replaying") {
+      const recordedMs = recordEndTime - recordStartTime;
+      const recordedSec = (recordedMs / 1000).toFixed(1);
+      timeStr = `${recordedSec}s/${maxSec}s`;
+    }
+
+    // 完全清晰：单一渲染，无任何效果 - 与时间轴平齐
+    p.noStroke();
+    p.textSize(22);
+    p.textStyle(p.NORMAL);
+    p.textAlign(p.RIGHT, p.CENTER);
+    p.fill(255, 255, 255);
+    p.text(timeStr, x + w + 130, timelineY - 10); //每个参数的含义分别是：文本内容、文本的x坐标、文本的y坐标
   }
 
   /**
@@ -512,15 +579,21 @@ export class Demo2RecordUI {
     ui,
     recordedActions,
     recordStartTime,
-    maxRecordTime
+    recordEndTime,
+    replayStartTime,
+    maxRecordTime,
+    state,
+    isPaused,
+    pausedRecordElapsed,
   ) {
     const C = Demo2RecordUI.COLOR_PALETTE;
+    const now = performance.now();
 
-    // 时间轴背景（半透明）
-    p.fill(C.softPurple.r, C.softPurple.g, C.softPurple.b, 120);
-    p.rect(x, y, w, h);
-
-    // 时间轴刻度线和标签
+    // 计算总时长
+    let totalMs = maxRecordTime;
+    if (state === "ReadyToReplay" || state === "Replaying") {
+      totalMs = Math.max(1, recordEndTime - recordStartTime);
+    }
     const tickCount = 5;
     p.stroke(C.midPurple.r, C.midPurple.g, C.midPurple.b, 100);
     p.strokeWeight(1);
@@ -529,17 +602,23 @@ export class Demo2RecordUI {
       p.line(tickX, y + 2, tickX, y + 6);
     }
 
-    // 绘制操作标记
-    const now = performance.now();
-    const recordedMs = now - recordStartTime;
+    // 绘制操作标记 - 暂停时使用暂停时间
+    const isPausedRecording = isPaused && pausedRecordElapsed !== null;
+    const recordedMs = isPausedRecording
+      ? pausedRecordElapsed
+      : Math.max(0, now - recordStartTime);
 
-    recordedActions.forEach(action => {
+    recordedActions.forEach((action) => {
       // 根据操作时间映射到进度条位置
-      const actionProgress = action.time / maxRecordTime;
+      const actionProgress = action.time / totalMs;
       const actionX = x + w * actionProgress;
 
-      // 检查是否在可见范围内（仅显示已录制的部分）
-      if (action.time <= recordedMs && actionX >= x && actionX <= x + w) {
+      // 检查是否在可见范围内
+      const isVisible = actionX >= x && actionX <= x + w;
+      const isRecorded =
+        state === "Recording" ? action.time <= recordedMs : true;
+
+      if (isVisible && isRecorded) {
         let actionColor = C.moveLeftColor;
         let icon = "←";
 
@@ -551,61 +630,23 @@ export class Demo2RecordUI {
           icon = "↑";
         }
 
-        // 操作标记圆圈
-        p.fill(actionColor.r, actionColor.g, actionColor.b, 200);
-        p.stroke(C.midPurple.r, C.midPurple.g, C.midPurple.b);
-        p.strokeWeight(1);
-        const iconR = 4;
-        p.circle(actionX, y + 14, iconR * 2);
+        // 操作标记 - KeyPrompt 风格镂空方形框
+        const keySize = 22;
+        p.push();
+        p.stroke(255, 255, 255, 255);
+        p.strokeWeight(2);
+        p.noFill();
+        p.rect(actionX - keySize / 2, y + 14 - keySize / 2, keySize, keySize, 2);
+        p.pop();
 
         // 操作图标
         p.noStroke();
         p.fill(255, 255, 255);
-        p.textSize(9);
+        p.textSize(14);
         p.textStyle(p.BOLD);
         p.textAlign(p.CENTER, p.CENTER);
         p.text(icon, actionX, y + 14);
       }
-    });
-
-    // 时间轴标签（左右）
-    p.textSize(8);
-    p.textStyle(p.NORMAL);
-    p.textAlign(p.LEFT, p.BOTTOM);
-    p.fill(C.midPurple.r, C.midPurple.g, C.midPurple.b, 180);
-    p.text("0s", x + 2, y + h - 2);
-
-    p.textAlign(p.RIGHT, p.BOTTOM);
-    const maxSec = (maxRecordTime / 1000).toFixed(1);
-    p.text(`${maxSec}s`, x + w - 2, y + h - 2);
-
-    // 图例（操作颜色说明）
-    const legendStartY = y + h + 2;
-    const legendX = x;
-    const legendItemW = 45;
-
-    const legends = [
-      { icon: "←", label: "Left", color: C.moveLeftColor },
-      { icon: "→", label: "Right", color: C.moveRightColor },
-      { icon: "↑", label: "Jump", color: C.jumpColor },
-    ];
-
-    legends.forEach((leg, idx) => {
-      const legX = legendX + idx * (legendItemW + 4);
-
-      // 彩色圆点
-      p.fill(leg.color.r, leg.color.g, leg.color.b, 180);
-      p.stroke(C.midPurple.r, C.midPurple.g, C.midPurple.b);
-      p.strokeWeight(0.5);
-      p.circle(legX + 4, legendStartY + 4, 3);
-
-      // 标签
-      p.noStroke();
-      p.fill(C.midPurple.r, C.midPurple.g, C.midPurple.b);
-      p.textSize(7);
-      p.textStyle(p.NORMAL);
-      p.textAlign(p.LEFT, p.CENTER);
-      p.text(leg.label, legX + 10, legendStartY + 4);
     });
   }
 

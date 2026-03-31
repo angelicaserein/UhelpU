@@ -486,20 +486,26 @@ export class RecordSystem {
     const moveRightKey = kbm.getKeyByIntent("moveRight");
     const jumpKey = kbm.getKeyByIntent("jump");
 
+    // 方向键和空格键的代码
+    const arrowLeftCode = "ArrowLeft";
+    const arrowRightCode = "ArrowRight";
+    const spaceCode = "Space";
+    const arrowUpCode = "ArrowUp";
+
     const actions = [];
 
     // 仅处理keydown事件，记录首次按下
-    this.clip.records.forEach(record => {
+    this.clip.records.forEach((record) => {
       if (record.keyType !== "keydown") {
         return;
       }
 
       let action = null;
-      if (record.code === moveLeftKey) {
+      if (record.code === moveLeftKey || record.code === arrowLeftCode) {
         action = "moveLeft";
-      } else if (record.code === moveRightKey) {
+      } else if (record.code === moveRightKey || record.code === arrowRightCode) {
         action = "moveRight";
-      } else if (record.code === jumpKey) {
+      } else if (record.code === jumpKey || record.code === spaceCode || record.code === arrowUpCode) {
         action = "jump";
       }
 

@@ -7,6 +7,7 @@ export { BasePlatform } from "./base/BasePlatform.js";
 // characters
 export { Player } from "./characters/Player.js";
 export { Replayer } from "./characters/Replayer.js";
+export { Enemy } from "./characters/Enemy.js";
 
 // terrain
 export { Ground } from "./terrain/Ground.js";

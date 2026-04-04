@@ -10,6 +10,7 @@
   Checkpoint,
   Button,
   Spike,
+  Enemy,
 } from "../../game-entity-model/index.js";
 import { CollisionSystem } from "../../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../../physics-system/PhysicsSystem.js";
@@ -91,6 +92,12 @@ export class Level7 extends BaseLevel {
         this._wpPortal_0,
         this._bsBtn_0,
         this._bsSpike_0,
+        new Enemy(700, 50, 30, 30, {
+          color: [200, 80, 80],
+          patrolLeft: 600,
+          patrolRight: 800,
+          speed: 2,
+        }),
       ],
       { right: { targetRoomIndex: 1 } },
     );

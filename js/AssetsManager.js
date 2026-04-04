@@ -69,7 +69,8 @@ export const Assets = {
   tileImage_doorOpen: null,
   tileImage_doorClose: null,
 
-  // 安全加载：失败时返回 null 而不是抛异常
+  // 敌人贴图
+  enemyImg: null,
   async _safeLoad(promise, name) {
     try {
       const result = await promise;
@@ -209,6 +210,8 @@ export const Assets = {
       this._safeLoad(p.loadImage("assets/images/npc/npc14.png"), "NPC idle4"),
       this._safeLoad(p.loadImage("assets/images/npc/npc15.png"), "NPC idle5"),
       this._safeLoad(p.loadImage("assets/images/npc/npc-face.png"), "NPC face"),
+      // 敌人贴图
+      this._safeLoad(p.loadImage("assets/images/bg/enemy.png"), "敌人"),
       // 地块贴图
       this._safeLoad(p.loadImage("assets/images/tiles/goal.png"), "终点门"),
       this._safeLoad(p.loadImage("assets/images/tiles/ground.png"), "地面贴图"),
@@ -314,20 +317,21 @@ export const Assets = {
       results[48],
     ];
     this.npcFaceImg = results[49];
+    // 敌人贴图
+    this.enemyImg = results[50];
     // 地块贴图
-    this.tileImage_goal = results[50];
-    this.tileImage_ground = results[51];
-    this.tileImage_platform = results[52];
-    this.tileImage_wall = results[53];
-    this.tileImage_signboard = results[54];
-    this.tileImage_signboard2 = results[55];
-    this.tileImage_Jump = results[66];
-    this.tileImage_doorOpen = results[67];
-    this.tileImage_doorClose = results[68];
-    this.bgImageDemo2Level = results[69];
-    this.bgImageLanguageChoice = results[70];
+    this.tileImage_goal = results[51];
+    this.tileImage_ground = results[52];
+    this.tileImage_platform = results[53];
+    this.tileImage_wall = results[54];
+    this.tileImage_signboard = results[55];
+    this.tileImage_signboard2 = results[56];
+    this.tileImage_Jump = results[67];
+    this.tileImage_doorOpen = results[68];
+    this.tileImage_doorClose = results[69];
+    this.bgImageDemo2Level = results[70];
+    this.bgImageLanguageChoice = results[71];
     this.achieveImgs = [
-      results[56],
       results[57],
       results[58],
       results[59],
@@ -337,6 +341,7 @@ export const Assets = {
       results[63],
       results[64],
       results[65],
+      results[66],
     ];
   },
 };

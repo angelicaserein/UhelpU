@@ -22,7 +22,7 @@ export class BasicActionValidator extends ActionValidator {
         }
 
         //意图是否能变成真正的动作，比如跳跃受到isOnGround限制
-        if(intent.has("wantsJump") && controlComponent.abilityCondition["isOnGround"]) {
+        if(intent.has("wantsJump") && controlComponent.abilityCondition["wasOnGround"]) {
             action.add("jump");
         }
         return action;

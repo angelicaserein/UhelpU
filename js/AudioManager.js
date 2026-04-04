@@ -21,7 +21,6 @@ const TRACKS = {
 const SFX_TRACKS = {
   click: "assets/audio/sxf/click.mp3",
   dead: "assets/audio/sxf/dead.mp3",
-  victory: "assets/audio/sxf/victory.mp3",
 };
 
 const clamp01 = (value) => Math.max(0, Math.min(1, Number(value) || 0));

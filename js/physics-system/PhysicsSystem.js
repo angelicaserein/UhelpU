@@ -21,7 +21,20 @@ export class PhysicsSystem {
                 entity.blockedXLastFrame = false;
                 // 每帧重置isOnGround，只有通过碰撞检测时才设置为true
                 if(entity.controllerManager) {
-                    entity.controllerManager.currentControlComponent.abilityCondition["isOnGround"] = false;
+                    const cc = entity.controllerManager.currentControlComponent;
+                    // Coyote time: allow jump for several frames after leaving ground
+                    if(cc.abilityCondition["jumpCooldown"] > 0) {
+                        cc.abilityCondition["coyoteFrames"] = 0;
+                    } else if(cc.abilityCondition["isOnGround"]) {
+                        cc.abilityCondition["coyoteFrames"] = 6;
+                    } else if(cc.abilityCondition["coyoteFrames"] > 0) {
+                        cc.abilityCondition["coyoteFrames"]--;
+                    }
+                    cc.abilityCondition["wasOnGround"] = cc.abilityCondition["coyoteFrames"] > 0;
+                    cc.abilityCondition["isOnGround"] = false;
+                    if(cc.abilityCondition["jumpCooldown"] > 0) {
+                        cc.abilityCondition["jumpCooldown"]--;
+                    }
                     if(!blockedXLastFrame && !entity.lockControlThisFrame) {
                         entity.controllerManager.tick();
                     }

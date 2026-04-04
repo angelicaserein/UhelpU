@@ -12,6 +12,10 @@ export class BasicControlComponent extends ControlComponent {
         this.gravity = -0.5;
         this.abilityCondition = {
             "isOnGround": false,
+            "wasOnGround": false,
+            "groundVelY": 0,
+            "jumpCooldown": 0,
+            "coyoteFrames": 0,
         }
     }
 }

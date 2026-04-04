@@ -1,6 +1,5 @@
 import { ColliderShape, ColliderType } from "./enumerator.js";
 import { EventTypes } from "../event-system/EventTypes.js";
-import { AudioManager } from "../AudioManager.js";
 
 export const responderMap = {
     "DYNAMIC-STATIC": (a, msg) => basicBlockResponse(a, msg),
@@ -13,12 +12,19 @@ function basicBlockResponse(a, msg) {
         a.movementComponent.velX = 0;
         a.blockedXLastFrame = true;
     } else {
-        a.movementComponent.velY = 0;
+        const cooldown = a.controllerManager.currentControlComponent.abilityCondition["jumpCooldown"] || 0;
+        // 跳跃冷却期间忽略碰撞约束，保证跳跃速度和高度一致
+        if(cooldown <= 0) {
+            a.movementComponent.velY = 0;
+        }
         if(msg === "top") {
             a.headBlockedThisFrame = true;
         }
         if(msg === "bottom") {
-            a.controllerManager.currentControlComponent.abilityCondition["isOnGround"] = true;
+            if(cooldown <= 0) {
+                a.controllerManager.currentControlComponent.abilityCondition["isOnGround"] = true;
+                a.controllerManager.currentControlComponent.abilityCondition["groundVelY"] = 0;
+            }
         }
     }
 }
@@ -29,6 +35,12 @@ function dynDynBlockResponse(a, b, msg) {
     }
     if(msg === "a_on_b") {
         // a 踩在 b 头上
+        const cooldownA = a.controllerManager.currentControlComponent.abilityCondition["jumpCooldown"] || 0;
+        // 跳跃冷却期间忽略碰撞约束，保证跳跃速度和高度一致
+        if(cooldownA > 0) {
+            return;
+        }
+
         if(a.movementComponent.velY <= 0) {
             a.movementComponent.velY = 0;
         }
@@ -37,9 +49,17 @@ function dynDynBlockResponse(a, b, msg) {
             b.movementComponent.velY = 0;
             b.headBlockedThisFrame = true;
         }
+        // 只有不在跳跃冷却期内才允许落地
         a.controllerManager.currentControlComponent.abilityCondition["isOnGround"] = true;
+        a.controllerManager.currentControlComponent.abilityCondition["groundVelY"] = b.movementComponent ? b.movementComponent.velY : 0;
     } else if(msg === "b_on_a") {
         // b 踩在 a 头上
+        const cooldownB = b.controllerManager.currentControlComponent.abilityCondition["jumpCooldown"] || 0;
+        // 跳跃冷却期间忽略碰撞约束，保证跳跃速度和高度一致
+        if(cooldownB > 0) {
+            return;
+        }
+
         if(b.movementComponent.velY <= 0) {
             b.movementComponent.velY = 0;
         }
@@ -48,7 +68,9 @@ function dynDynBlockResponse(a, b, msg) {
             a.movementComponent.velY = 0;
             a.headBlockedThisFrame = true;
         }
+        // 只有不在跳跃冷却期内才允许落地
         b.controllerManager.currentControlComponent.abilityCondition["isOnGround"] = true;
+        b.controllerManager.currentControlComponent.abilityCondition["groundVelY"] = a.movementComponent ? a.movementComponent.velY : 0;
     }
     return;
 }
@@ -64,29 +86,9 @@ function dynTriResponse(a, b, eventBus) {
         return;
     }
     if(a.type === "player" && b.type === "portal") {
-        console.log("[Portal Collision] Player hit portal! isOpen:", b.isOpen);
         if(b.isOpen) {
-            console.log("[Portal Collision] Portal is OPEN - triggering victory!");
-            // Play victory sound and start suction animation
-            AudioManager.playSFX("victory");
-
-            // Start player suction animation towards portal
-            if (a.startSuckedInAnimation && typeof a.startSuckedInAnimation === 'function') {
-              console.log("[Portal Collision] Starting suction animation");
-              a.startSuckedInAnimation(
-                null,
-                b.x + b.collider.w / 2,
-                b.y + b.collider.h / 2,
-                1000
-              );
-            }
-
-            console.log("[Portal Collision] Publishing AUTO_RESULT");
             eventBus && eventBus.publish(EventTypes.AUTO_RESULT, "autoResult1");
-        } else {
-            console.log("[Portal Collision] Portal is CLOSED - ignoring");
         }
         return;
     }
 }
-

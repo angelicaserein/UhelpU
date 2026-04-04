@@ -112,7 +112,7 @@ export class CollisionSystem {
       const collisionMsg = resolveFunc(dyn, sta);
 
       const responseFunc = responderMap[typePair];
-      responseFunc(dyn, collisionMsg);
+      responseFunc(dyn, sta, collisionMsg);
     }
   }
 

@@ -51,6 +51,11 @@ registerTranslations({
     easy_npc1_line2: "Get familiar with your skills, they're really useful!",
     easy_npc1_exhausted: "Easy mode levels are super simple!",
 
+    // ── Easy Level 1 — Signboard ──────────────────────────────────
+    easy_signboard_level1_front:
+      "Notice Board\n---\nWelcome to Beginner Level, you can check the tutorial here.",
+    easy_signboard_tutorial: "Start Tutorial",
+
     // ── Prompts ───────────────────────────────────────────────────
     prompt_ad: "A/D",
     prompt_arrows: "←/→",
@@ -106,6 +111,11 @@ registerTranslations({
     easy_npc1_line1: "你好呀！很高兴认识你！",
     easy_npc1_line2: "多多熟悉你的技能，特别有用！",
     easy_npc1_exhausted: "简单模式的关卡超级简单！",
+
+    // ── Easy Level 1 — Signboard ──────────────────────────────────
+    easy_signboard_level1_front:
+      "公告板\n---\n欢迎来到新手关卡，你可以在这里查看教程。",
+    easy_signboard_tutorial: "开始教程",
 
     // ── Prompts ───────────────────────────────────────────────────
     prompt_ad: "A/D",

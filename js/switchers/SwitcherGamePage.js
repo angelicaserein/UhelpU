@@ -47,6 +47,16 @@ export class SwitcherGamePage extends SwitcherBase {
       demo2_level8: Demo2GamePageLevel8,
       demo2_level9: Demo2GamePageLevel9,
       demo2_level10: Demo2GamePageLevel10,
+      easy_level1: Demo2GamePageLevel1,
+      easy_level2: Demo2GamePageLevel2,
+      easy_level3: Demo2GamePageLevel3,
+      easy_level4: Demo2GamePageLevel4,
+      easy_level5: Demo2GamePageLevel5,
+      easy_level6: Demo2GamePageLevel6,
+      easy_level7: Demo2GamePageLevel7,
+      easy_level8: Demo2GamePageLevel8,
+      easy_level9: Demo2GamePageLevel9,
+      easy_level10: Demo2GamePageLevel10,
     };
   }
 

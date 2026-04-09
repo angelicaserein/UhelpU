@@ -5,7 +5,7 @@ import {
   Wall,
   Platform,
   Portal,
-  Checkpoint,
+  CheckpointDemo2,
   Button,
   Spike,
   NPCDemo2,
@@ -42,7 +42,7 @@ export class Level4 extends BaseLevel {
       5000,
       (x, y) => this.addReplayer(x, y),
       () => this.removeReplayer(),
-      { uiClass: Demo2RecordUI }
+      { uiClass: Demo2RecordUI },
     );
     this.recordSystem.createListeners();
 
@@ -174,7 +174,7 @@ export class Level4 extends BaseLevel {
         new Spike(224, 80, 60, 20),
         new Spike(594, 80, 580, 60),
         new Spike(1174, 80, 170, 60),
-        new Checkpoint(144, 260, 40, 70, () => this._player),
+        new CheckpointDemo2(144, 260, 40, 70, () => this._player),
         (this._wpBtn_0 = new Button(484, 260, 34, 16)),
         (this._wpPortal_0 = new Portal(1084, 590, 50, 50)),
         (this._bpBtn_2 = new Button(234, 260, 34, 16)),

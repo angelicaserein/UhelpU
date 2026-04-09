@@ -1,6 +1,7 @@
 import { GameEntity } from "../base/GameEntity.js";
 import { RectangleCollider } from "../../collision-system/CollideComponent.js";
 import { ColliderType } from "../../collision-system/enumerator.js";
+import { MovementComponent } from "../../physics-system/MovementComponent.js";
 import { AudioManager } from "../../AudioManager.js";
 import { Assets } from "../../AssetsManager.js";
 
@@ -11,13 +12,26 @@ export class Enemy extends GameEntity {
     this.zIndex = -5;
 
     // Collision
-    this.collider = new RectangleCollider(ColliderType.STATIC, w, h);
+    this.collider = new RectangleCollider(ColliderType.DYNAMIC, w, h);
+    // Movement component for physics
+    this.movementComponent = new MovementComponent(0, 0, 0, 0);
 
     // Patrol behavior
-    this._patrolLeft = options.patrolLeft ?? x;
-    this._patrolRight = options.patrolRight ?? x + 100;
     this._speed = options.speed ?? 2;
-    this._direction = 1;  // 1 = right, -1 = left
+    this._direction = 1; // 1 = right, -1 = left
+
+    // Collision state for direction reversal
+    this.blockedLeftThisFrame = false;
+    this.blockedRightThisFrame = false;
+    this.blockedBottomThisFrame = false;
+    this._wasGroundedLastFrame = false;
+    this._supportLeft = Number.NEGATIVE_INFINITY;
+    this._supportRight = Number.POSITIVE_INFINITY;
+    this._edgeTurnMargin = options.edgeTurnMargin ?? 1;
+
+    // Previous position tracking for collision detection
+    this.prevX = x;
+    this.prevY = y;
 
     // Appearance
     this._color = options.color ?? [150, 150, 150];
@@ -25,25 +39,74 @@ export class Enemy extends GameEntity {
     // Death state
     this.deathState = {
       isDead: false,
-      deathFrameCounter: 0,  // Frame counter for death animation
-      deathDurationFrames: 18,  // ~300ms at 60fps (18 frames)
+      deathFrameCounter: 0, // Frame counter for death animation
+      deathDurationFrames: 18, // ~300ms at 60fps (18 frames)
     };
   }
 
   update(p) {
+    // Save previous position for collision detection
+    this.prevX = this.x;
+    this.prevY = this.y;
+
     // Update patrol movement if not dead
     if (!this.deathState.isDead) {
-      this.x += this._direction * this._speed;
+      // Use the same gravity convention as player.
+      this.movementComponent.accX = 0;
+      this.movementComponent.accY = -0.5;
 
-      // Reverse direction at patrol boundaries
-      if (this.x <= this._patrolLeft) {
-        this.x = this._patrolLeft;
+      // Wall hit: reverse direction.
+      if (this._direction === -1 && this.blockedLeftThisFrame) {
         this._direction = 1;
-      } else if (this.x >= this._patrolRight) {
-        this.x = this._patrolRight;
+      } else if (this._direction === 1 && this.blockedRightThisFrame) {
         this._direction = -1;
       }
+
+      // Edge guard (early turn): if front foot is already near/over support edge,
+      // reverse immediately instead of waiting to fully leave the platform.
+      if (
+        this._wasGroundedLastFrame &&
+        Number.isFinite(this._supportLeft) &&
+        Number.isFinite(this._supportRight)
+      ) {
+        const frontX =
+          this._direction === 1 ? this.x + this.collider.w : this.x;
+
+        const tooFarRight =
+          this._direction === 1 &&
+          frontX >= this._supportRight - this._edgeTurnMargin;
+        const tooFarLeft =
+          this._direction === -1 &&
+          frontX <= this._supportLeft + this._edgeTurnMargin;
+
+        if (tooFarRight || tooFarLeft) {
+          this.x -= this._direction * this._speed;
+          this._direction *= -1;
+        }
+      }
+
+      // Edge guard: if last frame was grounded but this frame is not,
+      // treat as "no road ahead" and turn around instead of walking off.
+      if (this._wasGroundedLastFrame && !this.blockedBottomThisFrame) {
+        this.x -= this._direction * this._speed;
+        this._direction *= -1;
+      }
+
+      this.movementComponent.velX = this._direction * this._speed;
+
+      this._wasGroundedLastFrame = this.blockedBottomThisFrame;
+
+      // Reset collision flags for next frame
+      this.blockedLeftThisFrame = false;
+      this.blockedRightThisFrame = false;
+      this.blockedBottomThisFrame = false;
     } else {
+      // Stop movement when dead
+      this.movementComponent.velX = 0;
+      this.movementComponent.velY = 0;
+      this.movementComponent.accX = 0;
+      this.movementComponent.accY = 0;
+
       // Update death animation frame counter
       this.deathState.deathFrameCounter++;
     }
@@ -69,8 +132,11 @@ export class Enemy extends GameEntity {
       }
     } else {
       // Draw death animation (scale out + fade) with y-axis flip
-      const progress = Math.min(1, this.deathState.deathFrameCounter / this.deathState.deathDurationFrames);
-      const scale = Math.max(0, 1 - progress);  // 1 → 0
+      const progress = Math.min(
+        1,
+        this.deathState.deathFrameCounter / this.deathState.deathDurationFrames,
+      );
+      const scale = Math.max(0, 1 - progress); // 1 �� 0
       const alpha = Math.max(0, 255 * (1 - progress));
 
       p.push();
@@ -95,24 +161,19 @@ export class Enemy extends GameEntity {
     }
   }
 
-  /**
-   * Trigger enemy death
-   */
   triggerDeath() {
     if (this.deathState.isDead) return;
     this.deathState.isDead = true;
-    this.deathState.deathFrameCounter = 0;  // Reset frame counter
+    this.deathState.deathFrameCounter = 0; // Reset frame counter
     AudioManager.playSFX("dead");
   }
 
-  /**
-   * Check if death animation is complete
-   * @returns {boolean} true if death animation finished
-   */
   isDeadAnimationComplete() {
     if (!this.deathState.isDead) {
       return false;
     }
-    return this.deathState.deathFrameCounter >= this.deathState.deathDurationFrames;
+    return (
+      this.deathState.deathFrameCounter >= this.deathState.deathDurationFrames
+    );
   }
 }

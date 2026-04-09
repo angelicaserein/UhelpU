@@ -7,7 +7,7 @@ import { Assets } from "../../../AssetsManager.js";
 import { AudioManager } from "../../../AudioManager.js";
 import { EventTypes } from "../../../event-system/EventTypes.js";
 
-export class StaticPageLevelChoice extends PageBase {
+export class StaticPageLevelChoiceEasy extends PageBase {
   constructor(switcher, p, eventBus) {
     super(switcher);
     this.p = p;
@@ -26,7 +26,7 @@ export class StaticPageLevelChoice extends PageBase {
     const backBtn = new BackButton(p, () => this.switcher.showWorldSelect(p));
     this.addElement(backBtn);
 
-    // 关卡按钮配置 — 上排 1-5，下排 6-10
+    // easy 关卡按钮配置 - 上排 1-5，下排 6-10
     const topRowConfigs = [
       { num: 1, x: 0.125, w: 0.05, cls: "level1-button" },
       { num: 2, x: 0.3, w: 0.051, cls: "level2-button" },
@@ -45,6 +45,7 @@ export class StaticPageLevelChoice extends PageBase {
     const topRowY = 0.441;
     const bottomRowY = 0.815;
 
+    const levelBtns = [];
     for (const cfg of topRowConfigs) {
       const btn = new ButtonBase(
         p,
@@ -52,7 +53,7 @@ export class StaticPageLevelChoice extends PageBase {
         cfg.x * p.width,
         topRowY * p.height,
         () => {
-          this.eventBus.publish(EventTypes.LOAD_LEVEL, `level${cfg.num}`);
+          this.eventBus.publish(EventTypes.LOAD_LEVEL, `easy_level${cfg.num}`);
         },
         cfg.cls,
       );
@@ -61,6 +62,12 @@ export class StaticPageLevelChoice extends PageBase {
       btn.btn.mouseOver(() => this.levelInfo?.setActiveLevel(cfg.num));
       btn.btn.mouseOut(() => this.levelInfo?.setActiveLevel(null));
       this.addElement(btn);
+      levelBtns.push({
+        btn: btn.btn,
+        callback: () => {
+          this.eventBus.publish(EventTypes.LOAD_LEVEL, `easy_level${cfg.num}`);
+        },
+      });
     }
 
     for (const cfg of bottomRowConfigs) {
@@ -70,7 +77,7 @@ export class StaticPageLevelChoice extends PageBase {
         cfg.x * p.width,
         bottomRowY * p.height,
         () => {
-          this.eventBus.publish(EventTypes.LOAD_LEVEL, `level${cfg.num}`);
+          this.eventBus.publish(EventTypes.LOAD_LEVEL, `easy_level${cfg.num}`);
         },
         cfg.cls,
       );
@@ -79,9 +86,21 @@ export class StaticPageLevelChoice extends PageBase {
       btn.btn.mouseOver(() => this.levelInfo?.setActiveLevel(cfg.num));
       btn.btn.mouseOut(() => this.levelInfo?.setActiveLevel(null));
       this.addElement(btn);
+      levelBtns.push({
+        btn: btn.btn,
+        callback: () => {
+          this.eventBus.publish(EventTypes.LOAD_LEVEL, `easy_level${cfg.num}`);
+        },
+      });
     }
 
-    // 跟随鼠标的动图
+    this.registerNavButtons(levelBtns, {
+      layout: "grid",
+      cols: 5,
+      rows: 2,
+      onEsc: () => this.switcher.showWorldSelect(p),
+    });
+
     const followerX = p.width * 0.5;
     const followerY = p.height * 0.115;
     const followerR = 0.04 * p.width;
@@ -94,12 +113,12 @@ export class StaticPageLevelChoice extends PageBase {
       60,
     );
 
-    // 关卡信息悬浮面板（FollowImage 左右两侧）
     this.levelInfo = new LevelInfo(
       p,
       followerX,
       followerY + 15,
       followerR + 150,
+      'easy_level'
     );
   }
 

@@ -30,6 +30,27 @@ export class CollisionSystem {
     // Final DD pass to guarantee no overlap before render
     if (replayerActive) this.processDynamicDynamicPair(player, replayer);
 
+    // Player collision detection with enemies (DYNAMIC-DYNAMIC pairs)
+    const player2 = this.getPlayer();
+    if (player2) {
+      for (const dyn of this._dynamicEntities) {
+        if (dyn.type === "enemy" && dyn !== player2) {
+          this.processEnemyPlayerPair(player2, dyn);
+        }
+      }
+    }
+
+    // Enemy collision detection with other DYNAMIC/STATIC entities (platforms, walls, etc.)
+    for (const dyn of this._dynamicEntities) {
+      if (dyn.type === "enemy") {
+        for (const sta of this._staticEntities) {
+          if (dyn !== sta && sta.type !== "spike") {
+            this.processDynamicStaticPair(dyn, sta);
+          }
+        }
+      }
+    }
+
     // 每帧重置所有按钮状态，碰撞检测时会重新按下仍被踩到的按钮
     for (const tri of this._triggerEntities) {
       if (tri.type === "button" && tri.isPressed) {
@@ -40,6 +61,15 @@ export class CollisionSystem {
     for (const dyn of this._dynamicEntities) {
       for (const tri of this._triggerEntities) {
         this.processDynamicTriggerPair(dyn, tri, eventBus);
+      }
+    }
+
+    // Enemy collision detection with TRIGGER entities (buttons, spikes, etc.)
+    for (const sta of this._staticEntities) {
+      if (sta.type === "enemy") {
+        for (const tri of this._triggerEntities) {
+          this.processEnemyTriggerPair(sta, tri, eventBus);
+        }
       }
     }
   }
@@ -92,6 +122,11 @@ export class CollisionSystem {
   processDynamicStaticPair(dyn, sta) {
     // 死亡的角色无视所有平台碰撞
     if (dyn.deathState && dyn.deathState.isDead) {
+      return;
+    }
+
+    // 死敌人的碰撞被忽略
+    if (sta.type === "enemy" && sta.deathState && sta.deathState.isDead) {
       return;
     }
 
@@ -154,6 +189,53 @@ export class CollisionSystem {
       //如果发生碰撞，执行if语句，如果没有则跳过
       const responseFunc = responderMap[typePair];
       responseFunc(dyn, tri, eventBus);
+    }
+  }
+
+  processEnemyPlayerPair(player, enemy) {
+    // Enemy collision detection with Player (DYNAMIC-DYNAMIC pairs)
+    if (player.deathState && player.deathState.isDead) {
+      return;
+    }
+    if (enemy.deathState && enemy.deathState.isDead) {
+      return;
+    }
+
+    const playerShape = player.collider.colliderShape;
+    const enemyShape = enemy.collider.colliderShape;
+
+    const typePair = "DYNAMIC-DYNAMIC";
+    const shapePair = `${playerShape}-${enemyShape}`;
+    const fullKey = `${typePair}-${shapePair}`;
+
+    const detectFunc = detectorMap[shapePair];
+    const detectResult = detectFunc(player, enemy);
+    if (detectResult) {
+      const resolveFunc = resolverMap[fullKey];
+      const collisionMsg = resolveFunc(player, enemy);
+
+      const responseFunc = responderMap[typePair];
+      responseFunc(player, enemy, collisionMsg);
+    }
+  }
+
+  processEnemyTriggerPair(enemy, tri, eventBus = this.eventBus) {
+    // Enemy collision detection with TRIGGER entities (buttons, spikes, etc.)
+    if (enemy.deathState && enemy.deathState.isDead) {
+      return;
+    }
+
+    const enemyShape = enemy.collider.colliderShape;
+    const triShape = tri.collider.colliderShape;
+
+    const typePair = "DYNAMIC-TRIGGER";
+    const shapePair = `${enemyShape}-${triShape}`;
+
+    const detectFunc = detectorMap[shapePair];
+    const detectResult = detectFunc(enemy, tri);
+    if (detectResult) {
+      const responseFunc = responderMap[typePair];
+      responseFunc(enemy, tri, eventBus);
     }
   }
 }

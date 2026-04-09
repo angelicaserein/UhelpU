@@ -9,12 +9,14 @@ export class LevelInfo {
    * @param {number} centerX - FollowImage 圆心 x（用于定位左右面板）
    * @param {number} centerY - FollowImage 圆心 y
    * @param {number} circleRadius - FollowImage 圆的半径
+   * @param {string} levelPrefix - 关卡标题前缀（如 'level', 'easy_level', 'demo2_level'），默认为 'level'
    */
-  constructor(p, centerX, centerY, circleRadius) {
+  constructor(p, centerX, centerY, circleRadius, levelPrefix = "level") {
     this.p = p;
     this.centerX = centerX;
     this.centerY = centerY;
     this.circleRadius = circleRadius;
+    this.levelPrefix = levelPrefix;
 
     this._activeLevelNum = null; // 当前悬浮的关卡编号，null 表示无
     this._alpha = 0; // 淡入淡出透明度 0–255
@@ -48,8 +50,8 @@ export class LevelInfo {
     if (!levelNum) return;
     this._lastDrawnLevel = levelNum;
 
-    const leftKey = `level${levelNum}_info_left`;
-    const rightKey = `level${levelNum}_info_right`;
+    const leftKey = `${this.levelPrefix}${levelNum}_info_left`;
+    const rightKey = `${this.levelPrefix}${levelNum}_info_right`;
     const leftText = t(leftKey);
     const rightText = t(rightKey);
 

@@ -18,7 +18,7 @@ import { i18n } from "../../../i18n.js";
  *   _pauseGame()    — extend with super._pauseGame() to add level-specific pause logic
  *   _resumeGame()   — extend with super._resumeGame() to add level-specific resume logic
  */
-export class GamePageBase extends PageBase {
+export class GamePageBaseDemo2 extends PageBase {
   constructor(switcher, p, hintLevel, hintKey, levelIndex, options = {}) {
     super(switcher);
     this._p = p;
@@ -124,7 +124,6 @@ export class GamePageBase extends PageBase {
       this.registerNavButtons(this._pageNavButtons, {
         layout: "vertical",
         onEsc: null, // ESC 由全局处理，不需要特殊处理
-        enableActivationKeys: false,
       });
     }
   }

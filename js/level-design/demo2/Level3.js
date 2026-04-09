@@ -4,7 +4,7 @@ import {
   Wall,
   Platform,
   Portal,
-  Checkpoint,
+  CheckpointDemo2,
   Button,
   Spike,
 } from "../../game-entity-model/index.js";
@@ -41,7 +41,9 @@ export class Level3 extends BaseLevel {
     this.entities.add(new Platform(890, 480, 280, 30));
 
     // Checkpoint
-    this.entities.add(new Checkpoint(610, 210, 40, 70, () => this._player));
+    this.entities.add(
+      new CheckpointDemo2(610, 210, 40, 70, () => this._player),
+    );
 
     // BtnWirePortalSystem
     const wpBtn_0 = new Button(1040, 510, 34, 16);

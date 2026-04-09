@@ -18,6 +18,16 @@ import { Level7 as Demo2Level7 } from "./demo2/Level7.js";
 import { Level8 as Demo2Level8 } from "./demo2/Level8.js";
 import { Level9 as Demo2Level9 } from "./demo2/Level9.js";
 import { Level10 as Demo2Level10 } from "./demo2/Level10.js";
+import { Level1 as EasyLevel1 } from "./easy/Level1.js";
+import { Level2 as EasyLevel2 } from "./easy/Level2.js";
+import { Level3 as EasyLevel3 } from "./easy/Level3.js";
+import { Level4 as EasyLevel4 } from "./easy/Level4.js";
+import { Level5 as EasyLevel5 } from "./easy/Level5.js";
+import { Level6 as EasyLevel6 } from "./easy/Level6.js";
+import { Level7 as EasyLevel7 } from "./easy/Level7.js";
+import { Level8 as EasyLevel8 } from "./easy/Level8.js";
+import { Level9 as EasyLevel9 } from "./easy/Level9.js";
+import { Level10 as EasyLevel10 } from "./easy/Level10.js";
 import { setGamePaused, isGamePaused } from "../game-runtime/GamePauseState.js";
 import { EventTypes } from "../event-system/EventTypes.js";
 import { Assets } from "../AssetsManager.js";
@@ -49,6 +59,16 @@ export class LevelManager {
       demo2_level8: Demo2Level8,
       demo2_level9: Demo2Level9,
       demo2_level10: Demo2Level10,
+      easy_level1: EasyLevel1,
+      easy_level2: EasyLevel2,
+      easy_level3: EasyLevel3,
+      easy_level4: EasyLevel4,
+      easy_level5: EasyLevel5,
+      easy_level6: EasyLevel6,
+      easy_level7: EasyLevel7,
+      easy_level8: EasyLevel8,
+      easy_level9: EasyLevel9,
+      easy_level10: EasyLevel10,
     };
     this.level = null;
     this.currentLevelIndex = null;
@@ -72,8 +92,20 @@ export class LevelManager {
   }
 
   startLevelTitleOverlay(levelIndex, p = this.p) {
-    const num = String(levelIndex || "").replace("level", "");
-    const key = "level" + num + "_title";
+    let prefix = "level";
+    let num = String(levelIndex || "");
+
+    if (num.startsWith("easy_level")) {
+      prefix = "easy_level";
+      num = num.replace("easy_level", "");
+    } else if (num.startsWith("demo2_level")) {
+      prefix = "demo2_level";
+      num = num.replace("demo2_level", "");
+    } else {
+      num = num.replace("level", "");
+    }
+
+    const key = prefix + num + "_title";
     this.levelTitleOverlay.active = true;
     this.levelTitleOverlay.startedAtMs = p?.millis
       ? p.millis()
@@ -196,7 +228,11 @@ export class LevelManager {
 
     // Only pause completely during EXIT phase
     let shouldPause = false;
-    if (this.portalTransition && this.portalTransition.isActive && this.portalTransition.mode === 'exit') {
+    if (
+      this.portalTransition &&
+      this.portalTransition.isActive &&
+      this.portalTransition.mode === "exit"
+    ) {
       shouldPause = true; // Entire 1500ms is paused
     }
 
@@ -218,7 +254,8 @@ export class LevelManager {
 
     const renderNudgeX = Math.round(this.cameraNudgeX);
     this.flipY(p);
-    this.level.clearCanvas && this.level.clearCanvas(p, renderNudgeX, this.bgParallaxFactor);
+    this.level.clearCanvas &&
+      this.level.clearCanvas(p, renderNudgeX, this.bgParallaxFactor);
 
     p.push();
     p.translate(-renderNudgeX, 0);

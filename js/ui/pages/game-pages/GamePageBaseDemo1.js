@@ -18,16 +18,13 @@ import { i18n } from "../../../i18n.js";
  *   _pauseGame()    — extend with super._pauseGame() to add level-specific pause logic
  *   _resumeGame()   — extend with super._resumeGame() to add level-specific resume logic
  */
-export class GamePageBase extends PageBase {
+export class GamePageBaseDemo1 extends PageBase {
   constructor(switcher, p, hintLevel, hintKey, levelIndex, options = {}) {
     super(switcher);
     this._p = p;
     this._isPaused = false;
     this._levelIndex = levelIndex || `level${hintLevel}`;
     const showButtons = options.showButtons !== false;
-
-    // 收集页面上的可导航按钮（会在子类中由 addElement 添加）
-    this._pageNavButtons = [];
 
     if (showButtons) {
       const backBtn = new BackButton(p, () => {
@@ -36,18 +33,6 @@ export class GamePageBase extends PageBase {
           this.switcher.eventBus.publish(EventTypes.RETURN_LEVEL_CHOICE);
       });
       this.addElement(backBtn);
-
-      // 添加到导航列表（带回调）
-      this._pageNavButtons.push({
-        btn: backBtn.btn,
-        callback:
-          backBtn.btn._onMousePressed ||
-          (() => {
-            this._resumeGame();
-            this.switcher.eventBus &&
-              this.switcher.eventBus.publish(EventTypes.RETURN_LEVEL_CHOICE);
-          }),
-      });
 
       // Pause button
       const pauseBtn = new ButtonBase(
@@ -63,12 +48,6 @@ export class GamePageBase extends PageBase {
       pauseBtn.btn.style("width", 0.03 * p.width + "px");
       pauseBtn.btn.style("height", 0.055 * p.height + "px");
       this.addElement(pauseBtn);
-
-      // 添加到导航列表
-      this._pageNavButtons.push({
-        btn: pauseBtn.btn,
-        callback: () => this._togglePause(),
-      });
     }
 
     // Pause window
@@ -119,14 +98,7 @@ export class GamePageBase extends PageBase {
     };
     document.addEventListener("keydown", this._onKeyDown);
 
-    // 注册页面的键盘导航按钮
-    if (this._pageNavButtons.length > 0) {
-      this.registerNavButtons(this._pageNavButtons, {
-        layout: "vertical",
-        onEsc: null, // ESC 由全局处理，不需要特殊处理
-        enableActivationKeys: false,
-      });
-    }
+    // Demo1：不启用关卡内键盘导航（仅保留鼠标 + ESC 暂停）
   }
 
   // Override in subclasses that need extra behaviour when hint is pressed

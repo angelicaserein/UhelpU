@@ -86,26 +86,6 @@ export class StaticPageOpeningStoryDemo1 extends PageBase {
     this._hintBtn = hintBtnFlip;
     this.addElement(hintBtnFlip);
 
-    // 注册键盘导航（BackButton + Skip 按钮）
-    this.registerNavButtons(
-      [
-        {
-          btn: backBtn.btn,
-          callback: () => this.switcher.showWorldSelect(p),
-        },
-        {
-          btn: hintBtn.btn,
-          callback: () => {
-            this.switcher.showLevelChoice(p);
-          },
-        },
-      ],
-      {
-        layout: "horizontal",
-        onEsc: () => this.switcher.showWorldSelect(p),
-      },
-    );
-
     // 滚动字幕（根据当前语言选择对应文本）
     const storyTexts =
       i18n.getLang() === "zh"

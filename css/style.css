@@ -1397,6 +1397,65 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   }
 }
 
+.signboard-content-button {
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 30px;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 32px;
+  color: #fff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+  z-index: 9999;
+}
+
+.signboard-content-button:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  transform: translateX(-50%) scale(1.05);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.signboard-content-button:active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+.signboard-tutorial-btn {
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 40px;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 32px;
+  font-weight: bold;
+  color: #fff;
+  background: rgba(200, 150, 220, 0.85);
+  border: 2px solid #d4a5e8;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), inset 0 1px 3px rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
+  z-index: 9999;
+}
+
+.signboard-tutorial-btn:hover {
+  background: rgba(220, 170, 240, 0.95);
+  border-color: #e8c5ff;
+  box-shadow: 0 6px 25px rgba(212, 165, 232, 0.7), inset 0 1px 3px rgba(255, 255, 255, 0.5);
+  transform: translateX(-50%) scale(1.05);
+}
+
+.signboard-tutorial-btn:active {
+  transform: translateX(-50%) scale(0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
 /* ========== 提示框浮窗 (Window Prompt) ========== */
 
 .window-prompt-overlay {

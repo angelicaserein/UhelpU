@@ -42,19 +42,23 @@ export class SignboardContent {
     this.bgImg.parent(this.content);
 
     // 标题
-    this.titleEl = p.createDiv("Notice");
+    this.titleEl = p.createDiv("");
     this.titleEl.addClass("signboard-content-title");
     this.titleEl.parent(this.content);
 
     // 正文
-    this.bodyEl = p.createDiv(
-      "A mysterious signboard stands here...A mysterious signboard stands here...A mysterious signboard stands here...",
-    );
+    this.bodyEl = p.createDiv("");
     this.bodyEl.addClass("signboard-content-body");
     this.bodyEl.parent(this.content);
 
+    // 教程按钮（可选）
+    this.tutorialBtn = p.createButton("");
+    this.tutorialBtn.addClass("signboard-tutorial-btn");
+    this.tutorialBtn.parent(this.content);
+    this.tutorialBtn.elt.style.display = "none";
+
     // 底部提示
-    this.footerEl = p.createDiv("Press Interact or move away to close");
+    this.footerEl = p.createDiv("");
     this.footerEl.addClass("signboard-content-footer");
     this.footerEl.parent(this.content);
 
@@ -71,6 +75,21 @@ export class SignboardContent {
 
   setFooter(text) {
     if (this.footerEl) this.footerEl.html(text);
+  }
+
+  setTutorialButton(callback, textKey = null) {
+    if (this.tutorialBtn) {
+      if (callback) {
+        this.tutorialBtn.elt.style.display = "block";
+        this.tutorialBtn.elt.onclick = callback;
+        // 设置按钮文本
+        if (textKey) {
+          this.tutorialBtn.elt.textContent = t(textKey);
+        }
+      } else {
+        this.tutorialBtn.elt.style.display = "none";
+      }
+    }
   }
 
   /**
@@ -133,8 +152,11 @@ export class SignboardContent {
       el.style.width = rect.width + "px";
       el.style.height = rect.height + "px";
     }
-    this.overlay.elt.style.display = "flex";
-    this.isVisible = true;
+    // 使用 requestAnimationFrame 确保 DOM 内容已完全设置再显示
+    requestAnimationFrame(() => {
+      this.overlay.elt.style.display = "flex";
+      this.isVisible = true;
+    });
   }
 
   hide() {
@@ -186,6 +208,8 @@ export class SignboardDemo2 extends GameEntity {
       imageKey = "tileImage_signboard",
       onInteract = null,
       textKey = null,
+      onTutorialClick = null,
+      tutorialButtonTextKey = null,
     } = {},
   ) {
     super(x, y);
@@ -197,6 +221,8 @@ export class SignboardDemo2 extends GameEntity {
     this._imageKey = imageKey;
     this._onInteract = onInteract;
     this._textKey = textKey;
+    this._onTutorialClick = onTutorialClick;
+    this._tutorialButtonTextKey = tutorialButtonTextKey;
     this.zIndex = -5; // 木牌在地形上层、交互物下层
 
     this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
@@ -333,6 +359,7 @@ export class SignboardDemo2 extends GameEntity {
         if (!this._signboardContent) {
           this._signboardContent = new SignboardContent(this._p);
         }
+        // 先设置所有文本内容
         this._applyText();
         // 动态更新底部提示文本，包含当前交互键
         const interactionKey =
@@ -340,7 +367,21 @@ export class SignboardDemo2 extends GameEntity {
         if (interactionKey) {
           this._signboardContent.setFooterWithKey(interactionKey);
         }
-        this._signboardContent.toggle();
+
+        // 设置教程按钮
+        if (this._onTutorialClick) {
+          this._signboardContent.setTutorialButton(
+            this._onTutorialClick,
+            this._tutorialButtonTextKey
+          );
+        } else {
+          this._signboardContent.setTutorialButton(null);
+        }
+
+        // 使用 requestAnimationFrame 确保文本完全渲染后再显示
+        requestAnimationFrame(() => {
+          this._signboardContent.toggle();
+        });
       }
 
       if (this.eventBus) {

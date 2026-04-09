@@ -40,7 +40,11 @@ export class Level1 extends BaseLevel {
     // ── Signboard ──────────────────────────────────────────────
     this.entities.add(
       new SignboardDemo2(480, 80, 100, 65, () => this._player, this.eventBus, {
-        textKey: "d2_signboard_level1_front",
+        textKey: "easy_signboard_level1_front",
+        onTutorialClick: () => {
+          console.log("开始教程");
+        },
+        tutorialButtonTextKey: "easy_signboard_tutorial",
       }),
     );
 

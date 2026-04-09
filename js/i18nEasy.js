@@ -48,8 +48,16 @@ registerTranslations({
 
     // ── Easy NPC (EasyNPC1) ──────────────────────────────────────────
     easy_npc1_line1: "Hi there! Nice to meet you!",
-    easy_npc1_line2: "You can view the tutorial on the side!",
-    easy_npc1_exhausted: "These are all easy levels, it's really very simple!",
+    easy_npc1_line2: "Get familiar with your skills, they're really useful!",
+    easy_npc1_exhausted: "Easy mode levels are super simple!",
+
+    // ── Prompts ───────────────────────────────────────────────────
+    prompt_ad: "A/D",
+    prompt_arrows: "←/→",
+    prompt_space: "Space",
+    prompt_w: "W",
+    prompt_up: "↑",
+    win_press_space_or_enter: "Press Space or Enter to proceed to the next level",
   },
 
   zh: {
@@ -96,7 +104,15 @@ registerTranslations({
 
     // ── Easy NPC (EasyNPC1) ──────────────────────────────────────────
     easy_npc1_line1: "你好呀！很高兴认识你！",
-    easy_npc1_line2: "可以在旁边查看教程！",
-    easy_npc1_exhausted: "这里都是简单难度关卡，真的非常简单！",
+    easy_npc1_line2: "多多熟悉你的技能，特别有用！",
+    easy_npc1_exhausted: "简单模式的关卡超级简单！",
+
+    // ── Prompts ───────────────────────────────────────────────────
+    prompt_ad: "A/D",
+    prompt_arrows: "←/→",
+    prompt_space: "Space",
+    prompt_w: "W",
+    prompt_up: "↑",
+    win_press_space_or_enter: "按空格或回车进入下一关",
   },
 });

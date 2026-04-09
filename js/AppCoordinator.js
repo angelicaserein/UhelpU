@@ -26,6 +26,7 @@ export class AppCoordinator {
 
   bindEvents() {
     this.eventBus.subscribe(EventTypes.LOAD_LEVEL, (levelIndex) => {
+      console.log("[AppCoordinator.LOAD_LEVEL] Event received with levelIndex:", levelIndex);
       this.switcher.clearOverlay(this.p);
       if (this.levelManager.level) {
         this.levelManager.setPaused(false);
@@ -35,6 +36,7 @@ export class AppCoordinator {
 
       this.playLevelBgm(levelIndex);
 
+      console.log("[AppCoordinator.LOAD_LEVEL] Calling loadLevel with:", levelIndex);
       this.levelManager.loadLevel(levelIndex, this.p, this.eventBus);
       this.switcher.gameSwitcher.runtimeLevelManager = this.levelManager;
 
@@ -79,7 +81,7 @@ export class AppCoordinator {
     this.eventBus.subscribe(EventTypes.AUTO_RESULT, (result) => {
       const levelIndex = this.levelManager.currentLevelIndex;
 
-      const isDemo2 = levelIndex.startsWith("demo2_");
+      const isDemo2 = levelIndex.startsWith("demo2_") || levelIndex.startsWith("easy_");
 
       if (result === "autoResult1") {
         this.levelManager.unloadLevel(this.p, this.eventBus);

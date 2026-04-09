@@ -30,6 +30,10 @@ registerTranslations({
     rec_op_right: "Right",
     rec_op_jump: "Jump",
 
+    // ── Win Page ─────────────────────────────────────────────────────────
+    win_press_space_or_enter:
+      "Press Space or Enter to proceed to the next level",
+
     // ── Level 1 — NPC Dialogue ───────────────────────────────────────
     d2_npc_level1_line1:
       "Welcome to           !\nYou could check the tutorial on the notice board.",
@@ -78,6 +82,8 @@ registerTranslations({
     d2_npc_level4_line2: "Come find me when you need a hint~",
     d2_npc_level4_exhausted:
       "Let your phantom fall down! Press Pause for more hints~",
+    win_press_space_or_enter:
+      "Press Space or Enter to proceed to the next level",
   },
 
   zh: {
@@ -105,6 +111,9 @@ registerTranslations({
     rec_op_left: "左移",
     rec_op_right: "右移",
     rec_op_jump: "跳跃",
+
+    // ── 胜利页面 ────────────────────────────────────────────────────────
+    win_press_space_or_enter: "按空格或回车进入下一关",
 
     // ── 第一关 — NPC 对话 ────────────────────────────────────────────
     d2_npc_level1_line1:
@@ -151,5 +160,6 @@ registerTranslations({
     d2_npc_level4_line1: "我可以给你提示哦！",
     d2_npc_level4_line2: "等你需要提示的时候来找我吧~",
     d2_npc_level4_exhausted: "让你的幻影掉下去吧！更多提示请按暂停哦~",
+    win_press_space_or_enter: "按空格或回车进入下一关",
   },
 });

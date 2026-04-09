@@ -7,6 +7,7 @@ import {
   Platform,
   NPCDemo2,
   SignboardDemo2,
+  KeyPrompt,
 } from "../../game-entity-model/index.js";
 import { BaseLevel } from "../BaseLevel.js";
 import { BtnWirePortalSystem } from "../../mechanism-system/demo2/BtnWirePortalSystem.js";
@@ -44,15 +45,56 @@ export class Level1 extends BaseLevel {
     );
 
     // ── BtnWirePortalSystem ────────────────────────────────────
-    const wpBtn_0 = new Button(1040, 130, 34, 16);
+    const wpBtn_0 = new Button(920, 80, 34, 16);
     const wpPortal_0 = new Portal(1220, 130, 50, 50);
-    wpPortal_0.openPortal();
     this._wpSys_0 = new BtnWirePortalSystem({
       button: wpBtn_0,
       portal: wpPortal_0,
     });
     this.entities.add(wpBtn_0);
     this.entities.add(wpPortal_0);
+
+    // ── KeyPrompts ────────────────────────────────────────────────
+    // Move left/right with A/D
+    this.entities.add(
+      new KeyPrompt(100, 90, this, {
+        keys: [
+          { col: 0, row: 0, label: "A" },
+          { col: 2, row: 0, label: "D" },
+        ],
+      }),
+    );
+
+    // Move left/right with arrows
+    this.entities.add(
+      new KeyPrompt(250, 90, this, {
+        keys: [
+          { col: 0, row: 0, label: "←" },
+          { col: 2, row: 0, label: "→" },
+        ],
+      }),
+    );
+
+    // Jump with Space
+    this.entities.add(
+      new KeyPrompt(670, 90, this, {
+        keys: [{ col: 0, row: 0, label: "⎵", width: 80 }],
+      }),
+    );
+
+    // Jump with W
+    this.entities.add(
+      new KeyPrompt(800, 90, this, {
+        keys: [{ col: 0, row: 0, label: "W" }],
+      }),
+    );
+
+    // Jump with Up arrow
+    this.entities.add(
+      new KeyPrompt(850, 90, this, {
+        keys: [{ col: 0, row: 0, label: "↑" }],
+      }),
+    );
 
     this._player = new Player(50, 450, 40, 40);
     this._player.createListeners();
@@ -64,5 +106,10 @@ export class Level1 extends BaseLevel {
   updatePhysics() {
     super.updatePhysics();
     this._wpSys_0.update();
+  }
+
+  draw(p) {
+    super.draw(p);
+    this._wpSys_0.draw(p);
   }
 }

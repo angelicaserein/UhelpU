@@ -19,6 +19,16 @@ import { GamePageLevel7 as Demo2GamePageLevel7 } from "../ui/pages/game-pages/de
 import { GamePageLevel8 as Demo2GamePageLevel8 } from "../ui/pages/game-pages/demo2/GamePageLevel8.js";
 import { GamePageLevel9 as Demo2GamePageLevel9 } from "../ui/pages/game-pages/demo2/GamePageLevel9.js";
 import { GamePageLevel10 as Demo2GamePageLevel10 } from "../ui/pages/game-pages/demo2/GamePageLevel10.js";
+import { GamePageLevel1 as EasyGamePageLevel1 } from "../ui/pages/game-pages/easy/GamePageLevel1.js";
+import { GamePageLevel2 as EasyGamePageLevel2 } from "../ui/pages/game-pages/easy/GamePageLevel2.js";
+import { GamePageLevel3 as EasyGamePageLevel3 } from "../ui/pages/game-pages/easy/GamePageLevel3.js";
+import { GamePageLevel4 as EasyGamePageLevel4 } from "../ui/pages/game-pages/easy/GamePageLevel4.js";
+import { GamePageLevel5 as EasyGamePageLevel5 } from "../ui/pages/game-pages/easy/GamePageLevel5.js";
+import { GamePageLevel6 as EasyGamePageLevel6 } from "../ui/pages/game-pages/easy/GamePageLevel6.js";
+import { GamePageLevel7 as EasyGamePageLevel7 } from "../ui/pages/game-pages/easy/GamePageLevel7.js";
+import { GamePageLevel8 as EasyGamePageLevel8 } from "../ui/pages/game-pages/easy/GamePageLevel8.js";
+import { GamePageLevel9 as EasyGamePageLevel9 } from "../ui/pages/game-pages/easy/GamePageLevel9.js";
+import { GamePageLevel10 as EasyGamePageLevel10 } from "../ui/pages/game-pages/easy/GamePageLevel10.js";
 
 export class SwitcherGamePage extends SwitcherBase {
   constructor(mainSwitcher, eventBus) {
@@ -47,16 +57,16 @@ export class SwitcherGamePage extends SwitcherBase {
       demo2_level8: Demo2GamePageLevel8,
       demo2_level9: Demo2GamePageLevel9,
       demo2_level10: Demo2GamePageLevel10,
-      easy_level1: Demo2GamePageLevel1,
-      easy_level2: Demo2GamePageLevel2,
-      easy_level3: Demo2GamePageLevel3,
-      easy_level4: Demo2GamePageLevel4,
-      easy_level5: Demo2GamePageLevel5,
-      easy_level6: Demo2GamePageLevel6,
-      easy_level7: Demo2GamePageLevel7,
-      easy_level8: Demo2GamePageLevel8,
-      easy_level9: Demo2GamePageLevel9,
-      easy_level10: Demo2GamePageLevel10,
+      easy_level1: EasyGamePageLevel1,
+      easy_level2: EasyGamePageLevel2,
+      easy_level3: EasyGamePageLevel3,
+      easy_level4: EasyGamePageLevel4,
+      easy_level5: EasyGamePageLevel5,
+      easy_level6: EasyGamePageLevel6,
+      easy_level7: EasyGamePageLevel7,
+      easy_level8: EasyGamePageLevel8,
+      easy_level9: EasyGamePageLevel9,
+      easy_level10: EasyGamePageLevel10,
     };
   }
 

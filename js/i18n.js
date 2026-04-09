@@ -19,6 +19,7 @@ const _dict = {
     result_win: "Level Complete!",
     result_lose: "Game Over",
     result_press_r: "Press R to Restart",
+    win_press_space_or_enter: "Press Space or Enter to proceed to the next level",
 
     // ── Setting Window ───────────────────────────────────────────────
     win_title: "⚙  Settings",
@@ -117,6 +118,7 @@ const _dict = {
     result_win: "~恭喜通关~",
     result_lose: "游戏结束",
     result_press_r: "按 R 键重新开始",
+    win_press_space_or_enter: "按空格或回车进入下一关",
 
     // ── Setting Window ───────────────────────────────────────────────
     win_title: "⚙  设置",

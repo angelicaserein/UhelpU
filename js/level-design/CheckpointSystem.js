@@ -23,6 +23,22 @@ export class CheckpointSystem {
   }
 
   /**
+   * demo2 关卡禁用按键传送到存档点（B 键）
+   * @returns {boolean}
+   */
+  _isTeleportEnabledForCurrentLevel() {
+    const level = this._getLevel();
+    if (!level) return false;
+
+    const levelIndex = level.__levelIndex;
+    if (typeof levelIndex === "string" && levelIndex.startsWith("demo2_")) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
    * 查找离玩家最近的已激活存档点
    * @param {object} player
    * @returns {object|null}
@@ -68,7 +84,23 @@ export class CheckpointSystem {
   }
 
   /**
-   * 传送到最近的已激活存档点（按键触发）
+   * 查找当前关卡中已激活的 TeleportPoint（优先于 Checkpoint）
+   * @returns {object|null}
+   */
+  _findActivatedTeleportPoint() {
+    const level = this._getLevel();
+    if (!level) return null;
+    for (const entity of level.entities) {
+      if (entity.type === "teleportpoint" && entity.activated) {
+        return entity;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * 传送到已激活的 TeleportPoint（优先）或最近的 Checkpoint（按键触发）
+   * TeleportPoint 在所有 demo 中均可用；Checkpoint 在 demo2 中被屏蔽。
    */
   teleportToNearestCheckpoint() {
     const level = this._getLevel();
@@ -84,11 +116,18 @@ export class CheckpointSystem {
     }
     if (!player || (player.deathState && player.deathState.isDead)) return;
 
-    const checkpoint = this.findNearestActivatedCheckpoint(player);
-    if (!checkpoint) return;
+    // TeleportPoint 优先，且在所有 demo 中均可用
+    let target = this._findActivatedTeleportPoint();
 
-    player.x = checkpoint.x;
-    player.y = checkpoint.y;
+    // 无 TeleportPoint 时回退到 Checkpoint（demo2 中被屏蔽）
+    if (!target && this._isTeleportEnabledForCurrentLevel()) {
+      target = this.findNearestActivatedCheckpoint(player);
+    }
+
+    if (!target) return;
+
+    player.x = target.x;
+    player.y = target.y;
     if (player.movementComponent) {
       player.movementComponent.velX = 0;
       player.movementComponent.velY = 0;

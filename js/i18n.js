@@ -9,6 +9,8 @@ const _dict = {
     btn_settings: "Settings",
     btn_achieves: "Achieves",
     menu_subtitle: "----   you help you   ----",
+    menu_nav_hint:
+      "Navigation: WASD or Arrow Keys to move focus, Space/Enter to confirm, Esc to go back",
 
     // ── Result ───────────────────────────────────────────────────────
     btn_back_menu: "Back to Menu",
@@ -83,6 +85,15 @@ const _dict = {
     world_1: "Demo 2",
     world_2: "World 2",
     world_3: "Demo 1",
+    world_easy: "Easy",
+    world_difficult: "Difficult",
+    world_memorial_title: "Memorial Versions",
+    world_legacy_title: "Iterative Versions",
+    world_legacy_demo1: "Demo 1 (6 Levels)",
+    world_legacy_demo2: "Demo 2 (4 Levels)",
+    world_memorial_earliest: "Earliest version (very buggy early demo)",
+    world_memorial_discarded:
+      "Discarded version (a totally different game idea)",
 
     // ── NPC Default Dialogue ─────────────────────────────────────────
     npc_default_line1: "Hi there! Nice to meet you!",
@@ -97,6 +108,7 @@ const _dict = {
     btn_settings: "设置",
     btn_achieves: "成就",
     menu_subtitle: "----   能自渡者，方得天助   ----",
+    menu_nav_hint: "导航: WASD/方向键移动焦点, 空格/Enter 确认, Esc 返回",
 
     // ── Result ───────────────────────────────────────────────────────
     btn_back_menu: "返回菜单",
@@ -170,6 +182,14 @@ const _dict = {
     world_1: "Demo 2",
     world_2: "世界 2",
     world_3: "初代 Demo",
+    world_easy: "简单",
+    world_difficult: "困难",
+    world_memorial_title: "纪念版本",
+    world_legacy_title: "迭代版本",
+    world_legacy_demo1: "演示一（共六关）",
+    world_legacy_demo2: "演示二（共四关）",
+    world_memorial_earliest: "最初代版本（早期演示，漏洞很多）",
+    world_memorial_discarded: "废弃版本（完全不同的游戏创意）",
 
     // ── NPC 默认对话 ─────────────────────────────────────────────────
     npc_default_line1: "你好呀！很高兴认识你！",

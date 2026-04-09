@@ -6,6 +6,7 @@ import { StaticPageOpeningStory } from "../ui/pages/static-pages/StaticPageOpeni
 import { StaticPageOpeningStoryDemo1 } from "../ui/pages/static-pages/StaticPageOpeningStoryDemo1.js";
 import { StaticPageLevelChoice } from "../ui/pages/static-pages/StaticPageLevelChoice.js";
 import { StaticPageLevelChoiceDemo2 } from "../ui/pages/static-pages/StaticPageLevelChoiceDemo2.js";
+import { StaticPageLevelChoiceEasy } from "../ui/pages/static-pages/StaticPageLevelChoiceEasy.js";
 import { StaticPageWorldSelect } from "../ui/pages/static-pages/StaticPageWorldSelect.js";
 import { LanguageChoice } from "../ui/pages/static-pages/LanguageChoice.js";
 
@@ -54,6 +55,11 @@ export class SwitcherStaticPage extends SwitcherBase {
 
   showLevelChoice(p = this.p) {
     const page = new StaticPageLevelChoice(this, p, this.eventBus);
+    this.main.switchToStatic(page, p);
+  }
+
+  showLevelChoiceEasy(p = this.p) {
+    const page = new StaticPageLevelChoiceEasy(this, p, this.eventBus);
     this.main.switchToStatic(page, p);
   }
 

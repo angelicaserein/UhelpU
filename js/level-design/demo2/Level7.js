@@ -7,7 +7,8 @@
   Portal,
   NPCDemo2,
   SignboardDemo2,
-  Checkpoint,
+  CheckpointDemo2,
+  TeleportPoint,
   Button,
   Spike,
   Enemy,
@@ -55,7 +56,7 @@ export class Level7 extends BaseLevel {
       5000,
       (x, y) => this.addReplayer(x, y),
       () => this.removeReplayer(),
-      { uiClass: Demo2RecordUI }
+      { uiClass: Demo2RecordUI },
     );
     this.recordSystem.createListeners();
 
@@ -79,6 +80,7 @@ export class Level7 extends BaseLevel {
         new Wall(0, 0, wallThickness, 768),
         new Ground(0, 0, p.width, 80),
         new Ground(450, 170, 200, 40),
+        new TeleportPoint(530, 210, 40, 70, () => this._player),
         new Platform(220, 85, 160, 30),
         new Portal(970, 120, 50, 50),
         new NPCDemo2(290, 130, 40, 40, {
@@ -87,15 +89,17 @@ export class Level7 extends BaseLevel {
           npcId: "level7_npc",
         }),
         new SignboardDemo2(620, 90, 100, 65, () => this._player, this.eventBus),
-        new Checkpoint(480, 70, 40, 70, () => this._player),
+        new CheckpointDemo2(480, 70, 40, 70, () => this._player),
         this._wpBtn_0,
         this._wpPortal_0,
         this._bsBtn_0,
         this._bsSpike_0,
-        new Enemy(700, 50, 30, 30, {
+        new Enemy(260, 115, 40, 40, {
+          color: [180, 100, 100],
+          speed: 2,
+        }),
+        new Enemy(700, 80, 40, 40, {
           color: [200, 80, 80],
-          patrolLeft: 600,
-          patrolRight: 800,
           speed: 2,
         }),
       ],
@@ -260,6 +264,7 @@ export class Level7 extends BaseLevel {
     }
     this._btnWirePortalSystem.update();
     this._buttonSpikeLinkSystem.update();
+    this.cleanupDeadEnemies();
   }
 
   updateCollision(p = this.p, eventBus = this.eventBus) {

@@ -1,4 +1,4 @@
-import { GamePageBase } from "../GamePageBase.js";
+﻿import { GamePageBaseDemo1 } from "../GamePageBaseDemo1.js";
 import { WindowPrompt } from "../../../windows/WindowPrompt.js";
 import { WindowPromptPause } from "../../../windows/WindowPromptPause.js";
 import { AudioManager } from "../../../../AudioManager.js";
@@ -8,11 +8,11 @@ import {
   resetLevel1PromptState,
 } from "../../../../level-design/demo1/Level1PromptState.js";
 
-export class GamePageLevel1 extends GamePageBase {
+export class GamePageLevel1 extends GamePageBaseDemo1 {
   constructor(switcher, p) {
     super(switcher, p, 1, "hint_level1");
 
-    this._isRecordHudUnlocked = false;
+    this._isRecordHudUnlocked = true;
     this._isModuleInstalled = false;
 
     // First-record prompt (pauses game)
@@ -22,7 +22,7 @@ export class GamePageLevel1 extends GamePageBase {
       fontSize: 17,
     });
 
-    // Module installation prompt — recording unlocks when this is dismissed
+    // Module installation prompt 鈥?recording unlocks when this is dismissed
     this._moduleInstallationPrompt = new WindowPrompt(
       p,
       "module_installation_complete",
@@ -47,12 +47,13 @@ export class GamePageLevel1 extends GamePageBase {
     });
 
     resetLevel1PromptState();
+    markLevel1RecordHudOpened();
     this._applyRecordHudVisibility();
     this._applyRecordDisabledState();
     this._hookFirstRecordPrompt();
   }
 
-  // ── Overrides ────────────────────────────────────────────────
+  // 鈹€鈹€ Overrides 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
   _onHint() {
     this._windowHint.open();
@@ -85,7 +86,7 @@ export class GamePageLevel1 extends GamePageBase {
     }
   }
 
-  // ── Record HUD ───────────────────────────────────────────────
+  // 鈹€鈹€ Record HUD 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
   _getCurrentRecordSystem() {
     return this.switcher?.runtimeLevelManager?.level?.recordSystem || null;
@@ -116,10 +117,12 @@ export class GamePageLevel1 extends GamePageBase {
   _hookFirstRecordPrompt() {
     const rs = this._getCurrentRecordSystem();
     if (!rs) return;
-    rs._onFirstRecord = () => this._firstRecordPrompt.open();
+    rs._onFirstRecord = this._isRecordHudUnlocked
+      ? null
+      : () => this._firstRecordPrompt.open();
   }
 
-  // ── Lifecycle ────────────────────────────────────────────────
+  // 鈹€鈹€ Lifecycle 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
   exit() {
     console.log("GamePageLevel1 exit");
@@ -131,3 +134,4 @@ export class GamePageLevel1 extends GamePageBase {
     super.exit();
   }
 }
+

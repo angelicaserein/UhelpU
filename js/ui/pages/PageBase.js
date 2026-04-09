@@ -28,7 +28,8 @@ export class PageBase {
       onEsc: options.onEsc || null,
       rows: options.rows || 1,
       cols: options.cols || 1,
-      initialFocus: options.initialFocus || 0,  // 默认焦点索引
+      enableActivationKeys: options.enableActivationKeys !== false,
+      initialFocus: options.initialFocus || 0, // 默认焦点索引
     };
 
     // 立即启动键盘导航（不用等 _enablePageNavigation）
@@ -48,6 +49,7 @@ export class PageBase {
       onEsc: this._navOptions.onEsc,
       rows: this._navOptions.rows,
       cols: this._navOptions.cols,
+      enableActivationKeys: this._navOptions.enableActivationKeys,
     });
 
     this._navManager.activate();

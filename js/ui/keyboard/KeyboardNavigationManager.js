@@ -25,8 +25,15 @@ export class KeyboardNavigationManager {
     this.layout = options.layout || "vertical"; // 'vertical' 或 'horizontal' 或 'grid'
     this.rows = options.rows || 1; // 仅在 'grid' 模式下使用
     this.cols = options.cols || 1;
+    this.enableActivationKeys = options.enableActivationKeys !== false;
+
+    // 标记当前焦点是否来自键盘导航
+    this._isKeyboardFocus = false;
 
     this._handleKeyDown = this._handleKeyDown.bind(this);
+    this._handleMouseClick = this._handleMouseClick.bind(this);
+    this._handleMouseEnter = this._handleMouseEnter.bind(this);
+    this._handleMouseLeave = this._handleMouseLeave.bind(this);
   }
 
   /**
@@ -67,9 +74,22 @@ export class KeyboardNavigationManager {
     if (this.isActive) return;
     this.isActive = true;
     document.addEventListener("keydown", this._handleKeyDown);
+    document.addEventListener("mousedown", this._handleMouseClick);
 
-    // 确保设置初始焦点到第一个按钮
+    // 为每个按钮添加鼠标悬浮监听器
+    this.buttons.forEach((btn) => {
+      if (btn && btn.btn) {
+        const btnElement = btn.btn.elt || btn.btn;
+        if (btnElement) {
+          btnElement.addEventListener("mouseover", this._handleMouseEnter);
+          btnElement.addEventListener("mouseout", this._handleMouseLeave);
+        }
+      }
+    });
+
+    // 确保设置初始焦点到第一个按钮（但不显示样式，直到有键盘导航）
     this.currentIndex = 0;
+    this._isKeyboardFocus = false;
     this._updateFocus();
 
     // 调试信息：打印按钮配置
@@ -93,6 +113,19 @@ export class KeyboardNavigationManager {
     if (!this.isActive) return;
     this.isActive = false;
     document.removeEventListener("keydown", this._handleKeyDown);
+    document.removeEventListener("mousedown", this._handleMouseClick);
+
+    // 为每个按钮移除鼠标悬浮监听器
+    this.buttons.forEach((btn) => {
+      if (btn && btn.btn) {
+        const btnElement = btn.btn.elt || btn.btn;
+        if (btnElement) {
+          btnElement.removeEventListener("mouseover", this._handleMouseEnter);
+          btnElement.removeEventListener("mouseout", this._handleMouseLeave);
+        }
+      }
+    });
+
     this._clearFocus();
   }
 
@@ -144,7 +177,10 @@ export class KeyboardNavigationManager {
     }
 
     // 确认键：Enter / Space
-    if (e.code === "Enter" || e.code === "Space") {
+    if (
+      this.enableActivationKeys &&
+      (e.code === "Enter" || e.code === "Space")
+    ) {
       e.preventDefault();
       console.log("[KeyboardNavigationManager] Activation key pressed");
       this._activateCurrentButton();
@@ -179,6 +215,8 @@ export class KeyboardNavigationManager {
     }
 
     if (this.currentIndex !== oldIndex) {
+      // 键盘导航时标记为键盘焦点
+      this._isKeyboardFocus = true;
       this._updateFocus();
       if (this.onNavigate) {
         this.onNavigate(this.currentIndex);
@@ -287,9 +325,7 @@ export class KeyboardNavigationManager {
     // 方式1: 使用存储的回调函数（最可靠）
     if (btn.callback && typeof btn.callback === "function") {
       try {
-        console.log(
-          "[KeyboardNavigationManager] Executing direct callback...",
-        );
+        console.log("[KeyboardNavigationManager] Executing direct callback...");
         btn.callback();
         console.log(
           "[KeyboardNavigationManager] Direct callback executed successfully!",
@@ -357,7 +393,7 @@ export class KeyboardNavigationManager {
    */
   _updateFocus() {
     console.log(
-      `[KeyboardNavigationManager] _updateFocus: currentIndex=${this.currentIndex}, totalButtons=${this.buttons.length}`,
+      `[KeyboardNavigationManager] _updateFocus: currentIndex=${this.currentIndex}, isKeyboardFocus=${this._isKeyboardFocus}, totalButtons=${this.buttons.length}`,
     );
     this.buttons.forEach((btn, idx) => {
       if (btn && btn.btn) {
@@ -369,7 +405,8 @@ export class KeyboardNavigationManager {
           `btElement:`,
           btnElement,
         );
-        if (isFocused) {
+        if (isFocused && this._isKeyboardFocus) {
+          // 只在键盘焦点时添加样式
           btn.btn.addClass("kb-focused");
           console.log(`    → Added kb-focused class`);
         } else {
@@ -392,6 +429,53 @@ export class KeyboardNavigationManager {
         btn.btn.removeClass("kb-focused");
       }
     });
+  }
+
+  /**
+   * 处理鼠标点击事件
+   * 当用户用鼠标点击时，禁用键盘焦点样式
+   */
+  _handleMouseClick(e) {
+    // 检查点击的元素是否是导航系统中的按钮
+    const clickedElement = e.target;
+    const isNavigationButton = this.buttons.some((btn) => {
+      const btnElement = btn?.btn?.elt || btn?.btn;
+      return (
+        btnElement &&
+        (btnElement === clickedElement || btnElement.contains(clickedElement))
+      );
+    });
+
+    if (isNavigationButton) {
+      // 鼠标点击时禁用键盘焦点显示
+      this._isKeyboardFocus = false;
+      this._updateFocus();
+      console.log(
+        "[KeyboardNavigationManager] Mouse click detected - keyboard focus disabled",
+      );
+    }
+  }
+
+  /**
+   * 处理鼠标进入事件
+   * 当用户鼠标悬浮在按钮上时，禁用键盘焦点样式
+   */
+  _handleMouseEnter(e) {
+    this._isKeyboardFocus = false;
+    this._updateFocus();
+    console.log(
+      "[KeyboardNavigationManager] Mouse hover detected - keyboard focus disabled",
+    );
+  }
+
+  /**
+   * 处理鼠标离开事件
+   * 用户鼠标离开后，保持禁用状态，直到再次使用键盘导航
+   */
+  _handleMouseLeave(e) {
+    // 离开时也保持禁用状态，除非用户再按键盘
+    this._isKeyboardFocus = false;
+    this._updateFocus();
   }
 
   /**

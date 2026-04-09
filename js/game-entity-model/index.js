@@ -23,6 +23,9 @@ export { SignboardDemo1 } from "./interactables/SignboardDemo1.js";
 export { NPCDemo1 } from "./interactables/NPCDemo1.js";
 export { NPC as NPCDemo2 } from "./interactables/NPCDemo2.js";
 export { Checkpoint } from "./interactables/Checkpoint.js";
+export { CheckpointDemo1 } from "./interactables/CheckpointDemo1.js";
+export { CheckpointDemo2 } from "./interactables/CheckpointDemo2.js";
+export { TeleportPoint } from "./interactables/TeleportPoint.js";
 
 // prompts
 export { KeyPrompt } from "./prompts/KeyPrompt.js";

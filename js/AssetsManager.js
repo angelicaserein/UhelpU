@@ -69,6 +69,10 @@ export const Assets = {
   tileImage_doorOpen: null,
   tileImage_doorClose: null,
 
+  // 传送点贴图
+  tileImage_teleportPointClose: null,
+  tileImage_teleportPointOpen: null,
+
   // 敌人贴图
   enemyImg: null,
   async _safeLoad(promise, name) {
@@ -255,6 +259,14 @@ export const Assets = {
         p.loadImage("assets/images/bg/languagechoice.png"),
         "语言选择页背景",
       ),
+      this._safeLoad(
+        p.loadImage("assets/images/tiles/TeleportPointClose.png"),
+        "传送点关闭贴图",
+      ),
+      this._safeLoad(
+        p.loadImage("assets/images/tiles/TeleportPointOpen.png"),
+        "传送点开启贴图",
+      ),
     ]);
 
     // 按顺序赋值
@@ -331,6 +343,8 @@ export const Assets = {
     this.tileImage_doorClose = results[69];
     this.bgImageDemo2Level = results[70];
     this.bgImageLanguageChoice = results[71];
+    this.tileImage_teleportPointClose = results[72];
+    this.tileImage_teleportPointOpen = results[73];
     this.achieveImgs = [
       results[57],
       results[58],

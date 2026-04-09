@@ -1,6 +1,6 @@
-import { GamePageBase } from "../GamePageBase.js";
+﻿import { GamePageBaseDemo1 } from "../GamePageBaseDemo1.js";
 
-export class GamePageLevel3 extends GamePageBase {
+export class GamePageLevel3 extends GamePageBaseDemo1 {
   constructor(switcher, p) {
     super(switcher, p, 3, "hint_level3");
 
@@ -16,3 +16,4 @@ export class GamePageLevel3 extends GamePageBase {
     });
   }
 }
+

@@ -1,5 +1,6 @@
 import "./i18nDemo1.js"; // 注册 Demo1 关卡专属文案
 import "./i18nDemo2.js"; // 注册 Demo2 关卡专属文案
+import "./i18nEasy.js"; // 注册 Easy 模式关卡专属文案
 import { SwitcherMain } from "./switchers/SwitcherMain.js";
 import { EventBus } from "./event-system/EventBus.js";
 import { EventTypes } from "./event-system/EventTypes.js";
@@ -53,11 +54,26 @@ export class AppCoordinator {
     });
 
     this.eventBus.subscribe(EventTypes.RETURN_LEVEL_CHOICE, () => {
+      const levelIndex = this.levelManager.currentLevelIndex;
+      const isDemo2 =
+        typeof levelIndex === "string" && levelIndex.startsWith("demo2_");
+      const isEasy =
+        typeof levelIndex === "string" && levelIndex.startsWith("easy_");
+
       this.switcher.clearOverlay(this.p);
       this.levelManager.setPaused(false);
       this.levelManager.unloadLevel(this.p, this.eventBus);
       this.switcher.gameSwitcher.runtimeLevelManager = null;
-      this.switcher.staticSwitcher.showWorldSelect(this.p);
+
+      if (isDemo2) {
+        this.switcher.staticSwitcher.showLevelChoiceDemo2(this.p);
+      } else if (isEasy) {
+        this.switcher.staticSwitcher.showLevelChoiceEasy(this.p);
+      } else if (typeof levelIndex === "string") {
+        this.switcher.staticSwitcher.showLevelChoice(this.p);
+      } else {
+        this.switcher.staticSwitcher.showWorldSelect(this.p);
+      }
     });
 
     this.eventBus.subscribe(EventTypes.AUTO_RESULT, (result) => {
@@ -111,43 +127,48 @@ export class AppCoordinator {
   }
 
   playLevelBgm(levelIndex) {
-    if (levelIndex === "level1") {
+    const normalizedLevelIndex =
+      typeof levelIndex === "string" && levelIndex.startsWith("easy_")
+        ? levelIndex.replace("easy_", "")
+        : levelIndex;
+
+    if (normalizedLevelIndex === "level1") {
       AudioManager.playBGM("level1");
       return;
     }
-    if (levelIndex === "level2") {
+    if (normalizedLevelIndex === "level2") {
       AudioManager.playBGM("level2");
       return;
     }
-    if (levelIndex === "level3") {
+    if (normalizedLevelIndex === "level3") {
       AudioManager.playBGM("level3");
       return;
     }
-    if (levelIndex === "level4") {
+    if (normalizedLevelIndex === "level4") {
       AudioManager.playBGM("level4");
       return;
     }
-    if (levelIndex === "level5") {
+    if (normalizedLevelIndex === "level5") {
       AudioManager.playBGM("level5");
       return;
     }
-    if (levelIndex === "level6") {
+    if (normalizedLevelIndex === "level6") {
       AudioManager.playBGM("level6");
       return;
     }
-    if (levelIndex === "level7") {
+    if (normalizedLevelIndex === "level7") {
       AudioManager.playBGM("level7");
       return;
     }
-    if (levelIndex === "level8") {
+    if (normalizedLevelIndex === "level8") {
       AudioManager.playBGM("level8");
       return;
     }
-    if (levelIndex === "level9") {
+    if (normalizedLevelIndex === "level9") {
       AudioManager.playBGM("level9");
       return;
     }
-    if (levelIndex === "level10") {
+    if (normalizedLevelIndex === "level10") {
       AudioManager.playBGM("level10");
       return;
     }

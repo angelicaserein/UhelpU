@@ -72,6 +72,22 @@ export class BaseLevel {
     return null;
   }
 
+  /**
+   * Remove enemies that have completed their death animation.
+   * Should be called in updatePhysics() to ensure proper cleanup.
+   */
+  cleanupDeadEnemies() {
+    const entitiesToRemove = [];
+    for (const entity of this.entities) {
+      if (entity.type === "enemy" && entity.isDeadAnimationComplete && entity.isDeadAnimationComplete()) {
+        entitiesToRemove.push(entity);
+      }
+    }
+    for (const entity of entitiesToRemove) {
+      this.entities.delete(entity);
+    }
+  }
+
   getPlayer() {
     return this.findEntityByType("player");
   }

@@ -196,15 +196,25 @@ export class LevelManager {
   }
 
   loadLevel(levelIndex, p = this.p, eventBus = this.eventBus) {
+    console.log("[LevelManager.loadLevel] Attempting to load levelIndex:", levelIndex);
     if (!this.level) {
       const LevelClass = this.levelMap[levelIndex];
+      if (!LevelClass) {
+        console.error("[LevelManager.loadLevel] ERROR: LevelClass not found for levelIndex:", levelIndex);
+        console.error("[LevelManager.loadLevel] Available keys in levelMap:", Object.keys(this.levelMap));
+        return;
+      }
+      console.log("[LevelManager.loadLevel] Found LevelClass:", LevelClass.name);
       this.level = new LevelClass(p, eventBus);
       this.level.__levelIndex = levelIndex;
       this.level.__editorPersistenceKey = levelIndex;
       this.currentLevelIndex = levelIndex;
+      console.log("[LevelManager.loadLevel] Set currentLevelIndex to:", this.currentLevelIndex);
       this.cameraNudgeX = 0;
       this.startLevelTitleOverlay(levelIndex, p);
-      console.log("load level: " + levelIndex);
+      console.log("[LevelManager.loadLevel] Loaded level:", levelIndex);
+    } else {
+      console.warn("[LevelManager.loadLevel] Level already exists, ignoring load request for:", levelIndex);
     }
   }
   unloadLevel(p = this.p, eventBus = this.eventBus) {

@@ -8,13 +8,20 @@ import { EventTypes } from "../../../event-system/EventTypes.js";
 export class StaticPageWinDemo2 extends PageBase {
   constructor(levelIndex, switcher, p, eventBus) {
     super(switcher);
+    // 确保 levelIndex 格式完整
+    if (!levelIndex.match(/^(easy_|demo2_|)level\d+$/)) {
+      console.warn("[WinDemo2] Invalid levelIndex format:", levelIndex);
+    }
     this.levelIndex = levelIndex;
     this.p = p;
     this.eventBus = eventBus;
 
+    console.log("[WinDemo2] Constructor - levelIndex:", this.levelIndex);
+
     const levelNum = parseInt(this.levelIndex.replace(/.*level/, ""), 10);
     const isDemo2 = this.levelIndex.startsWith("demo2_");
-    const levelPrefix = isDemo2 ? "demo2_level" : "level";
+    const isEasy = this.levelIndex.startsWith("easy_");
+    const levelPrefix = isDemo2 ? "demo2_level" : isEasy ? "easy_level" : "level";
     const TOTAL_LEVELS = 10;
 
     const btnW = 180;
@@ -26,52 +33,13 @@ export class StaticPageWinDemo2 extends PageBase {
     // 存储按钮引用以用于键盘导航
     this._winButtons = [];
 
-    const backBtn = new ButtonBase(
-      p,
-      t("btn_back_menu"),
-      btnX,
-      btnY0,
-      () => {
-        this.switcher.staticSwitcher.showMainMenu(p);
-      },
-      "win-action-button",
-    );
-    backBtn.btn.style("width", btnW + "px");
-    backBtn.btn.style("height", btnH + "px");
-    this.addElement(backBtn);
-    this._winButtons.push({
-      btn: backBtn.btn,
-      callback: () => {
-        this.switcher.staticSwitcher.showMainMenu(p);
-      },
-    });
-
-    const restartBtn = new ButtonBase(
-      p,
-      t("btn_restart"),
-      btnX,
-      btnY0 + btnH + btnGap,
-      () => {
-        this.eventBus.publish(EventTypes.LOAD_LEVEL, this.levelIndex);
-      },
-      "win-action-button",
-    );
-    restartBtn.btn.style("width", btnW + "px");
-    restartBtn.btn.style("height", btnH + "px");
-    this.addElement(restartBtn);
-    this._winButtons.push({
-      btn: restartBtn.btn,
-      callback: () => {
-        this.eventBus.publish(EventTypes.LOAD_LEVEL, this.levelIndex);
-      },
-    });
-
+    // 下一关按钮（第一排）
     if (levelNum < TOTAL_LEVELS) {
       const nextBtn = new ButtonBase(
         p,
         t("btn_next_level"),
         btnX,
-        btnY0 + (btnH + btnGap) * 2,
+        btnY0,
         () => {
           this.eventBus.publish(
             EventTypes.LOAD_LEVEL,
@@ -94,6 +62,50 @@ export class StaticPageWinDemo2 extends PageBase {
       });
     }
 
+    // 重试按钮（第二排）
+    const restartBtn = new ButtonBase(
+      p,
+      t("btn_restart"),
+      btnX,
+      btnY0 + btnH + btnGap,
+      () => {
+        console.log("[WinDemo2] Restart - publishing LOAD_LEVEL with levelIndex:", this.levelIndex);
+        this.eventBus.publish(EventTypes.LOAD_LEVEL, this.levelIndex);
+      },
+      "win-action-button",
+    );
+    restartBtn.btn.style("width", btnW + "px");
+    restartBtn.btn.style("height", btnH + "px");
+    this.addElement(restartBtn);
+    this._winButtons.push({
+      btn: restartBtn.btn,
+      callback: () => {
+        console.log("[WinDemo2] Restart (via keyboard) - publishing LOAD_LEVEL with levelIndex:", this.levelIndex);
+        this.eventBus.publish(EventTypes.LOAD_LEVEL, this.levelIndex);
+      },
+    });
+
+    // 返回菜单按钮（第三排）
+    const backBtn = new ButtonBase(
+      p,
+      t("btn_back_menu"),
+      btnX,
+      btnY0 + (btnH + btnGap) * 2,
+      () => {
+        this.switcher.staticSwitcher.showMainMenu(p);
+      },
+      "win-action-button",
+    );
+    backBtn.btn.style("width", btnW + "px");
+    backBtn.btn.style("height", btnH + "px");
+    this.addElement(backBtn);
+    this._winButtons.push({
+      btn: backBtn.btn,
+      callback: () => {
+        this.switcher.staticSwitcher.showMainMenu(p);
+      },
+    });
+
     // decorative star particles spawned once
     this._stars = [];
     for (let i = 0; i < 60; i++) {
@@ -114,11 +126,18 @@ export class StaticPageWinDemo2 extends PageBase {
 
     AudioManager.playBGM("gameWin");
 
+    // 底部提示条 HTML（类似 LanguageChoice 风格）
+    const hintBar = this.p.createDiv(
+      `<div class="win-hint-text">${t("win_press_space_or_enter")}</div>`,
+    );
+    hintBar.addClass("win-hint-bar");
+    this.addElement(hintBar);
+
     // 注册键盘导航（竖直排列）
     if (this._winButtons.length > 0) {
       this.registerNavButtons(this._winButtons, {
         layout: "vertical",
-        onEsc: () => this.switcher.staticSwitcher.showMainMenu(this._p),
+        onEsc: () => this.switcher.staticSwitcher.showMainMenu(this.p),
       });
     }
   }

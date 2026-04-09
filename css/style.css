@@ -1809,6 +1809,42 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   image-rendering: pixelated;
 }
 
+/* ========== Win Demo2 提示条 ========== */
+.win-hint-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 16px 0 18px;
+  background: rgba(0, 0, 0, 0.6);
+  text-align: center;
+  z-index: 150;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.win-hint-text {
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffde99;
+  letter-spacing: 0.08em;
+  line-height: 1.8;
+  animation: win-hint-breathe 2.2s ease-in-out infinite;
+  image-rendering: pixelated;
+  text-shadow: 0 0 8px rgba(255, 222, 153, 0.5);
+}
+
+@keyframes win-hint-breathe {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 /* ========== 键盘导航焦点样式 ========== */
 
 /* 通用键盘焦点高亮 */

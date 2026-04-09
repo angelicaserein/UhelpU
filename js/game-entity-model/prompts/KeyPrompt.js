@@ -139,7 +139,8 @@ export class KeyPrompt extends GameEntity {
     const strokeCol = this._keyColor;
 
     for (const key of this.keys) {
-      this._drawKey(p, key.col, key.row, key.label, strokeCol, alpha);
+      const width = key.width || this._keySize;
+      this._drawKey(p, key.col, key.row, key.label, strokeCol, alpha, width);
     }
 
     p.pop();
@@ -154,8 +155,9 @@ export class KeyPrompt extends GameEntity {
    * @param {string} label - 按键文字
    * @param {array} color - RGB 颜色
    * @param {number} alpha - 透明度 0-255
+   * @param {number} width - 按键宽度（可选，默认 keySize）
    */
-  _drawKey(p, col, row, label, color, alpha) {
+  _drawKey(p, col, row, label, color, alpha, width = this._keySize) {
     const x = col * (this._keySize + this._keySpacing);
     const y = row * (this._keySize + this._keySpacing);
 
@@ -164,21 +166,21 @@ export class KeyPrompt extends GameEntity {
     p.stroke(color[0], color[1], color[2], alpha);
     p.strokeWeight(this._keyStrokeWeight);
     p.noFill();
-    p.rect(x, y, this._keySize, this._keySize, 2);
+    p.rect(x, y, width, this._keySize, 2);
     p.pop();
 
     // 绘制文字（需要反向Y轴翻转以补偿全局翻转）
     p.push();
-    p.translate(x + this._keySize / 2, y + this._keySize / 2);
+    p.translate(x + width / 2, y + this._keySize / 2);
     p.scale(1, -1); // 反向Y轴翻转以补偿游戏全局翻转
-    p.translate(-(x + this._keySize / 2), -(y + this._keySize / 2));
+    p.translate(-(x + width / 2), -(y + this._keySize / 2));
 
     p.fill(color[0], color[1], color[2], alpha);
     p.noStroke();
     p.textAlign(p.CENTER, p.CENTER);
     p.textSize(14);
     p.textStyle(p.BOLD);
-    p.text(label, x + this._keySize / 2, y + this._keySize / 2);
+    p.text(label, x + width / 2, y + this._keySize / 2);
     p.pop();
   }
 
@@ -192,13 +194,19 @@ export class KeyPrompt extends GameEntity {
 
     let maxCol = 0;
     let maxRow = 0;
+    let totalWidth = 0;
+
     for (const key of this.keys) {
       if (key.col > maxCol) maxCol = key.col;
       if (key.row > maxRow) maxRow = key.row;
+      const keyWidth = key.width || this._keySize;
+      const keyRightEdge =
+        key.col * (this._keySize + this._keySpacing) + keyWidth;
+      if (keyRightEdge > totalWidth) totalWidth = keyRightEdge;
     }
 
     return {
-      width: (maxCol + 1) * this._keySize + maxCol * this._keySpacing,
+      width: totalWidth,
       height: (maxRow + 1) * this._keySize + maxRow * this._keySpacing,
     };
   }

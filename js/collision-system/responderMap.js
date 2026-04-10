@@ -70,6 +70,11 @@ function basicBlockResponse(a, b, msg) {
       }
     }
     if (msg === "bottom") {
+      // 如果玩家刚从分身上分离（仍在缓冲期），允许继续下落
+      if ((a._replayerLeftFrameCount || 0) > 0) {
+        // 延迟期内允许继续下落，不改变速度和地面状态
+        return;
+      }
       // 静态地板需要清零速度，防止持续下沉
       a.movementComponent.velY = 0;
       a.controllerManager.currentControlComponent.abilityCondition[

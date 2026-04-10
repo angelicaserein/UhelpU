@@ -78,6 +78,9 @@ function basicBlockResponse(a, b, msg) {
       a.controllerManager.currentControlComponent.abilityCondition[
         "groundVelY"
       ] = 0;
+      // 落地时清除分身相关标志
+      a._wasStandingOnReplayer = false;
+      a._replayerLeftFrameCount = 0;
     }
   }
 }
@@ -131,6 +134,11 @@ function dynDynBlockResponse(a, b, msg) {
         "groundVelY"
       ] = b.movementComponent ? b.movementComponent.velY : 0;
     }
+    // 标记玩家正在踩在分身上，这样当分身离开时我们知道玩家需要下落
+    if (b.type === "replayer") {
+      a._currentlyOnReplayer = true;
+      a._wasStandingOnReplayer = true;
+    }
   } else if (msg === "b_on_a") {
     // b 踩在 a 头上 - 只设置地面标志，不修改速度，让碰撞检测处理约束
     if (b.headBlockedThisFrame && a.movementComponent.velY > 0) {
@@ -144,6 +152,11 @@ function dynDynBlockResponse(a, b, msg) {
       b.controllerManager.currentControlComponent.abilityCondition[
         "groundVelY"
       ] = a.movementComponent ? a.movementComponent.velY : 0;
+    }
+    // 标记玩家正在踩在分身上
+    if (a.type === "replayer") {
+      b._currentlyOnReplayer = true;
+      b._wasStandingOnReplayer = true;
     }
   }
   return;

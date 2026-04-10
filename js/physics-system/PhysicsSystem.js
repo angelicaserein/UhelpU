@@ -15,6 +15,16 @@ export class PhysicsSystem {
                 }
 
                 entity.headBlockedThisFrame = false;
+                // 跟踪玩家离开分身的延迟帧数（给予1帧的缓冲）
+                if (entity._replayerLeftFrameCount !== undefined && entity._replayerLeftFrameCount > 0) {
+                    entity._replayerLeftFrameCount--;
+                }
+                // 检查是否需要标记玩家刚离开分身
+                if (entity._wasStandingOnReplayer && !entity._currentlyOnReplayer) {
+                    entity._replayerLeftFrameCount = 1;  // 1帧的缓冲
+                }
+                entity._currentlyOnReplayer = false;
+
                 entity.prevX = entity.x;
                 entity.prevY = entity.y;
                 const blockedXLastFrame = entity.blockedXLastFrame === true;

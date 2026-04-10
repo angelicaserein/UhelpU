@@ -51,10 +51,18 @@ registerTranslations({
     easy_npc1_line2: "Get familiar with your skills, they're really useful!",
     easy_npc1_exhausted: "Easy mode levels are super simple!",
 
+    // ── Easy Level 2 — NPC ────────────────────────────────────────────
+    easy_level2_npc_line1: "Step on the buttons to clear the spikes!",
+    easy_level2_npc_line2: "You can reach the portal on the right side after clearing them!",
+    easy_level2_npc_exhausted: "Don't give up! Keep trying!",
+
     // ── Easy Level 1 — Signboard ──────────────────────────────────
     easy_signboard_level1_front:
       "Notice Board\n---\nWelcome to Beginner Level, you can check the tutorial here.",
     easy_signboard_tutorial: "Start Tutorial",
+
+    // ── Easy Level 2 — Hint ────────────────────────────────────────
+    easy_hint_level2: "Step on the buttons to retract the spikes, then reach the portal to complete the level.",
 
     // ── Prompts ───────────────────────────────────────────────────
     prompt_ad: "A/D",
@@ -112,10 +120,18 @@ registerTranslations({
     easy_npc1_line2: "多多熟悉你的技能，特别有用！",
     easy_npc1_exhausted: "简单模式的关卡超级简单！",
 
+    // ── Easy Level 2 — NPC ────────────────────────────────────────────
+    easy_level2_npc_line1: "踩下按钮可以清除地刺！",
+    easy_level2_npc_line2: "清除了之后就可以到达右边的传送门了！",
+    easy_level2_npc_exhausted: "别放弃！继续加油！",
+
     // ── Easy Level 1 — Signboard ──────────────────────────────────
     easy_signboard_level1_front:
       "公告板\n---\n欢迎来到新手关卡，你可以在这里查看教程。",
     easy_signboard_tutorial: "开始教程",
+
+    // ── Easy Level 2 — Hint ────────────────────────────────────────
+    easy_hint_level2: "踩下按钮可以收回地刺，然后到达传送门即可过关。",
 
     // ── Prompts ───────────────────────────────────────────────────
     prompt_ad: "A/D",

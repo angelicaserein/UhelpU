@@ -15,6 +15,7 @@ export const EntityTool = Object.freeze({
   NPC: "npc",
   SIGNBOARD: "signboard",
   CHECKPOINT: "checkpoint",
+  ENEMY: "enemy",
   SPAWN: "spawn",
 });
 
@@ -110,6 +111,15 @@ export const SIGNBOARD_SIZE = {
 export const CHECKPOINT_SIZE = {
   width: 40,
   height: 70,
+};
+
+/** Enemy 默认大小和属性 */
+export const ENEMY_DEFAULTS = {
+  width: 40,
+  height: 40,
+  speed: 2,
+  directionRight: 1,
+  directionLeft: -1,
 };
 
 /** 预览半透明度 (0–255) */

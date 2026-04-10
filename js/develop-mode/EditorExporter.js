@@ -61,6 +61,7 @@ export class EditorExporter {
       { tool: EntityTool.NPC, label: "NPC", ctor: "NPC" },
       { tool: EntityTool.SIGNBOARD, label: "Signboard", ctor: "Signboard" },
       { tool: EntityTool.CHECKPOINT, label: "Checkpoint", ctor: "Checkpoint" },
+      { tool: EntityTool.ENEMY, label: "Enemy", ctor: "Enemy" },
     ];
 
     for (const g of groups) {
@@ -72,7 +73,13 @@ export class EditorExporter {
         const e = r.gameEntity;
         const w = e.collider ? e.collider.w : 50;
         const h = e.collider ? e.collider.h : 50;
-        lines.push(`new ${g.ctor}(${e.x}, ${e.y}, ${w}, ${h}),`);
+        if (g.tool === EntityTool.ENEMY) {
+          const speed = e._speed ?? 2;
+          const direction = r.direction ?? 1;
+          lines.push(`new ${g.ctor}(${e.x}, ${e.y}, ${w}, ${h}, { speed: ${speed}, direction: ${direction} }),`);
+        } else {
+          lines.push(`new ${g.ctor}(${e.x}, ${e.y}, ${w}, ${h}),`);
+        }
       }
     }
 

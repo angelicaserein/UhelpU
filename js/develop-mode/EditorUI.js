@@ -136,8 +136,14 @@ export class EditorUI {
       w: BTN_W2,
       h: BTN_H2,
     };
-    this._btnSpawn = {
+    this._btnEnemy = {
       x: startX + (BTN_W2 + BTN_GAP2) * 3,
+      y: row2Top,
+      w: BTN_W2,
+      h: BTN_H2,
+    };
+    this._btnSpawn = {
+      x: startX + (BTN_W2 + BTN_GAP2) * 4,
       y: row2Top,
       w: BTN_W2,
       h: BTN_H2,
@@ -311,6 +317,14 @@ export class EditorUI {
       "Checkpoint",
       this.activeTool === EntityTool.CHECKPOINT,
       [200, 80, 180],
+    );
+    // Enemy 按钮
+    this._drawButton(
+      p,
+      this._btnEnemy,
+      "Enemy",
+      this.activeTool === EntityTool.ENEMY,
+      [100, 200, 100],
     );
     // Spawn 按钮
     this._drawButton(
@@ -570,6 +584,11 @@ export class EditorUI {
     // Checkpoint 按钮
     if (this._insideRect(mx, my, this._btnCheckpoint)) {
       this.activeTool = EntityTool.CHECKPOINT;
+      return true;
+    }
+    // Enemy 按钮
+    if (this._insideRect(mx, my, this._btnEnemy)) {
+      this.activeTool = EntityTool.ENEMY;
       return true;
     }
     // Spawn 按钮

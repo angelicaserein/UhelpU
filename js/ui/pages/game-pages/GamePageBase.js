@@ -135,6 +135,11 @@ export class GamePageBase extends PageBase {
   }
 
   _togglePause() {
+    // 教程中禁用暂停菜单
+    if (window._tutorialPauseMenuDisabled) {
+      return;
+    }
+
     if (this._windowPause.isVisible) {
       this._resumeGame();
     } else {

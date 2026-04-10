@@ -34,6 +34,11 @@ function resolveFirst(a, b) {
     // Y轴穿越优先：落地 / 顶头
     if (crossedFromAbove) {
         collisionMsg = "bottom";
+        // 如果玩家刚从分身上分离（仍在缓冲帧内），延迟应用碰撞修正
+        if ((a._replayerLeftFrameCount || 0) > 0) {
+            // 这一帧不修正位置，让玩家继续下落
+            return collisionMsg;
+        }
         a.y = staTop;
         a.prevY = a.y;
         return collisionMsg;

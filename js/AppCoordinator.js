@@ -9,6 +9,7 @@ import { StaticPageResultDemo1 } from "./ui/pages/static-pages/StaticPageResultD
 import { StaticPageResultDemo2 } from "./ui/pages/static-pages/StaticPageResultDemo2.js";
 import { StaticPageWinDemo1 } from "./ui/pages/static-pages/StaticPageWinDemo1.js";
 import { StaticPageWinDemo2 } from "./ui/pages/static-pages/StaticPageWinDemo2.js";
+import { StaticPageWinEasy } from "./ui/pages/static-pages/StaticPageWinEasy.js";
 import { AudioManager } from "./AudioManager.js";
 
 export class AppCoordinator {
@@ -81,12 +82,23 @@ export class AppCoordinator {
     this.eventBus.subscribe(EventTypes.AUTO_RESULT, (result) => {
       const levelIndex = this.levelManager.currentLevelIndex;
 
-      const isDemo2 = levelIndex.startsWith("demo2_") || levelIndex.startsWith("easy_");
+      const isDemo2 = levelIndex.startsWith("demo2_");
+      const isEasy = levelIndex.startsWith("easy_");
 
       if (result === "autoResult1") {
         this.levelManager.unloadLevel(this.p, this.eventBus);
         this.switcher.gameSwitcher.runtimeLevelManager = null;
-        const WinPage = isDemo2 ? StaticPageWinDemo2 : StaticPageWinDemo1;
+
+        // 选择合适的通关页面
+        let WinPage;
+        if (isEasy) {
+          WinPage = StaticPageWinEasy;
+        } else if (isDemo2) {
+          WinPage = StaticPageWinDemo2;
+        } else {
+          WinPage = StaticPageWinDemo1;
+        }
+
         const winPage = new WinPage(
           levelIndex,
           this.switcher,

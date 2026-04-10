@@ -2015,3 +2015,86 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
     transform: translateY(-10px);
   }
 }
+
+/* ========== Name Input Page ========== */
+.name-input-container {
+  background: rgba(20, 10, 40, 0.95);
+  border: 3px solid rgba(200, 150, 255, 0.6);
+  border-radius: 12px;
+  padding: 50px 40px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  max-width: 420px;
+  z-index: 200;
+}
+
+.name-input-title {
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 32px;
+  font-weight: bold;
+  color: #e0b0ff;
+  margin-bottom: 30px;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+.name-input-field {
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 18px;
+  border: 2px solid rgba(200, 150, 255, 0.5);
+  border-radius: 6px;
+  background: rgba(50, 30, 80, 0.8);
+  color: #ffffff;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.name-input-field:focus {
+  outline: none;
+  border-color: #d4a5ff;
+  box-shadow: 0 0 12px rgba(200, 150, 255, 0.4);
+  background: rgba(60, 40, 100, 0.9);
+}
+
+.name-input-field::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.name-input-confirm-button,
+.name-input-back-button {
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 12px 24px;
+  margin: 8px;
+  border: 2px solid rgba(200, 150, 255, 0.6);
+  border-radius: 6px;
+  background: rgba(100, 70, 150, 0.8);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.05em;
+}
+
+.name-input-confirm-button:hover {
+  background: rgba(130, 100, 180, 1);
+  border-color: #d4a5ff;
+  box-shadow: 0 4px 12px rgba(200, 150, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.name-input-confirm-button:active {
+  transform: translateY(0);
+}
+
+.name-input-back-button {
+  background: rgba(80, 60, 120, 0.6);
+  border-color: rgba(200, 150, 255, 0.4);
+}
+
+.name-input-back-button:hover {
+  background: rgba(100, 80, 140, 0.9);
+  border-color: rgba(200, 150, 255, 0.6);
+}

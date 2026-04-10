@@ -221,4 +221,22 @@ export class Player extends Character {
     this._drawLandingDust(p);
     this._drawZzzBubbles(p);
   }
+
+  /**
+   * 通知计时器系统：玩家进行了首次输入
+   * 供 ControllerManager 调用
+   */
+  notifyFirstInput() {
+    if (this._hasReceivedFirstInput) {
+      return; // 已通知过，不重复
+    }
+
+    this._hasReceivedFirstInput = true;
+
+    // 发布事件到全局名称空间（会在 GamePageBase 初始化时设置）
+    if (window.__gameEventBus) {
+      window.__gameEventBus.publish("GAME_FIRST_INPUT");
+      console.log("[Player] First input detected, timer should start");
+    }
+  }
 }

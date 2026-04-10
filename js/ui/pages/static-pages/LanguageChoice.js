@@ -28,7 +28,7 @@ export class LanguageChoice extends PageBase {
     enPanel.addClass("language-panel lang-panel-left");
     enPanel.mouseClicked(() => {
       i18n.setLang("en");
-      this.switcher.showWorldSelect(p);
+      this.switcher.showNameInput(p);
     });
     this.addElement(enPanel);
 
@@ -37,7 +37,7 @@ export class LanguageChoice extends PageBase {
     zhPanel.addClass("language-panel lang-panel-right");
     zhPanel.mouseClicked(() => {
       i18n.setLang("zh");
-      this.switcher.showWorldSelect(p);
+      this.switcher.showNameInput(p);
     });
     this.addElement(zhPanel);
 
@@ -48,14 +48,14 @@ export class LanguageChoice extends PageBase {
           btn: enPanel,
           callback: () => {
             i18n.setLang("en");
-            this.switcher.showWorldSelect(p);
+            this.switcher.showNameInput(p);
           },
         },
         {
           btn: zhPanel,
           callback: () => {
             i18n.setLang("zh");
-            this.switcher.showWorldSelect(p);
+            this.switcher.showNameInput(p);
           },
         },
       ],

@@ -9,6 +9,7 @@ import { StaticPageLevelChoiceDemo2 } from "../ui/pages/static-pages/StaticPageL
 import { StaticPageLevelChoiceEasy } from "../ui/pages/static-pages/StaticPageLevelChoiceEasy.js";
 import { StaticPageWorldSelect } from "../ui/pages/static-pages/StaticPageWorldSelect.js";
 import { LanguageChoice } from "../ui/pages/static-pages/LanguageChoice.js";
+import { NameInputPage } from "../ui/pages/static-pages/NameInputPage.js";
 
 export class SwitcherStaticPage extends SwitcherBase {
   constructor(mainSwitcher, p) {
@@ -45,6 +46,11 @@ export class SwitcherStaticPage extends SwitcherBase {
 
   showLanguageChoice(p = this.p) {
     const page = new LanguageChoice(this, p);
+    this.main.switchToStatic(page, p);
+  }
+
+  showNameInput(p = this.p) {
+    const page = new NameInputPage(this, p);
     this.main.switchToStatic(page, p);
   }
 

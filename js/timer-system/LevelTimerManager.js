@@ -46,10 +46,23 @@ export class LevelTimerManager {
     // 排行榜回调
     this._onLevelCompleteCallback = null;
 
+    // 玩家名字（来自全局变量或外部设置）
+    this._playerName = window.playerName || null;
+
     // 绑定所有监听器
     this._bindEventListeners();
 
     console.log(`[LevelTimerManager] Initialized for level: ${this.levelId}`);
+  }
+
+  /**
+   * 设置玩家名字（用于排行榜）
+   * @param {string} name - 玩家名字
+   */
+  setPlayerName(name) {
+    this._playerName = name;
+    window.playerName = name;
+    console.log("[LevelTimerManager] Player name set to:", name);
   }
 
   /**
@@ -116,15 +129,39 @@ export class LevelTimerManager {
         this.timerSystem.getState() === "running"
       ) {
         const elapsedTime = this.timerSystem.finish();
+        const elapsedTimeMs = elapsedTime * 1000;
         console.log(
           `[LevelTimerManager] ✓ Level completed! Time: ${elapsedTime.toFixed(2)}s`,
         );
+
+        // 自动上报成绩到Firebase（异步执行，不阻塞）
+        if (this.levelId.startsWith("easy_") && window.submitScore && window.playerName) {
+          console.log(
+            `[LevelTimerManager] Auto-reporting score for ${this.levelId}...`,
+          );
+          // 异步执行，不等待结果
+          window.submitScore(window.playerName, elapsedTimeMs, this.levelId).catch((error) => {
+            console.error("[LevelTimerManager] Error submitting score:", error);
+          });
+        } else {
+          if (!this.levelId.startsWith("easy_")) {
+            console.log("[LevelTimerManager] Not Easy difficulty, skipping score submission");
+          }
+          if (!window.submitScore) {
+            console.warn("[LevelTimerManager] window.submitScore not available");
+          }
+          if (!window.playerName) {
+            console.warn("[LevelTimerManager] window.playerName not set:", window.playerName);
+          }
+        }
 
         // 触发排行榜回调
         if (this._onLevelCompleteCallback) {
           this._onLevelCompleteCallback({
             levelId: this.levelId,
+            playerName: this._playerName || window.playerName,
             playerTime: elapsedTime,
+            playerTimeMs: elapsedTimeMs,
             timestamp: Date.now(),
           });
         }

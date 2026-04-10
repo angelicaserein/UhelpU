@@ -12,11 +12,16 @@ import {
 import { BaseLevel } from "../BaseLevel.js";
 import { BtnWirePortalSystem } from "../../mechanism-system/demo2/BtnWirePortalSystem.js";
 import { Demo2RecordUI } from "../../record-system/Demo2RecordUI.js";
+import { EventTypes } from "../../event-system/EventTypes.js";
 
 export class Level1 extends BaseLevel {
   constructor(p, eventBus) {
     super(p, eventBus);
     this.bgAssetKey = "bgImageDemo2Level";
+
+    // ... 其他初始化 ...
+
+    this._signboard = null; // 保存对 signboard 的引用
 
     this.entities.add(new Wall(0, 0, 20, 768));
     this.entities.add(new Wall(1346, 0, 20, 768));
@@ -38,15 +43,26 @@ export class Level1 extends BaseLevel {
     );
 
     // ── Signboard ──────────────────────────────────────────────
-    this.entities.add(
-      new SignboardDemo2(480, 80, 100, 65, () => this._player, this.eventBus, {
-        textKey: "easy_signboard_level1_front",
-        onTutorialClick: () => {
-          console.log("开始教程");
-        },
-        tutorialButtonTextKey: "easy_signboard_tutorial",
-      }),
-    );
+    this._signboard = new SignboardDemo2(480, 80, 100, 65, () => this._player, this.eventBus, {
+      textKey: "easy_signboard_level1_front",
+      onTutorialClick: () => {
+        // 发送教程启动事件（由 GamePageLevel1 监听处理）
+        if (this.eventBus) {
+          this.eventBus.publish(EventTypes.TUTORIAL_START_REQUESTED);
+        }
+      },
+      tutorialButtonTextKey: "easy_signboard_tutorial",
+    });
+    this.entities.add(this._signboard);
+
+    // 监听教程启动事件，关闭 signboard
+    if (this.eventBus) {
+      this.eventBus.subscribe(EventTypes.TUTORIAL_CLOSE_SIGNBOARD, () => {
+        if (this._signboard && this._signboard._signboardContent) {
+          this._signboard._signboardContent.hide();
+        }
+      });
+    }
 
     // ── BtnWirePortalSystem ────────────────────────────────────
     const wpBtn_0 = new Button(920, 80, 34, 16);
@@ -105,6 +121,9 @@ export class Level1 extends BaseLevel {
     this.entities.add(this._player);
 
     this.initSystems(this._player, 5000, { uiClass: Demo2RecordUI });
+
+    // 存储全局引用以便 GamePageLevel1 获取
+    window._easyLevel1Current = this;
   }
 
   updatePhysics() {

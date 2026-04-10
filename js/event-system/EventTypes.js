@@ -19,6 +19,10 @@ export const EventTypes = Object.freeze({
   SIGNBOARD_INTERACTED: "signboardInteracted",
   SIGNBOARD_OUT_OF_RANGE: "signboardOutOfRange",
 
+  // Tutorial system (Easy level)
+  TUTORIAL_START_REQUESTED: "tutorialStartRequested",
+  TUTORIAL_CLOSE_SIGNBOARD: "tutorialCloseSignboard",
+
   // NPC dialogue
   NPC_DIALOGUE_START: "npcDialogueStart",
   NPC_DIALOGUE_NEXT: "npcDialogueNext",

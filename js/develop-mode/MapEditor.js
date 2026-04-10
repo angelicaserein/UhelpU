@@ -218,6 +218,17 @@ export class MapEditor {
       return;
     }
 
+    // F 键翻转选中 Enemy 的方向
+    if ((e.key === "f" || e.key === "F") && this._entityMgr.selected) {
+      const selected = this._entityMgr.selected;
+      if (selected.tool === EntityTool.ENEMY) {
+        selected.direction = selected.direction === 1 ? -1 : 1;
+        selected.gameEntity._direction = selected.direction;
+        this._ui.showToast(`敌人方向已切换为 ${selected.direction === 1 ? "→" : "←"}`);
+      }
+      return;
+    }
+
     // Delete / Backspace 清空全部
     if (e.key === "Delete") {
       this._entityMgr.clear();
@@ -264,6 +275,10 @@ export class MapEditor {
     }
     if (e.key === "0") {
       this._ui.activeTool = "checkpoint";
+      return;
+    }
+    if (e.key === ".") {
+      this._ui.activeTool = EntityTool.ENEMY;
       return;
     }
     if (e.key === "-") {

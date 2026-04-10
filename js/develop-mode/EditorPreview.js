@@ -19,6 +19,7 @@ import {
   NPC_SIZE,
   SIGNBOARD_SIZE,
   CHECKPOINT_SIZE,
+  ENEMY_DEFAULTS,
 } from "./EditorConfig.js";
 
 export class EditorPreview {
@@ -92,6 +93,9 @@ export class EditorPreview {
     } else if (tool === EntityTool.CHECKPOINT) {
       this.previewW = CHECKPOINT_SIZE.width;
       this.previewH = CHECKPOINT_SIZE.height;
+    } else if (tool === EntityTool.ENEMY) {
+      this.previewW = ENEMY_DEFAULTS.width;
+      this.previewH = ENEMY_DEFAULTS.height;
     } else {
       this.previewW = PORTAL_SIZE.width;
       this.previewH = PORTAL_SIZE.height;
@@ -319,6 +323,19 @@ export class EditorPreview {
       );
       p.noStroke();
       p.fill(200, 80, 180, PREVIEW_ALPHA * 0.4);
+      p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
+    } else if (tool === EntityTool.ENEMY) {
+      p.stroke(100, 200, 100, PREVIEW_ALPHA);
+      this._dashedRect(
+        p,
+        this.previewX,
+        this.previewY,
+        this.previewW,
+        this.previewH,
+        8,
+      );
+      p.noStroke();
+      p.fill(100, 200, 100, PREVIEW_ALPHA * 0.4);
       p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
     } else {
       p.stroke(100, 160, 255, PREVIEW_ALPHA);

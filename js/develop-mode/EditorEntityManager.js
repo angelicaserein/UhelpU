@@ -20,6 +20,7 @@ import {
   NPC_SIZE,
   SIGNBOARD_SIZE,
   CHECKPOINT_SIZE,
+  ENEMY_DEFAULTS,
   DELETE_BTN_SIZE,
 } from "./EditorConfig.js";
 import { Ground } from "../game-entity-model/terrain/Ground.js";
@@ -34,6 +35,7 @@ import { ButtonPlatformLinkSystem } from "../mechanism-system/demo2/ButtonPlatfo
 import { NPCDemo1 } from "../game-entity-model/interactables/NPCDemo1.js";
 import { SignboardDemo2 } from "../game-entity-model/interactables/SignboardDemo2.js";
 import { Checkpoint } from "../game-entity-model/interactables/Checkpoint.js";
+import { Enemy } from "../game-entity-model/characters/Enemy.js";
 
 /**
  * @typedef {Object} PlacedRecord
@@ -213,6 +215,14 @@ export class EditorEntityManager {
         CHECKPOINT_SIZE.width,
         CHECKPOINT_SIZE.height,
       );
+    } else if (tool === EntityTool.ENEMY) {
+      gameEntity = new Enemy(
+        x,
+        y,
+        ENEMY_DEFAULTS.width,
+        ENEMY_DEFAULTS.height,
+        { speed: ENEMY_DEFAULTS.speed },
+      );
     } else {
       gameEntity = new Portal(x, y, w, h);
       gameEntity.openPortal();
@@ -223,6 +233,11 @@ export class EditorEntityManager {
     this._syncSystems();
 
     const record = { tool, gameEntity };
+    // 为Enemy记录添加方向属性
+    if (tool === EntityTool.ENEMY) {
+      record.direction = options.direction ?? ENEMY_DEFAULTS.directionRight;
+      gameEntity._direction = record.direction;
+    }
     this._records.push(record);
     return record;
   }
@@ -305,6 +320,9 @@ export class EditorEntityManager {
       }
       if (record.startColorIndex !== undefined) {
         base.startColorIndex = record.startColorIndex;
+      }
+      if (record.direction !== undefined) {
+        base.direction = record.direction;
       }
 
       return base;
@@ -395,9 +413,14 @@ export class EditorEntityManager {
         gameEntity.y,
         gameEntity.w,
         gameEntity.h,
+        record.tool === EntityTool.ENEMY ? { direction: record.direction } : undefined,
       );
       if (restored?.gameEntity) {
         this._applySerializedEntity(restored.gameEntity, gameEntity);
+      }
+      if (record.tool === EntityTool.ENEMY && record.direction !== undefined) {
+        restored.direction = record.direction;
+        restored.gameEntity._direction = record.direction;
       }
     }
 
@@ -530,7 +553,8 @@ export class EditorEntityManager {
         rec.tool === EntityTool.BTN_PLATFORM ||
         rec.tool === EntityTool.NPC ||
         rec.tool === EntityTool.SIGNBOARD ||
-        rec.tool === EntityTool.CHECKPOINT
+        rec.tool === EntityTool.CHECKPOINT ||
+        rec.tool === EntityTool.ENEMY
       )
         continue;
       const e = rec.gameEntity;
@@ -1364,6 +1388,8 @@ export class EditorEntityManager {
         p.stroke(200, 160, 80, 180);
       } else if (rec.tool === EntityTool.CHECKPOINT) {
         p.stroke(200, 80, 180, 180);
+      } else if (rec.tool === EntityTool.ENEMY) {
+        p.stroke(100, 200, 100, 180);
       } else {
         p.stroke(100, 170, 255, 180);
       }
@@ -1405,6 +1431,9 @@ export class EditorEntityManager {
         p.text("Sign", 3, 3);
       } else if (rec.tool === EntityTool.CHECKPOINT) {
         p.text("CkPt", 3, 3);
+      } else if (rec.tool === EntityTool.ENEMY) {
+        const direction = rec.direction === 1 ? "→" : "←";
+        p.text(`Emy ${direction}`, 3, 3);
       } else {
         p.text("Portal", 3, 3);
       }

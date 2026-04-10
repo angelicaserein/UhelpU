@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>教学系统测试清单 · EasyLevel1</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Share+Tech+Mono&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0b0b0f;--surface:#111117;--surface2:#18181f;--surface3:#1f1f28;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);
+  --text:#f0eeff;--text2:#b8b2d0;--text3:#8a84a8;
+  --accent:#7c6dfa;--accent2:#a29bfe;
+  --green:#00b894;--green2:#55efc4;
+  --amber:#e17055;--amber2:#fab1a0;
+  --red:#d63031;--red2:#ff7675;
+  --mono:'Share Tech Mono',monospace;
+  --sans:'Noto Sans SC',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.6;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px);pointer-events:none;z-index:9999;}
+
+.container{max-width:1000px;margin:0 auto;padding:40px 24px 100px;}
+
+/* HEADER */
+header{margin-bottom:36px;padding-bottom:24px;border-bottom:1px solid var(--border2);}
+.header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.title-block h1{font-family:var(--mono);font-size:20px;font-weight:400;color:var(--accent2);letter-spacing:0.05em;}
+.title-block p{font-size:12px;color:var(--text2);margin-top:5px;font-family:var(--mono);}
+.progress-block{text-align:right;}
+.prog-nums{font-family:var(--mono);font-size:32px;color:var(--green2);line-height:1;}
+.prog-nums small{font-size:13px;color:var(--text2);}
+.prog-bar-wrap{height:4px;background:var(--surface3);border-radius:2px;overflow:hidden;margin-top:8px;}
+.prog-bar-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--green2));border-radius:2px;transition:width 0.4s;}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;align-items:center;}
+.btn{font-family:var(--mono);font-size:12px;padding:6px 14px;border-radius:4px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.btn:hover{border-color:var(--accent);color:var(--accent2);}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn.primary:hover{opacity:0.85;}
+.btn.danger:hover{border-color:var(--red);color:var(--red2);}
+.filter-group{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;}
+.fbtn{font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:3px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all 0.15s;}
+.fbtn:hover,.fbtn.active{border-color:var(--accent);color:var(--accent2);}
+
+/* LEGEND */
+.legend{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--mono);}
+.dot{width:8px;height:8px;border-radius:2px;}
+.dot-normal{background:rgba(0,184,148,0.5);}
+.dot-edge{background:rgba(225,112,85,0.5);}
+.dot-bug{background:rgba(214,48,49,0.5);}
+
+/* ADD PHASE MODAL */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;}
+.modal-backdrop.open{display:flex;}
+.modal{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:28px;width:560px;max-width:90vw;}
+.modal h2{font-family:var(--mono);font-size:15px;color:var(--accent2);margin-bottom:20px;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:12px;color:var(--text2);font-family:var(--mono);margin-bottom:5px;display:block;}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:8px 12px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color 0.15s;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);}
+.form-select{cursor:pointer;}
+.form-textarea{resize:vertical;min-height:60px;}
+.form-row{display:flex;gap:8px;margin-top:16px;}
+option{background:var(--surface3);}
+
+/* PHASE SECTIONS */
+.phase-section{margin-bottom:16px;border:1px solid var(--border);border-radius:6px;overflow:hidden;transition:border-color 0.2s;}
+.phase-section:hover{border-color:var(--border2);}
+.phase-header{display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--surface);cursor:pointer;user-select:none;transition:background 0.15s;}
+.phase-header:hover{background:var(--surface2);}
+.phase-badge{font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 9px;border-radius:3px;white-space:nowrap;flex-shrink:0;letter-spacing:0.06em;}
+.phase-name-block{flex:1;min-width:0;}
+.phase-name{font-size:13px;font-weight:500;color:var(--text);}
+.phase-shortdesc{font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.phase-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.phase-stat{font-family:var(--mono);font-size:11px;color:var(--text2);}
+.phase-stat.all-done{color:var(--green);}
+.phase-arrow{font-family:var(--mono);font-size:10px;color:var(--text2);transition:transform 0.2s;}
+.collapsed .phase-arrow{transform:rotate(-90deg);}
+.phase-edit-btn{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:2px;border:1px solid var(--border2);background:var(--surface3);color:var(--text2);cursor:pointer;opacity:0;transition:opacity 0.15s,color 0.1s;}
+.phase-header:hover .phase-edit-btn{opacity:1;}
+.phase-edit-btn:hover{color:var(--accent2);border-color:var(--accent);}
+
+/* PHASE DETAIL */
+.phase-detail{background:var(--surface2);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;gap:24px;flex-wrap:wrap;}
+.detail-item{font-size:13px;display:flex;gap:8px;}
+.detail-key{font-family:var(--mono);color:var(--accent2);flex-shrink:0;}
+.detail-val{color:var(--text);}
+
+/* CASES */
+.cases-body{background:var(--surface);}
+.collapsed .cases-body,.collapsed .phase-detail{display:none;}
+
+.case-row{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);transition:background 0.1s;position:relative;}
+.case-row:last-child{border-bottom:none;}
+.case-row:hover{background:var(--surface2);}
+.case-row.done{opacity:0.6;}
+
+.case-check{width:15px;height:15px;border:1px solid var(--border2);border-radius:3px;flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.case-check:hover{border-color:var(--green);}
+.case-check.checked{background:var(--green);border-color:var(--green);}
+.case-check.checked::after{content:'✓';font-size:9px;color:#000;font-weight:700;}
+
+.case-content{flex:1;min-width:0;}
+.case-text{font-size:13px;color:var(--text);line-height:1.55;cursor:pointer;}
+.done .case-text{text-decoration:line-through;color:var(--text2);}
+.case-tags{display:flex;gap:5px;margin-top:4px;flex-wrap:wrap;}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;padding:1px 6px;border-radius:2px;}
+.tag-normal{background:rgba(0,184,148,0.12);color:var(--green2);border:1px solid rgba(0,184,148,0.25);}
+.tag-edge{background:rgba(225,112,85,0.12);color:var(--amber2);border:1px solid rgba(225,112,85,0.25);}
+.tag-bug{background:rgba(214,48,49,0.12);color:var(--red2);border:1px solid rgba(214,48,49,0.25);}
+
+.case-actions{display:flex;gap:3px;flex-shrink:0;opacity:0;transition:opacity 0.15s;}
+.case-row:hover .case-actions{opacity:1;}
+.cbtn{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:2px;border:1px solid var(--border);background:var(--surface3);color:var(--text3);cursor:pointer;transition:all 0.1s;}
+.cbtn:hover{color:var(--text2);border-color:var(--border2);}
+.cbtn.del:hover{color:var(--red2);border-color:var(--red);}
+
+/* ADD CASE ROW */
+.add-case-wrap{padding:10px 16px;background:var(--surface2);border-top:1px solid var(--border);}
+.add-case-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.add-input{flex:1;min-width:180px;background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:6px 10px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color 0.15s;}
+.add-input:focus{border-color:var(--accent);}
+.add-select{background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:6px 10px;font-family:var(--mono);font-size:11px;color:var(--text2);outline:none;cursor:pointer;}
+
+/* EMPTY STATE */
+.empty{padding:20px 16px;text-align:center;font-size:12px;color:var(--text3);font-family:var(--mono);}
+
+/* FLOATING SAVE */
+.save-toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:#000;font-family:var(--mono);font-size:12px;padding:8px 16px;border-radius:4px;display:none;z-index:2000;animation:fadeup 0.3s;}
+@keyframes fadeup{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* GLOBAL STATS BAR */
+.stats-bar{display:flex;gap:20px;margin-top:16px;padding:12px 16px;background:var(--surface2);border-radius:5px;border:1px solid var(--border);flex-wrap:wrap;}
+.stat-item{font-size:12px;}
+.stat-val{font-family:var(--mono);color:var(--accent2);margin-right:4px;}
+.stat-label{color:var(--text2);}
+
+/* DRAG hint */
+.drag-hint{font-size:10px;color:var(--text3);font-family:var(--mono);text-align:right;margin-top:4px;}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="header-top">
+      <div class="title-block">
+        <h1>[ 教学系统测试清单 ]</h1>
+        <p>EasyLevel1 · Tutorial System · 可编辑 · 数据自动保存</p>
+      </div>
+      <div class="progress-block">
+        <div class="prog-nums" id="prog-nums">0 <small>/ 0</small></div>
+        <div style="font-size:11px;color:var(--text2);font-family:var(--mono);text-align:right;margin-top:2px;">已通过</div>
+        <div class="prog-bar-wrap" style="width:180px;margin-left:auto;"><div class="prog-bar-fill" id="prog-fill"></div></div>
+      </div>
+    </div>
+    <div class="stats-bar" id="stats-bar"></div>
+    <div class="toolbar">
+      <button class="btn primary" onclick="openAddPhaseModal()">＋ 新增阶段</button>
+      <button class="btn" onclick="expandAll()">展开全部</button>
+      <button class="btn" onclick="collapseAll()">折叠全部</button>
+      <button class="btn" onclick="resetChecks()">重置勾选</button>
+      <button class="btn primary" onclick="exportAsHTML()" title="生成新的 HTML 文件，包含当前所有数据，可直接发给他人">⬇ 导出为 HTML（发给他人用）</button>
+      <div class="filter-group">
+        <button class="fbtn active" data-filter="all" onclick="setFilter('all',this)">全部</button>
+        <button class="fbtn" data-filter="normal" onclick="setFilter('normal',this)">正常流程</button>
+        <button class="fbtn" data-filter="edge" onclick="setFilter('edge',this)">边界情况</button>
+        <button class="fbtn" data-filter="bug" onclick="setFilter('bug',this)">潜在问题</button>
+        <button class="fbtn" data-filter="undone" onclick="setFilter('undone',this)">未完成</button>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="dot dot-normal"></div><span style="color:var(--text2)">正常流程 — 主路径，必须全部通过</span></div>
+      <div class="legend-item"><div class="dot dot-edge"></div><span style="color:var(--text2)">边界情况 — 非常规操作，容易被忽略</span></div>
+      <div class="legend-item"><div class="dot dot-bug"></div><span style="color:var(--text2)">潜在问题 — 代码层面容易出 bug</span></div>
+    </div>
+  </header>
+
+  <div id="phases-container"></div>
+
+</div>
+
+<!-- ADD/EDIT PHASE MODAL -->
+<div class="modal-backdrop" id="phase-modal">
+  <div class="modal">
+    <h2 id="phase-modal-title">新增测试阶段</h2>
+    <input type="hidden" id="edit-phase-id">
+    <div class="form-group">
+      <label class="form-label">阶段标识 (如 PHASE 1)</label>
+      <input class="form-input" id="phase-badge-input" placeholder="PHASE 1">
+    </div>
+    <div class="form-group">
+      <label class="form-label">阶段名称</label>
+      <input class="form-input" id="phase-name-input" placeholder="引导录制按钮">
+    </div>
+    <div class="form-group">
+      <label class="form-label">阶段颜色</label>
+      <select class="form-select" id="phase-color-input">
+        <option value="purple">紫色（默认）</option>
+        <option value="blue">蓝色</option>
+        <option value="green">绿色</option>
+        <option value="amber">橙色</option>
+        <option value="red">红色</option>
+        <option value="gray">灰色</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">时间状态</label>
+      <input class="form-input" id="phase-time-input" placeholder="暂停 / 运行">
+    </div>
+    <div class="form-group">
+      <label class="form-label">黑幕范围</label>
+      <input class="form-input" id="phase-overlay-input" placeholder="全屏黑幕，录制UI镂空">
+    </div>
+    <div class="form-group">
+      <label class="form-label">触发条件（进入下一阶段）</label>
+      <input class="form-input" id="phase-trigger-input" placeholder="玩家按录制键 C">
+    </div>
+    <div class="form-group">
+      <label class="form-label">阶段简要说明</label>
+      <textarea class="form-textarea" id="phase-desc-input" placeholder="这个阶段的主要目的和玩家需要做什么..."></textarea>
+    </div>
+    <div class="form-row">
+      <button class="btn primary" onclick="savePhase()">保存</button>
+      <button class="btn" onclick="closeModal('phase-modal')">取消</button>
+      <button class="btn danger" id="delete-phase-btn" style="margin-left:auto;display:none;" onclick="deleteCurrentPhase()">删除阶段</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT CASE MODAL -->
+<div class="modal-backdrop" id="case-modal">
+  <div class="modal">
+    <h2 id="case-modal-title">新增测试用例</h2>
+    <input type="hidden" id="edit-case-phase">
+    <input type="hidden" id="edit-case-id">
+    <div class="form-group">
+      <label class="form-label">测试内容</label>
+      <textarea class="form-textarea" id="case-text-input" placeholder="描述这个测试用例需要验证什么..." style="min-height:80px;"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">所属阶段</label>
+      <select class="form-select" id="case-phase-select"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">类型</label>
+      <select class="form-select" id="case-tag-input">
+        <option value="normal">正常流程 — 主路径，必须通过</option>
+        <option value="edge">边界情况 — 非常规操作</option>
+        <option value="bug">潜在问题 — 容易出 bug</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <button class="btn primary" onclick="saveCase()">保存</button>
+      <button class="btn" onclick="closeModal('case-modal')">取消</button>
+      <button class="btn danger" id="delete-case-btn" style="margin-left:auto;display:none;" onclick="deleteCurrentCase()">删除用例</button>
+    </div>
+  </div>
+</div>
+
+<div class="save-toast" id="save-toast">✓ 已保存</div>
+
+<script>
+// ─── COLOR MAP ───────────────────────────────────────────────────────────────
+const COLORS = {
+  purple: {bg:'rgba(124,109,250,0.18)',text:'#a29bfe',border:'rgba(124,109,250,0.4)'},
+  blue:   {bg:'rgba(56,133,220,0.18)',text:'#74b9ff',border:'rgba(56,133,220,0.4)'},
+  green:  {bg:'rgba(0,184,148,0.18)',text:'#55efc4',border:'rgba(0,184,148,0.4)'},
+  amber:  {bg:'rgba(225,112,85,0.18)',text:'#fab1a0',border:'rgba(225,112,85,0.4)'},
+  red:    {bg:'rgba(214,48,49,0.18)',text:'#ff7675',border:'rgba(214,48,49,0.4)'},
+  gray:   {bg:'rgba(116,110,140,0.18)',text:'#a09ab8',border:'rgba(116,110,140,0.4)'},
+};
+
+// ─── DEFAULT DATA ─────────────────────────────────────────────────────────────
+const DEFAULT_DATA = {
+  phases: [
+    {
+      id:'p0', badge:'PHASE 0', name:'待机状态（教程未开始）', color:'gray',
+      time:'正常运行', overlay:'无黑幕',
+      trigger:'玩家点击 signboard 上的「开始教程」按钮',
+      desc:'玩家正常游玩 EasyLevel1。Signboard 上常驻显示「开始教程」按钮，无任何教程 UI，此时录制/回放功能完全正常。',
+      cases:[
+        {id:'p0c0',text:'进入 EasyLevel1，signboard 上正确显示「开始教程」按钮',tag:'normal',done:false},
+        {id:'p0c1',text:'待机状态下屏幕无黑幕、无任何教程提示框',tag:'normal',done:false},
+        {id:'p0c2',text:'待机状态下按 C 键（录制键）能正常录制，不触发教程流程',tag:'edge',done:false},
+        {id:'p0c3',text:'待机状态下 ESC 可以正常打开暂停菜单（不被教程拦截）',tag:'normal',done:false},
+        {id:'p0c4',text:'玩家先手动完成一次录制操作，再点「开始教程」，教程能正常启动且旧录制数据被处理干净',tag:'edge',done:false},
+      ]
+    },
+    {
+      id:'p1', badge:'PHASE 1', name:'引导录制按钮', color:'purple',
+      time:'游戏时间暂停',
+      overlay:'全屏半透明黑幕 · 仅录制 UI 区域镂空显示',
+      trigger:'玩家按录制键（默认 C 键）→ 进入 PHASE 2',
+      desc:'游戏暂停，全屏黑幕遮住一切，只有录制 UI 面板被镂空突出显示。提示文字出现在录制 UI 旁：「按照这个录制 UI 上面的字，开始录制吧！」玩家按 C 键后进入下一阶段。',
+      cases:[
+        {id:'p1c0',text:'点击「开始教程」后游戏时间立即暂停（角色不移动、计时器不走）',tag:'normal',done:false},
+        {id:'p1c1',text:'点击「开始教程」后全屏出现半透明黑幕',tag:'normal',done:false},
+        {id:'p1c2',text:'录制 UI 区域被镂空显示，其余区域被黑幕遮挡，位置准确不偏移',tag:'normal',done:false},
+        {id:'p1c3',text:'提示文字出现在录制 UI 旁，内容为「按照这个录制 UI 上面的字，开始录制吧！」',tag:'normal',done:false},
+        {id:'p1c4',text:'右上角显示「按 ESC 跳过教程」提示',tag:'normal',done:false},
+        {id:'p1c5',text:'按 C 键成功跳转到 PHASE 2',tag:'normal',done:false},
+        {id:'p1c6',text:'按其他无关键（方向键、空格等）不触发阶段跳转',tag:'edge',done:false},
+        {id:'p1c7',text:'PHASE 1 中按 ESC 不打开暂停菜单，直接跳过教程回到正常状态',tag:'normal',done:false},
+        {id:'p1c8',text:'ESC 跳过后游戏时间恢复正常，暂停菜单可以正常打开',tag:'bug',done:false},
+        {id:'p1c9',text:'窗口缩放后黑幕和镂空位置自动更新对齐，不错位',tag:'edge',done:false},
+      ]
+    },
+    {
+      id:'p2', badge:'PHASE 2', name:'引导了解时间轴', color:'blue',
+      time:'游戏时间暂停',
+      overlay:'全屏半透明黑幕 · 仅时间轴区域镂空显示',
+      trigger:'玩家按移动键 / 跳跃键 / 任意键 → 进入 PHASE 3（同时真正开始录制）',
+      desc:'黑幕镂空区域从录制 UI 切换到时间轴。提示文字：「你一共有 5 秒的时间可以录制你自己的操作，按移动、跳跃或任意键继续！」玩家按下移动/跳跃键后，游戏时间恢复，录制正式开始。',
+      cases:[
+        {id:'p2c0',text:'进入 PHASE 2 后游戏时间仍然暂停',tag:'normal',done:false},
+        {id:'p2c1',text:'黑幕镂空区域切换为时间轴区域（录制 UI 重新被遮挡）',tag:'normal',done:false},
+        {id:'p2c2',text:'提示文字更新为「你一共有 5 秒的时间可以录制你自己的操作，按移动、跳跃或任意键继续！」',tag:'normal',done:false},
+        {id:'p2c3',text:'按左方向键 / A 键能触发跳转到 PHASE 3',tag:'normal',done:false},
+        {id:'p2c4',text:'按右方向键 / D 键能触发跳转到 PHASE 3',tag:'normal',done:false},
+        {id:'p2c5',text:'按跳跃键（空格）能触发跳转到 PHASE 3',tag:'normal',done:false},
+        {id:'p2c6',text:'按下触发键的同时，角色不因该按键发生移动（按键被教程拦截，不传给角色控制器）',tag:'edge',done:false},
+        {id:'p2c7',text:'PHASE 2 中按 C 键不会触发任何录制或阶段跳转',tag:'edge',done:false},
+        {id:'p2c8',text:'PHASE 2 中 ESC 跳过后游戏时间恢复正常',tag:'normal',done:false},
+      ]
+    },
+    {
+      id:'p3', badge:'PHASE 3', name:'录制进行中', color:'green',
+      time:'游戏时间恢复运行，录制开始',
+      overlay:'无黑幕，全屏正常显示',
+      trigger:'录制时间达到 5 秒自动结束 / 玩家按 C 键提前结束 → 进入 PHASE 4',
+      desc:'游戏完全恢复运行，时间轴开始计时，录制正式进行（最长 5 秒）。录制 UI 旁出现醒目提示：「你可以提前终止录制，或等待 5 秒录制自动完成」。录制结束后自动进入 PHASE 4，游戏暂停。',
+      cases:[
+        {id:'p3c0',text:'进入 PHASE 3 后游戏时间立即恢复运行',tag:'normal',done:false},
+        {id:'p3c1',text:'黑幕完全消失，全屏正常显示',tag:'normal',done:false},
+        {id:'p3c2',text:'时间轴开始计时，录制正常进行',tag:'normal',done:false},
+        {id:'p3c3',text:'录制 UI 旁出现醒目提示「你可以提前终止录制，或等待 5 秒录制自动完成」',tag:'normal',done:false},
+        {id:'p3c4',text:'等待 5 秒后录制自动结束，自动跳转 PHASE 4',tag:'normal',done:false},
+        {id:'p3c5',text:'5 秒内按 C 键提前结束录制，能正确跳转 PHASE 4',tag:'normal',done:false},
+        {id:'p3c6',text:'玩家在 PHASE 3 全程不做任何操作（5 秒空录制），教程能否正常进入 PHASE 4',tag:'edge',done:false},
+        {id:'p3c7',text:'PHASE 3 中 ESC 跳过后录制被中止，不留残留状态',tag:'edge',done:false},
+      ]
+    },
+    {
+      id:'p4', badge:'PHASE 4', name:'录制完成，引导回放', color:'amber',
+      time:'游戏时间暂停',
+      overlay:'全屏半透明黑幕 · 三区域同时镂空：录制UI ＋ 时间轴 ＋ 分身幻影（signboard位置）',
+      trigger:'玩家按回放键（默认 R 键）→ 进入 PHASE 5',
+      desc:'录制完成后游戏自动暂停，黑幕出现并同时镂空三个区域。三处分别显示提示：录制UI旁「按照这个按键提示，开始回放吧！」；幻影旁「你已经捕捉了你自己的出生点操作！」；时间轴旁「你已经捕捉了自己的操作！」',
+      cases:[
+        {id:'p4c0',text:'进入 PHASE 4 后游戏时间暂停',tag:'normal',done:false},
+        {id:'p4c1',text:'全屏出现黑幕，三个区域同时镂空：录制 UI、时间轴、signboard（幻影位置）',tag:'normal',done:false},
+        {id:'p4c2',text:'三个镂空区域位置准确，无遮挡、无偏移',tag:'normal',done:false},
+        {id:'p4c3',text:'录制 UI 旁显示「按照这个按键提示，开始回放吧！」',tag:'normal',done:false},
+        {id:'p4c4',text:'幻影（signboard 位置）旁显示「你已经捕捉了你自己的出生点操作！」',tag:'normal',done:false},
+        {id:'p4c5',text:'时间轴旁显示「你已经捕捉了自己的操作！」',tag:'normal',done:false},
+        {id:'p4c6',text:'三个标签文字同时显示，互不遮挡',tag:'normal',done:false},
+        {id:'p4c7',text:'按 R 键（回放键）成功跳转 PHASE 5',tag:'normal',done:false},
+        {id:'p4c8',text:'按其他键不触发跳转',tag:'edge',done:false},
+        {id:'p4c9',text:'PHASE 4 中 ESC 跳过后，已录制的幻影数据被正确清理，不留残留',tag:'bug',done:false},
+      ]
+    },
+    {
+      id:'p5', badge:'PHASE 5', name:'回放进行中', color:'amber',
+      time:'游戏时间恢复运行，幻影开始回放',
+      overlay:'无黑幕，全屏正常显示',
+      trigger:'回放 5 秒自动结束 / 玩家按 R 键手动中断 → 进入 PHASE 6',
+      desc:'游戏恢复运行，幻影分身按录制内容重演动作。录制 UI 旁显示「这里你也可以随时中断回放！」；幻影附近显示「你的幻影已经按照你捕捉的动作进行回放了！」',
+      cases:[
+        {id:'p5c0',text:'进入 PHASE 5 后游戏时间恢复运行',tag:'normal',done:false},
+        {id:'p5c1',text:'黑幕完全消失，全屏正常显示',tag:'normal',done:false},
+        {id:'p5c2',text:'幻影分身开始按录制内容重演动作',tag:'normal',done:false},
+        {id:'p5c3',text:'录制 UI 旁显示「这里你也可以随时中断回放！」',tag:'normal',done:false},
+        {id:'p5c4',text:'幻影附近显示「你的幻影已经按照你捕捉的动作进行回放了！」',tag:'normal',done:false},
+        {id:'p5c5',text:'回放 5 秒自动结束，跳转 PHASE 6',tag:'normal',done:false},
+        {id:'p5c6',text:'按 R 键手动中断回放，跳转 PHASE 6',tag:'normal',done:false},
+        {id:'p5c7',text:'PHASE 3 录制时玩家什么都没做（空录制），PHASE 5 幻影出现在正确位置且静止',tag:'edge',done:false},
+        {id:'p5c8',text:'PHASE 5 中 ESC 跳过后，回放被中止且幻影消失',tag:'edge',done:false},
+      ]
+    },
+    {
+      id:'p6', badge:'PHASE 6', name:'教程完成', color:'green',
+      time:'游戏时间恢复正常',
+      overlay:'无黑幕',
+      trigger:'3 秒后自动消失 / 玩家点击关闭 → 回到 PHASE 0（正常游玩）',
+      desc:'屏幕中央弹出提示框「你已经完成了教学！多多利用你的技能完成关卡吧！」3 秒后自动消失，玩家回到完全正常的游玩状态。Signboard 上依然保留「开始教程」按钮，可随时重新触发。',
+      cases:[
+        {id:'p6c0',text:'进入 PHASE 6 后无黑幕，游戏时间恢复正常',tag:'normal',done:false},
+        {id:'p6c1',text:'屏幕中央弹出「你已经完成了教学！多多利用你的技能完成关卡吧！」',tag:'normal',done:false},
+        {id:'p6c2',text:'3 秒后提示框自动消失，回到正常游玩状态',tag:'normal',done:false},
+        {id:'p6c3',text:'教程结束后 signboard 上仍显示「开始教程」按钮',tag:'normal',done:false},
+        {id:'p6c4',text:'教程结束后 ESC 可以正常打开暂停菜单',tag:'normal',done:false},
+        {id:'p6c5',text:'教程结束后 C / R 键正常录制和回放，不被教程逻辑拦截',tag:'normal',done:false},
+        {id:'p6c6',text:'再次点击「开始教程」能从 PHASE 1 重新开始，且上一轮状态不残留',tag:'normal',done:false},
+        {id:'p6c7',text:'连续进行两轮完整教程，第二轮行为与第一轮完全一致',tag:'edge',done:false},
+      ]
+    },
+    {
+      id:'pg', badge:'全局', name:'边界 & 异常情况', color:'red',
+      time:'任意阶段',
+      overlay:'视阶段而定',
+      trigger:'—',
+      desc:'跨阶段的全局性测试用例，包括语言切换、刷新页面、窗口缩放、状态残留等问题。这里也适合记录测试过程中发现的新 bug 或异常行为。',
+      cases:[
+        {id:'pgc0',text:'教程任意阶段切换语言（中/英），所有提示文字实时更新',tag:'edge',done:false},
+        {id:'pgc1',text:'教程进行中刷新页面，重新进入关卡后状态干净（不残留教程状态）',tag:'edge',done:false},
+        {id:'pgc2',text:'教程进行中调整浏览器窗口大小，黑幕镂空区域自动重新对齐',tag:'edge',done:false},
+        {id:'pgc3',text:'教程进行中 RecordSystem 不响应正常按键（setDisabled 有效）',tag:'bug',done:false},
+        {id:'pgc4',text:'教程结束后 RecordSystem.setDisabled(false) 正确恢复',tag:'bug',done:false},
+        {id:'pgc5',text:'signboard 关闭事件（TUTORIAL_CLOSE_SIGNBOARD）在教程开始时正确发送',tag:'bug',done:false},
+        {id:'pgc6',text:'暂停菜单禁用标志 window._tutorialPauseMenuDisabled 在教程结束后被清除为 false',tag:'bug',done:false},
+      ]
+    }
+  ]
+};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let data;
+let currentFilter = 'all';
+
+function loadData() {
+  try {
+    const stored = localStorage.getItem('tutorial_test_data_v2');
+    if (stored) {
+      data = JSON.parse(stored);
+    } else {
+      data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+  } catch(e) {
+    data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  }
+}
+
+function saveData() {
+  localStorage.setItem('tutorial_test_data_v2', JSON.stringify(data));
+  const toast = document.getElementById('save-toast');
+  toast.style.display = 'block';
+  setTimeout(() => toast.style.display = 'none', 1500);
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function render() {
+  const container = document.getElementById('phases-container');
+  container.innerHTML = '';
+  data.phases.forEach(phase => {
+    container.appendChild(buildPhaseEl(phase));
+  });
+  updateProgress();
+}
+
+function buildPhaseEl(phase) {
+  const col = COLORS[phase.color] || COLORS.purple;
+  const cases = getFilteredCases(phase);
+  const total = phase.cases.length;
+  const done = phase.cases.filter(c=>c.done).length;
+  const allDone = total > 0 && done === total;
+
+  const sec = document.createElement('div');
+  sec.className = 'phase-section';
+  sec.dataset.phaseId = phase.id;
+
+  sec.innerHTML = `
+    <div class="phase-header" onclick="togglePhase('${phase.id}')">
+      <span class="phase-badge" style="background:${col.bg};color:${col.text};border:1px solid ${col.border};">${phase.badge}</span>
+      <div class="phase-name-block">
+        <div class="phase-name">${phase.name}</div>
+        <div class="phase-shortdesc">触发条件：${phase.trigger}</div>
+      </div>
+      <div class="phase-right">
+        <span class="phase-stat ${allDone?'all-done':''}">${done}/${total}</span>
+        <button class="phase-edit-btn" onclick="event.stopPropagation();openEditPhaseModal('${phase.id}')">编辑</button>
+        <span class="phase-arrow">▼</span>
+      </div>
+    </div>
+    <div class="phase-detail">
+      <div class="detail-item"><span class="detail-key">时间状态</span><span class="detail-val">${phase.time}</span></div>
+      <div class="detail-item"><span class="detail-key">黑幕范围</span><span class="detail-val">${phase.overlay}</span></div>
+      <div class="detail-item" style="flex-basis:100%;"><span class="detail-key">说明</span><span class="detail-val">${phase.desc}</span></div>
+    </div>
+    <div class="cases-body" id="cases-${phase.id}"></div>
+  `;
+
+  const casesBody = sec.querySelector(`#cases-${phase.id}`);
+  if (cases.length === 0) {
+    casesBody.innerHTML = `<div class="empty">— 暂无匹配的测试用例 —</div>`;
+  } else {
+    cases.forEach(c => casesBody.appendChild(buildCaseEl(c, phase.id)));
+  }
+
+  // Add case area
+  const addArea = document.createElement('div');
+  addArea.className = 'add-case-wrap';
+  addArea.innerHTML = `
+    <div class="add-case-row">
+      <input class="add-input" id="quick-input-${phase.id}" placeholder="快速添加测试用例…" onkeydown="quickAdd(event,'${phase.id}')">
+      <select class="add-select" id="quick-tag-${phase.id}">
+        <option value="normal">正常流程</option>
+        <option value="edge">边界情况</option>
+        <option value="bug">潜在问题</option>
+      </select>
+      <button class="btn primary" onclick="quickAdd(null,'${phase.id}')">添加</button>
+      <button class="btn" onclick="openAddCaseModal('${phase.id}')">详细编辑</button>
+    </div>
+  `;
+  casesBody.appendChild(addArea);
+
+  return sec;
+}
+
+function buildCaseEl(c, phaseId) {
+  const tagLabel = {normal:'正常流程',edge:'边界情况',bug:'潜在问题'};
+  const row = document.createElement('div');
+  row.className = 'case-row' + (c.done?' done':'');
+  row.dataset.caseId = c.id;
+  row.dataset.tag = c.tag;
+
+  row.innerHTML = `
+    <div class="case-check ${c.done?'checked':''}" onclick="toggleCase('${phaseId}','${c.id}')"></div>
+    <div class="case-content">
+      <span class="case-text" onclick="toggleCase('${phaseId}','${c.id}')">${c.text}</span>
+      <div class="case-tags"><span class="tag tag-${c.tag}">${tagLabel[c.tag]}</span></div>
+    </div>
+    <div class="case-actions">
+      <button class="cbtn" onclick="openEditCaseModal('${phaseId}','${c.id}')">编辑</button>
+      <button class="cbtn del" onclick="deleteCase('${phaseId}','${c.id}')">删除</button>
+    </div>
+  `;
+  return row;
+}
+
+function getFilteredCases(phase) {
+  if (currentFilter === 'all') return phase.cases;
+  if (currentFilter === 'undone') return phase.cases.filter(c=>!c.done);
+  return phase.cases.filter(c=>c.tag===currentFilter);
+}
+
+// ─── TOGGLE ───────────────────────────────────────────────────────────────────
+function togglePhase(id) {
+  const sec = document.querySelector(`[data-phase-id="${id}"]`);
+  sec.classList.toggle('collapsed');
+}
+
+function toggleCase(phaseId, caseId) {
+  const phase = data.phases.find(p=>p.id===phaseId);
+  const c = phase.cases.find(c=>c.id===caseId);
+  c.done = !c.done;
+  saveData();
+  render();
+}
+
+// ─── PROGRESS ─────────────────────────────────────────────────────────────────
+function updateProgress() {
+  let total=0,done=0,normal=0,normalDone=0,edge=0,bug=0;
+  data.phases.forEach(p=>{
+    p.cases.forEach(c=>{
+      total++;
+      if(c.done) done++;
+      if(c.tag==='normal'){normal++;if(c.done)normalDone++;}
+      if(c.tag==='edge') edge++;
+      if(c.tag==='bug') bug++;
+    });
+  });
+  document.getElementById('prog-nums').innerHTML = `${done} <small>/ ${total}</small>`;
+  document.getElementById('prog-fill').style.width = total ? (done/total*100)+'%' : '0%';
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat-item"><span class="stat-val">${total}</span><span class="stat-label">总用例</span></div>
+    <div class="stat-item"><span class="stat-val" style="color:var(--green2)">${done}</span><span class="stat-label">已通过</span></div>
+    <div class="stat-item"><span class="stat-val" style="color:var(--red2)">${total-done}</span><span class="stat-label">未完成</span></div>
+    <div class="stat-item"><span class="stat-val">${normal}</span><span class="stat-label">正常流程（${normalDone}✓）</span></div>
+    <div class="stat-item"><span class="stat-val" style="color:var(--amber2)">${edge}</span><span class="stat-label">边界情况</span></div>
+    <div class="stat-item"><span class="stat-val" style="color:var(--red2)">${bug}</span><span class="stat-label">潜在问题</span></div>
+  `;
+}
+
+// ─── FILTER ───────────────────────────────────────────────────────────────────
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+// ─── EXPAND / COLLAPSE ────────────────────────────────────────────────────────
+function expandAll() {
+  document.querySelectorAll('.phase-section').forEach(s=>s.classList.remove('collapsed'));
+}
+function collapseAll() {
+  document.querySelectorAll('.phase-section').forEach(s=>s.classList.add('collapsed'));
+}
+function resetChecks() {
+  if(!confirm('确认重置所有勾选状态？')) return;
+  data.phases.forEach(p=>p.cases.forEach(c=>c.done=false));
+  saveData(); render();
+}
+
+// ─── QUICK ADD ────────────────────────────────────────────────────────────────
+function quickAdd(event, phaseId) {
+  if (event && event.type==='keydown' && event.key!=='Enter') return;
+  const input = document.getElementById('quick-input-'+phaseId);
+  const tagEl = document.getElementById('quick-tag-'+phaseId);
+  const text = input.value.trim();
+  if (!text) return;
+  const phase = data.phases.find(p=>p.id===phaseId);
+  phase.cases.push({id: phaseId+'c'+Date.now(), text, tag: tagEl.value, done: false});
+  input.value = '';
+  saveData(); render();
+}
+
+// ─── DELETE CASE ─────────────────────────────────────────────────────────────
+function deleteCase(phaseId, caseId) {
+  if(!confirm('确认删除这个测试用例？')) return;
+  const phase = data.phases.find(p=>p.id===phaseId);
+  phase.cases = phase.cases.filter(c=>c.id!==caseId);
+  saveData(); render();
+}
+
+// ─── MODAL HELPERS ────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.addEventListener('click', e=>{
+  ['phase-modal','case-modal'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el && e.target===el) closeModal(id);
+  });
+});
+
+// ─── PHASE MODAL ─────────────────────────────────────────────────────────────
+function openAddPhaseModal() {
+  document.getElementById('phase-modal-title').textContent = '新增测试阶段';
+  document.getElementById('edit-phase-id').value = '';
+  document.getElementById('delete-phase-btn').style.display = 'none';
+  ['phase-badge-input','phase-name-input','phase-time-input','phase-overlay-input','phase-trigger-input','phase-desc-input'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('phase-color-input').value = 'purple';
+  openModal('phase-modal');
+}
+
+function openEditPhaseModal(phaseId) {
+  const phase = data.phases.find(p=>p.id===phaseId);
+  document.getElementById('phase-modal-title').textContent = '编辑阶段';
+  document.getElementById('edit-phase-id').value = phaseId;
+  document.getElementById('phase-badge-input').value = phase.badge;
+  document.getElementById('phase-name-input').value = phase.name;
+  document.getElementById('phase-color-input').value = phase.color||'purple';
+  document.getElementById('phase-time-input').value = phase.time;
+  document.getElementById('phase-overlay-input').value = phase.overlay;
+  document.getElementById('phase-trigger-input').value = phase.trigger;
+  document.getElementById('phase-desc-input').value = phase.desc;
+  document.getElementById('delete-phase-btn').style.display = 'inline-block';
+  openModal('phase-modal');
+}
+
+function savePhase() {
+  const badge = document.getElementById('phase-badge-input').value.trim();
+  const name = document.getElementById('phase-name-input').value.trim();
+  if(!badge||!name){ alert('阶段标识和名称不能为空'); return; }
+  const editId = document.getElementById('edit-phase-id').value;
+  const phaseData = {
+    badge, name,
+    color: document.getElementById('phase-color-input').value,
+    time: document.getElementById('phase-time-input').value.trim(),
+    overlay: document.getElementById('phase-overlay-input').value.trim(),
+    trigger: document.getElementById('phase-trigger-input').value.trim(),
+    desc: document.getElementById('phase-desc-input').value.trim(),
+  };
+  if (editId) {
+    const phase = data.phases.find(p=>p.id===editId);
+    Object.assign(phase, phaseData);
+  } else {
+    phaseData.id = 'phase_'+Date.now();
+    phaseData.cases = [];
+    data.phases.push(phaseData);
+  }
+  closeModal('phase-modal');
+  saveData(); render();
+}
+
+function deleteCurrentPhase() {
+  const id = document.getElementById('edit-phase-id').value;
+  if(!confirm('确认删除这个阶段及其所有测试用例？')) return;
+  data.phases = data.phases.filter(p=>p.id!==id);
+  closeModal('phase-modal');
+  saveData(); render();
+}
+
+// ─── CASE MODAL ──────────────────────────────────────────────────────────────
+function openAddCaseModal(phaseId) {
+  document.getElementById('case-modal-title').textContent = '新增测试用例';
+  document.getElementById('edit-case-phase').value = phaseId;
+  document.getElementById('edit-case-id').value = '';
+  document.getElementById('case-text-input').value = '';
+  document.getElementById('case-tag-input').value = 'normal';
+  document.getElementById('delete-case-btn').style.display = 'none';
+  populateCasePhaseSelect(phaseId);
+  openModal('case-modal');
+}
+
+function openEditCaseModal(phaseId, caseId) {
+  const phase = data.phases.find(p=>p.id===phaseId);
+  const c = phase.cases.find(c=>c.id===caseId);
+  document.getElementById('case-modal-title').textContent = '编辑测试用例';
+  document.getElementById('edit-case-phase').value = phaseId;
+  document.getElementById('edit-case-id').value = caseId;
+  document.getElementById('case-text-input').value = c.text;
+  document.getElementById('case-tag-input').value = c.tag;
+  document.getElementById('delete-case-btn').style.display = 'inline-block';
+  populateCasePhaseSelect(phaseId);
+  openModal('case-modal');
+}
+
+function populateCasePhaseSelect(selectedId) {
+  const sel = document.getElementById('case-phase-select');
+  sel.innerHTML = data.phases.map(p=>`<option value="${p.id}" ${p.id===selectedId?'selected':''}>${p.badge} · ${p.name}</option>`).join('');
+}
+
+function saveCase() {
+  const text = document.getElementById('case-text-input').value.trim();
+  if(!text){ alert('测试内容不能为空'); return; }
+  const editId = document.getElementById('edit-case-id').value;
+  const fromPhaseId = document.getElementById('edit-case-phase').value;
+  const toPhaseId = document.getElementById('case-phase-select').value;
+  const tag = document.getElementById('case-tag-input').value;
+
+  if (editId) {
+    // Edit: if phase changed, move it
+    const fromPhase = data.phases.find(p=>p.id===fromPhaseId);
+    const c = fromPhase.cases.find(c=>c.id===editId);
+    if (fromPhaseId !== toPhaseId) {
+      fromPhase.cases = fromPhase.cases.filter(c=>c.id!==editId);
+      const toPhase = data.phases.find(p=>p.id===toPhaseId);
+      toPhase.cases.push({...c, text, tag});
+    } else {
+      c.text = text; c.tag = tag;
+    }
+  } else {
+    const phase = data.phases.find(p=>p.id===toPhaseId);
+    phase.cases.push({id:'c_'+Date.now(), text, tag, done:false});
+  }
+  closeModal('case-modal');
+  saveData(); render();
+}
+
+function deleteCurrentCase() {
+  const phaseId = document.getElementById('edit-case-phase').value;
+  const caseId = document.getElementById('edit-case-id').value;
+  if(!confirm('确认删除这个测试用例？')) return;
+  const phase = data.phases.find(p=>p.id===phaseId);
+  phase.cases = phase.cases.filter(c=>c.id!==caseId);
+  closeModal('case-modal');
+  saveData(); render();
+}
+
+// ─── EXPORT AS HTML ──────────────────────────────────────────────────────────
+function exportAsHTML() {
+  // 获取当前页面完整 HTML
+  const fullHTML = document.documentElement.outerHTML;
+
+  // 把 DEFAULT_DATA 和 loadData 里的 localStorage 逻辑替换掉：
+  // 在 <script> 里注入一段"预载数据"，让新文件打开时直接用当前数据
+  const snapshot = JSON.stringify(data);
+
+  // 把原来 loadData() 函数替换成直接使用快照的版本
+  const patched = fullHTML.replace(
+    /function loadData\(\)\s*\{[\s\S]*?\}/,
+    `function loadData() {
+  try {
+    const stored = localStorage.getItem('tutorial_test_data_v2');
+    if (stored) {
+      data = JSON.parse(stored);
+    } else {
+      data = JSON.parse(${JSON.stringify(snapshot)});
+    }
+  } catch(e) {
+    data = JSON.parse(${JSON.stringify(snapshot)});
+  }
+}`
+  );
+
+  const blob = new Blob([patched], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '教学系统测试清单_' + new Date().toISOString().slice(0,10) + '.html';
+  a.click();
+  URL.revokeObjectURL(url);
+
+  const toast = document.getElementById('save-toast');
+  toast.textContent = '✓ HTML 文件已导出';
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; toast.textContent = '✓ 已保存'; }, 2000);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+loadData();
+render();
+</script>
+</body>
+</html>

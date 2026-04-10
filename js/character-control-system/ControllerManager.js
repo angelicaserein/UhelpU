@@ -59,6 +59,16 @@ export class ControllerManager {
     if (this.owner && this.owner.deathState && this.owner.deathState.isDead) {
       return;
     }
+
+    // 计时系统：首次按键时通知
+    if (
+      event.type === "keydown" &&
+      this.owner &&
+      typeof this.owner.notifyFirstInput === "function"
+    ) {
+      this.owner.notifyFirstInput();
+    }
+
     this.currentControlMode.controlPipeline(event);
   }
 

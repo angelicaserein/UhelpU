@@ -8,6 +8,9 @@ import { WindowHint } from "../../windows/WindowHint.js";
 import { AudioManager } from "../../../AudioManager.js";
 import { EventTypes } from "../../../event-system/EventTypes.js";
 import { i18n } from "../../../i18n.js";
+import { GameTimer } from "../../components/GameTimer.js";
+import { LevelTimerManager } from "../../../timer-system/LevelTimerManager.js";
+import { TIMER_CONFIG } from "../../../timer-system/TimerConfig.js";
 
 /**
  * Shared base for all in-game UI pages.
@@ -25,6 +28,40 @@ export class GamePageBaseDemo1 extends PageBase {
     this._isPaused = false;
     this._levelIndex = levelIndex || `level${hintLevel}`;
     const showButtons = options.showButtons !== false;
+
+    // 计时系统初始化
+    this._timerManager = null;
+    this._gameTimer = null;
+    this._updateTimerUI = null;
+
+    // 设置全局 eventBus 引用（供 Player.notifyFirstInput 使用）
+    window.__gameEventBus = switcher.eventBus;
+
+    // 根据配置启用计时器
+    const timerConfig = TIMER_CONFIG[levelIndex] || { enabled: false };
+    if (timerConfig.enabled) {
+      this._timerManager = new LevelTimerManager(switcher.eventBus, {
+        levelId: levelIndex,
+        enabled: true,
+      });
+
+      this._gameTimer = new GameTimer(p, {
+        x: p.width - 90,
+        y: 120,
+        fontSize: 28,
+        enableTimer: true,
+      });
+
+      // 每帧更新UI时间显示（约20fps更新一次）
+      this._updateTimerUI = setInterval(() => {
+        if (this._timerManager && this._gameTimer) {
+          const elapsed = this._timerManager.getElapsedTime();
+          this._gameTimer.update(elapsed);
+        }
+      }, 50);
+
+      console.log(`[GamePageBaseDemo1] Timer enabled for level: ${levelIndex}`);
+    }
 
     if (showButtons) {
       const backBtn = new BackButton(p, () => {
@@ -137,6 +174,11 @@ export class GamePageBaseDemo1 extends PageBase {
 
   draw() {
     // Game rendering driven by main.js levelManager.update()
+
+    // 绘制计时UI
+    if (this._gameTimer) {
+      this._gameTimer.draw(this._p);
+    }
   }
 
   // ── Signboard-hint shared system ───────────────────────────
@@ -362,6 +404,18 @@ export class GamePageBaseDemo1 extends PageBase {
     document.body.classList.remove("game-paused");
     document.removeEventListener("keydown", this._onKeyDown);
     this._cleanupSignboardHint();
+
+    // 清理计时系统
+    if (this._updateTimerUI) {
+      clearInterval(this._updateTimerUI);
+      this._updateTimerUI = null;
+    }
+    if (this._timerManager) {
+      this._timerManager.cleanup();
+      this._timerManager = null;
+    }
+    this._gameTimer = null;
+
     if (this._windowHint) this._windowHint.remove();
     if (this._windowSetting) this._windowSetting.remove();
     if (this._windowPause) this._windowPause.remove();

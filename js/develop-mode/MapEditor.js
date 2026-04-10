@@ -224,7 +224,9 @@ export class MapEditor {
       if (selected.tool === EntityTool.ENEMY) {
         selected.direction = selected.direction === 1 ? -1 : 1;
         selected.gameEntity._direction = selected.direction;
-        this._ui.showToast(`敌人方向已切换为 ${selected.direction === 1 ? "→" : "←"}`);
+        this._ui.showToast(
+          `敌人方向已切换为 ${selected.direction === 1 ? "→" : "←"}`,
+        );
       }
       return;
     }

@@ -72,7 +72,9 @@ function basicBlockResponse(a, b, msg) {
     if (msg === "bottom") {
       // 如果玩家刚从分身上分离（仍在缓冲期），允许继续下落
       if ((a._replayerLeftFrameCount || 0) > 0) {
-        // 延迟期内允许继续下落，不改变速度和地面状态
+        // 延迟期内：不改变速度和地面状态，但清零标志避免循环
+        a._wasStandingOnReplayer = false;
+        a._replayerLeftFrameCount = 0;
         return;
       }
       // 静态地板需要清零速度，防止持续下沉

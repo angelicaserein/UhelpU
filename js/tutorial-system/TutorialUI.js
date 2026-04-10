@@ -70,7 +70,8 @@ export class TutorialUI {
    * 显示单个提示框
    * @param {string} text - 提示文本（支持 i18n key）
    * @param {Object} options
-   *   - position: 'top-center' | 'center' | 'bottom-center'
+   *   - position: 'top-center' | 'center' | 'bottom-center' | 'custom'
+   *   - x, y: 当 position: 'custom' 时的窗口坐标
    *   - isPersistent: 是否持久显示（默认 true）
    *   - isHighlight: 是否使用醒目样式（默认 false）
    */
@@ -78,7 +79,9 @@ export class TutorialUI {
     const {
       position = "top-center",
       isPersistent = true,
-      isHighlight = false
+      isHighlight = false,
+      x = 0,
+      y = 0,
     } = options;
 
     // 清理旧的提示框
@@ -107,6 +110,12 @@ export class TutorialUI {
         bottom: "60px",
         left: "50%",
         transform: "translateX(-50%)",
+      },
+      custom: {
+        position: "fixed",
+        left: x + "px",
+        top: y + "px",
+        transform: "translate(-50%, -50%)",
       },
     };
 

@@ -106,7 +106,7 @@ export class IdleState extends BaseTutorialState {
 
 /**
  * PHASE 1: GUIDE_RECORD — 引导录制按钮
- * 游戏暂停，全屏黑幕，录制 UI 镂空
+ * 游戏暂停，全屏黑幕，提示在录制UI下面
  * 触发：玩家按录制键 → GUIDE_TIMELINE
  */
 export class GuideRecordState extends BaseTutorialState {
@@ -116,15 +116,15 @@ export class GuideRecordState extends BaseTutorialState {
     // 游戏暂停
     setGamePaused(true);
 
-    // 显示全屏黑幕 + 录制 UI 镂空
-    const windowWidth = window.innerWidth;
-    const recordUIRect = { x: 12, y: 12, width: windowWidth - 24, height: 56 };
-    this.ui.showOverlay({ type: "partial", visibleRects: [recordUIRect] });
+    // 全屏黑幕（不镂空）
+    this.ui.showOverlay({ type: "full" });
 
-    // 显示提示文字
+    // 提示显示在录制 UI 下面（相对 canvas）
+    const canvasRect = this.manager._getCanvasRect();
     this.ui.showPrompt("tutorial_guide_record_msg", {
-      position: "top-center",
-      isPersistent: true,
+      position: "custom",
+      x: canvasRect.left + canvasRect.width / 2,
+      y: canvasRect.top + 80,
     });
 
     console.log("[GuideRecordState] ✓ Waiting for record key press...");
@@ -137,7 +137,7 @@ export class GuideRecordState extends BaseTutorialState {
 
 /**
  * PHASE 2: GUIDE_TIMELINE — 引导时间轴
- * 游戏暂停，全屏黑幕，时间轴镂空
+ * 游戏暂停，全屏黑幕
  * 触发：玩家按移动/跳跃键 → RECORDING
  */
 export class GuideTimelineState extends BaseTutorialState {
@@ -147,15 +147,15 @@ export class GuideTimelineState extends BaseTutorialState {
     // 游戏暂停
     setGamePaused(true);
 
-    // 显示全屏黑幕 + 时间轴镂空
-    const windowWidth = window.innerWidth;
-    const timelineRect = { x: 12, y: 92, width: windowWidth - 24, height: 50 };
-    this.ui.showOverlay({ type: "partial", visibleRects: [timelineRect] });
+    // 全屏黑幕
+    this.ui.showOverlay({ type: "full" });
 
-    // 显示提示文字
+    // 提示显示在 canvas 中央附近
+    const canvasRect = this.manager._getCanvasRect();
     this.ui.showPrompt("tutorial_guide_timeline_msg", {
-      position: "top-center",
-      isPersistent: true,
+      position: "custom",
+      x: canvasRect.left + canvasRect.width / 2,
+      y: canvasRect.top + canvasRect.height / 2,
     });
 
     console.log("[GuideTimelineState] ✓ Waiting for movement key press...");
@@ -198,7 +198,7 @@ export class RecordingState extends BaseTutorialState {
 
 /**
  * PHASE 4: GUIDE_REPLAY — 引导回放
- * 游戏暂停，全屏黑幕，三个区域镂空（录制UI、时间轴、分身位置）
+ * 游戏暂停，全屏黑幕
  * 触发：玩家按回放键 → REPLAYING
  */
 export class GuideReplayState extends BaseTutorialState {
@@ -208,36 +208,16 @@ export class GuideReplayState extends BaseTutorialState {
     // 游戏暂停
     setGamePaused(true);
 
-    // 显示全屏黑幕 + 三个区域镂空
-    const windowWidth = window.innerWidth;
-    const recordUIRect = { x: 12, y: 12, width: windowWidth - 24, height: 56 };
-    const timelineRect = { x: 12, y: 92, width: windowWidth - 24, height: 50 };
-    const phantomRect = { x: 480, y: 80, width: 100, height: 65 }; // Signboard 位置
+    // 全屏黑幕（不镂空）
+    this.ui.showOverlay({ type: "full" });
 
-    this.ui.showOverlay({
-      type: "partial",
-      visibleRects: [recordUIRect, timelineRect, phantomRect]
+    // 显示提示文字（相对 canvas）
+    const canvasRect = this.manager._getCanvasRect();
+    this.ui.showPrompt("tutorial_guide_replay_msg", {
+      position: "custom",
+      x: canvasRect.left + canvasRect.width / 2,
+      y: canvasRect.top + 80,
     });
-
-    // 显示三个提示文字
-    this.ui.showMultiplePrompts([
-      {
-        text: "tutorial_guide_replay_msg",
-        position: "top-center",
-      },
-      {
-        text: "tutorial_phantom_label",
-        x: 530, // 分身位置附近
-        y: 150,
-        style: "label",
-      },
-      {
-        text: "tutorial_actions_label",
-        x: 30, // 时间轴附近
-        y: 150,
-        style: "label",
-      },
-    ]);
 
     console.log("[GuideReplayState] ✓ Waiting for replay key press...");
   }
@@ -250,7 +230,7 @@ export class GuideReplayState extends BaseTutorialState {
 /**
  * PHASE 5: REPLAYING — 回放进行中
  * 游戏运行，无黑幕，分身执行回放动作
- * 触发：RecordSystem 状态变为 "ReadyToRecord"（5秒或手动结束）→ COMPLETE
+ * 触发：5秒自动结束或玩家按 R 键 → COMPLETE
  */
 export class ReplayingState extends BaseTutorialState {
   enter() {
@@ -262,24 +242,50 @@ export class ReplayingState extends BaseTutorialState {
     // 隐藏黑幕
     this.ui.hideOverlay();
 
-    // 显示两个提示文字
-    this.ui.showMultiplePrompts([
-      {
-        text: "tutorial_replaying_msg",
-        position: "top-center",
-      },
-      {
-        text: "tutorial_phantom_replaying_label",
-        x: 530,
-        y: 150,
-        style: "label",
-      },
-    ]);
+    // 显示提示文字（相对 canvas）
+    const canvasRect = this.manager._getCanvasRect();
+    this.ui.showPrompt("tutorial_replaying_msg", {
+      position: "custom",
+      x: canvasRect.left + canvasRect.width / 2,
+      y: canvasRect.top + 80,
+    });
+
+    // 监听 R 键来提前结束回放
+    this._onReplayKeyPress = (event) => {
+      const intent = this.manager._kbm.getIntentByKey(event.code);
+      if (intent === "replay") {
+        console.log("[ReplayingState] User pressed replay key to interrupt");
+        // 清理我们的监听器
+        document.removeEventListener("keydown", this._onReplayKeyPress);
+        // 转到完成
+        this.transitionTo(TutorialStates.COMPLETE);
+      }
+    };
+    document.addEventListener("keydown", this._onReplayKeyPress);
+
+    // 轮询检查回放是否自动完成
+    this._replayCheckInterval = setInterval(() => {
+      if (this.recordSystem &&
+          this.recordSystem.replayer &&
+          !this.recordSystem.replayer.isReplaying) {
+        console.log("[ReplayingState] Replay completed automatically");
+        clearInterval(this._replayCheckInterval);
+        document.removeEventListener("keydown", this._onReplayKeyPress);
+        this.transitionTo(TutorialStates.COMPLETE);
+      }
+    }, 100);
 
     console.log("[ReplayingState] ✓ Replaying in progress...");
   }
 
   exit() {
+    // 清理我们的监听器
+    if (this._onReplayKeyPress) {
+      document.removeEventListener("keydown", this._onReplayKeyPress);
+    }
+    if (this._replayCheckInterval) {
+      clearInterval(this._replayCheckInterval);
+    }
     super.exit();
   }
 }
@@ -299,22 +305,28 @@ export class CompleteState extends BaseTutorialState {
     // 隐藏黑幕
     this.ui.hideOverlay();
 
-    // 显示完成提示（屏幕中央大字）
+    // 显示完成提示（相对 canvas，中央）
+    const canvasRect = this.manager._getCanvasRect();
     this.ui.showPrompt("tutorial_complete_msg", {
-      position: "center",
-      isPersistent: false, // 不需要持久显示，会自动消失
+      position: "custom",
+      x: canvasRect.left + canvasRect.width / 2,
+      y: canvasRect.top + canvasRect.height / 2,
+      isHighlight: true,
     });
 
+    console.log("[CompleteState] ✓ Tutorial complete! Showing message for 3 seconds...");
+
     // 3秒后自动返回 IDLE（正常游玩）
-    this.setTimeout(() => {
+    this._completeTimer = setTimeout(() => {
       console.log("[CompleteState] Tutorial completed, returning to IDLE");
       this.transitionTo(TutorialStates.IDLE);
     }, 3000);
-
-    console.log("[CompleteState] ✓ Tutorial complete!");
   }
 
   exit() {
+    if (this._completeTimer) {
+      clearTimeout(this._completeTimer);
+    }
     super.exit();
   }
 }

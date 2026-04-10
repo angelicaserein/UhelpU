@@ -63,6 +63,52 @@ export class TutorialManager {
   }
 
   /**
+   * 获取 Canvas 的窗口坐标（用于计算黑幕镂空位置）
+   */
+  _getCanvasRect() {
+    // 尝试从 level 获取 canvas
+    let canvas = null;
+    if (this.level && this.level.sketch && this.level.sketch.canvas) {
+      canvas = this.level.sketch.canvas;
+    } else if (window.p && window.p.canvas) {
+      canvas = window.p.canvas;
+    } else {
+      // 查找页面中的 canvas
+      canvas = document.querySelector("canvas");
+    }
+
+    if (canvas) {
+      return canvas.getBoundingClientRect();
+    }
+
+    // 如果找不到 canvas，返回默认值
+    return {
+      left: 0,
+      top: 0,
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
+  }
+
+  /**
+   * 将 Canvas 相对坐标转换为窗口坐标
+   * @param {number} x - Canvas 中的 x 坐标
+   * @param {number} y - Canvas 中的 y 坐标
+   * @param {number} width - 宽度
+   * @param {number} height - 高度
+   * @returns {{x, y, width, height}} 窗口坐标
+   */
+  _canvasToWindowCoords(x, y, width, height) {
+    const canvasRect = this._getCanvasRect();
+    return {
+      x: canvasRect.left + x,
+      y: canvasRect.top + y,
+      width: width,
+      height: height,
+    };
+  }
+
+  /**
    * 启动教程
    */
   start() {
@@ -71,6 +117,14 @@ export class TutorialManager {
     }
 
     console.log("[TutorialManager] Starting tutorial...");
+
+    // 清空 RecordSystem 的旧数据
+    this._clearRecordSystemData();
+
+    // 禁用 RecordSystem 的独立事件处理
+    // 教程会完全管理状态转换
+    this.recordSystem.setDisabled(true);
+    console.log("[TutorialManager] ✓ RecordSystem disabled (tutorial takes control)");
 
     // 导入状态类
     this._phaseMap = {
@@ -138,6 +192,40 @@ export class TutorialManager {
   }
 
   /**
+   * 内部：清空 RecordSystem 的旧数据
+   */
+  _clearRecordSystemData() {
+    console.log("[TutorialManager] Clearing old RecordSystem data...");
+
+    if (!this.recordSystem) return;
+
+    // 移除旧的分身
+    if (this.recordSystem.replayer) {
+      this.recordSystem.removeReplayer();
+      this.recordSystem.replayer = null;
+    }
+
+    // 清空旧的录制片段
+    if (this.recordSystem.clip) {
+      this.recordSystem.clip.clearListeners();
+      this.recordSystem.clip = null;
+    }
+
+    // 清空录制时间戳
+    this.recordSystem.recordStartTime = -1;
+    this.recordSystem.recordEndTime = -1;
+
+    // 清空回放数据
+    this.recordSystem._replayRecords = [];
+    this.recordSystem._replayCursor = 0;
+
+    // 重置状态到 ReadyToRecord
+    this.recordSystem.state = "ReadyToRecord";
+
+    console.log("[TutorialManager] ✓ RecordSystem data cleared");
+  }
+
+  /**
    * 跳过教程
    */
   skip() {
@@ -172,8 +260,9 @@ export class TutorialManager {
     this._cleanupRecordSystemPolling();
     this._cleanupGlobalEscHandler();
 
-    // 恢复暂停菜单
+    // 恢复开始状态
     this._restorePauseMenu();
+    this._restoreRecordSystem();
 
     // 清理 UI
     if (this.ui) {
@@ -181,6 +270,16 @@ export class TutorialManager {
     }
 
     console.log("[TutorialManager] ✓ Destroyed");
+  }
+
+  /**
+   * 内部：恢复 RecordSystem 的独立事件处理
+   */
+  _restoreRecordSystem() {
+    if (this.recordSystem) {
+      this.recordSystem.setDisabled(false);
+      console.log("[TutorialManager] ✓ RecordSystem re-enabled");
+    }
   }
 
   /**
@@ -212,6 +311,7 @@ export class TutorialManager {
       this._cleanupRecordSystemPolling();
       this._cleanupGlobalEscHandler();
       this._restorePauseMenu();
+      this._restoreRecordSystem(); // ← 恢复 RecordSystem
       setGamePaused(false);
       this.ui.cleanup();
     }
@@ -239,18 +339,36 @@ export class TutorialManager {
           intent === "jump"
         ) {
           console.log("[TutorialManager] Movement key pressed");
-          this._transitionToPhase(TutorialStates.RECORDING);
-          // 游戏时间恢复运行
+          // 恢复游戏时间
           setGamePaused(false);
+
+          // 确保 RecordSystem 开始真正的录制
+          // 如果还在 ReadyToRecord 状态，手动触发录制开始
+          if (this.recordSystem.state === "ReadyToRecord") {
+            console.log("[TutorialManager] Starting actual recording in RecordSystem");
+            this.recordSystem.transition("record");
+          }
+
+          // 转到 RECORDING PHASE
+          this._transitionToPhase(TutorialStates.RECORDING);
         }
       }
       // PHASE 4（GUIDE_REPLAY）：检测回放键
       else if (this._currentPhase === TutorialStates.GUIDE_REPLAY) {
         if (intent === "replay") {
           console.log("[TutorialManager] Replay key pressed");
-          this._transitionToPhase(TutorialStates.REPLAYING);
-          // 游戏时间恢复运行
+          // 恢复游戏时间
           setGamePaused(false);
+
+          // 确保 RecordSystem 开始真正的回放
+          // 如果还在 ReadyToReplay 状态，手动触发回放开始
+          if (this.recordSystem.state === "ReadyToReplay") {
+            console.log("[TutorialManager] Starting actual replay in RecordSystem");
+            this.recordSystem.transition("replay");
+          }
+
+          // 转到 REPLAYING PHASE
+          this._transitionToPhase(TutorialStates.REPLAYING);
         }
       }
     };

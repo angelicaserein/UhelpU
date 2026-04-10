@@ -111,7 +111,8 @@ export class AppCoordinator {
 
       // Lose: pause game and show overlay on top of the game
       this.levelManager.setPaused(true);
-      const ResultPage = isDemo2
+      // Easy 难度用 Demo2 的 Result 页面，Demo2 和 Demo1 各用各自的
+      const ResultPage = (isDemo2 || isEasy)
         ? StaticPageResultDemo2
         : StaticPageResultDemo1;
       const resultPage = new ResultPage(

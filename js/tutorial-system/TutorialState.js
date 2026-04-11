@@ -96,6 +96,8 @@ export class IdleState extends BaseTutorialState {
     console.log("[IdleState] Entering");
     // 确保所有 UI 隐藏
     this.ui.hideOverlay();
+    // 删除 ESC 提示（教程结束时）
+    this.ui.hideEscHint();
     this.ui.cleanup();
   }
 

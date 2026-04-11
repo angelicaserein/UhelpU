@@ -28,7 +28,13 @@ import { EventTypes } from "../event-system/EventTypes.js";
  * - 处理 ESC 全局退出
  */
 export class TutorialManager {
-  constructor(gamePageContainer, level, recordSystem, eventBus, p5Instance = null) {
+  constructor(
+    gamePageContainer,
+    level,
+    recordSystem,
+    eventBus,
+    p5Instance = null,
+  ) {
     this.gamePageContainer = gamePageContainer;
     this.level = level;
     this.recordSystem = recordSystem;
@@ -124,7 +130,9 @@ export class TutorialManager {
     // 禁用 RecordSystem 的独立事件处理
     // 教程会完全管理状态转换
     this.recordSystem.setDisabled(true);
-    console.log("[TutorialManager] ✓ RecordSystem disabled (tutorial takes control)");
+    console.log(
+      "[TutorialManager] ✓ RecordSystem disabled (tutorial takes control)",
+    );
 
     // 导入状态类
     this._phaseMap = {
@@ -132,43 +140,43 @@ export class TutorialManager {
         this,
         this.ui,
         this.level,
-        this.recordSystem
+        this.recordSystem,
       ),
       [TutorialStates.GUIDE_RECORD]: new GuideRecordState(
         this,
         this.ui,
         this.level,
-        this.recordSystem
+        this.recordSystem,
       ),
       [TutorialStates.GUIDE_TIMELINE]: new GuideTimelineState(
         this,
         this.ui,
         this.level,
-        this.recordSystem
+        this.recordSystem,
       ),
       [TutorialStates.RECORDING]: new RecordingState(
         this,
         this.ui,
         this.level,
-        this.recordSystem
+        this.recordSystem,
       ),
       [TutorialStates.GUIDE_REPLAY]: new GuideReplayState(
         this,
         this.ui,
         this.level,
-        this.recordSystem
+        this.recordSystem,
       ),
       [TutorialStates.REPLAYING]: new ReplayingState(
         this,
         this.ui,
         this.level,
-        this.recordSystem
+        this.recordSystem,
       ),
       [TutorialStates.COMPLETE]: new CompleteState(
         this,
         this.ui,
         this.level,
-        this.recordSystem
+        this.recordSystem,
       ),
     };
 
@@ -185,12 +193,12 @@ export class TutorialManager {
       this.eventBus.publish(EventTypes.TUTORIAL_CLOSE_SIGNBOARD);
     }
 
-    // 显示 ESC 跳过提示（位于画布右上角）
-    const canvasRect = this._getCanvasRect();
-    this.ui.showEscHint(canvasRect);
-
     // 进入第一个教学 PHASE（GUIDE_RECORD）
     this._transitionToPhase(TutorialStates.GUIDE_RECORD);
+
+    // 显示 ESC 跳过提示（在进入第一个 PHASE 之后）
+    const canvasRect = this._getCanvasRect();
+    this.ui.showEscHint(canvasRect);
 
     console.log("[TutorialManager] ✓ Tutorial started");
   }
@@ -349,7 +357,9 @@ export class TutorialManager {
           // 确保 RecordSystem 开始真正的录制
           // 如果还在 ReadyToRecord 状态，手动触发录制开始
           if (this.recordSystem.state === "ReadyToRecord") {
-            console.log("[TutorialManager] Starting actual recording in RecordSystem");
+            console.log(
+              "[TutorialManager] Starting actual recording in RecordSystem",
+            );
             this.recordSystem.transition("record");
           }
 
@@ -367,7 +377,9 @@ export class TutorialManager {
           // 确保 RecordSystem 开始真正的回放
           // 如果还在 ReadyToReplay 状态，手动触发回放开始
           if (this.recordSystem.state === "ReadyToReplay") {
-            console.log("[TutorialManager] Starting actual replay in RecordSystem");
+            console.log(
+              "[TutorialManager] Starting actual replay in RecordSystem",
+            );
             this.recordSystem.transition("replay");
           }
 
@@ -405,7 +417,7 @@ export class TutorialManager {
       }
 
       console.log(
-        `[TutorialManager] RecordSystem: ${this._lastRecordSystemState} → ${currentState}`
+        `[TutorialManager] RecordSystem: ${this._lastRecordSystemState} → ${currentState}`,
       );
 
       // PHASE 3（RECORDING）完成 → PHASE 4（GUIDE_REPLAY）
@@ -447,7 +459,10 @@ export class TutorialManager {
    */
   _setupGlobalEscHandler() {
     this._globalEscHandler = (event) => {
-      if (event.code === "Escape" && this._currentPhase !== TutorialStates.IDLE) {
+      if (
+        event.code === "Escape" &&
+        this._currentPhase !== TutorialStates.IDLE
+      ) {
         console.log("[TutorialManager] ESC pressed - exiting tutorial");
         event.preventDefault();
         event.stopPropagation();

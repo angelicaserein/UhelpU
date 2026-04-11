@@ -79,7 +79,11 @@ export class BaseLevel {
   cleanupDeadEnemies() {
     const entitiesToRemove = [];
     for (const entity of this.entities) {
-      if (entity.type === "enemy" && entity.isDeadAnimationComplete && entity.isDeadAnimationComplete()) {
+      if (
+        entity.type === "enemy" &&
+        entity.isDeadAnimationComplete &&
+        entity.isDeadAnimationComplete()
+      ) {
         entitiesToRemove.push(entity);
       }
     }
@@ -159,6 +163,13 @@ export class BaseLevel {
       typeof this.physicsSystem.physicsEntry === "function"
     ) {
       this.physicsSystem.physicsEntry();
+    }
+    // [NEW] 支撑链velX传递：物理积分后、碰撞检测前传递支撑链 velX
+    if (
+      this.physicsSystem &&
+      typeof this.physicsSystem.velXPropagationEntry === "function"
+    ) {
+      this.physicsSystem.velXPropagationEntry();
     }
     // 更新所有游戏实体（如 Signboard 的交互检测）
     for (const entity of this.entities) {

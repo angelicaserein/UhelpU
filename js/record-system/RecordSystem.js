@@ -546,9 +546,16 @@ export class RecordSystem {
       let action = null;
       if (record.code === moveLeftKey || record.code === arrowLeftCode) {
         action = "moveLeft";
-      } else if (record.code === moveRightKey || record.code === arrowRightCode) {
+      } else if (
+        record.code === moveRightKey ||
+        record.code === arrowRightCode
+      ) {
         action = "moveRight";
-      } else if (record.code === jumpKey || record.code === spaceCode || record.code === arrowUpCode) {
+      } else if (
+        record.code === jumpKey ||
+        record.code === spaceCode ||
+        record.code === arrowUpCode
+      ) {
         action = "jump";
       }
 

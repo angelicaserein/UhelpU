@@ -21,7 +21,11 @@ export class StaticPageWinDemo2 extends PageBase {
     const levelNum = parseInt(this.levelIndex.replace(/.*level/, ""), 10);
     const isDemo2 = this.levelIndex.startsWith("demo2_");
     const isEasy = this.levelIndex.startsWith("easy_");
-    const levelPrefix = isDemo2 ? "demo2_level" : isEasy ? "easy_level" : "level";
+    const levelPrefix = isDemo2
+      ? "demo2_level"
+      : isEasy
+        ? "easy_level"
+        : "level";
     const TOTAL_LEVELS = 10;
 
     const btnW = 180;
@@ -69,7 +73,10 @@ export class StaticPageWinDemo2 extends PageBase {
       btnX,
       btnY0 + btnH + btnGap,
       () => {
-        console.log("[WinDemo2] Restart - publishing LOAD_LEVEL with levelIndex:", this.levelIndex);
+        console.log(
+          "[WinDemo2] Restart - publishing LOAD_LEVEL with levelIndex:",
+          this.levelIndex,
+        );
         this.eventBus.publish(EventTypes.LOAD_LEVEL, this.levelIndex);
       },
       "win-action-button",
@@ -80,7 +87,10 @@ export class StaticPageWinDemo2 extends PageBase {
     this._winButtons.push({
       btn: restartBtn.btn,
       callback: () => {
-        console.log("[WinDemo2] Restart (via keyboard) - publishing LOAD_LEVEL with levelIndex:", this.levelIndex);
+        console.log(
+          "[WinDemo2] Restart (via keyboard) - publishing LOAD_LEVEL with levelIndex:",
+          this.levelIndex,
+        );
         this.eventBus.publish(EventTypes.LOAD_LEVEL, this.levelIndex);
       },
     });

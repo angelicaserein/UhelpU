@@ -10,10 +10,6 @@ export class StaticPageMenu extends PageBase {
     super(switcher);
     this.p = p;
     this.eventBus = eventBus;
-    this._subtitle = null;
-    this._startBtn = null;
-    this._settingsBtn = null;
-    this._achievesBtn = null;
   }
 
   enter() {
@@ -27,7 +23,6 @@ export class StaticPageMenu extends PageBase {
     subtitle.addClass("menu-subtitle");
     subtitle.position(0.5 * p.width, 0.45 * p.height);
     this.addElement(subtitle);
-    this._subtitle = subtitle;
 
     // PLAY 按钮 → 进入语言选择
     const startBtn = new ButtonBase(
@@ -43,7 +38,6 @@ export class StaticPageMenu extends PageBase {
     startBtn.btn.style("width", 0.088 * p.width + "px");
     startBtn.btn.style("height", 0.155 * p.height + "px");
     this.addElement(startBtn);
-    this._startBtn = startBtn;
 
     // SETTINGS 按钮
     const settingsBtn = new ButtonBase(
@@ -59,7 +53,6 @@ export class StaticPageMenu extends PageBase {
     settingsBtn.btn.style("width", 0.06 * p.width + "px");
     settingsBtn.btn.style("height", 0.11 * p.height + "px");
     this.addElement(settingsBtn);
-    this._settingsBtn = settingsBtn;
 
     // Achieves 按钮
     const achievesBtn = new ButtonBase(
@@ -75,7 +68,6 @@ export class StaticPageMenu extends PageBase {
     achievesBtn.btn.style("width", 0.06 * p.width + "px");
     achievesBtn.btn.style("height", 0.11 * p.height + "px");
     this.addElement(achievesBtn);
-    this._achievesBtn = achievesBtn;
 
     // 注册键盘导航（水平排列 - 按视觉顺序从左到右，Play是默认焦点）
     this.registerNavButtons(
@@ -125,21 +117,6 @@ export class StaticPageMenu extends PageBase {
       }
     };
     document.addEventListener("keydown", this._onDevModeKey);
-  }
-
-  _onLanguageChange(lang) {
-    if (this._subtitle) {
-      this._subtitle.html(t("menu_subtitle"));
-    }
-    if (this._startBtn && this._startBtn.btn) {
-      this._startBtn.btn.html(t("btn_play"));
-    }
-    if (this._settingsBtn && this._settingsBtn.btn) {
-      this._settingsBtn.btn.html(t("btn_settings"));
-    }
-    if (this._achievesBtn && this._achievesBtn.btn) {
-      this._achievesBtn.btn.html(t("btn_achieves"));
-    }
   }
 
   exit() {

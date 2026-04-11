@@ -92,8 +92,10 @@ registerTranslations({
       "You have successfully learned to record your actions!\nPress the record key again to start~\nMax recording duration: 5 seconds",
 
     // ── Achievement (demo1-specific) ─────────────────────────────────
-    achiev_first_steps_name: "First Steps",
-    achiev_first_steps_desc: "Complete Level 1 — Rule",
+    achiev_perseverance_name: "Perseverance",
+    achiev_perseverance_desc: "Did you fall down 3 times? ",
+    achiev_perseverance_unlock_desc:
+      'Trigger "How can I jump much higher?" 3 times in Level 2',
     achiev_selfjump_name: "Self-Jump",
     achiev_selfjump_desc: "You're a jumping master!",
     achiev_selfjump_unlock_desc:
@@ -102,22 +104,41 @@ registerTranslations({
     achiev_prisoner_desc: "Some people are alive, but they are already dead.",
     achiev_prisoner_unlock_desc:
       "Trap yourself in Level 5 without activating the checkpoint",
-    achiev_trap_master_name: "Trap Master",
-    achiev_trap_master_desc: "Complete Level 4 — Trap",
-    achiev_perfectionist_name: "Perfectionist",
-    achiev_perfectionist_desc: "Complete all levels",
-    achiev_perseverance_name: "Perseverance",
-    achiev_perseverance_desc: "Did you fall down 3 times? ",
-    achiev_perseverance_unlock_desc:
-      'Trigger "How can I jump much higher?" 3 times in Level 2',
-    achiev_student_name: "Student",
-    achiev_student_desc: "Read all signboards",
-    achiev_socialite_name: "Socialite",
-    achiev_socialite_desc: "Talk to all NPCs",
-    achiev_director_name: "Director",
-    achiev_director_desc: "Use recording for the first time",
-    achiev_phantom_master_name: "Phantom Master",
-    achiev_phantom_master_desc: "Complete a level using phantom replay",
+    achiev_achievement4_name: "Achievement 4",
+    achiev_achievement4_desc:
+      "Achievement 4 description (pending implementation)",
+    achiev_achievement4_unlock_desc:
+      "Achievement 4 unlock description (pending implementation)",
+    achiev_achievement5_name: "Achievement 5",
+    achiev_achievement5_desc:
+      "Achievement 5 description (pending implementation)",
+    achiev_achievement5_unlock_desc:
+      "Achievement 5 unlock description (pending implementation)",
+    achiev_achievement6_name: "Achievement 6",
+    achiev_achievement6_desc:
+      "Achievement 6 description (pending implementation)",
+    achiev_achievement6_unlock_desc:
+      "Achievement 6 unlock description (pending implementation)",
+    achiev_achievement7_name: "Achievement 7",
+    achiev_achievement7_desc:
+      "Achievement 7 description (pending implementation)",
+    achiev_achievement7_unlock_desc:
+      "Achievement 7 unlock description (pending implementation)",
+    achiev_achievement8_name: "Achievement 8",
+    achiev_achievement8_desc:
+      "Achievement 8 description (pending implementation)",
+    achiev_achievement8_unlock_desc:
+      "Achievement 8 unlock description (pending implementation)",
+    achiev_achievement9_name: "Achievement 9",
+    achiev_achievement9_desc:
+      "Achievement 9 description (pending implementation)",
+    achiev_achievement9_unlock_desc:
+      "Achievement 9 unlock description (pending implementation)",
+    achiev_achievement10_name: "Achievement 10",
+    achiev_achievement10_desc:
+      "Achievement 10 description (pending implementation)",
+    achiev_achievement10_unlock_desc:
+      "Achievement 10 unlock description (pending implementation)",
     achiev_jail_name: "Prisoner",
     achiev_jail_desc: "Some people are alive, but they are already dead.",
     achiev_jail_unlock_desc:
@@ -231,30 +252,37 @@ registerTranslations({
       "你学会录制自己的操作了！\n再按一次录制键开始吧\n最多只能录 5 秒哦",
 
     // ── Achievement (demo1-specific) ─────────────────────────────────
-    achiev_first_steps_name: "第一步",
-    achiev_first_steps_desc: "通关第一关 — 规则",
+    achiev_perseverance_name: "坚持不懈",
+    achiev_perseverance_desc: "你是不是掉下来了三次？",
+    achiev_perseverance_unlock_desc:
+      "在第二关里触发三次\u201C怎么才能跳得更高呢？\u201D",
     achiev_selfjump_name: "无钮自通",
     achiev_selfjump_desc: "你是跳跃高手！",
     achiev_selfjump_unlock_desc: "在第四关里不踩到黄、蓝按钮就跳过地刺",
     achiev_prisoner_name: "囚犯",
     achiev_prisoner_desc: "有的人活着，他已经死了。",
     achiev_prisoner_unlock_desc: "在第五关中没有激活存档点的情况下把自己困住",
-    achiev_trap_master_name: "陷阱大师",
-    achiev_trap_master_desc: "通关第四关 — 陷阱",
-    achiev_perfectionist_name: "完美主义者",
-    achiev_perfectionist_desc: "通关所有关卡",
-    achiev_perseverance_name: "坚持不懈",
-    achiev_perseverance_desc: "你是不是掉下来了三次？",
-    achiev_perseverance_unlock_desc:
-      "在第二关里触发三次\u201C怎么才能跳得更高呢？\u201D",
-    achiev_student_name: "好学生",
-    achiev_student_desc: "阅读所有告示牌",
-    achiev_socialite_name: "社交达人",
-    achiev_socialite_desc: "与所有NPC对话",
-    achiev_director_name: "导演",
-    achiev_director_desc: "第一次使用录制功能",
-    achiev_phantom_master_name: "幻影大师",
-    achiev_phantom_master_desc: "使用幻影回放完成一个关卡",
+    achiev_achievement4_name: "成就4",
+    achiev_achievement4_desc: "成就4描述（待实现）",
+    achiev_achievement4_unlock_desc: "成就4解锁描述（待实现）",
+    achiev_achievement5_name: "成就5",
+    achiev_achievement5_desc: "成就5描述（待实现）",
+    achiev_achievement5_unlock_desc: "成就5解锁描述（待实现）",
+    achiev_achievement6_name: "成就6",
+    achiev_achievement6_desc: "成就6描述（待实现）",
+    achiev_achievement6_unlock_desc: "成就6解锁描述（待实现）",
+    achiev_achievement7_name: "成就7",
+    achiev_achievement7_desc: "成就7描述（待实现）",
+    achiev_achievement7_unlock_desc: "成就7解锁描述（待实现）",
+    achiev_achievement8_name: "成就8",
+    achiev_achievement8_desc: "成就8描述（待实现）",
+    achiev_achievement8_unlock_desc: "成就8解锁描述（待实现）",
+    achiev_achievement9_name: "成就9",
+    achiev_achievement9_desc: "成就9描述（待实现）",
+    achiev_achievement9_unlock_desc: "成就9解锁描述（待实现）",
+    achiev_achievement10_name: "成就10",
+    achiev_achievement10_desc: "成就10描述（待实现）",
+    achiev_achievement10_unlock_desc: "成就10解锁描述（待实现）",
     achiev_jail_name: "囚犯",
     achiev_jail_desc: "有的人活着，但他已经死了。",
     achiev_jail_unlock_desc: "在第五关中没有激活存档点的情况下把自己困住",

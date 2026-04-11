@@ -93,6 +93,193 @@ body {
   font-family: "HYPixel11", "PixelFont", sans-serif;
 }
 
+/* 玩家名字面板（欢迎信息 + 改名按钮） */
+.player-name-panel {
+  z-index: 20;
+  position: absolute;
+  top: 30px;
+  left: 140px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 2px solid rgba(245, 220, 255, 0.7);
+  background: rgba(23, 13, 41, 0.82);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+}
+
+.player-name-text {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  white-space: nowrap;
+}
+
+.player-name-text-label {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 0.02em;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.player-name-text-name {
+  display: flex;
+  gap: 0;
+}
+
+.player-rename-button {
+  padding: 8px 16px;
+  background: rgba(220, 180, 220, 0.75);
+  border: 2px solid #4a1a6b;
+  border-radius: 6px;
+  color: #21043b;
+  font-size: 14px;
+  font-weight: bold;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease,
+    background-color 0.3s ease;
+  box-shadow: 0 0 0 2px #000000;
+}
+
+.player-rename-button:hover {
+  background: rgba(240, 200, 240, 0.95);
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 4px 12px rgba(53, 0, 51, 0.4);
+  transform: translateY(-2px);
+}
+
+.player-rename-button:active {
+  transform: translateY(0);
+}
+
+/* 改名对话框 */
+.rename-dialog-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  z-index: 10000 !important;
+}
+
+.rename-dialog {
+  background: rgba(26, 0, 51, 0.95);
+  border: 2px solid rgba(245, 220, 255, 0.8);
+  border-radius: 15px;
+  padding: 30px;
+  text-align: center;
+  max-width: 420px;
+  box-shadow:
+    0 12px 48px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(120, 50, 160, 0.5);
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  color: #f0e0ff;
+}
+
+.rename-dialog > div:first-child {
+  color: #feca57;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.rename-dialog input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  border: 2px solid rgba(120, 50, 160, 0.5);
+  border-radius: 6px;
+  background: rgba(50, 30, 70, 0.8);
+  color: #fff;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+}
+
+.rename-dialog input:focus {
+  outline: none;
+  border-color: #feca57;
+  box-shadow: 0 0 12px rgba(254, 202, 87, 0.3);
+}
+
+.rename-dialog button {
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 12px 25px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease,
+    background-color 0.3s ease;
+  border: 2px solid;
+}
+
+.rename-dialog button:first-of-type {
+  background: rgba(220, 180, 220, 0.8);
+  color: #21043b;
+  border-color: #4a1a6b;
+  box-shadow: 0 0 0 2px #000000;
+  margin-right: 15px;
+}
+
+.rename-dialog button:first-of-type:hover {
+  background: rgba(240, 200, 240, 0.95);
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 4px 12px rgba(53, 0, 51, 0.4);
+  transform: translateY(-2px);
+}
+
+.rename-dialog button:last-of-type {
+  background: rgba(70, 50, 100, 0.8);
+  color: #f0e0ff;
+  border-color: rgba(245, 220, 255, 0.7);
+  box-shadow: 0 0 0 2px #000000;
+}
+
+.rename-dialog button:last-of-type:hover {
+  background: rgba(100, 70, 140, 0.95);
+  box-shadow:
+    0 0 0 2px #feca57,
+    0 4px 12px rgba(254, 202, 87, 0.2);
+  transform: translateY(-2px);
+}
+
+/* 改名 Loading 对话框 */
+.rename-loading-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  z-index: 10000 !important;
+}
+
+.rename-loading-text {
+  color: #feca57;
+  font-size: 24px;
+  font-weight: bold;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
 #game-container {
   position: relative;
   flex-shrink: 0;

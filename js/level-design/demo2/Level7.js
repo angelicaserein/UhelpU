@@ -13,6 +13,7 @@
   Button,
   Spike,
   Enemy,
+  Box,
 } from "../../game-entity-model/index.js";
 import { CollisionSystem } from "../../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../../physics-system/PhysicsSystem.js";
@@ -82,6 +83,7 @@ export class Level7 extends BaseLevel {
         new Wall(0, 0, wallThickness, 768),
         new Ground(0, 0, p.width, 80),
         new Ground(450, 170, 200, 40),
+        new Box(550, 210, 40, 40),
         new TeleportPoint(530, 210, 40, 70, () => this._player),
         new Platform(220, 85, 160, 30),
         new Portal(970, 120, 50, 50),

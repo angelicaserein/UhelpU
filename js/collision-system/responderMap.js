@@ -7,7 +7,28 @@ export const responderMap = {
   "DYNAMIC-TRIGGER": (a, b, eventBus) => dynTriResponse(a, b, eventBus),
 };
 
+// Helper: Handle box collision response (as DYNAMIC object)
+function handleBoxCollision(boxEntity, otherEntity, msg) {
+  if (msg === "left" || msg === "right") {
+    boxEntity.movementComponent.velX = 0;
+    boxEntity.blockedXLastFrame = true;
+  } else if (msg === "top") {
+    boxEntity.headBlockedThisFrame = true;
+    if (boxEntity.movementComponent.velY > 0) {
+      boxEntity.movementComponent.velY = 0;
+    }
+  } else if (msg === "bottom") {
+    boxEntity.movementComponent.velY = 0;
+  }
+}
+
 function basicBlockResponse(a, b, msg) {
+  // Box collision with static platform
+  if (a && a.type === "box") {
+    handleBoxCollision(a, b, msg);
+    return;
+  }
+
   // 敌人（被踩踏）碰撞处理 - 忽略已死敌人
   if (b && b.type === "enemy") {
     // 检查敌人是否已死，已死的敌人无法再被互动
@@ -124,6 +145,84 @@ function dynDynBlockResponse(a, b, msg) {
     }
   }
 
+  // Replayer vs Enemy: 分身可以踩敌人，但侧碰不会死亡
+  if (a && b && a.type === "replayer" && b.type === "enemy") {
+    if (b.deathState && b.deathState.isDead) {
+      return;
+    }
+
+    if (msg === "a_on_b") {
+      // 分身踩到敌人：弹跳 + 敌人死亡
+      if (a.movementComponent) {
+        a.movementComponent.velY = 17.5;
+      }
+      if (a.controllerManager && a.controllerManager.currentControlComponent) {
+        a.controllerManager.currentControlComponent.abilityCondition[
+          "isOnGround"
+        ] = true;
+      }
+      if (typeof b.triggerDeath === "function") {
+        b.triggerDeath();
+      }
+      return;
+    }
+
+    // 分身侧碰敌人：无作用（不会死）
+    if (msg === "allowed collision" || msg === "b_on_a") {
+      return;
+    }
+  }
+
+  // Player/Replayer pushing Box (lateral collision)
+  if (a && b && (a.type === "player" || a.type === "replayer") && b.type === "box") {
+    if (msg === "allowed collision") {
+      return;
+    }
+    if (msg === "a_on_b") {
+      // a 踩在 box 头上
+      if (a.controllerManager && a.controllerManager.currentControlComponent) {
+        a.controllerManager.currentControlComponent.abilityCondition[
+          "isOnGround"
+        ] = true;
+        a.controllerManager.currentControlComponent.abilityCondition[
+          "groundVelY"
+        ] = b.movementComponent ? b.movementComponent.velY : 0;
+      }
+    } else if (msg === "b_on_a") {
+      // box 踩在 a 头上（rare, but handle it)
+      if (b.controllerManager && b.controllerManager.currentControlComponent) {
+        b.controllerManager.currentControlComponent.abilityCondition[
+          "isOnGround"
+        ] = true;
+        b.controllerManager.currentControlComponent.abilityCondition[
+          "groundVelY"
+        ] = a.movementComponent ? a.movementComponent.velY : 0;
+      }
+    }
+    return;
+  }
+
+  // Box pushing Box
+  if (a && b && a.type === "box" && b.type === "box") {
+    if (msg === "allowed collision") {
+      return;
+    }
+    if (msg === "a_on_b") {
+      // a 踩在 b 头上
+      if (a.movementComponent && b.movementComponent) {
+        a.movementComponent.velY = 0;
+        b.movementComponent.velY = Math.max(b.movementComponent.velY, 0);
+      }
+    } else if (msg === "b_on_a") {
+      // b 踩在 a 头上
+      if (a.movementComponent && b.movementComponent) {
+        b.movementComponent.velY = 0;
+        a.movementComponent.velY = Math.max(a.movementComponent.velY, 0);
+      }
+    }
+    return;
+  }
+
   if (msg === "allowed collision") {
     return;
   }
@@ -161,7 +260,7 @@ function dynDynBlockResponse(a, b, msg) {
       ] = a.movementComponent ? a.movementComponent.velY : 0;
     }
     // 标记玩家正在踩在分身上
-    if (a.type === "replayer") {
+    if (a.type === "replayer" && b.type === "player") {
       b._currentlyOnReplayer = true;
       b._wasStandingOnReplayer = true;
     }

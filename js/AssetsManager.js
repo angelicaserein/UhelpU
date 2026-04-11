@@ -65,6 +65,7 @@ export const Assets = {
   tileImage_wall: null,
   tileImage_signboard: null,
   tileImage_signboard2: null,
+  tileImage_box: null,
   tileImage_Jump: null,
   tileImage_doorOpen: null,
   tileImage_doorClose: null,
@@ -232,6 +233,7 @@ export const Assets = {
         p.loadImage("assets/images/tiles/signboard2.png"),
         "木牌2贴图",
       ),
+      this._safeLoad(p.loadImage("assets/images/tiles/box.png"), "box贴图"),
       this._safeLoad(p.loadImage("assets/images/achieve/1.png"), "成就图标1"),
       this._safeLoad(p.loadImage("assets/images/achieve/2.png"), "成就图标2"),
       this._safeLoad(p.loadImage("assets/images/achieve/3.png"), "成就图标3"),
@@ -338,15 +340,15 @@ export const Assets = {
     this.tileImage_wall = results[54];
     this.tileImage_signboard = results[55];
     this.tileImage_signboard2 = results[56];
-    this.tileImage_Jump = results[67];
-    this.tileImage_doorOpen = results[68];
-    this.tileImage_doorClose = results[69];
-    this.bgImageDemo2Level = results[70];
-    this.bgImageLanguageChoice = results[71];
-    this.tileImage_teleportPointClose = results[72];
-    this.tileImage_teleportPointOpen = results[73];
+    this.tileImage_box = results[57];
+    this.tileImage_Jump = results[68];
+    this.tileImage_doorOpen = results[69];
+    this.tileImage_doorClose = results[70];
+    this.bgImageDemo2Level = results[71];
+    this.bgImageLanguageChoice = results[72];
+    this.tileImage_teleportPointClose = results[73];
+    this.tileImage_teleportPointOpen = results[74];
     this.achieveImgs = [
-      results[57],
       results[58],
       results[59],
       results[60],
@@ -356,6 +358,7 @@ export const Assets = {
       results[64],
       results[65],
       results[66],
+      results[67],
     ];
   },
 };

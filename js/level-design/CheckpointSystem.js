@@ -24,6 +24,22 @@ export class CheckpointSystem {
     document.addEventListener("keydown", this._onTeleportKeyDown);
   }
 
+  /**
+   * demo2 和 easy 关卡禁用按键传送到存档点（B 键）
+   * 仅 demo1 的 CheckpointDemo1 支持 B 键，CheckpointDemo2 不支持
+   * @returns {boolean}
+   */
+  _isTeleportEnabledForCurrentLevel() {
+    const level = this._getLevel();
+    if (!level) return false;
+
+    const levelIndex = level.__levelIndex;
+    if (typeof levelIndex === "string" && (levelIndex.startsWith("demo2_") || levelIndex.startsWith("easy_"))) {
+      return false;
+    }
+
+    return true;
+  }
 
   /**
    * 查找离玩家最近的已激活存档点
@@ -107,6 +123,7 @@ export class CheckpointSystem {
 
   /**
    * 传送到已激活的 TeleportPoint（优先）或最后激活的 Checkpoint（按键触发）
+   * TeleportPoint 在所有 demo 中均可用；CheckpointDemo2（demo2/easy）的 B 键传送被禁用
    */
   teleportToNearestCheckpoint() {
     const level = this._getLevel();
@@ -125,8 +142,8 @@ export class CheckpointSystem {
     // TeleportPoint 优先
     let target = this._findActivatedTeleportPoint();
 
-    // 无 TeleportPoint 时回退到最后激活的 Checkpoint
-    if (!target) {
+    // 无 TeleportPoint 时回退到最后激活的 Checkpoint（仅 demo1 支持）
+    if (!target && this._isTeleportEnabledForCurrentLevel()) {
       target = this.findLastActivatedCheckpoint(player);
     }
 

@@ -1,4 +1,4 @@
-﻿import { Player, Ground, Wall, Platform, Spike, Checkpoint, TeleportPoint, Button, Portal } from "../../game-entity-model/index.js";
+﻿import { Player, Ground, Wall, Platform, Spike, Checkpoint, TeleportPoint, Button, Portal, WireRenderer } from "../../game-entity-model/index.js";
 import { BaseLevel } from "../BaseLevel.js";
 import { Demo2RecordUI } from "../../record-system/Demo2RecordUI.js";
 import { BtnWirePortalSystem } from "../../mechanism-system/demo2/BtnWirePortalSystem.js";
@@ -39,6 +39,7 @@ export class Level6 extends BaseLevel {
     const wpSys_0 = new BtnWirePortalSystem({ button: wpBtn_0, portal: wpPortal_0 });
     this.entities.add(wpBtn_0);
     this.entities.add(wpPortal_0);
+    this.entities.add(new WireRenderer(wpSys_0));
 
     this.initSystems(this._player, 5000, { uiClass: Demo2RecordUI });
 
@@ -52,10 +53,6 @@ export class Level6 extends BaseLevel {
   }
 
   draw(p = this.p) {
-    // ⚠️ 关键：必须先调用 super.draw(p) 来绘制所有实体
     super.draw(p);
-
-    // 然后绘制系统的特殊效果
-    this._wpSys_0?.draw?.(p);
   }
 }

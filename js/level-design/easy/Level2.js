@@ -39,7 +39,7 @@ export class Level2 extends BaseLevel {
         npcId: "easy_level2_npc",
         dialogueLines: ["easy_level2_npc_line1", "easy_level2_npc_line2"],
         exhaustedLine: "easy_level2_npc_exhausted",
-      })
+      }),
     );
 
     // ── Checkpoint ────────────────────────────────────────
@@ -50,7 +50,7 @@ export class Level2 extends BaseLevel {
     const bsSpike_0 = new Spike(640, 80, 100, 20);
     this._bsSys_0 = new ButtonSpikeLinkSystem(
       { button: bsBtn_0, spikes: [bsSpike_0] },
-      { startColorIndex: 0 }
+      { startColorIndex: 0 },
     );
     this.entities.add(bsBtn_0);
     this.entities.add(bsSpike_0);
@@ -60,7 +60,7 @@ export class Level2 extends BaseLevel {
     const bsSpike_1 = new Spike(900, 80, 200, 20);
     this._bsSys_1 = new ButtonSpikeLinkSystem(
       { button: bsBtn_1, spikes: [bsSpike_1] },
-      { startColorIndex: 1 }
+      { startColorIndex: 1 },
     );
     this.entities.add(bsBtn_1);
     this.entities.add(bsSpike_1);

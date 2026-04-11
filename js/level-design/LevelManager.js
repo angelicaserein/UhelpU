@@ -236,6 +236,9 @@ export class LevelManager {
       return;
     }
 
+    // 追踪checkpoint激活状态
+    this._trackCheckpointActivations();
+
     // Only pause completely during EXIT phase
     let shouldPause = false;
     if (
@@ -274,6 +277,19 @@ export class LevelManager {
 
     this.drawLevelTitleOverlay(p);
     // NOTE: vignette overlay is drawn in AppCoordinator (after resetMatrix)
+  }
+
+  /**
+   * 追踪checkpoint的激活状态
+   */
+  _trackCheckpointActivations() {
+    if (!this.level) return;
+
+    for (const entity of this.level.entities) {
+      if (entity.type === "checkpoint" && entity.activated) {
+        this._checkpointSystem.recordCheckpointActivation(entity);
+      }
+    }
   }
 
   setPaused(paused) {
@@ -350,9 +366,8 @@ export class LevelManager {
         player.y > viewBounds.maxY ||
         player.y + player.collider.h < viewBounds.minY
       ) {
-        // 查找最近的已激活存档点
-        const checkpoint =
-          this._checkpointSystem.findNearestActivatedCheckpoint(player);
+        // 查找最后激活的存档点
+        const checkpoint = this._checkpointSystem.findLastActivatedCheckpoint(player);
         if (checkpoint) {
           this._checkpointSystem.respawnPlayerAtCheckpoint(player, checkpoint);
         } else {

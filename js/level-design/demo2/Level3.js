@@ -96,5 +96,4 @@ export class Level3 extends BaseLevel {
     this._bsSys_1.update();
     this._bsSys_2.update();
   }
-
 }

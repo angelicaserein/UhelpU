@@ -90,7 +90,7 @@ export class CheckpointSystem {
   }
 
   /**
-   * 在存档点位置重生玩家，并清除已有的分身
+   * 在存档点位置重生玩家，并清除已有的分身和重置录制系统
    * @param {object} player
    * @param {object} checkpoint
    */
@@ -108,6 +108,11 @@ export class CheckpointSystem {
         if (typeof level.syncSystemsEntities === "function") {
           level.syncSystemsEntities();
         }
+      }
+
+      // 重置录制系统到待录制状态（"准备捕捉"）
+      if (level.recordSystem && typeof level.recordSystem.resetToReadyToRecord === "function") {
+        level.recordSystem.resetToReadyToRecord();
       }
     }
 

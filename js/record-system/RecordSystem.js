@@ -104,6 +104,49 @@ export class RecordSystem {
     return this._disabled;
   }
 
+  /**
+   * 重置录制系统回到待录制状态（"准备捕捉"）
+   * 在玩家死亡重生时调用
+   */
+  resetToReadyToRecord() {
+    // 清除所有计时器
+    if (this.recordTimer) {
+      clearTimeout(this.recordTimer);
+      this.recordTimer = null;
+    }
+    if (this.replayTimer) {
+      clearTimeout(this.replayTimer);
+      this.replayTimer = null;
+    }
+    if (this.eventDispatchTimer) {
+      clearTimeout(this.eventDispatchTimer);
+      this.eventDispatchTimer = null;
+    }
+    for (const timer of this.eventTimers) {
+      clearTimeout(timer);
+    }
+    this.eventTimers = [];
+
+    // 清除回放状态
+    this._replayRecords = [];
+    this._replayCursor = 0;
+    this._pausedRecordElapsed = null;
+    this._pausedReplayElapsed = null;
+
+    // 清除分身（已在 CheckpointSystem 中处理，但这里也进行清理）
+    if (this.replayer) {
+      this.removeReplayer();
+    }
+
+    // 重置 clip
+    this.clip = null;
+    this.recordStartTime = -1;
+    this.recordEndTime = -1;
+
+    // 设置状态回到 ReadyToRecord
+    this.state = "ReadyToRecord";
+  }
+
   createListeners() {
     window.addEventListener("keydown", this._keydownHandler);
     window.addEventListener("keyup", this._keyupHandler);

@@ -1,4 +1,15 @@
-﻿import { Player, Ground, Wall, Platform, Spike, Checkpoint, TeleportPoint, Button, Portal, WireRenderer } from "../../game-entity-model/index.js";
+﻿import {
+  Player,
+  Ground,
+  Wall,
+  Platform,
+  Spike,
+  Checkpoint,
+  TeleportPoint,
+  Button,
+  Portal,
+  WireRenderer,
+} from "../../game-entity-model/index.js";
 import { BaseLevel } from "../BaseLevel.js";
 import { Demo2RecordUI } from "../../record-system/Demo2RecordUI.js";
 import { BtnWirePortalSystem } from "../../mechanism-system/demo2/BtnWirePortalSystem.js";
@@ -39,7 +50,10 @@ export class Level6 extends BaseLevel {
     // BtnWirePortalSystem
     const wpBtn_0 = new Button(1090, 80, 34, 16);
     const wpPortal_0 = new Portal(1230, 360, 50, 50);
-    const wpSys_0 = new BtnWirePortalSystem({ button: wpBtn_0, portal: wpPortal_0 });
+    const wpSys_0 = new BtnWirePortalSystem({
+      button: wpBtn_0,
+      portal: wpPortal_0,
+    });
     this.entities.add(wpBtn_0);
     this.entities.add(wpPortal_0);
     this.entities.add(new WireRenderer(wpSys_0));

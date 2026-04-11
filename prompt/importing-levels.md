@@ -280,7 +280,9 @@ export class LevelX extends BaseLevel {
 | 情况                        | 做法                                      |
 | --------------------------- | ----------------------------------------- |
 | **没有某个系统**            | 就不导入、不创建、不调用 `update()`       |
-| **没有 Checkpoint**         | 删除 CheckpointDemo2 导入和创建代码       |
+| **没有 Checkpoint**         | 删除 Checkpoint/CheckpointDemo2 导入和创建代码       |
+| **Checkpoint 不显示**       | 检查是否传了 `() => this._player` 参数 |
+| **TeleportPoint 不显示**    | 检查是否传了 `() => this._player` 参数 |
 | **没有 NPC**                | 删除 NPCDemo2 导入和创建代码              |
 | **没有按钮-地刺系统**       | 删除 ButtonSpikeLinkSystem 导入和创建代码 |
 | **Portal 常开**             | 调用 `portal.openPortal()`                |
@@ -295,6 +297,7 @@ export class LevelX extends BaseLevel {
 | 错误                                             | 原因                                                  | 修复                                     |
 | ------------------------------------------------ | ----------------------------------------------------- | ---------------------------------------- |
 | Checkpoint不自动激活                             | 用了 `Checkpoint`                                     | 改为 `CheckpointDemo2`                   |
+| Checkpoint/TeleportPoint 不显示                  | 没传 `() => this._player` 参数                        | 添加参数：`new Checkpoint(x, y, w, h, () => this._player)` |
 | NPC不显示                                        | 用了 `NPC`                                            | 改为 `NPCDemo2`                          |
 | Signboard不显示                                  | 用了 `SignboardDemo1`                                 | 改为 `SignboardDemo2`                    |
 | Portal打不开                                     | 常开传送门没调用 `openPortal()`                       | 添加 `portal.openPortal()`               |

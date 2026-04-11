@@ -136,5 +136,4 @@ export class Level1 extends BaseLevel {
   draw(p) {
     super.draw(p);
   }
-  }
 }

@@ -180,28 +180,37 @@ export class StaticPageWinEasy extends PageBase {
       this._currentScore = window.finalScore || null;
       console.log("[WinEasy Load] playerName:", window.playerName, "finalScore:", window.finalScore, "currentScore:", this._currentScore);
 
-      // 去重逻辑：每个玩家名字只保留最佳成绩（时间最短）
+      // 去重逻辑：同名但身份不同（游客 vs 账号）视为不同玩家
+      // key = playerName + "|" + isAccount，保证游客 moosry 和账号 moosry 各自独立
       const playerBestScores = {};
       for (const entry of allEntries) {
-        const playerName = entry.playerName;
+        const key = entry.playerName + "|" + !!entry.isAccount;
         const timeSeconds = parseFloat(entry.timeSeconds);
 
-        if (!playerBestScores[playerName]) {
-          playerBestScores[playerName] = { ...entry, timeSeconds };
+        if (!playerBestScores[key]) {
+          playerBestScores[key] = { ...entry, timeSeconds };
         } else {
-          const currentBest = parseFloat(playerBestScores[playerName].timeSeconds);
+          const currentBest = parseFloat(playerBestScores[key].timeSeconds);
           if (timeSeconds < currentBest) {
-            playerBestScores[playerName] = { ...entry, timeSeconds };
+            playerBestScores[key] = { ...entry, timeSeconds };
           }
         }
       }
 
+      // 当前玩家的身份标志（用于匹配）
+      let currentPlayerIsAccount = false;
+      try {
+        if (localStorage.getItem("playerAccount")) currentPlayerIsAccount = true;
+      } catch (e) {}
+      this._currentPlayerIsAccount = currentPlayerIsAccount;
+      const currentPlayerKey = window.playerName + "|" + currentPlayerIsAccount;
+
       // 打印诊断信息
       console.log("[WinEasy] Total entries loaded:", allEntries.length);
       if (window.playerName) {
-        const myRecords = allEntries.filter(e => e.playerName === window.playerName);
-        console.log(`[WinEasy] All records for "${window.playerName}":`, myRecords.map(e => ({ time: e.timeSeconds, date: e.timestamp })));
-        console.log(`[WinEasy] Best from records:`, playerBestScores[window.playerName]);
+        const myRecords = allEntries.filter(e => e.playerName === window.playerName && !!e.isAccount === currentPlayerIsAccount);
+        console.log(`[WinEasy] All records for "${window.playerName}" (isAccount=${currentPlayerIsAccount}):`, myRecords.map(e => ({ time: e.timeSeconds, date: e.timestamp })));
+        console.log(`[WinEasy] Best from records:`, playerBestScores[currentPlayerKey]);
       }
 
       // 转换为数组并按时间排序，取前10名
@@ -221,17 +230,17 @@ export class StaticPageWinEasy extends PageBase {
         }
         this._currentRank = currentRank;
 
-        // 历史最佳成绩和排名
-        const playerBestValue = playerBestScores[window.playerName];
+        // 历史最佳成绩和排名（用复合 key 精确匹配当前玩家）
+        const playerBestValue = playerBestScores[currentPlayerKey];
         if (playerBestValue) {
-          // 确保是数字类型并比较
           this._bestScore = parseFloat(playerBestValue.timeSeconds);
 
-          // 计算历史最佳在排行榜中的排名
           const sortedByTime = Object.values(playerBestScores)
             .map(e => ({ ...e, time: parseFloat(e.timeSeconds) }))
             .sort((a, b) => a.time - b.time);
-          this._bestRank = sortedByTime.findIndex(e => e.playerName === window.playerName) + 1;
+          this._bestRank = sortedByTime.findIndex(
+            e => e.playerName === window.playerName && !!e.isAccount === currentPlayerIsAccount
+          ) + 1;
 
           console.log("[WinEasy] bestScore type:", typeof this._bestScore, "value:", this._bestScore);
         }
@@ -432,7 +441,7 @@ export class StaticPageWinEasy extends PageBase {
       // 仅当动画开始时才绘制
       if (animProgress === 0) continue;
 
-      const isCurrentPlayer = entry.playerName === window.playerName;
+      const isCurrentPlayer = entry.playerName === window.playerName && !!entry.isAccount === !!this._currentPlayerIsAccount;
 
       // 高亮当前玩家背景
       if (isCurrentPlayer) {
@@ -477,23 +486,24 @@ export class StaticPageWinEasy extends PageBase {
       p.textAlign(p.LEFT, p.TOP);
       p.text(rankText, baseX - panelWidth / 2 + 12, y);
 
-      // 玩家名字（当前玩家用不同颜色，第一名用彩虹效果）
+      // 玩家名字（账号用户加 👑，当前玩家用不同颜色，第一名用彩虹效果）
+      const displayName = entry.isAccount ? "👑" + entry.playerName : entry.playerName;
       if (i === 0) {
         // 第一名用彩虹效果
-        this._drawRainbowWaveText(p, entry.playerName, baseX - panelWidth / 2 + 50, y, alpha);
+        this._drawRainbowWaveText(p, displayName, baseX - panelWidth / 2 + 50, y, alpha);
         // 如果第一名是当前玩家，加上YOU标识
         if (isCurrentPlayer) {
           p.fill(255, 200, 100, Math.min(220, alpha * 1.1));
-          p.text(" ← YOU", baseX - panelWidth / 2 + 50 + p.textWidth(entry.playerName), y);
+          p.text(" ← YOU", baseX - panelWidth / 2 + 50 + p.textWidth(displayName), y);
         }
       } else if (isCurrentPlayer) {
         p.fill(255, 255, 100, Math.min(255, alpha * 1.2));
         p.textAlign(p.LEFT, p.TOP);
-        p.text(entry.playerName + " ← YOU", baseX - panelWidth / 2 + 50, y);
+        p.text(displayName + " ← YOU", baseX - panelWidth / 2 + 50, y);
       } else {
         p.fill(255, 255, 255, Math.min(220, alpha * 1.1));
         p.textAlign(p.LEFT, p.TOP);
-        p.text(entry.playerName, baseX - panelWidth / 2 + 50, y);
+        p.text(displayName, baseX - panelWidth / 2 + 50, y);
       }
 
       // 右侧显示时间

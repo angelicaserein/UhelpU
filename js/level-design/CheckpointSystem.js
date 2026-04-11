@@ -11,6 +11,8 @@ export class CheckpointSystem {
   constructor(getLevel) {
     this._getLevel = getLevel;
     this._keyBindingManager = KeyBindingManager.getInstance();
+    this._lastActivatedCheckpoint = null;
+    this._checkpointActivationOrder = []; // 记录checkpoint激活顺序
 
     this._onTeleportKeyDown = (e) => {
       const teleportKey =
@@ -22,21 +24,6 @@ export class CheckpointSystem {
     document.addEventListener("keydown", this._onTeleportKeyDown);
   }
 
-  /**
-   * demo2 关卡禁用按键传送到存档点（B 键）
-   * @returns {boolean}
-   */
-  _isTeleportEnabledForCurrentLevel() {
-    const level = this._getLevel();
-    if (!level) return false;
-
-    const levelIndex = level.__levelIndex;
-    if (typeof levelIndex === "string" && levelIndex.startsWith("demo2_")) {
-      return false;
-    }
-
-    return true;
-  }
 
   /**
    * 查找离玩家最近的已激活存档点
@@ -61,6 +48,26 @@ export class CheckpointSystem {
       }
     }
     return nearest;
+  }
+
+  /**
+   * 查找最后激活的已激活存档点（按激活顺序）
+   * @param {object} player - 不使用，保持接口一致
+   * @returns {object|null}
+   */
+  findLastActivatedCheckpoint(player) {
+    return this._lastActivatedCheckpoint;
+  }
+
+  /**
+   * 记录checkpoint激活（在checkpoint激活时调用）
+   * @param {object} checkpoint
+   */
+  recordCheckpointActivation(checkpoint) {
+    if (checkpoint && checkpoint.activated) {
+      this._lastActivatedCheckpoint = checkpoint;
+      this._checkpointActivationOrder.push(checkpoint);
+    }
   }
 
   /**
@@ -99,8 +106,7 @@ export class CheckpointSystem {
   }
 
   /**
-   * 传送到已激活的 TeleportPoint（优先）或最近的 Checkpoint（按键触发）
-   * TeleportPoint 在所有 demo 中均可用；Checkpoint 在 demo2 中被屏蔽。
+   * 传送到已激活的 TeleportPoint（优先）或最后激活的 Checkpoint（按键触发）
    */
   teleportToNearestCheckpoint() {
     const level = this._getLevel();
@@ -116,12 +122,12 @@ export class CheckpointSystem {
     }
     if (!player || (player.deathState && player.deathState.isDead)) return;
 
-    // TeleportPoint 优先，且在所有 demo 中均可用
+    // TeleportPoint 优先
     let target = this._findActivatedTeleportPoint();
 
-    // 无 TeleportPoint 时回退到 Checkpoint（demo2 中被屏蔽）
-    if (!target && this._isTeleportEnabledForCurrentLevel()) {
-      target = this.findNearestActivatedCheckpoint(player);
+    // 无 TeleportPoint 时回退到最后激活的 Checkpoint
+    if (!target) {
+      target = this.findLastActivatedCheckpoint(player);
     }
 
     if (!target) return;

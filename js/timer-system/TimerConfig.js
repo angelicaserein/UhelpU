@@ -9,16 +9,16 @@
 
 export const TIMER_CONFIG = {
   // ── 简单难度（启用计时） ────────────────────────────────────
-  easy_level1: { enabled: false },
+  easy_level1: { enabled: true },
   easy_level2: { enabled: true },
-  easy_level3: { enabled: false },
-  easy_level4: { enabled: false },
-  easy_level5: { enabled: false },
-  easy_level6: { enabled: false },
-  easy_level7: { enabled: false },
-  easy_level8: { enabled: false },
-  easy_level9: { enabled: false },
-  easy_level10: { enabled: false },
+  easy_level3: { enabled: true },
+  easy_level4: { enabled: true },
+  easy_level5: { enabled: true },
+  easy_level6: { enabled: true },
+  easy_level7: { enabled: true },
+  easy_level8: { enabled: true },
+  easy_level9: { enabled: true },
+  easy_level10: { enabled: true },
 
   // ── Demo1 难度（禁用计时） ────────────────────────────────────
   level1: { enabled: false },

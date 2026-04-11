@@ -148,6 +148,12 @@ export class EditorUI {
       w: BTN_W2,
       h: BTN_H2,
     };
+    this._btnTeleportPoint = {
+      x: startX + (BTN_W2 + BTN_GAP2) * 5,
+      y: row2Top,
+      w: BTN_W2,
+      h: BTN_H2,
+    };
 
     // BtnPlatform 平台数量 +/- 按钮（第二行，Spawn 按钮右侧）
     const PLAT_COUNT_BTN_W = 28;
@@ -334,6 +340,14 @@ export class EditorUI {
       this.activeTool === EntityTool.SPAWN,
       [255, 180, 0],
     );
+    // TeleportPoint 按钮
+    this._drawButton(
+      p,
+      this._btnTeleportPoint,
+      "TelePort",
+      this.activeTool === EntityTool.TELEPORT_POINT,
+      [100, 180, 255],
+    );
 
     // BtnPlatform 平台数量控制（仅在 BtnPlatform 工具激活时显示）
     if (this.activeTool === EntityTool.BTN_PLATFORM) {
@@ -394,7 +408,9 @@ export class EditorUI {
                           ? "存档点 (Checkpoint)"
                           : this.activeTool === EntityTool.SPAWN
                             ? "出生点 (Spawn)"
-                            : "传送门 (Portal)";
+                            : this.activeTool === EntityTool.TELEPORT_POINT
+                              ? "传送点 (TeleportPoint)"
+                              : "传送门 (Portal)";
     p.text(`正在放置：${toolLabel}`, statusX, statusY);
 
     // 保存按钮
@@ -594,6 +610,11 @@ export class EditorUI {
     // Spawn 按钮
     if (this._insideRect(mx, my, this._btnSpawn)) {
       this.activeTool = EntityTool.SPAWN;
+      return true;
+    }
+    // TeleportPoint 按钮
+    if (this._insideRect(mx, my, this._btnTeleportPoint)) {
+      this.activeTool = EntityTool.TELEPORT_POINT;
       return true;
     }
     // 添加房间按钮

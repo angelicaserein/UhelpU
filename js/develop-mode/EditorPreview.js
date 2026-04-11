@@ -20,6 +20,7 @@ import {
   SIGNBOARD_SIZE,
   CHECKPOINT_SIZE,
   ENEMY_DEFAULTS,
+  TELEPORT_POINT_SIZE,
 } from "./EditorConfig.js";
 
 export class EditorPreview {
@@ -93,6 +94,9 @@ export class EditorPreview {
     } else if (tool === EntityTool.CHECKPOINT) {
       this.previewW = CHECKPOINT_SIZE.width;
       this.previewH = CHECKPOINT_SIZE.height;
+    } else if (tool === EntityTool.TELEPORT_POINT) {
+      this.previewW = TELEPORT_POINT_SIZE.width;
+      this.previewH = TELEPORT_POINT_SIZE.height;
     } else if (tool === EntityTool.ENEMY) {
       this.previewW = ENEMY_DEFAULTS.width;
       this.previewH = ENEMY_DEFAULTS.height;
@@ -323,6 +327,19 @@ export class EditorPreview {
       );
       p.noStroke();
       p.fill(200, 80, 180, PREVIEW_ALPHA * 0.4);
+      p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
+    } else if (tool === EntityTool.TELEPORT_POINT) {
+      p.stroke(100, 180, 255, PREVIEW_ALPHA);
+      this._dashedRect(
+        p,
+        this.previewX,
+        this.previewY,
+        this.previewW,
+        this.previewH,
+        8,
+      );
+      p.noStroke();
+      p.fill(100, 180, 255, PREVIEW_ALPHA * 0.4);
       p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
     } else if (tool === EntityTool.ENEMY) {
       p.stroke(100, 200, 100, PREVIEW_ALPHA);

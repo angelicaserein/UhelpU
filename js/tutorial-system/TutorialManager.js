@@ -185,6 +185,10 @@ export class TutorialManager {
       this.eventBus.publish(EventTypes.TUTORIAL_CLOSE_SIGNBOARD);
     }
 
+    // 显示 ESC 跳过提示（位于画布右上角）
+    const canvasRect = this._getCanvasRect();
+    this.ui.showEscHint(canvasRect);
+
     // 进入第一个教学 PHASE（GUIDE_RECORD）
     this._transitionToPhase(TutorialStates.GUIDE_RECORD);
 

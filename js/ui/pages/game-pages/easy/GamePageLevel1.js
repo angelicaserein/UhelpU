@@ -7,10 +7,17 @@ import "../../../../tutorial-system/i18n-tutorial.js";
 
 export class GamePageLevel1 extends GamePageBaseDemo2 {
   constructor(switcher, p) {
-    super(switcher, p, 1, "easy_hint_level1", "easy_level1", { showButtons: false });
+    super(switcher, p, 1, "easy_hint_level1", "easy_level1", {
+      showButtons: false,
+    });
     this.tutorial = null;
     this._onTutorialStartRequested = null;
     this._level = null; // 会在 enter() 中设置
+
+    // 应用 Easy 风格计时器
+    if (this._gameTimer) {
+      this._gameTimer.applyEasyStyle(p.canvas);
+    }
   }
 
   enter() {
@@ -23,14 +30,16 @@ export class GamePageLevel1 extends GamePageBaseDemo2 {
 
     if (level && level.recordSystem) {
       this._level = level;
-      console.log("[GamePageLevel1] ✓ Got level instance from window._easyLevel1Current");
+      console.log(
+        "[GamePageLevel1] ✓ Got level instance from window._easyLevel1Current",
+      );
 
       this.tutorial = new TutorialManager(
         document.body,
         this._level,
         this._level.recordSystem,
         this.switcher.eventBus,
-        this._p  // 传递 p5 实例
+        this._p, // 传递 p5 实例
       );
 
       this._onTutorialStartRequested = () => {
@@ -43,14 +52,19 @@ export class GamePageLevel1 extends GamePageBaseDemo2 {
       if (this.switcher.eventBus) {
         this.switcher.eventBus.subscribe(
           EventTypes.TUTORIAL_START_REQUESTED,
-          this._onTutorialStartRequested
+          this._onTutorialStartRequested,
         );
       }
 
       console.log("[GamePageLevel1] ✓ Tutorial manager created and ready");
     } else {
-      console.warn("[GamePageLevel1] ✗ Could not get level from window._easyLevel1Current");
-      console.warn("[GamePageLevel1] window._easyLevel1Current:", window._easyLevel1Current);
+      console.warn(
+        "[GamePageLevel1] ✗ Could not get level from window._easyLevel1Current",
+      );
+      console.warn(
+        "[GamePageLevel1] window._easyLevel1Current:",
+        window._easyLevel1Current,
+      );
     }
   }
 
@@ -59,7 +73,7 @@ export class GamePageLevel1 extends GamePageBaseDemo2 {
     if (this._onTutorialStartRequested && this.switcher.eventBus) {
       this.switcher.eventBus.unsubscribe(
         EventTypes.TUTORIAL_START_REQUESTED,
-        this._onTutorialStartRequested
+        this._onTutorialStartRequested,
       );
     }
 

@@ -233,6 +233,7 @@ export class SignboardDemo2 extends GameEntity {
 
     // 键盘监听
     this._onKeyDown = (e) => {
+      if (window._tutorialPauseMenuDisabled) return;
       const interactionKey =
         this._keyBindingManager.getKeyByIntent("interaction");
       if (

@@ -22,6 +22,7 @@ export class TutorialUI {
     this._promptBoxes = []; // 所有提示框
     this._labels = []; // 所有标签元素，用于清理
     this._activeElements = []; // 所有创建的 DOM 元素
+    this._escHintEl = null; // ESC 跳过提示元素
 
     // 订阅语言变化，实时更新提示文本
     this._onLangChange = () => this._updatePromptTexts();
@@ -302,6 +303,59 @@ export class TutorialUI {
   }
 
   /**
+   * 在画布右上角显示 ESC 跳过提示
+   * @param {DOMRect} canvasRect - canvas 的位置信息
+   */
+  showEscHint(canvasRect) {
+    if (this._escHintEl) return; // 已存在则不重复创建
+
+    const el = document.createElement("div");
+    el.className = "tutorial-esc-hint";
+    el.style.position = "fixed";
+    el.style.right = (window.innerWidth - canvasRect.right + 12) + "px";
+    el.style.top = (canvasRect.top + 12) + "px";
+    el.style.zIndex = "5600";
+    el.style.padding = "6px 12px";
+    el.style.background = "rgba(30, 20, 50, 0.85)";
+    el.style.border = "1px solid #a085db";
+    el.style.borderRadius = "6px";
+    el.style.fontFamily = '"HYPixel11", "PixelFont", sans-serif';
+    el.style.fontSize = "14px";
+    el.style.color = "#c0b0e8";
+    el.style.pointerEvents = "none";
+    el.style.animation = "fadeIn 0.3s ease";
+
+    el._tutorialTextKey = "tutorial_press_esc_to_skip";
+    el.textContent = t("tutorial_press_esc_to_skip");
+
+    document.body.appendChild(el);
+    this._escHintEl = el;
+    this._activeElements.push(el);
+
+    // 订阅语言变化时更新文本
+    this._updateEscHintText = () => {
+      if (el) el.textContent = t("tutorial_press_esc_to_skip");
+    };
+    i18n.onChange(this._updateEscHintText);
+  }
+
+  /**
+   * 隐藏 ESC 跳过提示
+   */
+  hideEscHint() {
+    if (this._escHintEl) {
+      this._escHintEl.remove();
+      const idx = this._activeElements.indexOf(this._escHintEl);
+      if (idx !== -1) this._activeElements.splice(idx, 1);
+      this._escHintEl = null;
+    }
+    if (this._updateEscHintText) {
+      i18n.offChange(this._updateEscHintText);
+      this._updateEscHintText = null;
+    }
+  }
+
+  /**
    * 高亮 DOM 元素
    * @param {HTMLElement} element
    */
@@ -323,6 +377,7 @@ export class TutorialUI {
    * 清理所有 UI 元素
    */
   cleanup() {
+    this.hideEscHint();
     this._removeAllPrompts();
 
     // 移除所有标签

@@ -22,6 +22,7 @@ import {
   CHECKPOINT_SIZE,
   ENEMY_DEFAULTS,
   DELETE_BTN_SIZE,
+  TELEPORT_POINT_SIZE,
 } from "./EditorConfig.js";
 import { Ground } from "../game-entity-model/terrain/Ground.js";
 import { Portal } from "../game-entity-model/interactables/Portal.js";
@@ -36,6 +37,7 @@ import { NPCDemo1 } from "../game-entity-model/interactables/NPCDemo1.js";
 import { SignboardDemo2 } from "../game-entity-model/interactables/SignboardDemo2.js";
 import { Checkpoint } from "../game-entity-model/interactables/Checkpoint.js";
 import { Enemy } from "../game-entity-model/characters/Enemy.js";
+import { TeleportPoint } from "../game-entity-model/interactables/TeleportPoint.js";
 
 /**
  * @typedef {Object} PlacedRecord
@@ -222,6 +224,13 @@ export class EditorEntityManager {
         ENEMY_DEFAULTS.width,
         ENEMY_DEFAULTS.height,
         { speed: ENEMY_DEFAULTS.speed },
+      );
+    } else if (tool === EntityTool.TELEPORT_POINT) {
+      gameEntity = new TeleportPoint(
+        x,
+        y,
+        TELEPORT_POINT_SIZE.width,
+        TELEPORT_POINT_SIZE.height,
       );
     } else {
       gameEntity = new Portal(x, y, w, h);
@@ -554,6 +563,7 @@ export class EditorEntityManager {
         rec.tool === EntityTool.NPC ||
         rec.tool === EntityTool.SIGNBOARD ||
         rec.tool === EntityTool.CHECKPOINT ||
+        rec.tool === EntityTool.TELEPORT_POINT ||
         rec.tool === EntityTool.ENEMY
       )
         continue;
@@ -1388,6 +1398,8 @@ export class EditorEntityManager {
         p.stroke(200, 160, 80, 180);
       } else if (rec.tool === EntityTool.CHECKPOINT) {
         p.stroke(200, 80, 180, 180);
+      } else if (rec.tool === EntityTool.TELEPORT_POINT) {
+        p.stroke(100, 180, 255, 180);
       } else if (rec.tool === EntityTool.ENEMY) {
         p.stroke(100, 200, 100, 180);
       } else {
@@ -1401,7 +1413,8 @@ export class EditorEntityManager {
         rec.tool !== EntityTool.PORTAL &&
         rec.tool !== EntityTool.NPC &&
         rec.tool !== EntityTool.SIGNBOARD &&
-        rec.tool !== EntityTool.CHECKPOINT
+        rec.tool !== EntityTool.CHECKPOINT &&
+        rec.tool !== EntityTool.TELEPORT_POINT
       ) {
         this._drawHandles(p, e.x, e.y, w, h);
       }
@@ -1431,6 +1444,8 @@ export class EditorEntityManager {
         p.text("Sign", 3, 3);
       } else if (rec.tool === EntityTool.CHECKPOINT) {
         p.text("CkPt", 3, 3);
+      } else if (rec.tool === EntityTool.TELEPORT_POINT) {
+        p.text("TelePt", 3, 3);
       } else if (rec.tool === EntityTool.ENEMY) {
         const direction = rec.direction === 1 ? "→" : "←";
         p.text(`Emy ${direction}`, 3, 3);

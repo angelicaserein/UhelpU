@@ -37,7 +37,7 @@ export class Level9 extends BaseLevel {
       5000,
       (x, y) => this.addReplayer(x, y),
       () => this.removeReplayer(),
-      { uiClass: Demo2RecordUI }
+      { uiClass: Demo2RecordUI },
     );
     this.recordSystem.createListeners();
 

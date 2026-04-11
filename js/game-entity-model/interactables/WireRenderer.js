@@ -8,9 +8,9 @@ import { GameEntity } from "../base/GameEntity.js";
 export class WireRenderer extends GameEntity {
   /**
    * @param {object} wireSystem - BtnWirePortalSystem 实例
-   * @param {number} [zIndex=-30] - 绘制层级（负数确保在角色下方）
+   * @param {number} [zIndex=-100] - 绘制层级（非常低的负数确保在所有东西下方）
    */
-  constructor(wireSystem, zIndex = -30) {
+  constructor(wireSystem, zIndex = -100) {
     super(0, 0);
     this.type = "wirerenderer";
     this.zIndex = zIndex;

@@ -6,6 +6,7 @@ import {
   Enemy,
   Button,
   Portal,
+  WireRenderer,
 } from "../../game-entity-model/index.js";
 import { BaseLevel } from "../BaseLevel.js";
 import { Demo2RecordUI } from "../../record-system/Demo2RecordUI.js";
@@ -65,6 +66,7 @@ export class Level5 extends BaseLevel {
     });
     this.entities.add(wpBtn_0);
     this.entities.add(wpPortal_0);
+    this.entities.add(new WireRenderer(this._wpSys_0));
 
     // ── ButtonPlatformLinkSystem（必须在 initSystems() 之后）
     const bpBtn_0 = new Button(770, 340, 40, 20);
@@ -109,11 +111,8 @@ export class Level5 extends BaseLevel {
   }
 
   draw(p) {
-    // ⚠️ 关键：必须先调用 super.draw(p) 来绘制所有实体
     super.draw(p);
 
-    // 然后绘制系统的特殊效果
-    this._wpSys_0?.draw?.(p);
     this._bpSys_0?.draw?.(p);
     this._bpSys_1?.draw?.(p);
     this._bpSys_2?.draw?.(p);

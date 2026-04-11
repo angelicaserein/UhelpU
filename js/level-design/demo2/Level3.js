@@ -7,6 +7,7 @@ import {
   CheckpointDemo2,
   Button,
   Spike,
+  WireRenderer,
 } from "../../game-entity-model/index.js";
 import { BaseLevel } from "../BaseLevel.js";
 import { BtnWirePortalSystem } from "../../mechanism-system/demo2/BtnWirePortalSystem.js";
@@ -54,6 +55,7 @@ export class Level3 extends BaseLevel {
     });
     this.entities.add(wpBtn_0);
     this.entities.add(wpPortal_0);
+    this.entities.add(new WireRenderer(this._wpSys_0));
 
     // ButtonSpikeLinkSystem
     const bsBtn_0 = new Button(340, 80, 34, 16);
@@ -95,8 +97,4 @@ export class Level3 extends BaseLevel {
     this._bsSys_2.update();
   }
 
-  draw(p = this.p) {
-    this._wpSys_0.draw(p);
-    super.draw(p);
-  }
 }

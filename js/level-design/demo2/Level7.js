@@ -1,4 +1,5 @@
 ﻿import {
+  WireRenderer,
   Player,
   Replayer,
   Ground,
@@ -39,6 +40,7 @@ export class Level7 extends BaseLevel {
       button: this._wpBtn_0,
       portal: this._wpPortal_0,
     });
+    this.entities.add(new WireRenderer(this._btnWirePortalSystem));
 
     // ButtonSpikeLinkSystem
     this._buttonSpikeLinkSystem = new ButtonSpikeLinkSystem(
@@ -289,7 +291,6 @@ export class Level7 extends BaseLevel {
     for (const entity of this.entities) {
       if (entity.type === "ground") entity.draw(p);
     }
-    this._btnWirePortalSystem.draw(p);
     for (const entity of this.entities) {
       if (
         entity.type !== "spike" &&

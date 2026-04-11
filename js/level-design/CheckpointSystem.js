@@ -34,7 +34,10 @@ export class CheckpointSystem {
     if (!level) return false;
 
     const levelIndex = level.__levelIndex;
-    if (typeof levelIndex === "string" && (levelIndex.startsWith("demo2_") || levelIndex.startsWith("easy_"))) {
+    if (
+      typeof levelIndex === "string" &&
+      (levelIndex.startsWith("demo2_") || levelIndex.startsWith("easy_"))
+    ) {
       return false;
     }
 
@@ -107,23 +110,27 @@ export class CheckpointSystem {
   }
 
   /**
-   * 查找当前关卡中已激活的 TeleportPoint（优先于 Checkpoint）
-   * @returns {object|null}
+   * 在存档点位置重生玩家
+   * @param {object} player
+   * @param {object} checkpoint
    */
-  _findActivatedTeleportPoint() {
-    const level = this._getLevel();
-    if (!level) return null;
-    for (const entity of level.entities) {
-      if (entity.type === "teleportpoint" && entity.activated) {
-        return entity;
-      }
+  respawnPlayerAtCheckpoint(player, checkpoint) {
+    player.x = checkpoint.x;
+    player.y = checkpoint.y;
+    player.deathState.isDead = false;
+    player.deathState.initialized = false;
+    player.deathState.deathType = null;
+    if (player.movementComponent) {
+      player.movementComponent.velX = 0;
+      player.movementComponent.velY = 0;
     }
-    return null;
+    if (player.controllerManager) {
+      player.controllerManager.resetInputState();
+    }
   }
 
   /**
-   * 传送到已激活的 TeleportPoint（优先）或最后激活的 Checkpoint（按键触发）
-   * TeleportPoint 在所有 demo 中均可用；CheckpointDemo2（demo2/easy）的 B 键传送被禁用
+   * 以 B 键传送到最后激活的 Checkpoint（仅 demo1 支持）
    */
   teleportToNearestCheckpoint() {
     const level = this._getLevel();
@@ -139,24 +146,20 @@ export class CheckpointSystem {
     }
     if (!player || (player.deathState && player.deathState.isDead)) return;
 
-    // TeleportPoint 优先
-    let target = this._findActivatedTeleportPoint();
-
-    // 无 TeleportPoint 时回退到最后激活的 Checkpoint（仅 demo1 支持）
-    if (!target && this._isTeleportEnabledForCurrentLevel()) {
-      target = this.findLastActivatedCheckpoint(player);
-    }
-
-    if (!target) return;
-
-    player.x = target.x;
-    player.y = target.y;
-    if (player.movementComponent) {
-      player.movementComponent.velX = 0;
-      player.movementComponent.velY = 0;
-    }
-    if (player.controllerManager) {
-      player.controllerManager.resetInputState();
+    // 仅 demo1 支持 B 键传送 checkpoint
+    if (this._isTeleportEnabledForCurrentLevel()) {
+      const target = this.findLastActivatedCheckpoint(player);
+      if (target) {
+        player.x = target.x;
+        player.y = target.y;
+        if (player.movementComponent) {
+          player.movementComponent.velX = 0;
+          player.movementComponent.velY = 0;
+        }
+        if (player.controllerManager) {
+          player.controllerManager.resetInputState();
+        }
+      }
     }
   }
 

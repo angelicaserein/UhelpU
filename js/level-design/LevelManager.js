@@ -33,6 +33,7 @@ import { EventTypes } from "../event-system/EventTypes.js";
 import { Assets } from "../AssetsManager.js";
 import { t } from "../i18n.js";
 import { CheckpointSystem } from "./CheckpointSystem.js";
+import { TeleportPointSystem } from "./TeleportPointSystem.js";
 
 export class LevelManager {
   constructor(p, eventBus) {
@@ -86,6 +87,9 @@ export class LevelManager {
 
     // 存档点系统
     this._checkpointSystem = new CheckpointSystem(() => this.level);
+
+    // 传送点系统
+    this._teleportPointSystem = new TeleportPointSystem(() => this.level);
 
     // Portal transition effect
     this.portalTransition = null;
@@ -196,25 +200,44 @@ export class LevelManager {
   }
 
   loadLevel(levelIndex, p = this.p, eventBus = this.eventBus) {
-    console.log("[LevelManager.loadLevel] Attempting to load levelIndex:", levelIndex);
+    console.log(
+      "[LevelManager.loadLevel] Attempting to load levelIndex:",
+      levelIndex,
+    );
     if (!this.level) {
       const LevelClass = this.levelMap[levelIndex];
       if (!LevelClass) {
-        console.error("[LevelManager.loadLevel] ERROR: LevelClass not found for levelIndex:", levelIndex);
-        console.error("[LevelManager.loadLevel] Available keys in levelMap:", Object.keys(this.levelMap));
+        console.error(
+          "[LevelManager.loadLevel] ERROR: LevelClass not found for levelIndex:",
+          levelIndex,
+        );
+        console.error(
+          "[LevelManager.loadLevel] Available keys in levelMap:",
+          Object.keys(this.levelMap),
+        );
         return;
       }
-      console.log("[LevelManager.loadLevel] Found LevelClass:", LevelClass.name);
+      console.log(
+        "[LevelManager.loadLevel] Found LevelClass:",
+        LevelClass.name,
+      );
       this.level = new LevelClass(p, eventBus);
       this.level.__levelIndex = levelIndex;
       this.level.__editorPersistenceKey = levelIndex;
       this.currentLevelIndex = levelIndex;
-      console.log("[LevelManager.loadLevel] Set currentLevelIndex to:", this.currentLevelIndex);
+      console.log(
+        "[LevelManager.loadLevel] Set currentLevelIndex to:",
+        this.currentLevelIndex,
+      );
       this.cameraNudgeX = 0;
       this.startLevelTitleOverlay(levelIndex, p);
+      this._teleportPointSystem.registerTeleportPoints(this.level.entities);
       console.log("[LevelManager.loadLevel] Loaded level:", levelIndex);
     } else {
-      console.warn("[LevelManager.loadLevel] Level already exists, ignoring load request for:", levelIndex);
+      console.warn(
+        "[LevelManager.loadLevel] Level already exists, ignoring load request for:",
+        levelIndex,
+      );
     }
   }
   unloadLevel(p = this.p, eventBus = this.eventBus) {
@@ -367,7 +390,8 @@ export class LevelManager {
         player.y + player.collider.h < viewBounds.minY
       ) {
         // 查找最后激活的存档点
-        const checkpoint = this._checkpointSystem.findLastActivatedCheckpoint(player);
+        const checkpoint =
+          this._checkpointSystem.findLastActivatedCheckpoint(player);
         if (checkpoint) {
           this._checkpointSystem.respawnPlayerAtCheckpoint(player, checkpoint);
         } else {

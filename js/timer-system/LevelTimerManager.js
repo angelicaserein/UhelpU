@@ -134,24 +134,44 @@ export class LevelTimerManager {
           `[LevelTimerManager] ✓ Level completed! Time: ${elapsedTime.toFixed(2)}s`,
         );
 
+        // 保存通关时间到全局变量（供Win Page读取）
+        window.finalScore = elapsedTime;
+        console.log(`[LevelTimerManager] Saved finalScore to window: ${elapsedTime}s`);
+
         // 自动上报成绩到Firebase（异步执行，不阻塞）
-        if (this.levelId.startsWith("easy_") && window.submitScore && window.playerName) {
+        if (
+          this.levelId.startsWith("easy_") &&
+          window.submitScore &&
+          window.playerName
+        ) {
           console.log(
             `[LevelTimerManager] Auto-reporting score for ${this.levelId}...`,
           );
           // 异步执行，不等待结果
-          window.submitScore(window.playerName, elapsedTimeMs, this.levelId).catch((error) => {
-            console.error("[LevelTimerManager] Error submitting score:", error);
-          });
+          window
+            .submitScore(window.playerName, elapsedTimeMs, this.levelId)
+            .catch((error) => {
+              console.error(
+                "[LevelTimerManager] Error submitting score:",
+                error,
+              );
+            });
         } else {
           if (!this.levelId.startsWith("easy_")) {
-            console.log("[LevelTimerManager] Not Easy difficulty, skipping score submission");
+            console.log(
+              "[LevelTimerManager] Not Easy difficulty, skipping score submission",
+            );
           }
           if (!window.submitScore) {
-            console.warn("[LevelTimerManager] window.submitScore not available");
+            console.warn(
+              "[LevelTimerManager] window.submitScore not available",
+            );
           }
           if (!window.playerName) {
-            console.warn("[LevelTimerManager] window.playerName not set:", window.playerName);
+            console.warn(
+              "[LevelTimerManager] window.playerName not set:",
+              window.playerName,
+            );
           }
         }
 

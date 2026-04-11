@@ -20,20 +20,23 @@ export class StaticPageWinEasy extends PageBase {
     const btnW = 180;
     const btnH = 46;
     const btnGap = 14;
-    const btnX = p.width / 2 - btnW / 2;
-    // 按钮位置向下移动，为排行榜腾出空间
-    const btnY0 = p.height / 2 + 120;
+
+    // 计算横排按钮的布局
+    const totalBtnWidth = btnW * 3 + btnGap * 2;
+    const btnStartX = p.width / 2 - totalBtnWidth / 2;
+    // 按钮位置向下移动到屏幕下方，为排行榜腾出中间空间
+    const btnY = p.height * 3 / 4;
 
     // 存储按钮引用以用于键盘导航
     this._winButtons = [];
 
-    // 下一关按钮
+    // 下一关按钮（左边）
     if (levelNum < TOTAL_LEVELS) {
       const nextBtn = new ButtonBase(
         p,
         t("btn_next_level"),
-        btnX,
-        btnY0,
+        btnStartX,
+        btnY,
         () => {
           this.eventBus.publish(
             EventTypes.LOAD_LEVEL,
@@ -56,12 +59,12 @@ export class StaticPageWinEasy extends PageBase {
       });
     }
 
-    // 重试按钮
+    // 重试按钮（中间）
     const restartBtn = new ButtonBase(
       p,
       t("btn_restart"),
-      btnX,
-      btnY0 + btnH + btnGap,
+      btnStartX + btnW + btnGap,
+      btnY,
       () => {
         console.log(
           "[WinEasy] Restart - publishing LOAD_LEVEL with levelIndex:",
@@ -85,12 +88,12 @@ export class StaticPageWinEasy extends PageBase {
       },
     });
 
-    // 返回菜单按钮
+    // 返回菜单按钮（右边）
     const backBtn = new ButtonBase(
       p,
       t("btn_back_menu"),
-      btnX,
-      btnY0 + (btnH + btnGap) * 2,
+      btnStartX + (btnW + btnGap) * 2,
+      btnY,
       () => {
         this.switcher.staticSwitcher.showMainMenu(p);
       },
@@ -122,7 +125,13 @@ export class StaticPageWinEasy extends PageBase {
 
     // 排行榜数据
     this._leaderboard = [];
-    this._leaderboardLoaded = false;
+    this._leaderboardStatus = 'idle'; // 'idle' | 'loading' | 'loaded' | 'error'
+    this._leaderboardLoadTime = 0;
+    this._entryShowStartTimes = []; // 每条记录的显示开始时间戳
+    this._currentScore = null; // 本次成绩
+    this._currentRank = null; // 本次排名
+    this._bestScore = null; // 历史最佳成绩
+    this._bestRank = null; // 历史最佳排名
   }
 
   enter() {
@@ -142,10 +151,10 @@ export class StaticPageWinEasy extends PageBase {
     hintBar.addClass("win-hint-bar");
     this.addElement(hintBar);
 
-    // 注册键盘导航
+    // 注册键盘导航（横排排列）
     if (this._winButtons.length > 0) {
       this.registerNavButtons(this._winButtons, {
-        layout: "vertical",
+        layout: "horizontal",
         onEsc: () => this.switcher.staticSwitcher.showMainMenu(this.p),
       });
     }
@@ -158,21 +167,107 @@ export class StaticPageWinEasy extends PageBase {
   async _loadLeaderboard() {
     if (!window.getLeaderboard) {
       console.warn("[WinEasy] getLeaderboard not available, skipping");
+      this._leaderboardStatus = 'error';
       return;
     }
 
+    this._leaderboardStatus = 'loading';
+
     try {
-      this._leaderboard = await window.getLeaderboard(this.levelIndex, 10);
-      this._leaderboardLoaded = true;
+      const allEntries = await window.getLeaderboard(this.levelIndex, 100); // 获取更多数据用于去重
+
+      // 获取当前玩家的本次成绩（从 window.finalScore 获取，由 LevelTimerManager 在通关时设置）
+      this._currentScore = window.finalScore || null;
+      console.log("[WinEasy Load] playerName:", window.playerName, "finalScore:", window.finalScore, "currentScore:", this._currentScore);
+
+      // 去重逻辑：每个玩家名字只保留最佳成绩（时间最短）
+      const playerBestScores = {};
+      for (const entry of allEntries) {
+        const playerName = entry.playerName;
+        const timeSeconds = parseFloat(entry.timeSeconds);
+
+        if (!playerBestScores[playerName]) {
+          playerBestScores[playerName] = { ...entry, timeSeconds };
+        } else {
+          const currentBest = parseFloat(playerBestScores[playerName].timeSeconds);
+          if (timeSeconds < currentBest) {
+            playerBestScores[playerName] = { ...entry, timeSeconds };
+          }
+        }
+      }
+
+      // 打印诊断信息
+      console.log("[WinEasy] Total entries loaded:", allEntries.length);
+      if (window.playerName) {
+        const myRecords = allEntries.filter(e => e.playerName === window.playerName);
+        console.log(`[WinEasy] All records for "${window.playerName}":`, myRecords.map(e => ({ time: e.timeSeconds, date: e.timestamp })));
+        console.log(`[WinEasy] Best from records:`, playerBestScores[window.playerName]);
+      }
+
+      // 转换为数组并按时间排序，取前10名
+      this._leaderboard = Object.values(playerBestScores)
+        .sort((a, b) => a.timeSeconds - b.timeSeconds)
+        .slice(0, 10)
+        .map((entry, index) => ({ ...entry, rank: index + 1 }));
+
+      // 计算当前玩家的排名信息
+      if (this._currentScore !== null && window.playerName) {
+        // 本次排名（当前成绩和所有人最佳成绩对比）
+        let currentRank = 1;
+        for (const entry of Object.values(playerBestScores)) {
+          if (entry.timeSeconds < this._currentScore) {
+            currentRank++;
+          }
+        }
+        this._currentRank = currentRank;
+
+        // 历史最佳成绩和排名
+        const playerBestValue = playerBestScores[window.playerName];
+        if (playerBestValue) {
+          // 确保是数字类型并比较
+          this._bestScore = parseFloat(playerBestValue.timeSeconds);
+
+          // 计算历史最佳在排行榜中的排名
+          const sortedByTime = Object.values(playerBestScores)
+            .map(e => ({ ...e, time: parseFloat(e.timeSeconds) }))
+            .sort((a, b) => a.time - b.time);
+          this._bestRank = sortedByTime.findIndex(e => e.playerName === window.playerName) + 1;
+
+          console.log("[WinEasy] bestScore type:", typeof this._bestScore, "value:", this._bestScore);
+        }
+      }
+
+      this._leaderboardStatus = 'loaded';
+      this._leaderboardLoadTime = Date.now();
+
+      // 初始化每条记录的显示时间戳（依次延迟100ms）
+      this._entryShowStartTimes = this._leaderboard.map((_, i) => this._leaderboardLoadTime + i * 100);
+
       console.log(
-        "[WinEasy] Leaderboard loaded:",
+        "[WinEasy] Leaderboard loaded (deduplicated):",
         this._leaderboard.length,
-        "entries",
+        "entries, currentScore:",
+        this._currentScore,
+        "currentRank:",
+        this._currentRank,
+        "bestScore:",
+        this._bestScore,
+        "bestRank:",
+        this._bestRank,
       );
+
+      // 将统计信息挂到window对象便于调试
+      window._winEasyStats = {
+        currentScore: this._currentScore,
+        currentRank: this._currentRank,
+        bestScore: this._bestScore,
+        bestRank: this._bestRank,
+        playerName: window.playerName,
+      };
+      console.log("[WinEasy] Stats:", window._winEasyStats);
     } catch (error) {
       console.error("[WinEasy] Failed to load leaderboard:", error);
-      this._leaderboard = [];
-      this._leaderboardLoaded = true;
+      this._leaderboardStatus = 'error';
     }
   }
 
@@ -206,19 +301,21 @@ export class StaticPageWinEasy extends PageBase {
     p.textAlign(p.CENTER, p.CENTER);
     if (Assets.customFont) p.textFont(Assets.customFont);
 
+    const titleY = p.height / 6;
     p.fill(200, 80, 180, 60);
     p.textSize(78);
-    p.text(t("result_win"), p.width / 2 + 3, p.height / 4 + 3);
+    p.text(t("result_win"), p.width / 2 + 3, titleY + 3);
 
     p.fill(255, 200, 240);
     p.textSize(76);
-    p.text(t("result_win"), p.width / 2, p.height / 4);
+    p.text(t("result_win"), p.width / 2, titleY);
 
     // sub-label
     p.fill(255, 200, 240, 200);
     p.textSize(20);
-    const levelNum = parseInt(this.levelIndex.replace("level", ""), 10);
-    p.text(`- Level ${levelNum} -`, p.width / 2, p.height / 4 + 68);
+    const match = this.levelIndex.match(/\d+/);
+    const levelNum = match ? parseInt(match[0], 10) : "?";
+    p.text(`- Level ${levelNum} -`, p.width / 2, titleY + 52);
 
     // 绘制排行榜
     this._drawLeaderboard(p);
@@ -229,40 +326,117 @@ export class StaticPageWinEasy extends PageBase {
    * @private
    */
   _drawLeaderboard(p) {
-    if (!this._leaderboardLoaded) {
-      return;
-    }
-
     const baseX = p.width / 2;
-    const baseY = 180;
+    const baseY = 220;
     const rowHeight = 28;
     const maxRows = 10;
-
-    // 排行榜背景
     const panelWidth = 360;
-    const panelHeight = rowHeight * Math.min(this._leaderboard.length + 1, maxRows + 1) + 16;
+    const panelHeight = rowHeight * (maxRows + 1) + 16;
+
+    // 背景框和标题总是显示（不等数据）
     p.fill(0, 0, 0, 120);
     p.rect(baseX - panelWidth / 2, baseY - 8, panelWidth, panelHeight, 4);
 
-    // 排行榜标题
     if (Assets.customFont) p.textFont(Assets.customFont);
     p.textAlign(p.LEFT, p.TOP);
     p.textSize(16);
     p.fill(220, 180, 255, 255);
     p.text("TOP 10", baseX - panelWidth / 2 + 12, baseY);
 
-    // 排行榜条目
     p.textSize(14);
     p.textAlign(p.LEFT, p.TOP);
+
+    // 根据不同状态绘制内容
+    if (this._leaderboardStatus === 'loading' || this._leaderboardStatus === 'idle') {
+      // 未加载或加载中 - 显示骨架屏
+      this._drawSkeletonScreen(p, baseX, baseY, rowHeight, maxRows, panelWidth);
+    } else if (this._leaderboardStatus === 'loaded') {
+      if (this._leaderboard.length === 0) {
+        // 加载完成但无数据
+        p.fill(200, 180, 255, 150);
+        p.textAlign(p.CENTER, p.TOP);
+        p.text("No records yet", baseX, baseY + rowHeight);
+      } else {
+        // 加载完成 - 显示数据并做淡入动画
+        this._drawLeaderboardEntries(p, baseX, baseY, rowHeight, panelWidth);
+      }
+    } else if (this._leaderboardStatus === 'error') {
+      // 加载失败
+      p.fill(255, 100, 100, 200);
+      p.textAlign(p.CENTER, p.TOP);
+      p.textSize(14);
+      p.text("网络连接失败，请重试", baseX, baseY + rowHeight);
+    }
+  }
+
+  /**
+   * 绘制骨架屏（加载中）
+   * @private
+   */
+  _drawSkeletonScreen(p, baseX, baseY, rowHeight, maxRows, panelWidth) {
+    const time = Date.now();
+    const flashCycle = 1000; // 闪烁周期ms
+    const flashAlpha = p.map(Math.sin(time / flashCycle * Math.PI), -1, 1, 100, 200);
+    const rotation = (time / 20) % 360; // 旋转速度
+
+    p.textSize(14);
+    p.textAlign(p.LEFT, p.TOP);
+    p.fill(180, 170, 200, flashAlpha);
+
+    for (let i = 0; i < maxRows; i++) {
+      const y = baseY + rowHeight * (i + 1);
+
+      // 绘制loading文字
+      p.text("loading", baseX - panelWidth / 2 + 50, y);
+
+      // 绘制转圈的加载符号
+      const spinnerX = baseX - panelWidth / 2 + 35;
+      const spinnerY = y + 6;
+      const spinnerRadius = 4;
+
+      p.push();
+      p.translate(spinnerX, spinnerY);
+      p.rotate(p.radians(rotation));
+
+      // 绘制旋转的弧线
+      p.noFill();
+      p.stroke(180, 170, 200, flashAlpha);
+      p.strokeWeight(2);
+      p.arc(0, 0, spinnerRadius * 2, spinnerRadius * 2, 0, p.PI * 1.5);
+
+      p.pop();
+    }
+  }
+
+  /**
+   * 绘制排行榜条目（带淡入动画）
+   * @private
+   */
+  _drawLeaderboardEntries(p, baseX, baseY, rowHeight, panelWidth) {
+    const currentTime = Date.now();
+    const animationDuration = 400; // 每条记录的淡入动画时长ms
 
     for (let i = 0; i < Math.min(this._leaderboard.length, 10); i++) {
       const entry = this._leaderboard[i];
       const y = baseY + rowHeight * (i + 1);
+      const showStartTime = this._entryShowStartTimes[i];
 
-      // 高亮当前玩家
+      // 计算动画进度（0 ~ 1）
+      const timeSinceShow = currentTime - showStartTime;
+      let animProgress = Math.min(timeSinceShow / animationDuration, 1);
+      if (animProgress < 0) animProgress = 0;
+
+      // 淡入效果
+      const alpha = p.map(animProgress, 0, 1, 0, 255);
+
+      // 仅当动画开始时才绘制
+      if (animProgress === 0) continue;
+
       const isCurrentPlayer = entry.playerName === window.playerName;
+
+      // 高亮当前玩家背景
       if (isCurrentPlayer) {
-        p.fill(255, 200, 100, 30);
+        p.fill(255, 200, 100, 50 * animProgress / 255);
         p.rect(
           baseX - panelWidth / 2 + 4,
           y - 2,
@@ -272,33 +446,157 @@ export class StaticPageWinEasy extends PageBase {
         );
       }
 
-      // 排序颜色
+      // 排序颜色和奖牌emoji
       let rankColor;
-      if (i === 0) rankColor = [255, 215, 0]; // 金色
-      else if (i === 1) rankColor = [192, 192, 192]; // 银色
-      else if (i === 2) rankColor = [205, 127, 50]; // 铜色
-      else rankColor = [200, 180, 255]; // 默认
-      p.fill(...rankColor, 255);
-      p.text(`${entry.rank}`, baseX - panelWidth / 2 + 12, y);
+      let medal = "";
+      if (i === 0) {
+        rankColor = [255, 215, 0]; // 金色
+        medal = "🥇";
+      } else if (i === 1) {
+        rankColor = [192, 192, 192]; // 银色
+        medal = "🥈";
+      } else if (i === 2) {
+        rankColor = [205, 127, 50]; // 铜色
+        medal = "🥉";
+      } else {
+        rankColor = [200, 180, 255]; // 默认
+      }
 
-      // 玩家名字
-      p.fill(255, 255, 255, 220);
-      p.text(entry.playerName, baseX - panelWidth / 2 + 50, y);
+      // 排名 + 奖牌 - 1-3名只显示emoji，4-10名显示数字（右对齐保证对齐）
+      p.fill(...rankColor, alpha);
+      let rankText = "";
+      if (i === 0) {
+        rankText = "🥇";
+      } else if (i === 1) {
+        rankText = "🥈";
+      } else if (i === 2) {
+        rankText = "🥉";
+      } else {
+        rankText = `${entry.rank}`;
+      }
+      p.textAlign(p.LEFT, p.TOP);
+      p.text(rankText, baseX - panelWidth / 2 + 12, y);
 
-      // 时间
-      p.fill(220, 220, 200, 200);
-      p.text(
-        `${entry.timeSeconds}s`,
-        baseX - panelWidth / 2 + panelWidth - 80,
-        y,
-      );
+      // 玩家名字（当前玩家用不同颜色，第一名用彩虹效果）
+      if (i === 0) {
+        // 第一名用彩虹效果
+        this._drawRainbowWaveText(p, entry.playerName, baseX - panelWidth / 2 + 50, y, alpha);
+        // 如果第一名是当前玩家，加上YOU标识
+        if (isCurrentPlayer) {
+          p.fill(255, 200, 100, Math.min(220, alpha * 1.1));
+          p.text(" ← YOU", baseX - panelWidth / 2 + 50 + p.textWidth(entry.playerName), y);
+        }
+      } else if (isCurrentPlayer) {
+        p.fill(255, 255, 100, Math.min(255, alpha * 1.2));
+        p.textAlign(p.LEFT, p.TOP);
+        p.text(entry.playerName + " ← YOU", baseX - panelWidth / 2 + 50, y);
+      } else {
+        p.fill(255, 255, 255, Math.min(220, alpha * 1.1));
+        p.textAlign(p.LEFT, p.TOP);
+        p.text(entry.playerName, baseX - panelWidth / 2 + 50, y);
+      }
+
+      // 右侧显示时间
+      p.fill(220, 220, 200, Math.min(200, alpha));
+      p.textAlign(p.RIGHT, p.TOP);
+      p.text(`${entry.timeSeconds}s`, baseX + panelWidth / 2 - 12, y);
     }
 
-    // 如果没有排行榜数据
-    if (this._leaderboard.length === 0) {
-      p.fill(200, 180, 255, 150);
-      p.textAlign(p.CENTER, p.TOP);
-      p.text("No records yet", baseX, baseY + rowHeight);
+    // 在排行榜下方显示当前玩家的成绩和排名统计
+    this._drawPlayerStatsInfo(p, baseX, baseY, rowHeight, panelWidth);
+  }
+
+  /**
+   * 绘制彩虹波浪文字
+   * @private
+   */
+  _drawRainbowWaveText(p, text, startX, baselineY, alpha = 255) {
+    const waveAmplitude = 2;
+    const wavePeriodMs = 2400;
+    const colorPeriodMs = 3000;
+    const charDelayMs = 150;
+
+    const colorStops = [
+      [0.00, [255, 78,  80 ]],
+      [0.16, [255, 159, 67 ]],
+      [0.33, [254, 202, 87 ]],
+      [0.50, [72,  219, 251]],
+      [0.66, [162, 155, 254]],
+      [0.83, [253, 121, 168]],
+      [1.00, [255, 78,  80 ]],
+    ];
+
+    const timeMs = p.millis();
+    const colorT = (timeMs % colorPeriodMs) / colorPeriodMs;
+    let cr, cg, cb;
+    for (let j = 0; j < colorStops.length - 1; j++) {
+      const [t0, c0] = colorStops[j];
+      const [t1, c1] = colorStops[j + 1];
+      if (colorT >= t0 && colorT < t1) {
+        const f = (colorT - t0) / (t1 - t0);
+        cr = c0[0] + (c1[0] - c0[0]) * f;
+        cg = c0[1] + (c1[1] - c0[1]) * f;
+        cb = c0[2] + (c1[2] - c0[2]) * f;
+        break;
+      }
+    }
+    if (cr === undefined) [cr, cg, cb] = colorStops[colorStops.length - 1][1];
+
+    let currentX = startX;
+    p.push();
+    p.colorMode(p.RGB, 255);
+    p.noStroke();
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const rawPhase = (timeMs - i * charDelayMs) / wavePeriodMs;
+      const wavePhase = ((rawPhase % 1) + 1) % 1;
+      const charY = baselineY - waveAmplitude * Math.sin(Math.PI * wavePhase);
+      p.fill(cr, cg, cb, alpha);
+      p.text(char, currentX, charY);
+      currentX += p.textWidth(char);
+    }
+
+    p.pop();
+  }
+
+  /**
+   * 显示当前玩家的排名和成绩信息
+   * @private
+   */
+  _drawPlayerStatsInfo(p, baseX, baseY, rowHeight, panelWidth) {
+    // 调试：打印所有统计信息
+    console.log("[WinEasy] Stats - currentScore:", this._currentScore, "currentRank:", this._currentRank, "bestScore:", this._bestScore, "bestRank:", this._bestRank);
+
+    // 排行榜右边显示（panelWidth/2 右侧）
+    const infoStartX = baseX + panelWidth / 2 + 20;
+    const infoStartY = baseY + 30;
+    const lineHeight = 20;
+
+    p.textSize(13);
+    p.textAlign(p.LEFT, p.TOP);
+    p.noStroke();
+
+    // 本次成绩
+    if (this._currentScore !== null) {
+      p.fill(255, 200, 100, 255);
+      const text1 = `本次成绩：${this._currentScore.toFixed(2)}s`;
+      p.text(text1, infoStartX, infoStartY);
+    }
+
+    // 本次排名
+    if (this._currentRank !== null) {
+      p.fill(255, 200, 100, 255);
+      const text2 = `本次排名：第 ${this._currentRank} 名`;
+      p.text(text2, infoStartX, infoStartY + lineHeight);
+    }
+
+    // 历史最佳
+    if (this._bestScore !== null && this._bestRank !== null) {
+      p.fill(200, 180, 255, 255);
+      const bestScoreStr = typeof this._bestScore === 'number' ? this._bestScore.toFixed(2) : this._bestScore;
+      const text3 = `历史最佳：${bestScoreStr}s（#${this._bestRank}）`;
+      p.text(text3, infoStartX, infoStartY + lineHeight * 2);
     }
   }
 }

@@ -5,6 +5,7 @@
   Wall,
   Portal,
   Button,
+  WireRenderer,
 } from "../../game-entity-model/index.js";
 import { CollisionSystem } from "../../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../../physics-system/PhysicsSystem.js";
@@ -48,6 +49,7 @@ export class Level9 extends BaseLevel {
       button: this._room0Button,
       portal: this._room0Portal,
     });
+    this.entities.add(new WireRenderer(this._btnWirePortalSystem));
   }
 
   _buildRooms(p) {
@@ -255,7 +257,6 @@ export class Level9 extends BaseLevel {
     for (const entity of this.entities) {
       if (entity.type === "ground") entity.draw(p);
     }
-    this._btnWirePortalSystem.draw(p);
     for (const entity of this.entities) {
       if (entity.type !== "spike" && entity.type !== "ground") entity.draw(p);
     }

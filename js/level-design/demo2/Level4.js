@@ -9,6 +9,7 @@ import {
   Button,
   Spike,
   NPCDemo2,
+  WireRenderer,
 } from "../../game-entity-model/index.js";
 import { CollisionSystem } from "../../collision-system/CollisionSystem.js";
 import { PhysicsSystem } from "../../physics-system/PhysicsSystem.js";
@@ -53,6 +54,7 @@ export class Level4 extends BaseLevel {
       button: this._wpBtn_0,
       portal: this._wpPortal_0,
     });
+    this.entities.add(new WireRenderer(this._wpSys_0));
 
     this._bsSys_0 = new ButtonSpikeLinkSystem(
       { button: this._bsBtn_0, spikes: [this._bsSpike_0] },
@@ -370,7 +372,6 @@ export class Level4 extends BaseLevel {
     for (const system of this._bpSystems) {
       system.draw(p);
     }
-    this._wpSys_0.draw(p);
     for (const entity of this.entities) {
       if (
         entity.type !== "spike" &&

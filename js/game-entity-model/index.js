@@ -26,6 +26,7 @@ export { Checkpoint } from "./interactables/Checkpoint.js";
 export { CheckpointDemo1 } from "./interactables/CheckpointDemo1.js";
 export { CheckpointDemo2 } from "./interactables/CheckpointDemo2.js";
 export { TeleportPoint } from "./interactables/TeleportPoint.js";
+export { WireRenderer } from "./interactables/WireRenderer.js";
 
 // prompts
 export { KeyPrompt } from "./prompts/KeyPrompt.js";

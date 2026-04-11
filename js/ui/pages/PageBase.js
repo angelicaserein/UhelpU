@@ -1,5 +1,4 @@
 import { KeyboardNavigationManager } from "../keyboard/KeyboardNavigationManager.js";
-import { i18n } from "../../i18n.js";
 
 export class PageBase {
   constructor(switcher) {
@@ -9,9 +8,6 @@ export class PageBase {
     // 键盘导航支持
     this._navManager = null;
     this._navButtons = []; // 页面的可导航按钮列表
-
-    // 语言变化监听
-    this._i18nHandler = null;
   }
 
   // 添加元素到清理列表
@@ -83,12 +79,6 @@ export class PageBase {
   // 进入页面时调用
   enter() {
     this._enablePageNavigation();
-
-    // 注册语言变化监听
-    if (!this._i18nHandler) {
-      this._i18nHandler = (lang) => this._onLanguageChange(lang);
-      i18n.onChange(this._i18nHandler);
-    }
   }
 
   // 每帧更新
@@ -100,19 +90,7 @@ export class PageBase {
   // 退出页面时清理资源
   exit() {
     this._disablePageNavigation();
-
-    // 移除语言变化监听
-    if (this._i18nHandler) {
-      i18n.offChange(this._i18nHandler);
-      this._i18nHandler = null;
-    }
-
     this.cleanup();
-  }
-
-  // 当语言改变时调用（子类可覆盖来更新页面文本）
-  _onLanguageChange(lang) {
-    // 默认实现：子类可以覆盖此方法
   }
 
   // 清理所有 DOM 元素

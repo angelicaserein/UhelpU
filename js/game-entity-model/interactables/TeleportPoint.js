@@ -7,7 +7,7 @@ import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js
 /**
  * TeleportPoint — 手动激活的传送点
  *
- * 玩家靠近后按交互键（E）激活；激活后按 B 键（teleportCheckpoint）
+ * 玩家靠近后按交互键（E）激活；激活后通过数字键（1、2、3...）
  * 可传送回此处。不参与死亡重生逻辑（死亡仍回到 Checkpoint）。
  *
  * 贴图：
@@ -48,6 +48,7 @@ export class TeleportPoint extends GameEntity {
     this._interactionKeyPressed = false;
     this._keyBindingManager = KeyBindingManager.getInstance();
     this._onActivate = options.onActivate || null;
+    this._teleportPointIndex = null; // 由 TeleportPointSystem 设置
 
     this._onKeyDown = (e) => {
       const interactionKey =
@@ -129,18 +130,29 @@ export class TeleportPoint extends GameEntity {
       p.pop();
     }
 
-    // 在范围内且未激活时，在贴图上方显示交互键提示
+    // 在范围内且未激活时，在贴图上方显示交互键提示（E）
+    // 激活后，显示常亮的序号提示（1、2、3...）
     if (this._inRange && !this.activated) {
-      this._drawKeyPrompt(p);
+      this._drawKeyPrompt(p, "interaction");
+    } else if (this.activated && this._teleportPointIndex !== null) {
+      this._drawKeyPrompt(p, "number", this._teleportPointIndex.toString());
     }
   }
 
   /**
-   * 在贴图正上方绘制交互键方块提示（与 KeyPrompt 样式一致）
+   * 在贴图正上方绘制键提示方块（与 KeyPrompt 样式一致）
+   * @param {object} p - p5.js 实例
+   * @param {string} promptType - "interaction" 或 "number"
+   * @param {string} [label] - 自定义标签（仅 promptType="number" 时使用）
    */
-  _drawKeyPrompt(p) {
-    const keyCode = this._keyBindingManager.getKeyByIntent("interaction");
-    const label = KeyBindingManager.keyCodeToLabel(keyCode) || "E";
+  _drawKeyPrompt(p, promptType, label) {
+    let displayLabel = label;
+
+    if (promptType === "interaction") {
+      const keyCode = this._keyBindingManager.getKeyByIntent("interaction");
+      displayLabel = KeyBindingManager.keyCodeToLabel(keyCode) || "E";
+    }
+
     const keySize = 28;
     const gap = 8;
 
@@ -165,7 +177,7 @@ export class TeleportPoint extends GameEntity {
     p.textAlign(p.CENTER, p.CENTER);
     p.textSize(14);
     p.textStyle(p.BOLD);
-    p.text(label, 0, 0);
+    p.text(displayLabel, 0, 0);
     p.pop();
   }
 

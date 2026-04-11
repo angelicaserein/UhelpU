@@ -188,6 +188,17 @@ function dynDynBlockResponse(a, b, msg) {
           "groundVelY"
         ] = b.movementComponent ? b.movementComponent.velY : 0;
       }
+      // [FIX] 落地速度异常：重力每帧累积到 velY，走下边缘时爆发成超快下落。
+      // 同步 velY 为实体当前速度（静止时为0），防止累积，离开时从自然重力起步。
+      if (a.movementComponent) {
+        a.movementComponent.velY = b.movementComponent ? b.movementComponent.velY : 0;
+      }
+      // [NEW] 支撑链velX传递：记录 a 站在 box 上的支撑关系
+      a._supportingEntity = b;
+      a._supportingType = "standing";
+      // [FIX] velX链修复：b 是下方支撑者，记录 support 让 BFS 能以它为根节点向上传递
+      b._supportingEntity = null;
+      b._supportingType = "support";
     } else if (msg === "b_on_a") {
       // box 踩在 a 头上（rare, but handle it)
       if (b.controllerManager && b.controllerManager.currentControlComponent) {
@@ -198,6 +209,15 @@ function dynDynBlockResponse(a, b, msg) {
           "groundVelY"
         ] = a.movementComponent ? a.movementComponent.velY : 0;
       }
+      // [FIX] 落地速度异常：同上，b 站在 box 上时同步 velY 防止重力累积。
+      if (b.movementComponent) {
+        b.movementComponent.velY = a.movementComponent ? a.movementComponent.velY : 0;
+      }
+      // [NEW] 支撑链velX传递：记录 b 站在 a 上（a 顶推 b）的支撑关系
+      b._supportingEntity = a;
+      b._supportingType = "standing";
+      a._supportingEntity = b;
+      a._supportingType = "pushing";
     }
     return;
   }
@@ -213,12 +233,23 @@ function dynDynBlockResponse(a, b, msg) {
         a.movementComponent.velY = 0;
         b.movementComponent.velY = Math.max(b.movementComponent.velY, 0);
       }
+      // [NEW] 支撑链velX传递：记录上方 box 站在下方 box 上的支撑关系
+      a._supportingEntity = b;
+      a._supportingType = "standing";
+      // [FIX] velX链修复：b 是下方支撑者，记录 support 让 BFS 能以它为根节点向上传递
+      b._supportingEntity = null;
+      b._supportingType = "support";
     } else if (msg === "b_on_a") {
       // b 踩在 a 头上
       if (a.movementComponent && b.movementComponent) {
         b.movementComponent.velY = 0;
         a.movementComponent.velY = Math.max(a.movementComponent.velY, 0);
       }
+      // [NEW] 支撑链velX传递：记录上方 box 站在下方 box 上の支撑关系
+      b._supportingEntity = a;
+      b._supportingType = "standing";
+      a._supportingEntity = b;
+      a._supportingType = "pushing";
     }
     return;
   }
@@ -240,11 +271,22 @@ function dynDynBlockResponse(a, b, msg) {
         "groundVelY"
       ] = b.movementComponent ? b.movementComponent.velY : 0;
     }
+    // [FIX] 落地速度异常：重力每帧累积到 velY，走下边缘时爆发成超快下落。
+    // 同步 velY 为实体当前速度（静止时为0），防止累积，离开时从自然重力起步。
+    if (a.movementComponent) {
+      a.movementComponent.velY = b.movementComponent ? b.movementComponent.velY : 0;
+    }
     // 标记玩家正在踩在分身上，这样当分身离开时我们知道玩家需要下落
     if (b.type === "replayer") {
       a._currentlyOnReplayer = true;
       a._wasStandingOnReplayer = true;
     }
+    // [NEW] 支撑链velX传递：记录 a 站在 b 上的支撑关系
+    a._supportingEntity = b;
+    a._supportingType = "standing";
+    // [FIX] velX链修复：b 是下方支撑者，记录 support 让 BFS 能以它为根节点向上传递
+    b._supportingEntity = null;
+    b._supportingType = "support";
   } else if (msg === "b_on_a") {
     // b 踩在 a 头上 - 只设置地面标志，不修改速度，让碰撞检测处理约束
     if (b.headBlockedThisFrame && a.movementComponent.velY > 0) {
@@ -259,11 +301,20 @@ function dynDynBlockResponse(a, b, msg) {
         "groundVelY"
       ] = a.movementComponent ? a.movementComponent.velY : 0;
     }
+    // [FIX] 落地速度异常：同上，b 站在动态实体上时同步 velY 防止重力累积。
+    if (b.movementComponent) {
+      b.movementComponent.velY = a.movementComponent ? a.movementComponent.velY : 0;
+    }
     // 标记玩家正在踩在分身上
     if (a.type === "replayer" && b.type === "player") {
       b._currentlyOnReplayer = true;
       b._wasStandingOnReplayer = true;
     }
+    // [NEW] 支撑链velX传递：记录 b 站在 a 上（a 顶推 b）的支撑关系
+    b._supportingEntity = a;
+    b._supportingType = "standing";
+    a._supportingEntity = b;
+    a._supportingType = "pushing";
   }
   return;
 }
@@ -279,6 +330,12 @@ function dynTriResponse(a, b, eventBus) {
 
   // 敌人可以踩按钮
   if (a.type === "enemy" && b.type === "button") {
+    b.pressButton();
+    return;
+  }
+
+  // 箱子可以踩按钮
+  if (a.type === "box" && b.type === "button") {
     b.pressButton();
     return;
   }

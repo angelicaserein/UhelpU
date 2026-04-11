@@ -42,6 +42,36 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
+/* ESC 跳过提示 */
+.tutorial-esc-hint {
+  display: block !important;
+  visibility: visible !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 10px 16px !important;
+  font-family: "HYPixel11", "PixelFont", sans-serif !important;
+  font-size: 16px !important;
+  color: #FFB6D9 !important;
+  font-weight: bold !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+  text-shadow: none !important;
+  animation: breathe 2s ease-in-out infinite !important;
+}
+
+/* 呼吸灯动画 - 纯透明度呼吸 */
+@keyframes breathe {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
 /* 动画 */
 @keyframes fadeIn {
   from {

@@ -22,7 +22,7 @@ export class TutorialUI {
     this._promptBoxes = []; // 所有提示框
     this._labels = []; // 所有标签元素，用于清理
     this._activeElements = []; // 所有创建的 DOM 元素
-    this._escHintEl = null; // ESC 跳过提示元素
+    this._escHintEl = null; // ESC 跳过提示元素（独立的，不被 _removeAllPrompts 删除）
 
     // 订阅语言变化，实时更新提示文本
     this._onLangChange = () => this._updatePromptTexts();
@@ -131,9 +131,12 @@ export class TutorialUI {
     promptBox.style.animation = "fadeIn 0.3s ease";
 
     // 设置文本内容
-    const translatedText = typeof text === "string"
-      ? (text.startsWith("tutorial_") ? t(text) : text)
-      : text;
+    const translatedText =
+      typeof text === "string"
+        ? text.startsWith("tutorial_")
+          ? t(text)
+          : text
+        : text;
 
     promptBox.textContent = translatedText;
 
@@ -199,9 +202,12 @@ export class TutorialUI {
         promptBox.style.textAlign = "center";
         promptBox.style.animation = "fadeIn 0.3s ease";
 
-        const translatedText = typeof text === "string"
-          ? (text.startsWith("tutorial_") ? t(text) : text)
-          : text;
+        const translatedText =
+          typeof text === "string"
+            ? text.startsWith("tutorial_")
+              ? t(text)
+              : text
+            : text;
 
         promptBox.textContent = translatedText;
         promptBox._tutorialTextKey = text;
@@ -223,11 +229,12 @@ export class TutorialUI {
   _updatePromptTexts() {
     this._promptBoxes.forEach((box) => {
       if (box && box._tutorialTextKey) {
-        const translatedText = typeof box._tutorialTextKey === "string"
-          ? (box._tutorialTextKey.startsWith("tutorial_")
+        const translatedText =
+          typeof box._tutorialTextKey === "string"
+            ? box._tutorialTextKey.startsWith("tutorial_")
               ? t(box._tutorialTextKey)
-              : box._tutorialTextKey)
-          : box._tutorialTextKey;
+              : box._tutorialTextKey
+            : box._tutorialTextKey;
 
         box.textContent = translatedText;
       }
@@ -235,11 +242,12 @@ export class TutorialUI {
 
     this._labels.forEach((label) => {
       if (label && label._tutorialTextKey) {
-        const translatedText = typeof label._tutorialTextKey === "string"
-          ? (label._tutorialTextKey.startsWith("tutorial_")
+        const translatedText =
+          typeof label._tutorialTextKey === "string"
+            ? label._tutorialTextKey.startsWith("tutorial_")
               ? t(label._tutorialTextKey)
-              : label._tutorialTextKey)
-          : label._tutorialTextKey;
+              : label._tutorialTextKey
+            : label._tutorialTextKey;
 
         label.textContent = translatedText;
       }
@@ -247,11 +255,11 @@ export class TutorialUI {
   }
 
   /**
-   * 隐藏并移除所有提示框
+   * 隐藏并移除所有提示框（但保留 ESC 提示）
    */
   _removeAllPrompts() {
     this._promptBoxes.forEach((box) => {
-      if (box) {
+      if (box && box !== this._escHintEl) { // 不删除 ESC 提示
         box.style.animation = "fadeOut 0.2s ease";
         setTimeout(() => {
           if (box && box.parentNode) {
@@ -280,9 +288,12 @@ export class TutorialUI {
     label.style.top = y + "px";
     label.style.color = color;
 
-    const translatedText = typeof text === "string"
-      ? (text.startsWith("tutorial_") ? t(text) : text)
-      : text;
+    const translatedText =
+      typeof text === "string"
+        ? text.startsWith("tutorial_")
+          ? t(text)
+          : text
+        : text;
 
     label.textContent = translatedText;
     label._tutorialTextKey = text;
@@ -303,38 +314,50 @@ export class TutorialUI {
   }
 
   /**
-   * 在画布右上角显示 ESC 跳过提示
-   * @param {DOMRect} canvasRect - canvas 的位置信息
+   * 在画布右下角（内部）显示 ESC 跳过提示
    */
   showEscHint(canvasRect) {
-    if (this._escHintEl) return; // 已存在则不重复创建
+    if (this._escHintEl && document.body.contains(this._escHintEl)) {
+      return;
+    }
 
-    const el = document.createElement("div");
-    el.className = "tutorial-esc-hint";
-    el.style.position = "fixed";
-    el.style.right = (window.innerWidth - canvasRect.right + 12) + "px";
-    el.style.top = (canvasRect.top + 12) + "px";
-    el.style.zIndex = "5600";
-    el.style.padding = "6px 12px";
-    el.style.background = "rgba(30, 20, 50, 0.85)";
-    el.style.border = "1px solid #a085db";
-    el.style.borderRadius = "6px";
-    el.style.fontFamily = '"HYPixel11", "PixelFont", sans-serif';
-    el.style.fontSize = "14px";
-    el.style.color = "#c0b0e8";
-    el.style.pointerEvents = "none";
-    el.style.animation = "fadeIn 0.3s ease";
+    const promptBox = document.createElement("div");
+    promptBox.className = "tutorial-esc-hint";
+    promptBox.id = "esc-hint-element";
 
-    el._tutorialTextKey = "tutorial_press_esc_to_skip";
-    el.textContent = t("tutorial_press_esc_to_skip");
+    promptBox.style.position = "fixed";
+    promptBox.style.zIndex = "5500";
 
-    document.body.appendChild(el);
-    this._escHintEl = el;
-    this._activeElements.push(el);
+    // 文本
+    const translatedText = t("tutorial_press_esc_to_skip");
+    promptBox.textContent = translatedText;
+    promptBox._tutorialTextKey = "tutorial_press_esc_to_skip";
 
-    // 订阅语言变化时更新文本
+    document.body.appendChild(promptBox);
+
+    // 获取元素实际尺寸后调整位置（放在画布内部右下角）
+    setTimeout(() => {
+      const rect = promptBox.getBoundingClientRect();
+      const marginFromEdge = 12;
+
+      // 计算位置：在画布内部右下角
+      const left = canvasRect.right - rect.width - marginFromEdge;
+      const top = canvasRect.bottom - rect.height - marginFromEdge;
+
+      promptBox.style.left = left + "px";
+      promptBox.style.top = top + "px";
+    }, 0);
+
+    this._escHintEl = promptBox;
+
+    // 语言变化时更新文本
+    if (this._updateEscHintText) {
+      i18n.offChange(this._updateEscHintText);
+    }
     this._updateEscHintText = () => {
-      if (el) el.textContent = t("tutorial_press_esc_to_skip");
+      if (this._escHintEl) {
+        this._escHintEl.textContent = t("tutorial_press_esc_to_skip");
+      }
     };
     i18n.onChange(this._updateEscHintText);
   }
@@ -343,10 +366,10 @@ export class TutorialUI {
    * 隐藏 ESC 跳过提示
    */
   hideEscHint() {
+    console.log("[hideEscHint] 被调用了");
     if (this._escHintEl) {
+      console.log("[hideEscHint] 删除元素");
       this._escHintEl.remove();
-      const idx = this._activeElements.indexOf(this._escHintEl);
-      if (idx !== -1) this._activeElements.splice(idx, 1);
       this._escHintEl = null;
     }
     if (this._updateEscHintText) {
@@ -377,7 +400,7 @@ export class TutorialUI {
    * 清理所有 UI 元素
    */
   cleanup() {
-    this.hideEscHint();
+    // 注意：不在这里删除 ESC 提示，只在进入 IDLE 状态时删除
     this._removeAllPrompts();
 
     // 移除所有标签
@@ -410,4 +433,3 @@ export class TutorialUI {
     return this._activeElements.length + this._labels.length;
   }
 }
-

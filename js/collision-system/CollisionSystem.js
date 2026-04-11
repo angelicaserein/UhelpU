@@ -13,6 +13,12 @@ export class CollisionSystem {
   }
 
   collisionEntry(eventBus = this.eventBus) {
+    // [NEW] 支撑链velX传递：每帧开始清空支撑关系，由本帧碰撞检测重新建立
+    for (const dyn of this._dynamicEntities) {
+      dyn._supportingEntity = null;
+      dyn._supportingType = null;
+    }
+
     const replayer = this.getReplayer();
     const replayerActive = replayer && replayer.isReplaying;
     const player = replayerActive ? this.getPlayer() : null;
@@ -40,12 +46,25 @@ export class CollisionSystem {
       }
     }
 
-    // Player collision detection with boxes (DYNAMIC-DYNAMIC pairs)
+    // [FIX] 推箱穿模：DD 推箱 → DS 弹回 → 再次 DD 会用旧 prevX 把箱子重新推进墙。
+    // 改为：记录 DS 前后箱子的 x 位移量，把同等位移施加给 player，彻底消除重叠，不再做第三次 DD。
     const player3 = this.getPlayer();
     if (player3) {
       for (const dyn of this._dynamicEntities) {
         if (dyn.type === "box" && dyn !== player3) {
           this.processDynamicDynamicPair(player3, dyn);
+          // [FIX] 推箱穿模：DD 推完箱子后立即补一次 DS，防止箱子停在墙内
+          const boxXBeforeDS = dyn.x;
+          for (const sta of this._staticEntities) {
+            this.processDynamicStaticPair(dyn, sta);
+          }
+          // [FIX] 推箱穿模：DS 把箱子弹回时，将同等修正量施加给 player，防止 player 陷入箱内，
+          // 且不再做第三次 DD（第三次 DD 会用旧 prevX 把箱子重新推回墙里）
+          const boxCorrection = dyn.x - boxXBeforeDS;
+          if (boxCorrection !== 0) {
+            player3.x += boxCorrection;
+            if (player3.movementComponent) player3.movementComponent.velX = 0;
+          }
         }
       }
     }
@@ -60,12 +79,23 @@ export class CollisionSystem {
       }
     }
 
-    // Replayer collision detection with boxes (DYNAMIC-DYNAMIC pairs)
+    // [FIX] 推箱穿模：replayer 推箱子与玩家推箱子同理，DD 后补 DS，再用位移量修正 replayer
     const replayer3 = this.getReplayer();
     if (replayer3 && replayer3.isReplaying) {
       for (const dyn of this._dynamicEntities) {
         if (dyn.type === "box" && dyn !== replayer3) {
           this.processDynamicDynamicPair(replayer3, dyn);
+          // [FIX] 推箱穿模：DD 推完箱子后立即补一次 DS，防止箱子停在墙内
+          const boxXBeforeDS = dyn.x;
+          for (const sta of this._staticEntities) {
+            this.processDynamicStaticPair(dyn, sta);
+          }
+          // [FIX] 推箱穿模：DS 把箱子弹回时，将同等修正量施加给 replayer，防止 replayer 陷入箱内
+          const boxCorrection = dyn.x - boxXBeforeDS;
+          if (boxCorrection !== 0) {
+            replayer3.x += boxCorrection;
+            if (replayer3.movementComponent) replayer3.movementComponent.velX = 0;
+          }
         }
       }
     }
@@ -101,6 +131,12 @@ export class CollisionSystem {
           this.processEnemyTriggerPair(sta, tri, eventBus);
         }
       }
+    }
+
+    // [FIX] standing跟随：box 由 DD resolver 直接修改 x 位置而非 velX，
+    // 记录本帧实际位移量供下帧 velXPropagationEntry 使用（box.velX 恒为 0，不能反映真实移动）
+    for (const dyn of this._dynamicEntities) {
+      dyn._lastFrameDeltaX = dyn.x - dyn.prevX;
     }
   }
   getReplayer() {

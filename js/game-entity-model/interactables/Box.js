@@ -13,7 +13,7 @@ export class Box extends GameEntity {
     this._startY = y;
 
     // Physics
-    this.movementComponent = new MovementComponent(0, 0, 0, -0.6); // gravity in accY (negative for upright axis)
+    this.movementComponent = new MovementComponent(0, 0, 0, -0.5); // gravity in accY (negative for upright axis)
     this.collider = new RectangleCollider(ColliderType.DYNAMIC, w, h);
 
     // State tracking

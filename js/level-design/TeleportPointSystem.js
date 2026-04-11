@@ -72,10 +72,7 @@ export class TeleportPointSystem {
 
     // 找到对应序号的激活传送点
     for (const tp of this._teleportPoints) {
-      if (
-        tp._teleportPointIndex === pointNumber &&
-        tp.activated
-      ) {
+      if (tp._teleportPointIndex === pointNumber && tp.activated) {
         player.x = tp.x;
         player.y = tp.y;
         if (player.movementComponent) {

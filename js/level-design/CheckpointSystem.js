@@ -90,31 +90,27 @@ export class CheckpointSystem {
   }
 
   /**
-   * 在存档点位置重生玩家
+   * 在存档点位置重生玩家，并清除已有的分身
    * @param {object} player
    * @param {object} checkpoint
    */
   respawnPlayerAtCheckpoint(player, checkpoint) {
-    player.x = checkpoint.x;
-    player.y = checkpoint.y;
-    player.deathState.isDead = false;
-    player.deathState.initialized = false;
-    player.deathState.deathType = null;
-    if (player.movementComponent) {
-      player.movementComponent.velX = 0;
-      player.movementComponent.velY = 0;
-    }
-    if (player.controllerManager) {
-      player.controllerManager.resetInputState();
-    }
-  }
+    const level = this._getLevel();
 
-  /**
-   * 在存档点位置重生玩家
-   * @param {object} player
-   * @param {object} checkpoint
-   */
-  respawnPlayerAtCheckpoint(player, checkpoint) {
+    // 清除已有的分身（replayer）
+    if (level) {
+      const replayer = level.getReplayer?.();
+      if (replayer) {
+        if (typeof replayer.clearEventListeners === "function") {
+          replayer.clearEventListeners();
+        }
+        level.entities.delete(replayer);
+        if (typeof level.syncSystemsEntities === "function") {
+          level.syncSystemsEntities();
+        }
+      }
+    }
+
     player.x = checkpoint.x;
     player.y = checkpoint.y;
     player.deathState.isDead = false;

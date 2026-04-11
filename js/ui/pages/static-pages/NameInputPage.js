@@ -42,7 +42,7 @@ export class NameInputPage extends PageBase {
     this.addElement(container);
 
     // 标题
-    const title = p.createDiv(t("name_input_title") || "Enter Your Name");
+    const title = p.createDiv(t("name_input_title"));
     title.addClass("name-input-title");
     title.parent(container);
 
@@ -52,12 +52,12 @@ export class NameInputPage extends PageBase {
     this.inputElement.attribute("maxlength", "12");
     this.inputElement.attribute(
       "placeholder",
-      t("name_input_placeholder") || "Player Name",
+      t("name_input_placeholder"),
     );
     this.inputElement.parent(container);
 
     // 确认按钮
-    this.confirmButton = p.createButton(t("btn_confirm") || "Confirm");
+    this.confirmButton = p.createButton(t("btn_confirm"));
     this.confirmButton.addClass("name-input-confirm-button");
     this.confirmButton.parent(container);
     this.confirmButton.mousePressed(() => {
@@ -65,7 +65,7 @@ export class NameInputPage extends PageBase {
     });
 
     // 返回按钮
-    const backButton = p.createButton(t("btn_back") || "Back");
+    const backButton = p.createButton(t("btn_back"));
     backButton.addClass("name-input-back-button");
     backButton.parent(container);
     backButton.mousePressed(() => {

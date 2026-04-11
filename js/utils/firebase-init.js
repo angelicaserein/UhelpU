@@ -95,46 +95,57 @@ window.getLeaderboard = async (levelId, limitCount = 10) => {
  */
 async function _getLeaderboardFallback(levelId, limitCount) {
   try {
-    console.log("[Firebase] Using fallback method to load scores...");
+    console.log("[Firebase] Loading all scores with pagination...");
 
-    // 列出 leaderboard/{levelId}/scores 下的所有文档
-    const url = `${FIRESTORE_API}/leaderboard/${levelId}/scores?key=${API_KEY}&pageSize=100`;
+    const allDocs = [];
+    let pageToken = null;
 
-    const response = await fetch(url);
+    // 翻页直到没有更多数据
+    do {
+      let url = `${FIRESTORE_API}/leaderboard/${levelId}/scores?key=${API_KEY}&pageSize=300`;
+      if (pageToken) url += `&pageToken=${encodeURIComponent(pageToken)}`;
 
-    if (!response.ok) {
-      console.warn(`[Firebase] Fallback also failed: ${response.status}`);
-      return [];
+      const response = await fetch(url);
+      if (!response.ok) {
+        console.warn(`[Firebase] Fetch failed: ${response.status}`);
+        break;
+      }
+
+      const data = await response.json();
+      if (data.documents && Array.isArray(data.documents)) {
+        allDocs.push(...data.documents);
+      }
+      pageToken = data.nextPageToken || null;
+    } while (pageToken);
+
+    console.log(`[Firebase] Fetched ${allDocs.length} total docs`);
+
+    // 去重：每个 (playerName, isAccount) 组合只保留最佳成绩
+    const bestMap = new Map();
+    for (const doc of allDocs) {
+      const fields = doc.fields || {};
+      const playerName = fields.playerName?.stringValue || "Unknown";
+      const isAccount = fields.isAccount?.booleanValue || false;
+      const timeMs = parseInt(fields.timeMs?.integerValue || 0);
+      const key = playerName + "|" + isAccount;
+      if (!bestMap.has(key) || timeMs < bestMap.get(key).timeMs) {
+        bestMap.set(key, {
+          rank: 0,
+          playerName,
+          timeSeconds: fields.timeSeconds?.stringValue || "0.00",
+          timeMs,
+          timestamp: fields.timestamp?.timestampValue,
+          isAccount,
+        });
+      }
     }
 
-    const data = await response.json();
+    const leaderboard = [...bestMap.values()]
+      .sort((a, b) => a.timeMs - b.timeMs)
+      .slice(0, limitCount)
+      .map((entry, index) => ({ ...entry, rank: index + 1 }));
 
-    let leaderboard = [];
-    if (data.documents && Array.isArray(data.documents)) {
-      leaderboard = data.documents
-        .map((doc, index) => {
-          const fields = doc.fields || {};
-          return {
-            rank: 0, // 暂时设为0，之后再更新
-            playerName: fields.playerName?.stringValue || "Unknown",
-            timeSeconds: fields.timeSeconds?.stringValue || "0.00",
-            timeMs: parseInt(fields.timeMs?.integerValue || 0),
-            timestamp: fields.timestamp?.timestampValue,
-            isAccount: fields.isAccount?.booleanValue || false,
-          };
-        })
-        // 按时间排序
-        .sort((a, b) => a.timeMs - b.timeMs)
-        // 取前N条
-        .slice(0, limitCount)
-        // 更新排名
-        .map((entry, index) => ({
-          ...entry,
-          rank: index + 1,
-        }));
-    }
-
-    console.log(`[Firebase] ✓ Fallback loaded ${leaderboard.length} scores`);
+    console.log(`[Firebase] ✓ Leaderboard ready: ${leaderboard.length} entries`);
     return leaderboard;
   } catch (error) {
     console.error("[Firebase] Fallback failed:", error);

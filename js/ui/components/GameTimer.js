@@ -117,4 +117,32 @@ export class GameTimer {
       console.log("[GameTimer] Cleaned up DOM element");
     }
   }
+
+  /**
+   * 应用 Easy 难度风格（浅紫色、透明背景、右上角）
+   * @param {HTMLCanvasElement} canvas - p5.js canvas 元素
+   */
+  applyEasyStyle(canvas) {
+    if (!this.element || !canvas) return;
+
+    const canvasRect = canvas.getBoundingClientRect();
+    const timerX = canvasRect.left + canvasRect.width - 110;
+    const timerY = canvasRect.top + 30;
+
+    // 应用 Easy 风格
+    this.element.style.position = "fixed";
+    this.element.style.left = `${timerX}px`;
+    this.element.style.top = `${timerY}px`;
+    this.element.style.right = "auto";
+    this.element.style.transform = "none";
+    this.element.style.fontSize = "18px";
+    this.element.style.fontWeight = "bold";
+    this.element.style.fontFamily = "'Courier New', monospace";
+    this.element.style.color = "#DAC6EE";
+    this.element.style.background = "transparent";
+    this.element.style.border = "none";
+    this.element.style.padding = "0px";
+    this.element.style.textShadow = "none";
+    this.element.style.zIndex = "1200";
+  }
 }

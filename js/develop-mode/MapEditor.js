@@ -287,6 +287,10 @@ export class MapEditor {
       this._ui.activeTool = EntityTool.SPAWN;
       return;
     }
+    if (e.key === ",") {
+      this._ui.activeTool = EntityTool.TELEPORT_POINT;
+      return;
+    }
   }
 
   _onMousePressed() {

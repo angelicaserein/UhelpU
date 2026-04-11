@@ -221,11 +221,14 @@ export class StaticPageWinEasy extends PageBase {
 
       // 计算当前玩家的排名信息
       if (this._currentScore !== null && window.playerName) {
-        // 本次排名（当前成绩和所有人最佳成绩对比）
+        // 本次排名（当前成绩和所有人最佳成绩对比，但排除当前玩家自己）
         let currentRank = 1;
         for (const entry of Object.values(playerBestScores)) {
-          if (entry.timeSeconds < this._currentScore) {
-            currentRank++;
+          // 排除当前玩家自己的历史最佳，只看其他玩家
+          if (entry.playerName !== window.playerName || !!entry.isAccount !== currentPlayerIsAccount) {
+            if (entry.timeSeconds < this._currentScore) {
+              currentRank++;
+            }
           }
         }
         this._currentRank = currentRank;
@@ -486,24 +489,32 @@ export class StaticPageWinEasy extends PageBase {
       p.textAlign(p.LEFT, p.TOP);
       p.text(rankText, baseX - panelWidth / 2 + 12, y);
 
-      // 玩家名字（账号用户加 👑，当前玩家用不同颜色，第一名用彩虹效果）
-      const displayName = entry.isAccount ? "👑" + entry.playerName : entry.playerName;
+      // 账户标记 - 皇冠单独显示在排名和名字之间
+      let nameStartX = baseX - panelWidth / 2 + 50;
+      if (entry.isAccount) {
+        p.fill(255, 255, 255, alpha);
+        p.text("👑", baseX - panelWidth / 2 + 42, y);
+        nameStartX = baseX - panelWidth / 2 + 60; // 名字向右移动为皇冠腾出空间
+      }
+
+      // 玩家名字（当前玩家用不同颜色，第一名用彩虹效果）
       if (i === 0) {
         // 第一名用彩虹效果
-        this._drawRainbowWaveText(p, displayName, baseX - panelWidth / 2 + 50, y, alpha);
+        this._drawRainbowWaveText(p, entry.playerName, nameStartX, y, alpha);
         // 如果第一名是当前玩家，加上YOU标识
         if (isCurrentPlayer) {
           p.fill(255, 200, 100, Math.min(220, alpha * 1.1));
-          p.text(" ← YOU", baseX - panelWidth / 2 + 50 + p.textWidth(displayName), y);
+          p.text(" ← YOU", nameStartX + p.textWidth(entry.playerName), y);
         }
       } else if (isCurrentPlayer) {
+        const playerDisplayName = entry.playerName;
         p.fill(255, 255, 100, Math.min(255, alpha * 1.2));
         p.textAlign(p.LEFT, p.TOP);
-        p.text(displayName + " ← YOU", baseX - panelWidth / 2 + 50, y);
+        p.text(playerDisplayName + " ← YOU", nameStartX, y);
       } else {
         p.fill(255, 255, 255, Math.min(220, alpha * 1.1));
         p.textAlign(p.LEFT, p.TOP);
-        p.text(displayName, baseX - panelWidth / 2 + 50, y);
+        p.text(entry.playerName, nameStartX, y);
       }
 
       // 右侧显示时间

@@ -17,6 +17,7 @@ export const EntityTool = Object.freeze({
   CHECKPOINT: "checkpoint",
   ENEMY: "enemy",
   SPAWN: "spawn",
+  TELEPORT_POINT: "teleportPoint",
 });
 
 /** 网格吸附大小 */
@@ -109,6 +110,12 @@ export const SIGNBOARD_SIZE = {
 
 /** Checkpoint 固定大小 */
 export const CHECKPOINT_SIZE = {
+  width: 40,
+  height: 70,
+};
+
+/** TeleportPoint 固定大小 */
+export const TELEPORT_POINT_SIZE = {
   width: 40,
   height: 70,
 };

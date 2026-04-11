@@ -119,12 +119,9 @@ export class GuideRecordState extends BaseTutorialState {
     // 全屏黑幕（不镂空）
     this.ui.showOverlay({ type: "full" });
 
-    // 提示显示在录制 UI 下面（相对 canvas）
-    const canvasRect = this.manager._getCanvasRect();
+    // 提示居中显示
     this.ui.showPrompt("tutorial_guide_record_msg", {
-      position: "custom",
-      x: canvasRect.left + canvasRect.width / 2,
-      y: canvasRect.top + 80,
+      position: "center",
     });
 
     console.log("[GuideRecordState] ✓ Waiting for record key press...");
@@ -150,12 +147,9 @@ export class GuideTimelineState extends BaseTutorialState {
     // 全屏黑幕
     this.ui.showOverlay({ type: "full" });
 
-    // 提示显示在 canvas 中央附近
-    const canvasRect = this.manager._getCanvasRect();
+    // 提示居中显示
     this.ui.showPrompt("tutorial_guide_timeline_msg", {
-      position: "custom",
-      x: canvasRect.left + canvasRect.width / 2,
-      y: canvasRect.top + canvasRect.height / 2,
+      position: "center",
     });
 
     console.log("[GuideTimelineState] ✓ Waiting for movement key press...");
@@ -211,12 +205,9 @@ export class GuideReplayState extends BaseTutorialState {
     // 全屏黑幕（不镂空）
     this.ui.showOverlay({ type: "full" });
 
-    // 显示提示文字（相对 canvas）
-    const canvasRect = this.manager._getCanvasRect();
+    // 提示居中显示
     this.ui.showPrompt("tutorial_guide_replay_msg", {
-      position: "custom",
-      x: canvasRect.left + canvasRect.width / 2,
-      y: canvasRect.top + 80,
+      position: "center",
     });
 
     console.log("[GuideReplayState] ✓ Waiting for replay key press...");
@@ -242,12 +233,9 @@ export class ReplayingState extends BaseTutorialState {
     // 隐藏黑幕
     this.ui.hideOverlay();
 
-    // 显示提示文字（相对 canvas）
-    const canvasRect = this.manager._getCanvasRect();
+    // 提示居中显示
     this.ui.showPrompt("tutorial_replaying_msg", {
-      position: "custom",
-      x: canvasRect.left + canvasRect.width / 2,
-      y: canvasRect.top + 80,
+      position: "center",
     });
 
     // 监听 R 键来提前结束回放
@@ -305,12 +293,9 @@ export class CompleteState extends BaseTutorialState {
     // 隐藏黑幕
     this.ui.hideOverlay();
 
-    // 显示完成提示（相对 canvas，中央）
-    const canvasRect = this.manager._getCanvasRect();
+    // 显示完成提示（居中）
     this.ui.showPrompt("tutorial_complete_msg", {
-      position: "custom",
-      x: canvasRect.left + canvasRect.width / 2,
-      y: canvasRect.top + canvasRect.height / 2,
+      position: "center",
       isHighlight: true,
     });
 

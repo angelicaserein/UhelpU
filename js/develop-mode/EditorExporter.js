@@ -61,6 +61,7 @@ export class EditorExporter {
       { tool: EntityTool.NPC, label: "NPC", ctor: "NPC" },
       { tool: EntityTool.SIGNBOARD, label: "Signboard", ctor: "Signboard" },
       { tool: EntityTool.CHECKPOINT, label: "Checkpoint", ctor: "Checkpoint" },
+      { tool: EntityTool.TELEPORT_POINT, label: "TeleportPoint", ctor: "TeleportPoint" },
       { tool: EntityTool.ENEMY, label: "Enemy", ctor: "Enemy" },
     ];
 

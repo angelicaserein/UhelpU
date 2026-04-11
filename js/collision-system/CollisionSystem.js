@@ -40,6 +40,16 @@ export class CollisionSystem {
       }
     }
 
+    // Replayer collision detection with enemies (DYNAMIC-DYNAMIC pairs)
+    const replayer2 = this.getReplayer();
+    if (replayer2 && replayer2.isReplaying) {
+      for (const dyn of this._dynamicEntities) {
+        if (dyn.type === "enemy" && dyn !== replayer2) {
+          this.processEnemyReplayerPair(replayer2, dyn);
+        }
+      }
+    }
+
     // Enemy collision detection with other DYNAMIC/STATIC entities (platforms, walls, etc.)
     for (const dyn of this._dynamicEntities) {
       if (dyn.type === "enemy") {
@@ -216,6 +226,30 @@ export class CollisionSystem {
 
       const responseFunc = responderMap[typePair];
       responseFunc(player, enemy, collisionMsg);
+    }
+  }
+
+  processEnemyReplayerPair(replayer, enemy) {
+    // Enemy collision detection with Replayer (DYNAMIC-DYNAMIC pairs)
+    if (enemy.deathState && enemy.deathState.isDead) {
+      return;
+    }
+
+    const replayerShape = replayer.collider.colliderShape;
+    const enemyShape = enemy.collider.colliderShape;
+
+    const typePair = "DYNAMIC-DYNAMIC";
+    const shapePair = `${replayerShape}-${enemyShape}`;
+    const fullKey = `${typePair}-${shapePair}`;
+
+    const detectFunc = detectorMap[shapePair];
+    const detectResult = detectFunc(replayer, enemy);
+    if (detectResult) {
+      const resolveFunc = resolverMap[fullKey];
+      const collisionMsg = resolveFunc(replayer, enemy);
+
+      const responseFunc = responderMap[typePair];
+      responseFunc(replayer, enemy, collisionMsg);
     }
   }
 

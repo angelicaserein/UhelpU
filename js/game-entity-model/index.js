@@ -18,6 +18,7 @@ export { Platform } from "./terrain/Platform.js";
 export { Spike } from "./interactables/Spike.js";
 export { Portal } from "./interactables/Portal.js";
 export { Button } from "./interactables/Button.js";
+export { Box } from "./interactables/Box.js";
 export { SignboardDemo2 } from "./interactables/SignboardDemo2.js";
 export { SignboardDemo1 } from "./interactables/SignboardDemo1.js";
 export { NPCDemo1 } from "./interactables/NPCDemo1.js";

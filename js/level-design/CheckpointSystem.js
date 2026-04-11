@@ -110,6 +110,13 @@ export class CheckpointSystem {
         }
       }
 
+      // 重置所有支持inLevelReset的实体（box, enemy等）
+      for (const entity of level.entities) {
+        if (entity.type !== "player" && typeof entity.inLevelReset === "function") {
+          entity.inLevelReset();
+        }
+      }
+
       // 重置录制系统到待录制状态（"准备捕捉"）
       if (level.recordSystem && typeof level.recordSystem.resetToReadyToRecord === "function") {
         level.recordSystem.resetToReadyToRecord();

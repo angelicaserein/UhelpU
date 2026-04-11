@@ -95,11 +95,23 @@ function resolveFirst(a, b) {
 function resolveDynDyn(a, b) {
     const aPrevY = (a.prevY !== undefined) ? a.prevY : a.y;
     const bPrevY = (b.prevY !== undefined) ? b.prevY : b.y;
+    const aPrevX = (a.prevX !== undefined) ? a.prevX : a.x;
+    const bPrevX = (b.prevX !== undefined) ? b.prevX : b.x;
 
     const aPrevBottom = aPrevY;
     const aPrevTop = aPrevY + a.collider.h;
     const bPrevBottom = bPrevY;
     const bPrevTop = bPrevY + b.collider.h;
+
+    const aPrevRight = aPrevX + a.collider.w;
+    const aPrevLeft = aPrevX;
+    const bPrevRight = bPrevX + b.collider.w;
+    const bPrevLeft = bPrevX;
+
+    const aCurrRight = a.x + a.collider.w;
+    const aCurrLeft = a.x;
+    const bCurrRight = b.x + b.collider.w;
+    const bCurrLeft = b.x;
 
     // A 上一帧在 B 上方：A 踩 B 头，A 精确吸附到 B 顶部
     if(aPrevBottom >= bPrevTop) {
@@ -121,6 +133,33 @@ function resolveDynDyn(a, b) {
             b.y = a.y + a.collider.h;
         }
         return "b_on_a";
+    }
+
+    // 侧面碰撞：检测box推动
+    // A 从左边推入 B（A 向右推 B)
+    if (b.type === "box" && aPrevRight <= bPrevLeft && aCurrRight > bCurrLeft) {
+        // b 被从左边推动
+        b.x = a.x + a.collider.w;
+        return "allowed collision";
+    }
+    // A 从右边推入 B（A 向左推 B）
+    if (b.type === "box" && aPrevLeft >= bPrevRight && aCurrLeft < bCurrRight) {
+        // b 被从右边推动
+        b.x = a.x - b.collider.w;
+        return "allowed collision";
+    }
+
+    // B 从左边推入 A（B 向右推 A）
+    if (a.type === "box" && bPrevRight <= aPrevLeft && bCurrRight > aCurrLeft) {
+        // a 被从左边推动
+        a.x = b.x + b.collider.w;
+        return "allowed collision";
+    }
+    // B 从右边推入 A（B 向左推 A）
+    if (a.type === "box" && bPrevLeft >= aPrevRight && bCurrLeft < aCurrRight) {
+        // a 被从右边推动
+        a.x = b.x - a.collider.w;
+        return "allowed collision";
     }
 
     // 左右方向的相交保留，不做垂直分离

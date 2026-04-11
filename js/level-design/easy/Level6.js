@@ -9,6 +9,7 @@
   Button,
   Portal,
   WireRenderer,
+  Box,
 } from "../../game-entity-model/index.js";
 import { BaseLevel } from "../BaseLevel.js";
 import { Demo2RecordUI } from "../../record-system/Demo2RecordUI.js";
@@ -31,7 +32,7 @@ export class Level6 extends BaseLevel {
     this.entities.add(this._player);
 
     // Ground - 新增地板
-    this.entities.add(new Ground(10, 60, 620, 300));
+    this.entities.add(new Ground(10, 80, 620, 280)); //参数分别是：x, y, width, height
     this.entities.add(new Ground(740, 80, 310, 280));
 
     // Platform
@@ -39,6 +40,9 @@ export class Level6 extends BaseLevel {
 
     // Spike
     this.entities.add(new Spike(440, 360, 50, 20));
+
+    // Box - pushable box that can be stood on
+    this.entities.add(new Box(600, 350, 40, 40));
 
     // Checkpoint
     this.entities.add(new Checkpoint(230, 360, 40, 70, () => this._player));

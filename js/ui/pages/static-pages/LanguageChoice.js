@@ -25,7 +25,7 @@ export class LanguageChoice extends PageBase {
 
     // 检查 localStorage 中是否有保存的名字和语言
     const savedName = localStorage.getItem("playerName");
-    const savedLang = localStorage.getItem("playerLang");
+    const savedLang = localStorage.getItem("kinoko_lang");
 
     if (savedName && savedLang) {
       // 两者都有，直接进入游戏，跳过语言和名字选择
@@ -43,7 +43,6 @@ export class LanguageChoice extends PageBase {
     enPanel.addClass("language-panel lang-panel-left");
     enPanel.mouseClicked(() => {
       i18n.setLang("en");
-      localStorage.setItem("playerLang", "en");
       this.switcher.showNameInput(p);
     });
     this.addElement(enPanel);
@@ -53,7 +52,6 @@ export class LanguageChoice extends PageBase {
     zhPanel.addClass("language-panel lang-panel-right");
     zhPanel.mouseClicked(() => {
       i18n.setLang("zh");
-      localStorage.setItem("playerLang", "zh");
       this.switcher.showNameInput(p);
     });
     this.addElement(zhPanel);
@@ -65,7 +63,6 @@ export class LanguageChoice extends PageBase {
           btn: enPanel,
           callback: () => {
             i18n.setLang("en");
-            localStorage.setItem("playerLang", "en");
             this.switcher.showNameInput(p);
           },
         },
@@ -73,7 +70,6 @@ export class LanguageChoice extends PageBase {
           btn: zhPanel,
           callback: () => {
             i18n.setLang("zh");
-            localStorage.setItem("playerLang", "zh");
             this.switcher.showNameInput(p);
           },
         },

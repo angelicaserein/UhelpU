@@ -40,7 +40,7 @@ export class StaticPageWorldSelect extends PageBase {
       {
         cls: "world-button world-button-2 world-mode-button",
         label: t("world_difficult"),
-        action: () => this.switcher.showLevelChoiceDemo2(p),
+        action: () => this.switcher.showLevelChoiceHard(p),
       },
     ];
 
@@ -117,12 +117,14 @@ export class StaticPageWorldSelect extends PageBase {
     try {
       const raw = localStorage.getItem("playerAccount");
       if (raw) savedAccount = JSON.parse(raw);
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+      /* ignore */
+    }
 
     const isAccount = !!savedAccount;
     const playerName = isAccount
-      ? (savedAccount.username || "Player")
-      : (localStorage.getItem("playerName") || "Player");
+      ? savedAccount.username || "Player"
+      : localStorage.getItem("playerName") || "Player";
 
     const nameTextContainer = p.createDiv("");
     nameTextContainer.addClass("player-name-text");
@@ -200,7 +202,9 @@ export class StaticPageWorldSelect extends PageBase {
     title.parent(dialog);
 
     let savedAccount = null;
-    try { savedAccount = JSON.parse(localStorage.getItem("playerAccount")); } catch (e) {}
+    try {
+      savedAccount = JSON.parse(localStorage.getItem("playerAccount"));
+    } catch (e) {}
     const currentUsername = savedAccount?.username || "";
 
     const inputField = p.createInput(currentUsername);
@@ -216,8 +220,14 @@ export class StaticPageWorldSelect extends PageBase {
     const confirmBtn = p.createButton(t("btn_confirm"));
     confirmBtn.mousePressed(async () => {
       const newUsername = inputField.value().trim();
-      if (!newUsername) { alert(t("name_input_empty")); return; }
-      if (newUsername.length > 12) { alert(t("name_input_too_long")); return; }
+      if (!newUsername) {
+        alert(t("name_input_empty"));
+        return;
+      }
+      if (newUsername.length > 12) {
+        alert(t("name_input_too_long"));
+        return;
+      }
       dialogContainer.remove();
       await this._handleAccountRename(newUsername);
     });
@@ -227,7 +237,10 @@ export class StaticPageWorldSelect extends PageBase {
     cancelBtn.mousePressed(() => dialogContainer.remove());
     cancelBtn.parent(buttonContainer);
 
-    setTimeout(() => { inputField.elt.focus(); inputField.elt.select(); }, 100);
+    setTimeout(() => {
+      inputField.elt.focus();
+      inputField.elt.select();
+    }, 100);
   }
 
   /**
@@ -237,7 +250,9 @@ export class StaticPageWorldSelect extends PageBase {
     if (this._isRenamingInProgress) return;
 
     let savedAccount = null;
-    try { savedAccount = JSON.parse(localStorage.getItem("playerAccount")); } catch (e) {}
+    try {
+      savedAccount = JSON.parse(localStorage.getItem("playerAccount"));
+    } catch (e) {}
     if (!savedAccount) return;
 
     const oldUsername = savedAccount.username;
@@ -246,17 +261,34 @@ export class StaticPageWorldSelect extends PageBase {
     try {
       const count = await this._getAccountNameCount(newUsername);
       if (count === 0) {
-        await this._updateAccountNameAndLeaderboard(oldUsername, newUsername, savedAccount);
+        await this._updateAccountNameAndLeaderboard(
+          oldUsername,
+          newUsername,
+          savedAccount,
+        );
       } else {
-        this._showAccountRenameDuplicateDialog(oldUsername, newUsername, count, savedAccount);
+        this._showAccountRenameDuplicateDialog(
+          oldUsername,
+          newUsername,
+          count,
+          savedAccount,
+        );
       }
     } catch (error) {
-      console.error("[StaticPageWorldSelect] Error checking account name:", error);
+      console.error(
+        "[StaticPageWorldSelect] Error checking account name:",
+        error,
+      );
       alert(t("name_check_error"));
     }
   }
 
-  _showAccountRenameDuplicateDialog(oldUsername, newUsername, count, savedAccount) {
+  _showAccountRenameDuplicateDialog(
+    oldUsername,
+    newUsername,
+    count,
+    savedAccount,
+  ) {
     const p = this.p;
 
     const dialogContainer = p.createDiv("");
@@ -269,8 +301,14 @@ export class StaticPageWorldSelect extends PageBase {
 
     const messageContent = t("name_duplicate_message")
       .replace(/\n/g, "<br>")
-      .replace(/{COUNT}/g, `<span style="color: #ff9f43; font-weight: bold;">${count}</span>`)
-      .replace(/{NAME}/g, `<span style="color: #feca57; font-weight: bold;">${newUsername}</span>`);
+      .replace(
+        /{COUNT}/g,
+        `<span style="color: #ff9f43; font-weight: bold;">${count}</span>`,
+      )
+      .replace(
+        /{NAME}/g,
+        `<span style="color: #feca57; font-weight: bold;">${newUsername}</span>`,
+      );
 
     const message = p.createDiv(messageContent);
     message.style("color", "#e0e0e0");
@@ -289,7 +327,11 @@ export class StaticPageWorldSelect extends PageBase {
     confirmBtn.mousePressed(async () => {
       dialogContainer.remove();
       const finalName = newUsername + "#" + (count + 1);
-      await this._updateAccountNameAndLeaderboard(oldUsername, finalName, savedAccount);
+      await this._updateAccountNameAndLeaderboard(
+        oldUsername,
+        finalName,
+        savedAccount,
+      );
     });
     confirmBtn.parent(buttonContainer);
 
@@ -304,7 +346,11 @@ export class StaticPageWorldSelect extends PageBase {
   /**
    * 执行账号改名：更新 Firestore 排行榜 + accountNames + localStorage
    */
-  async _updateAccountNameAndLeaderboard(oldUsername, newUsername, savedAccount) {
+  async _updateAccountNameAndLeaderboard(
+    oldUsername,
+    newUsername,
+    savedAccount,
+  ) {
     this._isRenamingInProgress = true;
     const p = this.p;
 
@@ -336,13 +382,15 @@ export class StaticPageWorldSelect extends PageBase {
       if (this._playerNameElement) {
         this._playerNameElement.elt.innerHTML = "";
         const crown = document.createElement("div");
-        crown.style.cssText = "font-size:18px;font-weight:bold;letter-spacing:0.02em;display:inline-block";
+        crown.style.cssText =
+          "font-size:18px;font-weight:bold;letter-spacing:0.02em;display:inline-block";
         crown.textContent = "👑";
         this._playerNameElement.elt.appendChild(crown);
         for (const char of newUsername) {
           const span = document.createElement("div");
           span.className = "rainbow-wave";
-          span.style.cssText = "font-size:18px;font-weight:bold;letter-spacing:0.02em;text-shadow:2px 2px 4px rgba(0,0,0,0.7)";
+          span.style.cssText =
+            "font-size:18px;font-weight:bold;letter-spacing:0.02em;text-shadow:2px 2px 4px rgba(0,0,0,0.7)";
           span.textContent = char;
           this._playerNameElement.elt.appendChild(span);
         }
@@ -482,8 +530,14 @@ export class StaticPageWorldSelect extends PageBase {
     // 提示文字
     const messageContent = t("name_duplicate_message")
       .replace(/\n/g, "<br>")
-      .replace(/{COUNT}/g, `<span style="color: #ff9f43; font-weight: bold;">${count}</span>`)
-      .replace(/{NAME}/g, `<span style="color: #feca57; font-weight: bold;">${newName}</span>`);
+      .replace(
+        /{COUNT}/g,
+        `<span style="color: #ff9f43; font-weight: bold;">${count}</span>`,
+      )
+      .replace(
+        /{NAME}/g,
+        `<span style="color: #feca57; font-weight: bold;">${newName}</span>`,
+      );
 
     const message = p.createDiv(messageContent);
     message.style("color", "#e0e0e0");
@@ -613,7 +667,10 @@ export class StaticPageWorldSelect extends PageBase {
       const data = await response.json();
       return parseInt(data.fields?.count?.integerValue || 0);
     } catch (error) {
-      console.error(`[StaticPageWorldSelect] Error getting account name count:`, error);
+      console.error(
+        `[StaticPageWorldSelect] Error getting account name count:`,
+        error,
+      );
       return 0;
     }
   }
@@ -629,10 +686,15 @@ export class StaticPageWorldSelect extends PageBase {
       await fetch(url, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fields: { count: { integerValue: currentCount + 1 } } }),
+        body: JSON.stringify({
+          fields: { count: { integerValue: currentCount + 1 } },
+        }),
       });
     } catch (error) {
-      console.error(`[StaticPageWorldSelect] Error incrementing account name count:`, error);
+      console.error(
+        `[StaticPageWorldSelect] Error incrementing account name count:`,
+        error,
+      );
     }
   }
 
@@ -651,11 +713,16 @@ export class StaticPageWorldSelect extends PageBase {
         await fetch(url, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ fields: { count: { integerValue: currentCount - 1 } } }),
+          body: JSON.stringify({
+            fields: { count: { integerValue: currentCount - 1 } },
+          }),
         });
       }
     } catch (error) {
-      console.error(`[StaticPageWorldSelect] Error decrementing account name count:`, error);
+      console.error(
+        `[StaticPageWorldSelect] Error decrementing account name count:`,
+        error,
+      );
     }
   }
 
@@ -727,7 +794,8 @@ export class StaticPageWorldSelect extends PageBase {
             const matchingDocs = allDocs.filter((doc) => {
               const playerName = doc.fields?.playerName?.stringValue;
               const docIsAccount = doc.fields?.isAccount?.booleanValue || false;
-              const isMatch = playerName === oldName && docIsAccount === isAccount;
+              const isMatch =
+                playerName === oldName && docIsAccount === isAccount;
               if (isMatch) {
                 console.log(
                   `[StaticPageWorldSelect]   ⭐ 匹配到旧名字: "${playerName}" (isAccount=${docIsAccount}) 在 ${doc.name}`,
@@ -868,7 +936,11 @@ export class StaticPageWorldSelect extends PageBase {
     try {
       console.log(`[改名流程] 1/3 - 开始更新排行榜...`);
       // 更新排行榜中的所有记录
-      const updateCount = await this._updateLeaderboardName(oldName, newName, false);
+      const updateCount = await this._updateLeaderboardName(
+        oldName,
+        newName,
+        false,
+      );
       console.log(
         `[改名流程] 1/3 - 排行榜更新完成，共更新 ${updateCount} 条记录\n`,
       );
@@ -889,9 +961,7 @@ export class StaticPageWorldSelect extends PageBase {
       window.playerName = newName;
       console.log(`[改名流程] 3/3 - 本地存储完成\n`);
 
-      console.log(
-        `[改名流程] ✓ 改名成功: "${oldName}" → "${newName}"\n`,
-      );
+      console.log(`[改名流程] ✓ 改名成功: "${oldName}" → "${newName}"\n`);
 
       // 隐藏 loading，更新欢迎信息
       loadingContainer.remove();
@@ -914,17 +984,14 @@ export class StaticPageWorldSelect extends PageBase {
       console.log(
         `╔════════════════════════════════════════════════════════════╗`,
       );
-      console.log(`║                      改名流程完成✓`,);
+      console.log(`║                      改名流程完成✓`);
       console.log(
         `╚════════════════════════════════════════════════════════════╝\n`,
       );
 
       this._isRenamingInProgress = false;
     } catch (error) {
-      console.error(
-        "[改名流程] ✗ 改名失败:",
-        error,
-      );
+      console.error("[改名流程] ✗ 改名失败:", error);
       loadingContainer.remove();
       this._isRenamingInProgress = false;
       alert("改名失败，请重试 / Rename failed, please try again");

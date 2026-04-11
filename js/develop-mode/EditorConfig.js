@@ -18,6 +18,7 @@ export const EntityTool = Object.freeze({
   ENEMY: "enemy",
   SPAWN: "spawn",
   TELEPORT_POINT: "teleportPoint",
+  BOX: "box",
 });
 
 /** 网格吸附大小 */
@@ -67,6 +68,16 @@ export const WALL_DEFAULTS = {
   maxWidth: 100,
   minHeight: 40,
   maxHeight: 800,
+};
+
+/** Box 默认/限制 */
+export const BOX_DEFAULTS = {
+  width: 40,
+  height: 40,
+  minWidth: 20,
+  maxWidth: 200,
+  minHeight: 20,
+  maxHeight: 200,
 };
 
 /** BtnWirePortalSystem 默认值（按钮 + 传送门） */

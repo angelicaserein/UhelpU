@@ -115,6 +115,12 @@ export class EditorUI {
       w: BTN_W,
       h: BTN_H,
     };
+    this._btnBox = {
+      x: startX + (BTN_W + BTN_GAP) * 8,
+      y: toolbarTop + BTN_Y_OFFSET,
+      w: BTN_W,
+      h: BTN_H,
+    };
 
     // 第二行按钮
     const row2Top = toolbarTop + BTN_Y_OFFSET + BTN_H + 4;
@@ -300,6 +306,14 @@ export class EditorUI {
       this.activeTool === EntityTool.BTN_PLATFORM,
       [60, 180, 140],
     );
+    // Box 按钮
+    this._drawButton(
+      p,
+      this._btnBox,
+      "Box",
+      this.activeTool === EntityTool.BOX,
+      [200, 140, 100],
+    );
     // NPC 按钮
     this._drawButton(
       p,
@@ -406,12 +420,21 @@ export class EditorUI {
                         ? "木牌 (Signboard)"
                         : this.activeTool === EntityTool.CHECKPOINT
                           ? "存档点 (Checkpoint)"
-                          : this.activeTool === EntityTool.SPAWN
-                            ? "出生点 (Spawn)"
-                            : this.activeTool === EntityTool.TELEPORT_POINT
-                              ? "传送点 (TeleportPoint)"
-                              : "传送门 (Portal)";
+                          : this.activeTool === EntityTool.ENEMY
+                            ? "敌人 (Enemy)"
+                            : this.activeTool === EntityTool.SPAWN
+                              ? "出生点 (Spawn)"
+                              : this.activeTool === EntityTool.TELEPORT_POINT
+                                ? "传送点 (TeleportPoint)"
+                                : "传送门 (Portal)";
     p.text(`正在放置：${toolLabel}`, statusX, statusY);
+
+    if (this.activeTool === EntityTool.ENEMY) {
+      p.fill(170, 220, 170);
+      p.textSize(12);
+      p.textAlign(p.LEFT, p.CENTER);
+      p.text("提示：放置后选中敌人按 F 可翻转方向", statusX, statusY + 18);
+    }
 
     // 保存按钮
     this._drawButton(p, this._btnSave, "💾 保存", false, [60, 180, 100]);
@@ -570,6 +593,11 @@ export class EditorUI {
     // BtnPlatform 按钮
     if (this._insideRect(mx, my, this._btnBtnPlatform)) {
       this.activeTool = EntityTool.BTN_PLATFORM;
+      return true;
+    }
+    // Box 按钮
+    if (this._insideRect(mx, my, this._btnBox)) {
+      this.activeTool = EntityTool.BOX;
       return true;
     }
     // BtnPlatform 平台数量 +/- 按钮

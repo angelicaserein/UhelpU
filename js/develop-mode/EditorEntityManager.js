@@ -23,6 +23,7 @@ import {
   ENEMY_DEFAULTS,
   DELETE_BTN_SIZE,
   TELEPORT_POINT_SIZE,
+  BOX_DEFAULTS,
 } from "./EditorConfig.js";
 import { Ground } from "../game-entity-model/terrain/Ground.js";
 import { Portal } from "../game-entity-model/interactables/Portal.js";
@@ -39,6 +40,7 @@ import { Checkpoint } from "../game-entity-model/interactables/Checkpoint.js";
 import { Enemy } from "../game-entity-model/characters/Enemy.js";
 import { TeleportPoint } from "../game-entity-model/interactables/TeleportPoint.js";
 
+import { Box } from "../game-entity-model/interactables/Box.js";
 /**
  * @typedef {Object} PlacedRecord
  * @property {string} tool      — EntityTool 枚举值
@@ -97,6 +99,8 @@ export class EditorEntityManager {
       gameEntity = new Spike(x, y, w, h, { color: [220, 50, 50] });
     } else if (tool === EntityTool.WALL) {
       gameEntity = new Wall(x, y, w, h);
+    } else if (tool === EntityTool.BOX) {
+      gameEntity = new Box(x, y, w, h);
     } else if (tool === EntityTool.WIRE_PORTAL) {
       const btn = new Button(
         x,
@@ -422,7 +426,9 @@ export class EditorEntityManager {
         gameEntity.y,
         gameEntity.w,
         gameEntity.h,
-        record.tool === EntityTool.ENEMY ? { direction: record.direction } : undefined,
+        record.tool === EntityTool.ENEMY
+          ? { direction: record.direction }
+          : undefined,
       );
       if (restored?.gameEntity) {
         this._applySerializedEntity(restored.gameEntity, gameEntity);
@@ -913,7 +919,9 @@ export class EditorEntityManager {
           ? SPIKE_DEFAULTS
           : this._selected.tool === EntityTool.WALL
             ? WALL_DEFAULTS
-            : GROUND_DEFAULTS;
+            : this._selected.tool === EntityTool.BOX
+              ? BOX_DEFAULTS
+              : GROUND_DEFAULTS;
 
     let newW = Math.abs(this._anchor.x - sx);
     let newH = Math.abs(this._anchor.y - sy);
@@ -1392,6 +1400,8 @@ export class EditorEntityManager {
         p.stroke(isSelected ? 255 : 220, 80, 80, isSelected ? 240 : 180);
       } else if (rec.tool === EntityTool.WALL) {
         p.stroke(isSelected ? 255 : 140, 140, 160, isSelected ? 240 : 180);
+      } else if (rec.tool === EntityTool.BOX) {
+        p.stroke(isSelected ? 255 : 200, 140, 100, isSelected ? 240 : 180);
       } else if (rec.tool === EntityTool.NPC) {
         p.stroke(60, 200, 220, 180);
       } else if (rec.tool === EntityTool.SIGNBOARD) {
@@ -1438,6 +1448,8 @@ export class EditorEntityManager {
         p.text(`S ${w}×${h}`, 3, 3);
       } else if (rec.tool === EntityTool.WALL) {
         p.text(`W ${w}×${h}`, 3, 3);
+      } else if (rec.tool === EntityTool.BOX) {
+        p.text(`B ${w}×${h}`, 3, 3);
       } else if (rec.tool === EntityTool.NPC) {
         p.text("NPC", 3, 3);
       } else if (rec.tool === EntityTool.SIGNBOARD) {

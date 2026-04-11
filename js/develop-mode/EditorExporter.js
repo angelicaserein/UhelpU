@@ -57,11 +57,16 @@ export class EditorExporter {
       { tool: EntityTool.PLATFORM, label: "Platform", ctor: "Platform" },
       { tool: EntityTool.SPIKE, label: "Spike", ctor: "Spike" },
       { tool: EntityTool.WALL, label: "Wall", ctor: "Wall" },
+      { tool: EntityTool.BOX, label: "Box", ctor: "Box" },
       { tool: EntityTool.PORTAL, label: "Portal", ctor: "Portal" },
       { tool: EntityTool.NPC, label: "NPC", ctor: "NPC" },
       { tool: EntityTool.SIGNBOARD, label: "Signboard", ctor: "Signboard" },
       { tool: EntityTool.CHECKPOINT, label: "Checkpoint", ctor: "Checkpoint" },
-      { tool: EntityTool.TELEPORT_POINT, label: "TeleportPoint", ctor: "TeleportPoint" },
+      {
+        tool: EntityTool.TELEPORT_POINT,
+        label: "TeleportPoint",
+        ctor: "TeleportPoint",
+      },
       { tool: EntityTool.ENEMY, label: "Enemy", ctor: "Enemy" },
     ];
 
@@ -77,7 +82,9 @@ export class EditorExporter {
         if (g.tool === EntityTool.ENEMY) {
           const speed = e._speed ?? 2;
           const direction = r.direction ?? 1;
-          lines.push(`new ${g.ctor}(${e.x}, ${e.y}, ${w}, ${h}, { speed: ${speed}, direction: ${direction} }),`);
+          lines.push(
+            `new ${g.ctor}(${e.x}, ${e.y}, ${w}, ${h}, { speed: ${speed}, direction: ${direction} }),`,
+          );
         } else {
           lines.push(`new ${g.ctor}(${e.x}, ${e.y}, ${w}, ${h}),`);
         }

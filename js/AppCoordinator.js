@@ -1,6 +1,7 @@
 import "./i18nDemo1.js"; // 注册 Demo1 关卡专属文案
 import "./i18nDemo2.js"; // 注册 Demo2 关卡专属文案
 import "./i18nEasy.js"; // 注册 Easy 模式关卡专属文案
+import "./i18nHard.js"; // 注册 Hard 模式关卡专属文案
 import { SwitcherMain } from "./switchers/SwitcherMain.js";
 import { EventBus } from "./event-system/EventBus.js";
 import { EventTypes } from "./event-system/EventTypes.js";
@@ -27,7 +28,10 @@ export class AppCoordinator {
 
   bindEvents() {
     this.eventBus.subscribe(EventTypes.LOAD_LEVEL, (levelIndex) => {
-      console.log("[AppCoordinator.LOAD_LEVEL] Event received with levelIndex:", levelIndex);
+      console.log(
+        "[AppCoordinator.LOAD_LEVEL] Event received with levelIndex:",
+        levelIndex,
+      );
       this.switcher.clearOverlay(this.p);
       if (this.levelManager.level) {
         this.levelManager.setPaused(false);
@@ -37,7 +41,10 @@ export class AppCoordinator {
 
       this.playLevelBgm(levelIndex);
 
-      console.log("[AppCoordinator.LOAD_LEVEL] Calling loadLevel with:", levelIndex);
+      console.log(
+        "[AppCoordinator.LOAD_LEVEL] Calling loadLevel with:",
+        levelIndex,
+      );
       this.levelManager.loadLevel(levelIndex, this.p, this.eventBus);
       this.switcher.gameSwitcher.runtimeLevelManager = this.levelManager;
 
@@ -62,6 +69,8 @@ export class AppCoordinator {
         typeof levelIndex === "string" && levelIndex.startsWith("demo2_");
       const isEasy =
         typeof levelIndex === "string" && levelIndex.startsWith("easy_");
+      const isHard =
+        typeof levelIndex === "string" && levelIndex.startsWith("hard_");
 
       this.switcher.clearOverlay(this.p);
       this.levelManager.setPaused(false);
@@ -72,6 +81,8 @@ export class AppCoordinator {
         this.switcher.staticSwitcher.showLevelChoiceDemo2(this.p);
       } else if (isEasy) {
         this.switcher.staticSwitcher.showLevelChoiceEasy(this.p);
+      } else if (isHard) {
+        this.switcher.staticSwitcher.showLevelChoiceHard(this.p);
       } else if (typeof levelIndex === "string") {
         this.switcher.staticSwitcher.showLevelChoice(this.p);
       } else {
@@ -84,6 +95,7 @@ export class AppCoordinator {
 
       const isDemo2 = levelIndex.startsWith("demo2_");
       const isEasy = levelIndex.startsWith("easy_");
+      const isHard = levelIndex.startsWith("hard_");
 
       if (result === "autoResult1") {
         this.levelManager.unloadLevel(this.p, this.eventBus);
@@ -92,6 +104,8 @@ export class AppCoordinator {
         // 选择合适的通关页面
         let WinPage;
         if (isEasy) {
+          WinPage = StaticPageWinEasy;
+        } else if (isHard) {
           WinPage = StaticPageWinEasy;
         } else if (isDemo2) {
           WinPage = StaticPageWinDemo2;
@@ -111,10 +125,9 @@ export class AppCoordinator {
 
       // Lose: pause game and show overlay on top of the game
       this.levelManager.setPaused(true);
-      // Easy 难度用 Demo2 的 Result 页面，Demo2 和 Demo1 各用各自的
-      const ResultPage = (isDemo2 || isEasy)
-        ? StaticPageResultDemo2
-        : StaticPageResultDemo1;
+      // Easy/Hard 难度用 Demo2 的 Result 页面，Demo2 和 Demo1 各用各自的
+      const ResultPage =
+        isDemo2 || isEasy || isHard ? StaticPageResultDemo2 : StaticPageResultDemo1;
       const resultPage = new ResultPage(
         result,
         levelIndex,
@@ -145,6 +158,8 @@ export class AppCoordinator {
     const normalizedLevelIndex =
       typeof levelIndex === "string" && levelIndex.startsWith("easy_")
         ? levelIndex.replace("easy_", "")
+        : typeof levelIndex === "string" && levelIndex.startsWith("hard_")
+        ? levelIndex.replace("hard_", "")
         : levelIndex;
 
     if (normalizedLevelIndex === "level1") {

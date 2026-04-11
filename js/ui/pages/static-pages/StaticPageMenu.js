@@ -115,12 +115,12 @@ export class StaticPageMenu extends PageBase {
       60,
     );
 
-    // M 键快捷进入 Demo2 Level10 开发者模式
+    // M 键快捷进入 Hard Level10 开发者模式
     this._onDevModeKey = (e) => {
       if (e.key === "m" || e.key === "M") {
         document.removeEventListener("keydown", this._onDevModeKey);
         this._onDevModeKey = null;
-        this.eventBus.publish("loadLevel", "demo2_level10");
+        this.eventBus.publish("loadLevel", "hard_level10");
         this.eventBus.publish("activateDevMode");
       }
     };

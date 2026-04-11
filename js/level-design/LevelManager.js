@@ -28,6 +28,16 @@ import { Level7 as EasyLevel7 } from "./easy/Level7.js";
 import { Level8 as EasyLevel8 } from "./easy/Level8.js";
 import { Level9 as EasyLevel9 } from "./easy/Level9.js";
 import { Level10 as EasyLevel10 } from "./easy/Level10.js";
+import { Level1 as HardLevel1 } from "./hard/Level1.js";
+import { Level2 as HardLevel2 } from "./hard/Level2.js";
+import { Level3 as HardLevel3 } from "./hard/Level3.js";
+import { Level4 as HardLevel4 } from "./hard/Level4.js";
+import { Level5 as HardLevel5 } from "./hard/Level5.js";
+import { Level6 as HardLevel6 } from "./hard/Level6.js";
+import { Level7 as HardLevel7 } from "./hard/Level7.js";
+import { Level8 as HardLevel8 } from "./hard/Level8.js";
+import { Level9 as HardLevel9 } from "./hard/Level9.js";
+import { Level10 as HardLevel10 } from "./hard/Level10.js";
 import { setGamePaused, isGamePaused } from "../game-runtime/GamePauseState.js";
 import { EventTypes } from "../event-system/EventTypes.js";
 import { Assets } from "../AssetsManager.js";
@@ -70,6 +80,16 @@ export class LevelManager {
       easy_level8: EasyLevel8,
       easy_level9: EasyLevel9,
       easy_level10: EasyLevel10,
+      hard_level1: HardLevel1,
+      hard_level2: HardLevel2,
+      hard_level3: HardLevel3,
+      hard_level4: HardLevel4,
+      hard_level5: HardLevel5,
+      hard_level6: HardLevel6,
+      hard_level7: HardLevel7,
+      hard_level8: HardLevel8,
+      hard_level9: HardLevel9,
+      hard_level10: HardLevel10,
     };
     this.level = null;
     this.currentLevelIndex = null;
@@ -102,6 +122,9 @@ export class LevelManager {
     if (num.startsWith("easy_level")) {
       prefix = "easy_level";
       num = num.replace("easy_level", "");
+    } else if (num.startsWith("hard_level")) {
+      prefix = "hard_level";
+      num = num.replace("hard_level", "");
     } else if (num.startsWith("demo2_level")) {
       prefix = "demo2_level";
       num = num.replace("demo2_level", "");

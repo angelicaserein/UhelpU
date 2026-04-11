@@ -29,6 +29,16 @@ import { GamePageLevel7 as EasyGamePageLevel7 } from "../ui/pages/game-pages/eas
 import { GamePageLevel8 as EasyGamePageLevel8 } from "../ui/pages/game-pages/easy/GamePageLevel8.js";
 import { GamePageLevel9 as EasyGamePageLevel9 } from "../ui/pages/game-pages/easy/GamePageLevel9.js";
 import { GamePageLevel10 as EasyGamePageLevel10 } from "../ui/pages/game-pages/easy/GamePageLevel10.js";
+import { GamePageLevel1 as HardGamePageLevel1 } from "../ui/pages/game-pages/hard/GamePageLevel1.js";
+import { GamePageLevel2 as HardGamePageLevel2 } from "../ui/pages/game-pages/hard/GamePageLevel2.js";
+import { GamePageLevel3 as HardGamePageLevel3 } from "../ui/pages/game-pages/hard/GamePageLevel3.js";
+import { GamePageLevel4 as HardGamePageLevel4 } from "../ui/pages/game-pages/hard/GamePageLevel4.js";
+import { GamePageLevel5 as HardGamePageLevel5 } from "../ui/pages/game-pages/hard/GamePageLevel5.js";
+import { GamePageLevel6 as HardGamePageLevel6 } from "../ui/pages/game-pages/hard/GamePageLevel6.js";
+import { GamePageLevel7 as HardGamePageLevel7 } from "../ui/pages/game-pages/hard/GamePageLevel7.js";
+import { GamePageLevel8 as HardGamePageLevel8 } from "../ui/pages/game-pages/hard/GamePageLevel8.js";
+import { GamePageLevel9 as HardGamePageLevel9 } from "../ui/pages/game-pages/hard/GamePageLevel9.js";
+import { GamePageLevel10 as HardGamePageLevel10 } from "../ui/pages/game-pages/hard/GamePageLevel10.js";
 
 export class SwitcherGamePage extends SwitcherBase {
   constructor(mainSwitcher, eventBus) {
@@ -67,6 +77,16 @@ export class SwitcherGamePage extends SwitcherBase {
       easy_level8: EasyGamePageLevel8,
       easy_level9: EasyGamePageLevel9,
       easy_level10: EasyGamePageLevel10,
+      hard_level1: HardGamePageLevel1,
+      hard_level2: HardGamePageLevel2,
+      hard_level3: HardGamePageLevel3,
+      hard_level4: HardGamePageLevel4,
+      hard_level5: HardGamePageLevel5,
+      hard_level6: HardGamePageLevel6,
+      hard_level7: HardGamePageLevel7,
+      hard_level8: HardGamePageLevel8,
+      hard_level9: HardGamePageLevel9,
+      hard_level10: HardGamePageLevel10,
     };
   }
 

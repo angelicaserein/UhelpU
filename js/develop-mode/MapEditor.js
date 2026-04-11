@@ -7,8 +7,6 @@
  *   2. 在构造函数末尾: this._mapEditor = new MapEditor(this);
  *   3. 在 draw() 末尾:  this._mapEditor.draw(p);
  *
- *   进入关卡后按 M 开启/关闭编辑模式。
- *
  * 设计原则：
  *   - 不修改 Level10 原有逻辑，仅在渲染层叠加
  *   - 所有编辑器 UI 在屏幕空间绘制（resetMatrix）
@@ -231,65 +229,10 @@ export class MapEditor {
       return;
     }
 
-    // Delete / Backspace 清空全部
+    // Delete 清空全部
     if (e.key === "Delete") {
       this._entityMgr.clear();
       this._ui.showToast("已清空所有编辑器实体");
-      return;
-    }
-
-    // 1/2/3/4 快捷切换工具
-    if (e.key === "1") {
-      this._ui.activeTool = "ground";
-      return;
-    }
-    if (e.key === "2") {
-      this._ui.activeTool = "portal";
-      return;
-    }
-    if (e.key === "3") {
-      this._ui.activeTool = "platform";
-      return;
-    }
-    if (e.key === "4") {
-      this._ui.activeTool = "spike";
-      return;
-    }
-    if (e.key === "5") {
-      this._ui.activeTool = "wall";
-      return;
-    }
-    if (e.key === "6") {
-      this._ui.activeTool = "wirePortal";
-      return;
-    }
-    if (e.key === "7") {
-      this._ui.activeTool = "btnSpike";
-      return;
-    }
-    if (e.key === "8") {
-      this._ui.activeTool = "btnPlatform";
-      return;
-    }
-    if (e.key === "9") {
-      this._ui.activeTool = "npc";
-      return;
-    }
-    if (e.key === "0") {
-      this._ui.activeTool = "checkpoint";
-      return;
-    }
-    if (e.key === ".") {
-      this._ui.activeTool = EntityTool.ENEMY;
-      return;
-    }
-    if (e.key === "-") {
-      this._ui.activeTool = EntityTool.SPAWN;
-      return;
-    }
-    if (e.key === ",") {
-      this._ui.activeTool = EntityTool.TELEPORT_POINT;
-      return;
     }
   }
 

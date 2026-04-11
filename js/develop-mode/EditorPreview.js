@@ -21,6 +21,7 @@ import {
   CHECKPOINT_SIZE,
   ENEMY_DEFAULTS,
   TELEPORT_POINT_SIZE,
+  BOX_DEFAULTS,
 } from "./EditorConfig.js";
 
 export class EditorPreview {
@@ -76,6 +77,10 @@ export class EditorPreview {
     } else if (tool === EntityTool.WALL) {
       this.previewW = WALL_DEFAULTS.width;
       this.previewH = WALL_DEFAULTS.height;
+    } else if (tool === EntityTool.WIRE_PORTAL) {
+    } else if (tool === EntityTool.BOX) {
+      this.previewW = BOX_DEFAULTS.width;
+      this.previewH = BOX_DEFAULTS.height;
     } else if (tool === EntityTool.WIRE_PORTAL) {
       this.previewW = WIRE_PORTAL_DEFAULTS.buttonWidth;
       this.previewH = WIRE_PORTAL_DEFAULTS.buttonHeight;
@@ -174,6 +179,19 @@ export class EditorPreview {
       );
       p.noStroke();
       p.fill(140, 140, 160, PREVIEW_ALPHA * 0.4);
+    } else if (tool === EntityTool.BOX) {
+      p.stroke(200, 140, 100, PREVIEW_ALPHA);
+      this._dashedRect(
+        p,
+        this.previewX,
+        this.previewY,
+        this.previewW,
+        this.previewH,
+        8,
+      );
+      p.noStroke();
+      p.fill(200, 140, 100, PREVIEW_ALPHA * 0.4);
+      p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
       p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
     } else if (tool === EntityTool.WIRE_PORTAL) {
       // 按钮预览（紫色）

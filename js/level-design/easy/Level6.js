@@ -11,12 +11,15 @@ export class Level6 extends BaseLevel {
     this.entities.add(new Wall(0, 0, 20, 768));
     this.entities.add(new Wall(1346, 0, 20, 768));
 
+    // Ground - 顶部大地板
+    this.entities.add(new Ground(0, 0, this.p.width, 80));
+
     // Player
     this._player = new Player(70, 450, 40, 40);
     this._player.createListeners();
     this.entities.add(this._player);
 
-    // Ground
+    // Ground - 新增地板
     this.entities.add(new Ground(10, 60, 620, 300));
     this.entities.add(new Ground(740, 80, 310, 280));
 
@@ -27,11 +30,11 @@ export class Level6 extends BaseLevel {
     this.entities.add(new Spike(440, 360, 50, 20));
 
     // Checkpoint
-    this.entities.add(new Checkpoint(230, 360, 40, 70));
+    this.entities.add(new Checkpoint(230, 360, 40, 70, () => this._player));
 
     // TeleportPoint
-    this.entities.add(new TeleportPoint(350, 360, 40, 70));
-    this.entities.add(new TeleportPoint(870, 360, 40, 70));
+    this.entities.add(new TeleportPoint(350, 360, 40, 70, () => this._player));
+    this.entities.add(new TeleportPoint(870, 360, 40, 70, () => this._player));
 
     // BtnWirePortalSystem
     const wpBtn_0 = new Button(1090, 80, 34, 16);

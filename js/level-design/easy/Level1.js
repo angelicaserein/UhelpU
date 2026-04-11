@@ -8,6 +8,7 @@ import {
   NPCDemo2,
   SignboardDemo2,
   KeyPrompt,
+  WireRenderer,
 } from "../../game-entity-model/index.js";
 import { BaseLevel } from "../BaseLevel.js";
 import { BtnWirePortalSystem } from "../../mechanism-system/demo2/BtnWirePortalSystem.js";
@@ -73,6 +74,7 @@ export class Level1 extends BaseLevel {
     });
     this.entities.add(wpBtn_0);
     this.entities.add(wpPortal_0);
+    this.entities.add(new WireRenderer(this._wpSys_0));
 
     // ── KeyPrompts ────────────────────────────────────────────────
     // Move left/right with A/D
@@ -133,6 +135,6 @@ export class Level1 extends BaseLevel {
 
   draw(p) {
     super.draw(p);
-    this._wpSys_0.draw(p);
+  }
   }
 }

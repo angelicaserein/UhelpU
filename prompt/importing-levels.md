@@ -102,11 +102,19 @@ this.entities.add(
 );
 ```
 
-### ✅ CheckpointDemo2（检查点）- ⚠️ Demo1/Demo2 → 用 Demo2
+### ✅ CheckpointDemo2（检查点 Demo2）- ⚠️ Demo1/Demo2 → 用 Demo2
 
 ```javascript
 this.entities.add(new CheckpointDemo2(x, y, width, height, () => this._player));
 ```
+
+### ✅ Checkpoint（检查点 - 标准版）- 需要 getPlayer 回调
+
+```javascript
+this.entities.add(new Checkpoint(x, y, width, height, () => this._player));
+```
+
+**⚠️ 必须传递 `() => this._player` 参数，否则 Checkpoint 无法正确显示！**
 
 ### ✅ SignboardDemo2（告示板）- ⚠️ Demo1/Demo2 → 用 Demo2
 
@@ -122,11 +130,13 @@ this.entities.add(
 );
 ```
 
-### ✅ TeleportPoint（传送点）- 无版本区分
+### ✅ TeleportPoint（传送点）- 无版本区分，需要 getPlayer 回调
 
 ```javascript
-this.entities.add(new TeleportPoint(x, y, width, height, targetX, targetY));
+this.entities.add(new TeleportPoint(x, y, width, height, () => this._player));
 ```
+
+**⚠️ 必须传递 `() => this._player` 参数，否则 TeleportPoint 无法正确显示交互提示！**
 
 ---
 

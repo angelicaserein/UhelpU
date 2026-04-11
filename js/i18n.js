@@ -19,7 +19,8 @@ const _dict = {
     result_win: "Level Complete!",
     result_lose: "Game Over",
     result_press_r: "Press R to Restart",
-    win_press_space_or_enter: "Press Space or Enter to proceed to the next level",
+    win_press_space_or_enter:
+      "Press Space or Enter to proceed to the next level",
 
     // ── Setting Window ───────────────────────────────────────────────
     win_title: "⚙  Settings",
@@ -103,7 +104,8 @@ const _dict = {
     name_input_too_long: "Max 12 characters",
     name_check_error: "Error checking name",
     name_duplicate_title: "Duplicate Name",
-    name_duplicate_message: "There are {COUNT} players named \"{NAME}\".\nAre you sure you want to use this name?",
+    name_duplicate_message:
+      'There are {COUNT} players named "{NAME}".\nAre you sure you want to use this name?',
     name_duplicate_confirm_btn: "Use it!",
     name_duplicate_cancel_btn: "Choose Another",
     btn_confirm: "Confirm",
@@ -219,7 +221,8 @@ const _dict = {
     name_input_too_long: "名字最多12个字符",
     name_check_error: "检查名字时发生错误",
     name_duplicate_title: "名字重复",
-    name_duplicate_message: "前方已有 {COUNT} 个\"{NAME}\"。\n你确定还要用这个名字吗？",
+    name_duplicate_message:
+      '前方已有 {COUNT} 个"{NAME}"。\n你确定还要用这个名字吗？',
     name_duplicate_confirm_btn: "就要用！",
     name_duplicate_cancel_btn: "换一个",
     btn_confirm: "确认",

@@ -40,12 +40,32 @@ export class CollisionSystem {
       }
     }
 
+    // Player collision detection with boxes (DYNAMIC-DYNAMIC pairs)
+    const player3 = this.getPlayer();
+    if (player3) {
+      for (const dyn of this._dynamicEntities) {
+        if (dyn.type === "box" && dyn !== player3) {
+          this.processDynamicDynamicPair(player3, dyn);
+        }
+      }
+    }
+
     // Replayer collision detection with enemies (DYNAMIC-DYNAMIC pairs)
     const replayer2 = this.getReplayer();
     if (replayer2 && replayer2.isReplaying) {
       for (const dyn of this._dynamicEntities) {
         if (dyn.type === "enemy" && dyn !== replayer2) {
           this.processEnemyReplayerPair(replayer2, dyn);
+        }
+      }
+    }
+
+    // Replayer collision detection with boxes (DYNAMIC-DYNAMIC pairs)
+    const replayer3 = this.getReplayer();
+    if (replayer3 && replayer3.isReplaying) {
+      for (const dyn of this._dynamicEntities) {
+        if (dyn.type === "box" && dyn !== replayer3) {
+          this.processDynamicDynamicPair(replayer3, dyn);
         }
       }
     }

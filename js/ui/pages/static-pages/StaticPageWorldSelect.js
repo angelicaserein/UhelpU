@@ -100,12 +100,11 @@ export class StaticPageWorldSelect extends PageBase {
   update() {}
 
   /**
-   * 创建玩家名字显示区域和改名按钮
+   * 创建玩家名字显示区域和改名/登出按钮
    */
   _createPlayerNameSection() {
     const p = this.p;
 
-    // 面板容器
     const panelX = 160;
     const panelY = 40;
     const panel = p.createDiv("");
@@ -113,23 +112,40 @@ export class StaticPageWorldSelect extends PageBase {
     panel.position(panelX, panelY);
     this.addElement(panel);
 
-    // 欢迎信息容器
+    // 判断账号 or 游客
+    let savedAccount = null;
+    try {
+      const raw = localStorage.getItem("playerAccount");
+      if (raw) savedAccount = JSON.parse(raw);
+    } catch (e) { /* ignore */ }
+
+    const isAccount = !!savedAccount;
+    const playerName = isAccount
+      ? (savedAccount.username || "Player")
+      : (localStorage.getItem("playerName") || "Player");
+
     const nameTextContainer = p.createDiv("");
     nameTextContainer.addClass("player-name-text");
     nameTextContainer.parent(panel);
 
-    // "欢迎！"标签（白色）
+    // 「欢迎！」标签（账号和游客都显示）
     const label = p.createDiv(t("player_welcome") + "！");
     label.addClass("player-name-text-label");
     label.parent(nameTextContainer);
 
-    // 玩家名字（彩虹效果）
-    const playerName = localStorage.getItem("playerName") || "Player";
     this._playerNameElement = p.createDiv("");
     this._playerNameElement.addClass("player-name-text-name");
     this._playerNameElement.parent(nameTextContainer);
 
-    // 为每个字符创建 span，应用 rainbow-wave 效果
+    if (isAccount) {
+      // 账号用户：先渲染 👑 再对用户名每个字符应用 rainbow-wave
+      const crownSpan = p.createDiv("👑");
+      crownSpan.style("font-size", "18px");
+      crownSpan.style("font-weight", "bold");
+      crownSpan.style("letter-spacing", "0.02em");
+      crownSpan.parent(this._playerNameElement);
+    }
+
     for (const char of playerName) {
       const charSpan = p.createDiv(char);
       charSpan.addClass("rainbow-wave");
@@ -140,13 +156,205 @@ export class StaticPageWorldSelect extends PageBase {
       charSpan.parent(this._playerNameElement);
     }
 
-    // 改名按钮
-    const renameBtn = p.createButton(t("player_rename_button"));
-    renameBtn.addClass("player-rename-button");
-    renameBtn.parent(panel);
-    renameBtn.mousePressed(() => {
-      this._showRenameInputDialog();
+    if (isAccount) {
+      // 账号用户：「改用户名」+「登出」两个按钮
+      const changeUsernameBtn = p.createButton(t("player_change_username"));
+      changeUsernameBtn.addClass("player-rename-button");
+      changeUsernameBtn.parent(panel);
+      changeUsernameBtn.mousePressed(() => this._showAccountRenameDialog());
+
+      const logoutBtn = p.createButton(t("player_logout_button"));
+      logoutBtn.addClass("player-rename-button");
+      logoutBtn.style("margin-left", "8px");
+      logoutBtn.parent(panel);
+      logoutBtn.mousePressed(() => {
+        localStorage.removeItem("playerAccount");
+        localStorage.removeItem("playerName");
+        window.playerName = null;
+        this.switcher.showNameInput(p);
+      });
+    } else {
+      // 游客：「改名」按钮（原有逻辑不变）
+      const renameBtn = p.createButton(t("player_rename_button"));
+      renameBtn.addClass("player-rename-button");
+      renameBtn.parent(panel);
+      renameBtn.mousePressed(() => this._showRenameInputDialog());
+    }
+  }
+
+  /**
+   * 账号用户改用户名对话框
+   */
+  _showAccountRenameDialog() {
+    const p = this.p;
+
+    const dialogContainer = p.createDiv("");
+    dialogContainer.addClass("rename-dialog-overlay");
+    this.addElement(dialogContainer);
+
+    const dialog = p.createDiv("");
+    dialog.addClass("rename-dialog");
+    dialog.parent(dialogContainer);
+
+    const title = p.createDiv(t("rename_input_title"));
+    title.parent(dialog);
+
+    let savedAccount = null;
+    try { savedAccount = JSON.parse(localStorage.getItem("playerAccount")); } catch (e) {}
+    const currentUsername = savedAccount?.username || "";
+
+    const inputField = p.createInput(currentUsername);
+    inputField.attribute("maxlength", "12");
+    inputField.parent(dialog);
+
+    const buttonContainer = p.createDiv("");
+    buttonContainer.style("display", "flex");
+    buttonContainer.style("gap", "15px");
+    buttonContainer.style("justify-content", "center");
+    buttonContainer.parent(dialog);
+
+    const confirmBtn = p.createButton(t("btn_confirm"));
+    confirmBtn.mousePressed(async () => {
+      const newUsername = inputField.value().trim();
+      if (!newUsername) { alert(t("name_input_empty")); return; }
+      if (newUsername.length > 12) { alert(t("name_input_too_long")); return; }
+      dialogContainer.remove();
+      await this._handleAccountRename(newUsername);
     });
+    confirmBtn.parent(buttonContainer);
+
+    const cancelBtn = p.createButton(t("btn_cancel"));
+    cancelBtn.mousePressed(() => dialogContainer.remove());
+    cancelBtn.parent(buttonContainer);
+
+    setTimeout(() => { inputField.elt.focus(); inputField.elt.select(); }, 100);
+  }
+
+  /**
+   * 账号改名逻辑（重名检测只查 accountNames，独立命名空间）
+   */
+  async _handleAccountRename(newUsername) {
+    if (this._isRenamingInProgress) return;
+
+    let savedAccount = null;
+    try { savedAccount = JSON.parse(localStorage.getItem("playerAccount")); } catch (e) {}
+    if (!savedAccount) return;
+
+    const oldUsername = savedAccount.username;
+    if (oldUsername === newUsername) return;
+
+    try {
+      const count = await this._getAccountNameCount(newUsername);
+      if (count === 0) {
+        await this._updateAccountNameAndLeaderboard(oldUsername, newUsername, savedAccount);
+      } else {
+        this._showAccountRenameDuplicateDialog(oldUsername, newUsername, count, savedAccount);
+      }
+    } catch (error) {
+      console.error("[StaticPageWorldSelect] Error checking account name:", error);
+      alert(t("name_check_error"));
+    }
+  }
+
+  _showAccountRenameDuplicateDialog(oldUsername, newUsername, count, savedAccount) {
+    const p = this.p;
+
+    const dialogContainer = p.createDiv("");
+    dialogContainer.addClass("rename-dialog-overlay");
+    this.addElement(dialogContainer);
+
+    const dialog = p.createDiv("");
+    dialog.addClass("rename-dialog");
+    dialog.parent(dialogContainer);
+
+    const messageContent = t("name_duplicate_message")
+      .replace(/\n/g, "<br>")
+      .replace(/{COUNT}/g, `<span style="color: #ff9f43; font-weight: bold;">${count}</span>`)
+      .replace(/{NAME}/g, `<span style="color: #feca57; font-weight: bold;">${newUsername}</span>`);
+
+    const message = p.createDiv(messageContent);
+    message.style("color", "#e0e0e0");
+    message.style("font-size", "16px");
+    message.style("margin-bottom", "25px");
+    message.style("line-height", "1.6");
+    message.parent(dialog);
+
+    const buttonContainer = p.createDiv("");
+    buttonContainer.style("display", "flex");
+    buttonContainer.style("gap", "15px");
+    buttonContainer.style("justify-content", "center");
+    buttonContainer.parent(dialog);
+
+    const confirmBtn = p.createButton(t("name_duplicate_confirm_btn"));
+    confirmBtn.mousePressed(async () => {
+      dialogContainer.remove();
+      const finalName = newUsername + "#" + (count + 1);
+      await this._updateAccountNameAndLeaderboard(oldUsername, finalName, savedAccount);
+    });
+    confirmBtn.parent(buttonContainer);
+
+    const cancelBtn = p.createButton(t("name_duplicate_cancel_btn"));
+    cancelBtn.mousePressed(() => {
+      dialogContainer.remove();
+      this._showAccountRenameDialog();
+    });
+    cancelBtn.parent(buttonContainer);
+  }
+
+  /**
+   * 执行账号改名：更新 Firestore 排行榜 + accountNames + localStorage
+   */
+  async _updateAccountNameAndLeaderboard(oldUsername, newUsername, savedAccount) {
+    this._isRenamingInProgress = true;
+    const p = this.p;
+
+    const loadingContainer = p.createDiv("");
+    loadingContainer.addClass("rename-loading-overlay");
+    this.addElement(loadingContainer);
+    const loadingText = p.createDiv("改名中...");
+    loadingText.addClass("rename-loading-text");
+    loadingText.parent(loadingContainer);
+
+    try {
+      await this._updateLeaderboardName(oldUsername, newUsername, true);
+
+      // accountNames：增新减旧
+      const baseNew = newUsername.split("#")[0];
+      const baseOld = oldUsername.split("#")[0];
+      await this._incrementAccountNameCount(baseNew);
+      await this._decrementAccountNameCount(baseOld);
+
+      // 更新 localStorage
+      savedAccount.username = newUsername;
+      localStorage.setItem("playerAccount", JSON.stringify(savedAccount));
+      localStorage.setItem("playerName", newUsername);
+      window.playerName = newUsername;
+
+      loadingContainer.remove();
+
+      // 刷新页面上的名字显示（重建彩虹字符 span）
+      if (this._playerNameElement) {
+        this._playerNameElement.elt.innerHTML = "";
+        const crown = document.createElement("div");
+        crown.style.cssText = "font-size:18px;font-weight:bold;letter-spacing:0.02em;display:inline-block";
+        crown.textContent = "👑";
+        this._playerNameElement.elt.appendChild(crown);
+        for (const char of newUsername) {
+          const span = document.createElement("div");
+          span.className = "rainbow-wave";
+          span.style.cssText = "font-size:18px;font-weight:bold;letter-spacing:0.02em;text-shadow:2px 2px 4px rgba(0,0,0,0.7)";
+          span.textContent = char;
+          this._playerNameElement.elt.appendChild(span);
+        }
+      }
+
+      this._isRenamingInProgress = false;
+    } catch (error) {
+      console.error("[StaticPageWorldSelect] Account rename failed:", error);
+      loadingContainer.remove();
+      this._isRenamingInProgress = false;
+      alert("改名失败，请重试 / Rename failed, please try again");
+    }
   }
 
   /**
@@ -388,9 +596,76 @@ export class StaticPageWorldSelect extends PageBase {
   }
 
   /**
-   * 更新所有关卡排行榜中的旧名字为新名字（使用 fallback 方法直接读取所有文档）
+   * accountNames 集合：获取账号用户名的使用次数（与 playerNames 完全独立）
    */
-  async _updateLeaderboardName(oldName, newName) {
+  async _getAccountNameCount(username) {
+    const PROJECT_ID = "uhelpu";
+    const API_KEY = "AIzaSyA34riJGsAh-jx9YHME-M5Nw5OHr4ndFuI";
+    const FIRESTORE_API = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+    try {
+      const docId = username.toLowerCase();
+      const url = `${FIRESTORE_API}/accountNames/${docId}?key=${API_KEY}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        if (response.status === 404) return 0;
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      return parseInt(data.fields?.count?.integerValue || 0);
+    } catch (error) {
+      console.error(`[StaticPageWorldSelect] Error getting account name count:`, error);
+      return 0;
+    }
+  }
+
+  async _incrementAccountNameCount(username) {
+    const PROJECT_ID = "uhelpu";
+    const API_KEY = "AIzaSyA34riJGsAh-jx9YHME-M5Nw5OHr4ndFuI";
+    const FIRESTORE_API = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+    try {
+      const docId = username.toLowerCase();
+      const currentCount = await this._getAccountNameCount(username);
+      const url = `${FIRESTORE_API}/accountNames/${docId}?key=${API_KEY}`;
+      await fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fields: { count: { integerValue: currentCount + 1 } } }),
+      });
+    } catch (error) {
+      console.error(`[StaticPageWorldSelect] Error incrementing account name count:`, error);
+    }
+  }
+
+  async _decrementAccountNameCount(username) {
+    const PROJECT_ID = "uhelpu";
+    const API_KEY = "AIzaSyA34riJGsAh-jx9YHME-M5Nw5OHr4ndFuI";
+    const FIRESTORE_API = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+    try {
+      const docId = username.toLowerCase();
+      const currentCount = await this._getAccountNameCount(username);
+      if (currentCount <= 1) {
+        const url = `${FIRESTORE_API}/accountNames/${docId}?key=${API_KEY}`;
+        await fetch(url, { method: "DELETE" });
+      } else {
+        const url = `${FIRESTORE_API}/accountNames/${docId}?key=${API_KEY}`;
+        await fetch(url, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fields: { count: { integerValue: currentCount - 1 } } }),
+        });
+      }
+    } catch (error) {
+      console.error(`[StaticPageWorldSelect] Error decrementing account name count:`, error);
+    }
+  }
+
+  /**
+   * 更新所有关卡排行榜中的旧名字为新名字
+   * @param {string} oldName
+   * @param {string} newName
+   * @param {boolean} isAccount - true=只更新账号记录，false=只更新游客记录
+   */
+  async _updateLeaderboardName(oldName, newName, isAccount = false) {
     const PROJECT_ID = "uhelpu";
     const API_KEY = "AIzaSyA34riJGsAh-jx9YHME-M5Nw5OHr4ndFuI";
     const FIRESTORE_API = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
@@ -448,13 +723,14 @@ export class StaticPageWorldSelect extends PageBase {
               `[StaticPageWorldSelect] ${levelId} 总共有 ${allDocs.length} 个 scores 文档`,
             );
 
-            // 找出所有 playerName = oldName 的文档
+            // 找出 playerName == oldName 且 isAccount 身份匹配的文档
             const matchingDocs = allDocs.filter((doc) => {
               const playerName = doc.fields?.playerName?.stringValue;
-              const isMatch = playerName === oldName;
+              const docIsAccount = doc.fields?.isAccount?.booleanValue || false;
+              const isMatch = playerName === oldName && docIsAccount === isAccount;
               if (isMatch) {
                 console.log(
-                  `[StaticPageWorldSelect]   ⭐ 匹配到旧名字: "${playerName}" 在 ${doc.name}`,
+                  `[StaticPageWorldSelect]   ⭐ 匹配到旧名字: "${playerName}" (isAccount=${docIsAccount}) 在 ${doc.name}`,
                 );
               }
               return isMatch;
@@ -592,7 +868,7 @@ export class StaticPageWorldSelect extends PageBase {
     try {
       console.log(`[改名流程] 1/3 - 开始更新排行榜...`);
       // 更新排行榜中的所有记录
-      const updateCount = await this._updateLeaderboardName(oldName, newName);
+      const updateCount = await this._updateLeaderboardName(oldName, newName, false);
       console.log(
         `[改名流程] 1/3 - 排行榜更新完成，共更新 ${updateCount} 条记录\n`,
       );

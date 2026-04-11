@@ -3,12 +3,16 @@ import { Assets } from "../../../AssetsManager.js";
 import { i18n } from "../../../i18n.js";
 import { t } from "../../../i18n.js";
 
+const PROJECT_ID = "uhelpu";
+const API_KEY = "AIzaSyA34riJGsAh-jx9YHME-M5Nw5OHr4ndFuI";
+const FIRESTORE_API = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+const AUTH_API = `https://identitytoolkit.googleapis.com/v1`;
+
 export class NameInputPage extends PageBase {
   constructor(switcher, p) {
     super(switcher);
     this.p = p;
     this.inputElement = null;
-    this.confirmButton = null;
     this._onKeyDown = null;
   }
 
@@ -17,21 +21,29 @@ export class NameInputPage extends PageBase {
 
     const p = this.p;
 
-    // 检查 localStorage 里是否已保存名字，有的话直接进入游戏
+    // 账号用户优先
+    const savedAccount = localStorage.getItem("playerAccount");
+    if (savedAccount) {
+      try {
+        window.playerName = JSON.parse(savedAccount).username;
+      } catch (e) {
+        localStorage.removeItem("playerAccount");
+      }
+      if (window.playerName) {
+        setTimeout(() => this.switcher.showWorldSelect(p), 100);
+        return;
+      }
+    }
+
+    // 游客
     const savedName = localStorage.getItem("playerName");
     if (savedName) {
-      console.log("[NameInputPage] Found saved name in localStorage:", savedName);
       window.playerName = savedName;
-      // 延迟以确保 window.playerName 被正确设置
-      setTimeout(() => {
-        this.switcher.showWorldSelect(p);
-      }, 100);
+      setTimeout(() => this.switcher.showWorldSelect(p), 100);
       return;
     }
 
-    // 没有保存的名字，显示输入框
-
-    // 创建输入框容器
+    // 显示身份选择 UI
     const container = p.createDiv("");
     container.addClass("name-input-container");
     container.style("position", "absolute");
@@ -46,48 +58,53 @@ export class NameInputPage extends PageBase {
     title.addClass("name-input-title");
     title.parent(container);
 
-    // 输入框
+    // 输入框（供游客填写昵称）
     this.inputElement = p.createInput(window.playerName || "");
     this.inputElement.addClass("name-input-field");
     this.inputElement.attribute("maxlength", "12");
-    this.inputElement.attribute(
-      "placeholder",
-      t("name_input_placeholder"),
-    );
+    this.inputElement.attribute("placeholder", t("name_input_placeholder"));
     this.inputElement.parent(container);
 
-    // 确认按钮
-    this.confirmButton = p.createButton(t("btn_confirm"));
-    this.confirmButton.addClass("name-input-confirm-button");
-    this.confirmButton.parent(container);
-    this.confirmButton.mousePressed(() => {
-      this._handleConfirm();
-    });
+    // 三个主按钮
+    const btnRow = p.createDiv("");
+    btnRow.style("display", "flex");
+    btnRow.style("gap", "10px");
+    btnRow.style("justify-content", "center");
+    btnRow.style("margin-top", "12px");
+    btnRow.parent(container);
+
+    const guestBtn = p.createButton(t("btn_play_as_guest"));
+    guestBtn.addClass("name-input-confirm-button");
+    guestBtn.parent(btnRow);
+    guestBtn.mousePressed(() => this._handleGuestPlay());
+
+    const loginBtn = p.createButton(t("btn_login"));
+    loginBtn.addClass("name-input-confirm-button");
+    loginBtn.parent(btnRow);
+    loginBtn.mousePressed(() => this._showLoginForm());
+
+    const registerBtn = p.createButton(t("btn_register"));
+    registerBtn.addClass("name-input-confirm-button");
+    registerBtn.parent(btnRow);
+    registerBtn.mousePressed(() => this._showRegisterForm());
 
     // 返回按钮
     const backButton = p.createButton(t("btn_back"));
     backButton.addClass("name-input-back-button");
     backButton.parent(container);
-    backButton.mousePressed(() => {
-      this.switcher.showLanguageChoice(p);
-    });
+    backButton.mousePressed(() => this.switcher.showLanguageChoice(p));
 
-    // 键盘事件：Enter 确认，ESC 返回
+    // Enter → 游客流程，ESC → 返回
     this._onKeyDown = (e) => {
       if (e.code === "Enter") {
-        this._handleConfirm();
+        this._handleGuestPlay();
       } else if (e.code === "Escape") {
         this.switcher.showLanguageChoice(p);
       }
     };
     document.addEventListener("keydown", this._onKeyDown);
 
-    // 自动聚焦输入框
-    if (this.inputElement) {
-      setTimeout(() => {
-        this.inputElement.elt.focus();
-      }, 100);
-    }
+    setTimeout(() => this.inputElement.elt.focus(), 100);
   }
 
   exit() {
@@ -97,143 +114,365 @@ export class NameInputPage extends PageBase {
     super.exit();
   }
 
-  async _handleConfirm() {
+  // ─────────────────────────────────────────────────────────────────────────
+  // 游客流程（使用 playerNames 集合）
+  // ─────────────────────────────────────────────────────────────────────────
+
+  async _handleGuestPlay() {
     const playerName = this.inputElement.value().trim();
 
-    // 验证：不能为空或全是空格
     if (!playerName) {
       alert(t("name_input_empty"));
       return;
     }
-
-    // 验证：最多12个字符
     if (playerName.length > 12) {
       alert(t("name_input_too_long"));
       this.inputElement.elt.select();
       return;
     }
 
-    // 禁用按钮，防止重复提交
-    this.confirmButton.attribute("disabled", "true");
-    this.confirmButton.elt.style.opacity = "0.5";
-
     try {
-      // 去 Firebase 查询这个名字一共使用过几次
-      const count = await this._checkNameCount(playerName);
-
-      // 恢复按钮
-      this.confirmButton.removeAttribute("disabled");
-      this.confirmButton.elt.style.opacity = "1";
-
+      const count = await this._getPlayerNameCount(playerName);
       if (count === 0) {
-        // 第一个使用这个名字，无编号
-        await this._saveNameAndContinue(playerName);
+        await this._saveGuestAndContinue(playerName);
       } else {
-        // 已有人使用过这个名字，显示确认对话框
         this._showDuplicateConfirmDialog(playerName, count);
       }
     } catch (error) {
       console.error("[NameInputPage] Error checking name count:", error);
-      this.confirmButton.removeAttribute("disabled");
-      this.confirmButton.elt.style.opacity = "1";
       alert(t("name_check_error"));
     }
   }
 
-  /**
-   * 查询 Firebase playerNames 集合中这个名字的使用次数
-   */
-  async _checkNameCount(playerName) {
-    try {
-      const count = await this._getPlayerNameCount(playerName);
-      console.log(`[NameInputPage] Name "${playerName}" has been used ${count} times`);
-      return count;
-    } catch (error) {
-      console.error("[NameInputPage] Error querying name count:", error);
-      return 0;
-    }
+  async _saveGuestAndContinue(finalName) {
+    localStorage.setItem("playerName", finalName);
+    window.playerName = finalName;
+    const baseName = finalName.split("#")[0];
+    await this._incrementNameCount(baseName);
+    this.switcher.showWorldSelect(this.p);
   }
 
-  /**
-   * 从 playerNames 集合获取名字的使用次数
-   */
-  async _getPlayerNameCount(playerName) {
-    const PROJECT_ID = "uhelpu";
-    const API_KEY = "AIzaSyA34riJGsAh-jx9YHME-M5Nw5OHr4ndFuI";
-    const FIRESTORE_API = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+  // ─────────────────────────────────────────────────────────────────────────
+  // 登录表单
+  // ─────────────────────────────────────────────────────────────────────────
 
-    try {
-      // 文档ID就是名字本身
-      const docId = playerName.toLowerCase();
-      const url = `${FIRESTORE_API}/playerNames/${docId}?key=${API_KEY}`;
+  _showLoginForm() {
+    const p = this.p;
+    const overlay = this._createOverlay();
 
-      const response = await fetch(url);
+    const dialog = p.createDiv("");
+    dialog.addClass("name-duplicate-dialog");
+    dialog.parent(overlay);
 
-      if (!response.ok) {
-        if (response.status === 404) {
-          // 文档不存在，说明这是第一个使用这个名字的玩家
-          console.log(`[NameInputPage] Name "${playerName}" not found in playerNames, count = 0`);
-          return 0;
+    const titleEl = p.createDiv(t("auth_login_title"));
+    titleEl.style("color", "#feca57");
+    titleEl.style("font-size", "20px");
+    titleEl.style("font-weight", "bold");
+    titleEl.style("margin-bottom", "18px");
+    titleEl.parent(dialog);
+
+    const emailInput = p.createInput("");
+    emailInput.attribute("type", "email");
+    emailInput.attribute("placeholder", t("auth_email_placeholder"));
+    emailInput.addClass("name-input-field");
+    emailInput.style("display", "block");
+    emailInput.style("margin", "0 auto 10px auto");
+    emailInput.parent(dialog);
+
+    const passwordInput = p.createInput("");
+    passwordInput.attribute("type", "password");
+    passwordInput.attribute("placeholder", t("auth_password_placeholder"));
+    passwordInput.addClass("name-input-field");
+    passwordInput.style("display", "block");
+    passwordInput.style("margin", "0 auto 18px auto");
+    passwordInput.parent(dialog);
+
+    const btnRow = p.createDiv("");
+    btnRow.style("display", "flex");
+    btnRow.style("gap", "12px");
+    btnRow.style("justify-content", "center");
+    btnRow.parent(dialog);
+
+    const confirmBtn = p.createButton(t("btn_confirm"));
+    confirmBtn.addClass("name-duplicate-confirm-btn");
+    confirmBtn.parent(btnRow);
+    confirmBtn.mousePressed(async () => {
+      const email = emailInput.value().trim();
+      const password = passwordInput.value();
+      if (!email || !password) {
+        alert(t("name_input_empty"));
+        return;
+      }
+      confirmBtn.attribute("disabled", "true");
+      confirmBtn.elt.style.opacity = "0.5";
+      try {
+        const { localId } = await this._loginWithFirebaseAuth(email, password);
+        const { username } = await this._getUserByUid(localId);
+        overlay.remove();
+        localStorage.setItem("playerName", username);
+        localStorage.setItem("playerAccount", JSON.stringify({ uid: localId, username, email, isAccount: true }));
+        window.playerName = username;
+        this.switcher.showWorldSelect(p);
+      } catch (err) {
+        console.error("[NameInputPage] Login error:", err);
+        confirmBtn.removeAttribute("disabled");
+        confirmBtn.elt.style.opacity = "1";
+        alert(t("auth_login_error"));
+      }
+    });
+
+    const cancelBtn = p.createButton(t("btn_cancel"));
+    cancelBtn.addClass("name-duplicate-cancel-btn");
+    cancelBtn.parent(btnRow);
+    cancelBtn.mousePressed(() => overlay.remove());
+
+    setTimeout(() => emailInput.elt.focus(), 100);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 注册表单
+  // ─────────────────────────────────────────────────────────────────────────
+
+  _showRegisterForm() {
+    const p = this.p;
+    const overlay = this._createOverlay();
+
+    const dialog = p.createDiv("");
+    dialog.addClass("name-duplicate-dialog");
+    dialog.parent(overlay);
+
+    const titleEl = p.createDiv(t("auth_register_title"));
+    titleEl.style("color", "#feca57");
+    titleEl.style("font-size", "20px");
+    titleEl.style("font-weight", "bold");
+    titleEl.style("margin-bottom", "18px");
+    titleEl.parent(dialog);
+
+    const usernameInput = p.createInput(this.inputElement ? this.inputElement.value().trim() : "");
+    usernameInput.attribute("maxlength", "12");
+    usernameInput.attribute("placeholder", t("auth_username_placeholder"));
+    usernameInput.addClass("name-input-field");
+    usernameInput.style("display", "block");
+    usernameInput.style("margin", "0 auto 10px auto");
+    usernameInput.parent(dialog);
+
+    const emailInput = p.createInput("");
+    emailInput.attribute("type", "email");
+    emailInput.attribute("placeholder", t("auth_email_placeholder"));
+    emailInput.addClass("name-input-field");
+    emailInput.style("display", "block");
+    emailInput.style("margin", "0 auto 10px auto");
+    emailInput.parent(dialog);
+
+    const passwordInput = p.createInput("");
+    passwordInput.attribute("type", "password");
+    passwordInput.attribute("placeholder", t("auth_password_placeholder"));
+    passwordInput.addClass("name-input-field");
+    passwordInput.style("display", "block");
+    passwordInput.style("margin", "0 auto 18px auto");
+    passwordInput.parent(dialog);
+
+    const btnRow = p.createDiv("");
+    btnRow.style("display", "flex");
+    btnRow.style("gap", "12px");
+    btnRow.style("justify-content", "center");
+    btnRow.parent(dialog);
+
+    const confirmBtn = p.createButton(t("btn_confirm"));
+    confirmBtn.addClass("name-duplicate-confirm-btn");
+    confirmBtn.parent(btnRow);
+    confirmBtn.mousePressed(async () => {
+      const username = usernameInput.value().trim();
+      const email = emailInput.value().trim();
+      const password = passwordInput.value();
+
+      if (!username) { alert(t("name_input_empty")); return; }
+      if (username.length > 12) { alert(t("name_input_too_long")); return; }
+      if (!email || !password) { alert(t("name_input_empty")); return; }
+
+      confirmBtn.attribute("disabled", "true");
+      confirmBtn.elt.style.opacity = "0.5";
+
+      try {
+        const count = await this._getAccountNameCount(username);
+        confirmBtn.removeAttribute("disabled");
+        confirmBtn.elt.style.opacity = "1";
+
+        if (count > 0) {
+          overlay.remove();
+          this._showRegisterDuplicateDialog(username, email, password, count);
+          return;
         }
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
 
-      const data = await response.json();
-      const count = data.fields?.count?.integerValue || 0;
-      return parseInt(count);
-    } catch (error) {
-      console.error(`[NameInputPage] Error getting name count: ${error}`);
-      return 0;
-    }
+        overlay.remove();
+        await this._doRegister(username, email, password);
+      } catch (err) {
+        console.error("[NameInputPage] Register check error:", err);
+        confirmBtn.removeAttribute("disabled");
+        confirmBtn.elt.style.opacity = "1";
+        alert(t("name_check_error"));
+      }
+    });
+
+    const cancelBtn = p.createButton(t("btn_cancel"));
+    cancelBtn.addClass("name-duplicate-cancel-btn");
+    cancelBtn.parent(btnRow);
+    cancelBtn.mousePressed(() => overlay.remove());
+
+    setTimeout(() => usernameInput.elt.focus(), 100);
   }
 
-  /**
-   * 更新 playerNames 集合中名字的使用次数
-   */
-  async _incrementNameCount(playerName) {
-    const PROJECT_ID = "uhelpu";
-    const API_KEY = "AIzaSyA34riJGsAh-jx9YHME-M5Nw5OHr4ndFuI";
-    const FIRESTORE_API = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+  _showRegisterDuplicateDialog(username, email, password, count) {
+    const p = this.p;
+    const overlay = this._createOverlay();
 
+    const dialog = p.createDiv("");
+    dialog.addClass("name-duplicate-dialog");
+    dialog.parent(overlay);
+
+    const messageContent = t("name_duplicate_message")
+      .replace(/\n/g, "<br>")
+      .replace(/{COUNT}/g, `<span style="color: #ff9f43; font-weight: bold;">${count}</span>`)
+      .replace(/{NAME}/g, `<span style="color: #feca57; font-weight: bold;">${username}</span>`);
+
+    const message = p.createDiv(messageContent);
+    message.style("color", "#e0e0e0");
+    message.style("font-size", "16px");
+    message.style("margin-bottom", "25px");
+    message.style("line-height", "1.6");
+    message.parent(dialog);
+
+    const btnRow = p.createDiv("");
+    btnRow.style("display", "flex");
+    btnRow.style("gap", "15px");
+    btnRow.style("justify-content", "center");
+    btnRow.parent(dialog);
+
+    const confirmBtn = p.createButton(t("name_duplicate_confirm_btn"));
+    confirmBtn.addClass("name-duplicate-confirm-btn");
+    confirmBtn.parent(btnRow);
+    confirmBtn.mousePressed(async () => {
+      overlay.remove();
+      const finalName = username + "#" + (count + 1);
+      await this._doRegister(finalName, email, password);
+    });
+
+    const cancelBtn = p.createButton(t("name_duplicate_cancel_btn"));
+    cancelBtn.addClass("name-duplicate-cancel-btn");
+    cancelBtn.parent(btnRow);
+    cancelBtn.mousePressed(() => overlay.remove());
+  }
+
+  async _doRegister(username, email, password) {
     try {
-      const docId = playerName.toLowerCase();
-      const currentCount = await this._getPlayerNameCount(playerName);
-      const newCount = currentCount + 1;
+      const { localId } = await this._registerWithFirebaseAuth(email, password);
+      await this._createUserDoc(localId, username, email);
+      const baseName = username.split("#")[0];
+      await this._incrementAccountNameCount(baseName);
 
-      const docData = {
-        fields: {
-          count: { integerValue: newCount },
-        },
-      };
+      // 在覆盖 playerName 之前先读出旧的游客名（若有）
+      const existingGuestName = localStorage.getItem("playerName");
 
-      // 使用 PATCH 更新或创建文档
-      const url = `${FIRESTORE_API}/playerNames/${docId}?key=${API_KEY}`;
+      localStorage.setItem("playerName", username);
+      localStorage.setItem("playerAccount", JSON.stringify({ uid: localId, username, email, isAccount: true }));
+      window.playerName = username;
 
-      const response = await fetch(url, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(docData),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      if (existingGuestName && existingGuestName !== username) {
+        this._showGuestTransferDialog(existingGuestName, username);
+      } else {
+        this.switcher.showWorldSelect(this.p);
       }
-
-      console.log(`[NameInputPage] ✓ Updated "${playerName}" count to ${newCount}`);
-      return true;
-    } catch (error) {
-      console.error(`[NameInputPage] Error incrementing name count: ${error}`);
-      return false;
+    } catch (err) {
+      console.error("[NameInputPage] Registration error:", err);
+      alert(t("auth_register_error"));
     }
   }
 
-  /**
-   * 显示重名确认对话框
-   */
+  // ─────────────────────────────────────────────────────────────────────────
+  // 游客成绩迁移
+  // ─────────────────────────────────────────────────────────────────────────
+
+  _showGuestTransferDialog(guestName, newUsername) {
+    const p = this.p;
+    const overlay = this._createOverlay();
+
+    const dialog = p.createDiv("");
+    dialog.addClass("name-duplicate-dialog");
+    dialog.parent(overlay);
+
+    const message = p.createDiv(
+      t("auth_transfer_guest_prompt").replace(/{NAME}/g, `<span style="color: #feca57; font-weight: bold;">${guestName}</span>`)
+    );
+    message.style("color", "#e0e0e0");
+    message.style("font-size", "16px");
+    message.style("margin-bottom", "25px");
+    message.style("line-height", "1.6");
+    message.parent(dialog);
+
+    const btnRow = p.createDiv("");
+    btnRow.style("display", "flex");
+    btnRow.style("gap", "15px");
+    btnRow.style("justify-content", "center");
+    btnRow.parent(dialog);
+
+    const confirmBtn = p.createButton(t("auth_transfer_confirm"));
+    confirmBtn.addClass("name-duplicate-confirm-btn");
+    confirmBtn.parent(btnRow);
+    confirmBtn.mousePressed(async () => {
+      overlay.remove();
+      await this._transferGuestScores(guestName, newUsername);
+      this.switcher.showWorldSelect(p);
+    });
+
+    const skipBtn = p.createButton(t("auth_transfer_skip"));
+    skipBtn.addClass("name-duplicate-cancel-btn");
+    skipBtn.parent(btnRow);
+    skipBtn.mousePressed(() => {
+      overlay.remove();
+      this.switcher.showWorldSelect(p);
+    });
+  }
+
+  async _transferGuestScores(guestName, newUsername) {
+    console.log(`[NameInputPage] Transferring scores from "${guestName}" to "${newUsername}"`);
+    const levelFormats = ["easy_level", "demo2_level", "level"];
+    for (const format of levelFormats) {
+      for (let i = 1; i <= 10; i++) {
+        const levelId = `${format}${i}`;
+        try {
+          const listUrl = `${FIRESTORE_API}/leaderboard/${levelId}/scores?key=${API_KEY}&pageSize=100`;
+          const listResponse = await fetch(listUrl);
+          if (!listResponse.ok) continue;
+
+          const listData = await listResponse.json();
+          const docs = listData.documents || [];
+
+          for (const doc of docs) {
+            const fields = doc.fields || {};
+            const docIsAccount = fields.isAccount?.booleanValue || false;
+            if (fields.playerName?.stringValue === guestName && !docIsAccount) {
+              const patchUrl = `${doc.name}?key=${API_KEY}&updateMask.fieldPaths=playerName`;
+              await fetch(patchUrl, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ fields: { playerName: { stringValue: newUsername } } }),
+              });
+            }
+          }
+        } catch (err) {
+          console.warn(`[NameInputPage] Error transferring scores for ${levelId}:`, err);
+        }
+      }
+    }
+    await this._decrementPlayerNameCount(guestName.split("#")[0]);
+    console.log(`[NameInputPage] ✓ Transfer complete`);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 游客重名确认（与原来完全一致）
+  // ─────────────────────────────────────────────────────────────────────────
+
   _showDuplicateConfirmDialog(playerName, count) {
-    // 创建自定义对话框容器
     const dialogContainer = this.p.createDiv("");
     dialogContainer.addClass("name-duplicate-dialog-overlay");
     dialogContainer.style("position", "fixed");
@@ -247,7 +486,6 @@ export class NameInputPage extends PageBase {
     dialogContainer.style("align-items", "center");
     dialogContainer.style("z-index", "10000");
 
-    // 对话框内容
     const dialog = this.p.createDiv("");
     dialog.addClass("name-duplicate-dialog");
     dialog.style("background-color", "#1a0033");
@@ -259,7 +497,6 @@ export class NameInputPage extends PageBase {
     dialog.style("box-shadow", "0 0 30px rgba(255, 159, 67, 0.3)");
     dialog.parent(dialogContainer);
 
-    // 提示文字
     const messageContent = t("name_duplicate_message")
       .replace(/\n/g, "<br>")
       .replace(/{COUNT}/g, `<span style="color: #ff9f43; font-weight: bold;">${count}</span>`)
@@ -272,14 +509,12 @@ export class NameInputPage extends PageBase {
     message.style("line-height", "1.6");
     message.parent(dialog);
 
-    // 按钮容器
     const buttonContainer = this.p.createDiv("");
     buttonContainer.style("display", "flex");
     buttonContainer.style("gap", "15px");
     buttonContainer.style("justify-content", "center");
     buttonContainer.parent(dialog);
 
-    // "就要用！"按钮 - 分配编号 (count+1)
     const confirmBtn = this.p.createButton(t("name_duplicate_confirm_btn"));
     confirmBtn.addClass("name-duplicate-confirm-btn");
     confirmBtn.style("background-color", "#ff9f43");
@@ -290,16 +525,13 @@ export class NameInputPage extends PageBase {
     confirmBtn.style("font-size", "14px");
     confirmBtn.style("font-weight", "bold");
     confirmBtn.style("cursor", "pointer");
-    confirmBtn.style("transition", "all 0.3s");
     confirmBtn.mousePressed(async () => {
       dialogContainer.remove();
-      // 分配编号：第 (count+1) 个使用这个名字的玩家
       const finalName = playerName + "#" + (count + 1);
-      await this._saveNameAndContinue(finalName);
+      await this._saveGuestAndContinue(finalName);
     });
     confirmBtn.parent(buttonContainer);
 
-    // "换一个"按钮
     const cancelBtn = this.p.createButton(t("name_duplicate_cancel_btn"));
     cancelBtn.addClass("name-duplicate-cancel-btn");
     cancelBtn.style("background-color", "#555");
@@ -309,7 +541,6 @@ export class NameInputPage extends PageBase {
     cancelBtn.style("padding", "12px 25px");
     cancelBtn.style("font-size", "14px");
     cancelBtn.style("cursor", "pointer");
-    cancelBtn.style("transition", "all 0.3s");
     cancelBtn.mousePressed(() => {
       dialogContainer.remove();
       this.inputElement.elt.focus();
@@ -317,43 +548,187 @@ export class NameInputPage extends PageBase {
     });
     cancelBtn.parent(buttonContainer);
 
-    // 鼠标悬停效果
-    confirmBtn.elt.onmouseover = () => {
-      confirmBtn.style("background-color", "#ffb366");
-    };
-    confirmBtn.elt.onmouseout = () => {
-      confirmBtn.style("background-color", "#ff9f43");
-    };
-    cancelBtn.elt.onmouseover = () => {
-      cancelBtn.style("background-color", "#666");
-    };
-    cancelBtn.elt.onmouseout = () => {
-      cancelBtn.style("background-color", "#555");
+    confirmBtn.elt.onmouseover = () => confirmBtn.style("background-color", "#ffb366");
+    confirmBtn.elt.onmouseout = () => confirmBtn.style("background-color", "#ff9f43");
+    cancelBtn.elt.onmouseover = () => cancelBtn.style("background-color", "#666");
+    cancelBtn.elt.onmouseout = () => cancelBtn.style("background-color", "#555");
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Firebase Auth REST
+  // ─────────────────────────────────────────────────────────────────────────
+
+  async _callAuthAPI(endpoint, body) {
+    const url = `${AUTH_API}/${endpoint}?key=${API_KEY}`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error?.message || `HTTP ${response.status}`);
+    }
+    return data;
+  }
+
+  async _loginWithFirebaseAuth(email, password) {
+    return this._callAuthAPI("accounts:signInWithPassword", { email, password, returnSecureToken: true });
+  }
+
+  async _registerWithFirebaseAuth(email, password) {
+    return this._callAuthAPI("accounts:signUp", { email, password, returnSecureToken: true });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Firestore users 集合
+  // ─────────────────────────────────────────────────────────────────────────
+
+  async _createUserDoc(uid, username, email) {
+    const url = `${FIRESTORE_API}/users/${uid}?key=${API_KEY}`;
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fields: {
+          username: { stringValue: username },
+          email: { stringValue: email },
+        },
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+  }
+
+  async _getUserByUid(uid) {
+    const url = `${FIRESTORE_API}/users/${uid}?key=${API_KEY}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return {
+      username: data.fields?.username?.stringValue || "",
+      email: data.fields?.email?.stringValue || "",
     };
   }
 
-  /**
-   * 保存完整名字到 localStorage、更新 playerNames 集合并进入游戏
-   * @param {string} finalName - 完整名字（可能包含编号，如 "moosry" 或 "moosry#2"）
-   */
-  async _saveNameAndContinue(finalName) {
-    // 保存完整名字到 localStorage
-    localStorage.setItem("playerName", finalName);
-    console.log("[NameInputPage] Player name saved to localStorage:", finalName);
+  // ─────────────────────────────────────────────────────────────────────────
+  // playerNames 集合（游客命名空间）
+  // ─────────────────────────────────────────────────────────────────────────
 
-    // 保存玩家名字到全局变量
-    window.playerName = finalName;
-    console.log("[NameInputPage] Player name saved to window:", finalName);
-
-    // 提取基础名字（去掉编号）
-    const baseName = finalName.split("#")[0];
-
-    // 更新 playerNames 集合中的 count
-    await this._incrementNameCount(baseName);
-
-    // 跳转到世界选择页面
-    this.switcher.showWorldSelect(this.p);
+  async _getPlayerNameCount(playerName) {
+    try {
+      const docId = playerName.toLowerCase();
+      const url = `${FIRESTORE_API}/playerNames/${docId}?key=${API_KEY}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        if (response.status === 404) return 0;
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      return parseInt(data.fields?.count?.integerValue || 0);
+    } catch (error) {
+      console.error(`[NameInputPage] Error getting player name count:`, error);
+      return 0;
+    }
   }
+
+  async _incrementNameCount(playerName) {
+    try {
+      const docId = playerName.toLowerCase();
+      const currentCount = await this._getPlayerNameCount(playerName);
+      const url = `${FIRESTORE_API}/playerNames/${docId}?key=${API_KEY}`;
+      await fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fields: { count: { integerValue: currentCount + 1 } } }),
+      });
+    } catch (error) {
+      console.error(`[NameInputPage] Error incrementing name count:`, error);
+    }
+  }
+
+  async _decrementPlayerNameCount(baseName) {
+    try {
+      const docId = baseName.toLowerCase();
+      const currentCount = await this._getPlayerNameCount(baseName);
+      if (currentCount <= 1) {
+        const url = `${FIRESTORE_API}/playerNames/${docId}?key=${API_KEY}`;
+        await fetch(url, { method: "DELETE" });
+      } else {
+        const url = `${FIRESTORE_API}/playerNames/${docId}?key=${API_KEY}`;
+        await fetch(url, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fields: { count: { integerValue: currentCount - 1 } } }),
+        });
+      }
+    } catch (error) {
+      console.error(`[NameInputPage] Error decrementing player name count:`, error);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // accountNames 集合（账号命名空间，独立于 playerNames）
+  // ─────────────────────────────────────────────────────────────────────────
+
+  async _getAccountNameCount(username) {
+    try {
+      const docId = username.toLowerCase();
+      const url = `${FIRESTORE_API}/accountNames/${docId}?key=${API_KEY}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        if (response.status === 404) return 0;
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      return parseInt(data.fields?.count?.integerValue || 0);
+    } catch (error) {
+      console.error(`[NameInputPage] Error getting account name count:`, error);
+      return 0;
+    }
+  }
+
+  async _incrementAccountNameCount(username) {
+    try {
+      const docId = username.toLowerCase();
+      const currentCount = await this._getAccountNameCount(username);
+      const url = `${FIRESTORE_API}/accountNames/${docId}?key=${API_KEY}`;
+      await fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fields: { count: { integerValue: currentCount + 1 } } }),
+      });
+    } catch (error) {
+      console.error(`[NameInputPage] Error incrementing account name count:`, error);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 工具：创建遮罩层
+  // ─────────────────────────────────────────────────────────────────────────
+
+  _createOverlay() {
+    const overlay = this.p.createDiv("");
+    overlay.style("position", "fixed");
+    overlay.style("top", "0");
+    overlay.style("left", "0");
+    overlay.style("width", "100%");
+    overlay.style("height", "100%");
+    overlay.style("background-color", "rgba(0, 0, 0, 0.7)");
+    overlay.style("display", "flex");
+    overlay.style("justify-content", "center");
+    overlay.style("align-items", "center");
+    overlay.style("z-index", "10000");
+    this.addElement(overlay);
+    return overlay;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 绘制
+  // ─────────────────────────────────────────────────────────────────────────
 
   draw() {
     const p = this.p;
@@ -379,7 +754,6 @@ export class NameInputPage extends PageBase {
     p.resetMatrix();
     p.noStroke();
 
-    // 两侧渐隐光带
     for (let i = 0; i < sideFadeW; i++) {
       const t = i / Math.max(1, sideFadeW - 1);
       p.fill(255, 255, 255, (1 - t) * 108);
@@ -393,10 +767,10 @@ export class NameInputPage extends PageBase {
     p.textStyle(p.BOLD);
 
     p.textSize(Math.floor(p.width * 0.026));
-    p.text("Enter Your Player Name", p.width * 0.5, centerY - bandH * 0.2);
+    p.text("Choose your identity", p.width * 0.5, centerY - bandH * 0.2);
 
     p.textSize(Math.floor(p.width * 0.032));
-    p.text("输 入 你 的 昵 称", p.width * 0.5, centerY + bandH * 0.22);
+    p.text("选 择 你 的 身 份", p.width * 0.5, centerY + bandH * 0.22);
 
     p.pop();
   }

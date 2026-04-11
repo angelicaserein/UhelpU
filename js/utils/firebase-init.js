@@ -34,6 +34,13 @@ window.submitScore = async (playerName, timeMs, levelId) => {
     const timeSeconds = timeMs / 1000;
     const timestamp = new Date().toISOString();
 
+    // 判断是否为账号用户
+    let isAccount = false;
+    try {
+      const acctRaw = localStorage.getItem("playerAccount");
+      if (acctRaw) isAccount = JSON.parse(acctRaw).isAccount === true;
+    } catch (e) { /* ignore */ }
+
     // 构建请求数据
     const docData = {
       fields: {
@@ -43,6 +50,7 @@ window.submitScore = async (playerName, timeMs, levelId) => {
         levelId: { stringValue: levelId },
         timestamp: { timestampValue: timestamp },
         submittedAt: { stringValue: timestamp },
+        isAccount: { booleanValue: isAccount },
       },
     };
 
@@ -78,88 +86,7 @@ window.submitScore = async (playerName, timeMs, levelId) => {
  */
 window.getLeaderboard = async (levelId, limitCount = 10) => {
   console.log(`[Firebase] getLeaderboard: ${levelId}, limit: ${limitCount}`);
-
-  try {
-    // 使用 runQuery 端点进行排序查询
-    // 正确的端点：/documents:runQuery
-    const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:runQuery?key=${API_KEY}`;
-
-    const queryBody = {
-      structuredQuery: {
-        from: [
-          {
-            // 查询路径：leaderboard/{levelId}/scores
-            collectionId: "scores",
-            allDescendants: false,
-          },
-        ],
-        where: {
-          fieldFilter: {
-            field: {
-              fieldPath: "levelId",
-            },
-            op: "EQUAL",
-            value: {
-              stringValue: levelId,
-            },
-          },
-        },
-        orderBy: [
-          {
-            field: {
-              fieldPath: "timeMs",
-            },
-            direction: "ASCENDING",
-          },
-        ],
-        limit: limitCount,
-      },
-      parent: `projects/${PROJECT_ID}/databases/(default)/documents/leaderboard/${levelId}`,
-    };
-
-    console.log("[Firebase] POST to runQuery endpoint:", url);
-    console.log("[Firebase] Query body:", queryBody);
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(queryBody),
-    });
-
-    if (!response.ok) {
-      console.warn(
-        `[Firebase] runQuery failed ${response.status}, trying fallback method...`,
-      );
-      return await _getLeaderboardFallback(levelId, limitCount);
-    }
-
-    const data = await response.json();
-    console.log("[Firebase] Query response:", data);
-
-    const leaderboard = [];
-    if (Array.isArray(data)) {
-      data.forEach((result, index) => {
-        if (result.document && result.document.fields) {
-          const fields = result.document.fields;
-          leaderboard.push({
-            rank: index + 1,
-            playerName: fields.playerName?.stringValue || "Unknown",
-            timeSeconds: fields.timeSeconds?.stringValue || "0.00",
-            timeMs: parseInt(fields.timeMs?.integerValue || 0),
-            timestamp: fields.timestamp?.timestampValue,
-          });
-        }
-      });
-    }
-
-    console.log(`[Firebase] ✓ Loaded ${leaderboard.length} scores`);
-    return leaderboard;
-  } catch (error) {
-    console.error("[Firebase] Error loading leaderboard:", error);
-    return [];
-  }
+  return await _getLeaderboardFallback(levelId, limitCount);
 };
 
 /**
@@ -193,6 +120,7 @@ async function _getLeaderboardFallback(levelId, limitCount) {
             timeSeconds: fields.timeSeconds?.stringValue || "0.00",
             timeMs: parseInt(fields.timeMs?.integerValue || 0),
             timestamp: fields.timestamp?.timestampValue,
+            isAccount: fields.isAccount?.booleanValue || false,
           };
         })
         // 按时间排序

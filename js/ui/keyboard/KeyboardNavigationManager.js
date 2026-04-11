@@ -157,6 +157,28 @@ export class KeyboardNavigationManager {
       `[KeyboardNavigationManager] Key pressed: ${e.code}, isActive: ${this.isActive}, buttonCount: ${this.buttons.length}`,
     );
 
+    // 检查焦点是否在输入框或文本输入元素上
+    // 如果是，则不处理导航键（允许文本输入）
+    const focusedElement = document.activeElement;
+    const isInputElement =
+      focusedElement &&
+      ["INPUT", "TEXTAREA", "SELECT", "CONTENTEDITABLE"].includes(
+        focusedElement.tagName,
+      );
+
+    if (isInputElement) {
+      // 在输入框中时，仅处理 ESC 键，其他键正常输入
+      if (e.code === "Escape") {
+        e.preventDefault();
+        console.log("[KeyboardNavigationManager] ESC pressed in input");
+        if (this.onEsc && typeof this.onEsc === "function") {
+          this.onEsc();
+        }
+      }
+      // 其他键在输入框中正常工作
+      return;
+    }
+
     // 导航键：方向键 / WASD
     const isNavigationKey = [
       "ArrowUp",

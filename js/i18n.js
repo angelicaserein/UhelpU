@@ -96,6 +96,24 @@ const _dict = {
     world_memorial_discarded:
       "Discarded version (a totally different game idea)",
 
+    // ── Name Input / Rename ──────────────────────────────────────────
+    name_input_title: "Enter Your Name",
+    name_input_placeholder: "Player Name",
+    name_input_empty: "Please enter a name",
+    name_input_too_long: "Max 12 characters",
+    name_check_error: "Error checking name",
+    name_duplicate_title: "Duplicate Name",
+    name_duplicate_message: "There are {COUNT} players named \"{NAME}\".\nAre you sure you want to use this name?",
+    name_duplicate_confirm_btn: "Use it!",
+    name_duplicate_cancel_btn: "Choose Another",
+    btn_confirm: "Confirm",
+    btn_cancel: "Cancel",
+    rename_input_title: "Enter New Name",
+    rename_prompt: "Enter your new player name",
+    rename_error: "Error updating name",
+    player_welcome: "Welcome",
+    player_rename_button: "Rename",
+
     // ── NPC Default Dialogue ─────────────────────────────────────────
     npc_default_line1: "Hi there! Nice to meet you!",
     npc_default_line2: "Good luck on your adventure!",
@@ -192,6 +210,24 @@ const _dict = {
     world_legacy_demo2: "演示二（共四关）",
     world_memorial_earliest: "最初代版本（早期演示，漏洞很多）",
     world_memorial_discarded: "废弃版本（完全不同的游戏创意）",
+
+    // ── 名字输入 / 改名 ──────────────────────────────────────────────
+    name_input_title: "输入你的昵称",
+    name_input_placeholder: "玩家名字",
+    name_input_empty: "请输入名字",
+    name_input_too_long: "名字最多12个字符",
+    name_check_error: "检查名字时发生错误",
+    name_duplicate_title: "名字重复",
+    name_duplicate_message: "前方已有 {COUNT} 个\"{NAME}\"。\n你确定还要用这个名字吗？",
+    name_duplicate_confirm_btn: "就要用！",
+    name_duplicate_cancel_btn: "换一个",
+    btn_confirm: "确认",
+    btn_cancel: "取消",
+    rename_input_title: "输入新的昵称",
+    rename_prompt: "输入你的新玩家名字",
+    rename_error: "更新名字时发生错误",
+    player_welcome: "欢迎",
+    player_rename_button: "改名",
 
     // ── NPC 默认对话 ─────────────────────────────────────────────────
     npc_default_line1: "你好呀！很高兴认识你！",

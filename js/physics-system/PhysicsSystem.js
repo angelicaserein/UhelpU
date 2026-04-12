@@ -1,3 +1,90 @@
+const ABILITY_KEYS = Object.freeze({
+  COYOTE_FRAMES: "coyoteFrames",
+  IS_ON_GROUND: "isOnGround",
+  JUMP_COOLDOWN: "jumpCooldown",
+  WAS_ON_GROUND: "wasOnGround",
+});
+
+const SUPPORT_TYPES = Object.freeze({
+  PUSHING: "pushing",
+  STANDING: "standing",
+  SUPPORT: "support",
+});
+
+const REPLAYER_LEAVE_BUFFER_FRAMES = 1;
+const DEFAULT_COYOTE_FRAMES = 6;
+const JUMP_TAKEOFF_COOLDOWN = 6;
+
+function hasMovement(entity) {
+  return !!entity?.movementComponent;
+}
+
+function decrementReplayerLeaveBuffer(entity) {
+  if (
+    entity._replayerLeftFrameCount !== undefined &&
+    entity._replayerLeftFrameCount > 0
+  ) {
+    entity._replayerLeftFrameCount--;
+  }
+}
+
+function refreshReplayerStandingState(entity) {
+  decrementReplayerLeaveBuffer(entity);
+
+  if (entity._wasStandingOnReplayer && !entity._currentlyOnReplayer) {
+    entity._replayerLeftFrameCount = REPLAYER_LEAVE_BUFFER_FRAMES;
+  }
+
+  entity._currentlyOnReplayer = false;
+}
+
+function updateGroundAbilityState(controlComponent) {
+  const ability = controlComponent.abilityCondition;
+
+  if (ability[ABILITY_KEYS.JUMP_COOLDOWN] > 0) {
+    ability[ABILITY_KEYS.COYOTE_FRAMES] = 0;
+  } else if (ability[ABILITY_KEYS.IS_ON_GROUND]) {
+    ability[ABILITY_KEYS.COYOTE_FRAMES] = DEFAULT_COYOTE_FRAMES;
+  } else if (ability[ABILITY_KEYS.COYOTE_FRAMES] > 0) {
+    ability[ABILITY_KEYS.COYOTE_FRAMES]--;
+  }
+
+  ability[ABILITY_KEYS.WAS_ON_GROUND] = ability[ABILITY_KEYS.COYOTE_FRAMES] > 0;
+  ability[ABILITY_KEYS.IS_ON_GROUND] = false;
+
+  if (ability[ABILITY_KEYS.JUMP_COOLDOWN] > 0) {
+    ability[ABILITY_KEYS.JUMP_COOLDOWN]--;
+  }
+}
+
+function integrateMovement(entity) {
+  const movement = entity.movementComponent;
+  movement.velY = movement.velY + movement.accY;
+  movement.velX = movement.velX + movement.accX;
+  entity.x = entity.x + movement.velX;
+  entity.y = entity.y + movement.velY;
+}
+
+function appendMapList(map, key, value) {
+  if (!key || !value) return;
+
+  let list = map.get(key);
+  if (!list) {
+    list = [];
+    map.set(key, list);
+  }
+  list.push(value);
+}
+
+function isTakeoffFrame(entity) {
+  return !!(
+    entity.controllerManager &&
+    entity.controllerManager.currentControlComponent.abilityCondition[
+      ABILITY_KEYS.JUMP_COOLDOWN
+    ] === JUMP_TAKEOFF_COOLDOWN
+  );
+}
+
 export class PhysicsSystem {
   constructor(entities) {
     this.entities = entities;
@@ -7,57 +94,33 @@ export class PhysicsSystem {
   }
   physicsEntry() {
     for (const entity of this.entities) {
-      const m = entity.movementComponent;
-      if (m) {
-        // 初始化死亡效果（仅执行一次）
-        if (entity.initDeathEffect) {
-          entity.initDeathEffect();
-        }
+      if (!hasMovement(entity)) continue;
 
-        entity.headBlockedThisFrame = false;
-        // 跟踪玩家离开分身的延迟帧数（给予1帧的缓冲）
-        if (
-          entity._replayerLeftFrameCount !== undefined &&
-          entity._replayerLeftFrameCount > 0
-        ) {
-          entity._replayerLeftFrameCount--;
-        }
-        // 检查是否需要标记玩家刚离开分身
-        if (entity._wasStandingOnReplayer && !entity._currentlyOnReplayer) {
-          entity._replayerLeftFrameCount = 1; // 1帧的缓冲
-        }
-        entity._currentlyOnReplayer = false;
-
-        entity.prevX = entity.x;
-        entity.prevY = entity.y;
-        const blockedXLastFrame = entity.blockedXLastFrame === true;
-        entity.blockedXLastFrame = false;
-        // 每帧重置isOnGround，只有通过碰撞检测时才设置为true
-        if (entity.controllerManager) {
-          const cc = entity.controllerManager.currentControlComponent;
-          // Coyote time: allow jump for several frames after leaving ground
-          if (cc.abilityCondition["jumpCooldown"] > 0) {
-            cc.abilityCondition["coyoteFrames"] = 0;
-          } else if (cc.abilityCondition["isOnGround"]) {
-            cc.abilityCondition["coyoteFrames"] = 6;
-          } else if (cc.abilityCondition["coyoteFrames"] > 0) {
-            cc.abilityCondition["coyoteFrames"]--;
-          }
-          cc.abilityCondition["wasOnGround"] =
-            cc.abilityCondition["coyoteFrames"] > 0;
-          cc.abilityCondition["isOnGround"] = false;
-          if (cc.abilityCondition["jumpCooldown"] > 0) {
-            cc.abilityCondition["jumpCooldown"]--;
-          }
-          if (!blockedXLastFrame && !entity.lockControlThisFrame) {
-            entity.controllerManager.tick();
-          }
-        }
-        m.velY = m.velY + m.accY;
-        m.velX = m.velX + m.accX;
-        entity.x = entity.x + m.velX;
-        entity.y = entity.y + m.velY;
+      // 初始化死亡效果（仅执行一次）
+      if (entity.initDeathEffect) {
+        entity.initDeathEffect();
       }
+
+      entity.headBlockedThisFrame = false;
+      refreshReplayerStandingState(entity);
+
+      entity.prevX = entity.x;
+      entity.prevY = entity.y;
+      const blockedXLastFrame = entity.blockedXLastFrame === true;
+      entity.blockedXLastFrame = false;
+
+      // 每帧重置isOnGround，只有通过碰撞检测时才设置为true
+      if (entity.controllerManager) {
+        const controlComponent =
+          entity.controllerManager.currentControlComponent;
+        updateGroundAbilityState(controlComponent);
+
+        if (!blockedXLastFrame && !entity.lockControlThisFrame) {
+          entity.controllerManager.tick();
+        }
+      }
+
+      integrateMovement(entity);
     }
   }
 
@@ -67,35 +130,29 @@ export class PhysicsSystem {
     // standing：entity 站在 _supportingEntity 头上 → ridersOf[supporter].push(entity)
     // pushing：entity 在顶着 _supportingEntity    → ridersOf[entity].push(_supportingEntity)
     const ridersOf = new Map();
-    const appendRider = (supporter, rider) => {
-      if (!supporter || !rider) return;
-      let list = ridersOf.get(supporter);
-      if (!list) {
-        list = [];
-        ridersOf.set(supporter, list);
-      }
-      list.push(rider);
-    };
 
     for (const entity of this.entities) {
-      if (!entity.movementComponent) continue;
-      if (entity._supportingType === "standing" && entity._supportingEntity) {
-        appendRider(entity._supportingEntity, entity);
-      } else if (
-        entity._supportingType === "pushing" &&
+      if (!hasMovement(entity)) continue;
+      if (
+        entity._supportingType === SUPPORT_TYPES.STANDING &&
         entity._supportingEntity
       ) {
-        appendRider(entity, entity._supportingEntity);
+        appendMapList(ridersOf, entity._supportingEntity, entity);
+      } else if (
+        entity._supportingType === SUPPORT_TYPES.PUSHING &&
+        entity._supportingEntity
+      ) {
+        appendMapList(ridersOf, entity, entity._supportingEntity);
       }
     }
 
     // 第二步：找根节点（链底层）：support 或 pushing 类型的实体
     const roots = [];
     for (const entity of this.entities) {
-      if (!entity.movementComponent) continue;
+      if (!hasMovement(entity)) continue;
       if (
-        entity._supportingType === "support" ||
-        entity._supportingType === "pushing"
+        entity._supportingType === SUPPORT_TYPES.SUPPORT ||
+        entity._supportingType === SUPPORT_TYPES.PUSHING
       ) {
         roots.push(entity);
       }
@@ -120,19 +177,14 @@ export class PhysicsSystem {
       for (const rider of riders) {
         if (
           !rider ||
-          !rider.movementComponent ||
+          !hasMovement(rider) ||
           visited.has(rider) ||
           movedRiders.has(rider)
         )
           continue;
 
         // [FIX] velX链修复：跳跃起飞帧切断该 rider 分支，不影响其他同层 rider。
-        const isJumping =
-          rider.controllerManager &&
-          rider.controllerManager.currentControlComponent.abilityCondition[
-            "jumpCooldown"
-          ] === 6;
-        if (isJumping) continue;
+        if (isTakeoffFrame(rider)) continue;
 
         // 直接改位置，避免被 controller.tick() 覆盖 velX。
         rider.x += supporterDeltaX;

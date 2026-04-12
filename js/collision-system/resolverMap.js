@@ -1,5 +1,114 @@
 import { ColliderShape, ColliderType } from "./enumerator.js";
 
+const ENTITY_TYPES = Object.freeze({
+  BOX: "box",
+  PLAYER: "player",
+  REPLAYER: "replayer",
+});
+
+const COLLISION_MSGS = Object.freeze({
+  ALLOWED: "allowed collision",
+  A_ON_B: "a_on_b",
+  B_ON_A: "b_on_a",
+  BOTTOM: "bottom",
+  LEFT: "left",
+  RIGHT: "right",
+  TOP: "top",
+});
+
+function getPrevCoord(entity, axis) {
+  const prevKey = axis === "x" ? "prevX" : "prevY";
+  return entity[prevKey] !== undefined ? entity[prevKey] : entity[axis];
+}
+
+function getBoundsAt(entity, x, y) {
+  return {
+    left: x,
+    right: x + entity.collider.w,
+    bottom: y,
+    top: y + entity.collider.h,
+  };
+}
+
+function getPrevBounds(entity) {
+  return getBoundsAt(
+    entity,
+    getPrevCoord(entity, "x"),
+    getPrevCoord(entity, "y"),
+  );
+}
+
+function getCurrBounds(entity) {
+  return getBoundsAt(entity, entity.x, entity.y);
+}
+
+function getCenterOverlap(a, b) {
+  const vectorX = a.x + a.collider.w / 2 - (b.x + b.collider.w / 2);
+  const vectorY = a.y + a.collider.h / 2 - (b.y + b.collider.h / 2);
+  const overlapX = a.collider.w / 2 + b.collider.w / 2 - Math.abs(vectorX);
+  const overlapY = a.collider.h / 2 + b.collider.h / 2 - Math.abs(vectorY);
+
+  return { vectorX, vectorY, overlapX, overlapY };
+}
+
+function isType(entity, type) {
+  return !!entity && entity.type === type;
+}
+
+function isBox(entity) {
+  return isType(entity, ENTITY_TYPES.BOX);
+}
+
+function isPusher(entity) {
+  return (
+    isType(entity, ENTITY_TYPES.PLAYER) || isType(entity, ENTITY_TYPES.REPLAYER)
+  );
+}
+
+function placeEntityOnTop(entity, supporter) {
+  entity.y = supporter.y + supporter.collider.h;
+}
+
+function placeEntityBelow(entity, blocker) {
+  entity.y = blocker.y - entity.collider.h;
+}
+
+function resolveVerticalFallback(a, b, overlap) {
+  if (overlap.vectorY > 0) {
+    a.y = b.y + b.collider.h;
+    a.prevY = a.y;
+    return COLLISION_MSGS.BOTTOM;
+  }
+
+  a.y = b.y - a.collider.h;
+  a.prevY = a.y;
+  return COLLISION_MSGS.TOP;
+}
+
+function tryResolveLateralBoxPush(a, b, aPrev, bPrev, aCurr, bCurr) {
+  if (isBox(b) && aPrev.right <= bPrev.left && aCurr.right > bCurr.left) {
+    b.x = a.x + a.collider.w;
+    return COLLISION_MSGS.ALLOWED;
+  }
+
+  if (isBox(b) && aPrev.left >= bPrev.right && aCurr.left < bCurr.right) {
+    b.x = a.x - b.collider.w;
+    return COLLISION_MSGS.ALLOWED;
+  }
+
+  if (isBox(a) && bPrev.right <= aPrev.left && bCurr.right > aCurr.left) {
+    a.x = b.x + b.collider.w;
+    return COLLISION_MSGS.ALLOWED;
+  }
+
+  if (isBox(a) && bPrev.left >= aPrev.right && bCurr.left < aCurr.right) {
+    a.x = b.x - a.collider.w;
+    return COLLISION_MSGS.ALLOWED;
+  }
+
+  return null;
+}
+
 export const resolverMap = {
   // "DYNAMIC-DYNAMIC": (a, b) => resolveBoth(a, b),
   "DYNAMIC-STATIC-RECTANGLE-RECTANGLE": (a, b) => resolveFirst(a, b),
@@ -9,200 +118,147 @@ export const resolverMap = {
 function resolveFirst(a, b) {
   let collisionMsg = "";
 
-  const prevY = a.prevY !== undefined ? a.prevY : a.y;
-  const prevX = a.prevX !== undefined ? a.prevX : a.x;
+  const prevBounds = getPrevBounds(a);
+  const currBounds = getCurrBounds(a);
+  const staticBounds = getCurrBounds(b);
 
-  const prevBottom = prevY;
-  const prevTop = prevY + a.collider.h;
-  const currBottom = a.y;
-  const currTop = a.y + a.collider.h;
-  const staBottom = b.y;
-  const staTop = b.y + b.collider.h;
-  const staLeft = b.x;
-  const staRight = b.x + b.collider.w;
-  const prevRight = prevX + a.collider.w;
-  const prevLeft = prevX;
-  const currRight = a.x + a.collider.w;
-  const currLeft = a.x;
-
-  const crossedFromAbove = prevBottom >= staTop && currBottom < staTop;
-  const crossedFromBelow = prevTop <= staBottom && currTop > staBottom;
+  const crossedFromAbove =
+    prevBounds.bottom >= staticBounds.top &&
+    currBounds.bottom < staticBounds.top;
+  const crossedFromBelow =
+    prevBounds.top <= staticBounds.bottom &&
+    currBounds.top > staticBounds.bottom;
   // X轴帧穿越：防止高速水平移动时被错判为vertical碰撞
-  const crossedFromLeft = prevRight <= staLeft && currRight > staLeft;
-  const crossedFromRight = prevLeft >= staRight && currLeft < staRight;
+  const crossedFromLeft =
+    prevBounds.right <= staticBounds.left &&
+    currBounds.right > staticBounds.left;
+  const crossedFromRight =
+    prevBounds.left >= staticBounds.right &&
+    currBounds.left < staticBounds.right;
 
   // Y轴穿越优先：落地 / 顶头
   if (crossedFromAbove) {
-    collisionMsg = "bottom";
+    collisionMsg = COLLISION_MSGS.BOTTOM;
     // 如果玩家刚从分身上分离（仍在缓冲帧内），延迟应用碰撞修正
     if ((a._replayerLeftFrameCount || 0) > 0) {
       // 这一帧不修正位置，让玩家继续下落
       return collisionMsg;
     }
-    a.y = staTop;
+    a.y = staticBounds.top;
     a.prevY = a.y;
     return collisionMsg;
   }
   if (crossedFromBelow) {
-    collisionMsg = "top";
-    a.y = staBottom - a.collider.h;
+    collisionMsg = COLLISION_MSGS.TOP;
+    a.y = staticBounds.bottom - a.collider.h;
     a.prevY = a.y;
     return collisionMsg;
   }
   // X轴穿越：从侧面高速撞入
   if (crossedFromLeft) {
-    collisionMsg = "right";
-    a.x = staLeft - a.collider.w;
+    collisionMsg = COLLISION_MSGS.RIGHT;
+    a.x = staticBounds.left - a.collider.w;
     return collisionMsg;
   }
   if (crossedFromRight) {
-    collisionMsg = "left";
-    a.x = staRight;
+    collisionMsg = COLLISION_MSGS.LEFT;
+    a.x = staticBounds.right;
     return collisionMsg;
   }
 
   // Fallback：玩家在上一帧已经与平台重叠（极罕见），用最小重叠量弹出
-  let vectorX = a.x + a.collider.w / 2 - (b.x + b.collider.w / 2);
-  let vectorY = a.y + a.collider.h / 2 - (b.y + b.collider.h / 2);
-  let combinedHalfWidths = a.collider.w / 2 + b.collider.w / 2;
-  let combinedHalfHeights = a.collider.h / 2 + b.collider.h / 2;
-  let overlapX = combinedHalfWidths - Math.abs(vectorX);
-  let overlapY = combinedHalfHeights - Math.abs(vectorY);
+  const overlap = getCenterOverlap(a, b);
 
-  if (overlapX <= overlapY) {
-    if (vectorX > 0) {
-      collisionMsg = "left";
-      a.x = a.x + overlapX;
+  if (overlap.overlapX <= overlap.overlapY) {
+    if (overlap.vectorX > 0) {
+      collisionMsg = COLLISION_MSGS.LEFT;
+      a.x = a.x + overlap.overlapX;
     } else {
-      collisionMsg = "right";
-      a.x = a.x - overlapX;
+      collisionMsg = COLLISION_MSGS.RIGHT;
+      a.x = a.x - overlap.overlapX;
     }
   } else {
-    if (vectorY > 0) {
-      // 玩家中心在平台中心上方 → 落在平台顶上
-      collisionMsg = "bottom";
-      a.y = staTop;
-    } else {
-      // 玩家中心在平台中心下方 → 推到平台底下
-      collisionMsg = "top";
-      a.y = b.y - a.collider.h;
-    }
-    a.prevY = a.y;
+    collisionMsg = resolveVerticalFallback(a, b, overlap);
   }
   return collisionMsg;
 }
 
 function resolveDynDyn(a, b) {
-  const aPrevY = a.prevY !== undefined ? a.prevY : a.y;
-  const bPrevY = b.prevY !== undefined ? b.prevY : b.y;
-  const aPrevX = a.prevX !== undefined ? a.prevX : a.x;
-  const bPrevX = b.prevX !== undefined ? b.prevX : b.x;
-
-  const aPrevBottom = aPrevY;
-  const aPrevTop = aPrevY + a.collider.h;
-  const bPrevBottom = bPrevY;
-  const bPrevTop = bPrevY + b.collider.h;
-
-  const aPrevRight = aPrevX + a.collider.w;
-  const aPrevLeft = aPrevX;
-  const bPrevRight = bPrevX + b.collider.w;
-  const bPrevLeft = bPrevX;
-
-  const aCurrRight = a.x + a.collider.w;
-  const aCurrLeft = a.x;
-  const bCurrRight = b.x + b.collider.w;
-  const bCurrLeft = b.x;
+  const aPrev = getPrevBounds(a);
+  const bPrev = getPrevBounds(b);
+  const aCurr = getCurrBounds(a);
+  const bCurr = getCurrBounds(b);
 
   // A 上一帧在 B 上方：A 踩 B 头，A 精确吸附到 B 顶部
-  if (aPrevBottom >= bPrevTop) {
+  if (aPrev.bottom >= bPrev.top) {
     if (a.headBlockedThisFrame) {
       // A 被平台顶住时，改为压回下方的 B，防止 A/B 互相穿模重叠
-      b.y = a.y - b.collider.h;
+      placeEntityBelow(b, a);
     } else {
-      a.y = b.y + b.collider.h;
+      placeEntityOnTop(a, b);
     }
-    return "a_on_b";
+    return COLLISION_MSGS.A_ON_B;
   }
 
   // B 上一帧在 A 上方：B 踩 A 头，B 精确吸附到 A 顶部
-  if (bPrevBottom >= aPrevTop) {
+  if (bPrev.bottom >= aPrev.top) {
     if (b.headBlockedThisFrame) {
       // B 被平台顶住时，改为压回下方的 A，防止 A/B 互相穿模重叠
-      a.y = b.y - a.collider.h;
+      placeEntityBelow(a, b);
     } else {
-      b.y = a.y + a.collider.h;
+      placeEntityOnTop(b, a);
     }
-    return "b_on_a";
+    return COLLISION_MSGS.B_ON_A;
   }
 
   // 侧面碰撞：检测box推动
-  // A 从左边推入 B（A 向右推 B)
-  if (b.type === "box" && aPrevRight <= bPrevLeft && aCurrRight > bCurrLeft) {
-    // b 被从左边推动
-    b.x = a.x + a.collider.w;
-    return "allowed collision";
-  }
-  // A 从右边推入 B（A 向左推 B）
-  if (b.type === "box" && aPrevLeft >= bPrevRight && aCurrLeft < bCurrRight) {
-    // b 被从右边推动
-    b.x = a.x - b.collider.w;
-    return "allowed collision";
+  const boxPushMsg = tryResolveLateralBoxPush(a, b, aPrev, bPrev, aCurr, bCurr);
+  if (boxPushMsg) {
+    return boxPushMsg;
   }
 
-  // B 从左边推入 A（B 向右推 A）
-  if (a.type === "box" && bPrevRight <= aPrevLeft && bCurrRight > aCurrLeft) {
-    // a 被从左边推动
-    a.x = b.x + b.collider.w;
-    return "allowed collision";
-  }
-  // B 从右边推入 A（B 向左推 A）
-  if (a.type === "box" && bPrevLeft >= aPrevRight && bCurrLeft < aCurrRight) {
-    // a 被从右边推动
-    a.x = b.x - a.collider.w;
-    return "allowed collision";
-  }
+  const overlap = getCenterOverlap(a, b);
 
-  const vectorX = a.x + a.collider.w / 2 - (b.x + b.collider.w / 2);
-  const vectorY = a.y + a.collider.h / 2 - (b.y + b.collider.h / 2);
-  const overlapX = a.collider.w / 2 + b.collider.w / 2 - Math.abs(vectorX);
-  const overlapY = a.collider.h / 2 + b.collider.h / 2 - Math.abs(vectorY);
-
-  const isPusherA = a.type === "player" || a.type === "replayer";
-  const isPusherB = b.type === "player" || b.type === "replayer";
   const isPusherBoxPair =
-    (isPusherA && b.type === "box") || (isPusherB && a.type === "box");
-  const isBoxBoxPair = a.type === "box" && b.type === "box";
+    (isPusher(a) && isBox(b)) || (isPusher(b) && isBox(a));
+  const isBoxBoxPair = isBox(a) && isBox(b);
 
   // Deterministic lateral fallback for chain pushes:
   // if side overlap remains after crossing checks, snap by previous-frame side relation.
-  if ((isPusherBoxPair || isBoxBoxPair) && overlapX > 0 && overlapY > 0) {
+  if (
+    (isPusherBoxPair || isBoxBoxPair) &&
+    overlap.overlapX > 0 &&
+    overlap.overlapY > 0
+  ) {
     const verticallyStacked =
-      aPrevBottom >= bPrevTop || bPrevBottom >= aPrevTop;
+      aPrev.bottom >= bPrev.top || bPrev.bottom >= aPrev.top;
 
     // Do not consume vertical stack cases (standing/on-head), let other branches handle them.
     if (!verticallyStacked) {
-      const aWasLeftOfB = aPrevRight <= bPrevLeft || aPrevX < bPrevX;
-      const bWasLeftOfA = bPrevRight <= aPrevLeft || bPrevX < aPrevX;
+      const aPrevX = getPrevCoord(a, "x");
+      const bPrevX = getPrevCoord(b, "x");
+      const aWasLeftOfB = aPrev.right <= bPrev.left || aPrevX < bPrevX;
+      const bWasLeftOfA = bPrev.right <= aPrev.left || bPrevX < aPrevX;
 
       if (aWasLeftOfB && !bWasLeftOfA) {
         b.x = a.x + a.collider.w;
-        return "allowed collision";
+        return COLLISION_MSGS.ALLOWED;
       }
       if (bWasLeftOfA && !aWasLeftOfB) {
         a.x = b.x + b.collider.w;
-        return "allowed collision";
+        return COLLISION_MSGS.ALLOWED;
       }
 
       // Tie-breaker for exact same prevX: separate by current center direction.
-      if (vectorX <= 0) {
+      if (overlap.vectorX <= 0) {
         b.x = a.x + a.collider.w;
       } else {
         a.x = b.x + b.collider.w;
       }
-      return "allowed collision";
+      return COLLISION_MSGS.ALLOWED;
     }
   }
 
   // 左右方向的相交保留，不做垂直分离
-  return "allowed collision";
+  return COLLISION_MSGS.ALLOWED;
 }

@@ -235,11 +235,7 @@ export class Level10 extends BaseLevel {
   }
 
   updatePhysics() {
-    this.physicsSystem.physicsEntry();
-    for (const entity of this.entities) {
-      if (entity.update && typeof entity.update === "function")
-        entity.update(this.p);
-    }
+    super.updatePhysics();
   }
 
   updateCollision(p = this.p, eventBus = this.eventBus) {

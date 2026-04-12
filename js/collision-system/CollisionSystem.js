@@ -2,6 +2,62 @@ import { detectorMap } from "./detectorMap.js";
 import { resolverMap } from "./resolverMap.js";
 import { responderMap } from "./responderMap.js";
 
+const ENTITY_TYPES = Object.freeze({
+  BOX: "box",
+  BUTTON: "button",
+  ENEMY: "enemy",
+  PLAYER: "player",
+  REPLAYER: "replayer",
+  SPIKE: "spike",
+});
+
+const SUPPORT_TYPES = Object.freeze({
+  PUSHING: "pushing",
+  STANDING: "standing",
+  SUPPORT: "support",
+});
+
+const BOX_STABILIZATION_PASSES = 4;
+const HEAD_PUSH_VERTICAL_TOLERANCE = 8;
+const HEAD_PUSH_HORIZONTAL_TOLERANCE = 6;
+const BOX_SIDE_EJECT_LANDING_TOLERANCE = 8;
+
+function hasCollider(entity) {
+  return !!(entity && entity.collider);
+}
+
+function isType(entity, type) {
+  return !!entity && entity.type === type;
+}
+
+function isBox(entity) {
+  return isType(entity, ENTITY_TYPES.BOX);
+}
+
+function isButton(entity) {
+  return isType(entity, ENTITY_TYPES.BUTTON);
+}
+
+function isEnemy(entity) {
+  return isType(entity, ENTITY_TYPES.ENEMY);
+}
+
+function isPlayer(entity) {
+  return isType(entity, ENTITY_TYPES.PLAYER);
+}
+
+function isReplayer(entity) {
+  return isType(entity, ENTITY_TYPES.REPLAYER);
+}
+
+function isActiveReplayer(entity) {
+  return isReplayer(entity) && entity.isReplaying;
+}
+
+function isPusherEntity(entity) {
+  return isPlayer(entity) || isReplayer(entity);
+}
+
 export class CollisionSystem {
   constructor(entities, eventBus) {
     this.entities = entities;
@@ -39,71 +95,31 @@ export class CollisionSystem {
     // Player collision detection with enemies (DYNAMIC-DYNAMIC pairs)
     const player2 = this.getPlayer();
     if (player2) {
-      for (const dyn of this._dynamicEntities) {
-        if (dyn.type === "enemy" && dyn !== player2) {
-          this.processEnemyPlayerPair(player2, dyn);
-        }
-      }
+      this.processEnemyCollisionsForActor(player2, (actor, enemy) =>
+        this.processEnemyPlayerPair(actor, enemy),
+      );
     }
 
     // [FIX] 推箱穿模：DD 推箱 → DS 弹回 → 再次 DD 会用旧 prevX 把箱子重新推进墙。
     // 改为：记录 DS 前后箱子的 x 位移量，把同等位移施加给 player，彻底消除重叠，不再做第三次 DD。
     const player3 = this.getPlayer();
     if (player3) {
-      for (const dyn of this._dynamicEntities) {
-        if (dyn.type === "box" && dyn !== player3) {
-          this.processDynamicDynamicPair(player3, dyn);
-          // [FIX] 推箱穿模：DD 推完箱子后立即补一次 DS，防止箱子停在墙内
-          const boxXBeforeDS = dyn.x;
-          for (const sta of this._staticEntities) {
-            this.processDynamicStaticPair(dyn, sta);
-          }
-          // [FIX] 推箱穿模：DS 把箱子弹回时，将同等修正量施加给 player，防止 player 陷入箱内，
-          // 且不再做第三次 DD（第三次 DD 会用旧 prevX 把箱子重新推回墙里）
-          const boxCorrection = dyn.x - boxXBeforeDS;
-          if (boxCorrection !== 0) {
-            player3.x += boxCorrection;
-            if (player3.movementComponent) player3.movementComponent.velX = 0;
-          }
-          this.pushPusherOutOfBoxIfOverlapping(player3, dyn);
-        }
-      }
-
+      this.processPusherBoxInteractions(player3);
       this.maintainHeadPushSupportRelations(player3);
     }
 
     // Replayer collision detection with enemies (DYNAMIC-DYNAMIC pairs)
     const replayer2 = this.getReplayer();
     if (replayer2 && replayer2.isReplaying) {
-      for (const dyn of this._dynamicEntities) {
-        if (dyn.type === "enemy" && dyn !== replayer2) {
-          this.processEnemyReplayerPair(replayer2, dyn);
-        }
-      }
+      this.processEnemyCollisionsForActor(replayer2, (actor, enemy) =>
+        this.processEnemyReplayerPair(actor, enemy),
+      );
     }
 
     // [FIX] 推箱穿模：replayer 推箱子与玩家推箱子同理，DD 后补 DS，再用位移量修正 replayer
     const replayer3 = this.getReplayer();
     if (replayer3 && replayer3.isReplaying) {
-      for (const dyn of this._dynamicEntities) {
-        if (dyn.type === "box" && dyn !== replayer3) {
-          this.processDynamicDynamicPair(replayer3, dyn);
-          // [FIX] 推箱穿模：DD 推完箱子后立即补一次 DS，防止箱子停在墙内
-          const boxXBeforeDS = dyn.x;
-          for (const sta of this._staticEntities) {
-            this.processDynamicStaticPair(dyn, sta);
-          }
-          // [FIX] 推箱穿模：DS 把箱子弹回时，将同等修正量施加给 replayer，防止 replayer 陷入箱内
-          const boxCorrection = dyn.x - boxXBeforeDS;
-          if (boxCorrection !== 0) {
-            replayer3.x += boxCorrection;
-            if (replayer3.movementComponent)
-              replayer3.movementComponent.velX = 0;
-          }
-          this.pushPusherOutOfBoxIfOverlapping(replayer3, dyn);
-        }
-      }
-
+      this.processPusherBoxInteractions(replayer3);
       this.maintainHeadPushSupportRelations(replayer3);
     }
 
@@ -111,22 +127,22 @@ export class CollisionSystem {
     this.stabilizeBoxCollisions();
 
     // Final guard: if box stabilization moved boxes into pusher, separate them immediately.
-    if (player3 && player3._supportingType === "pushing") {
+    if (player3 && player3._supportingType === SUPPORT_TYPES.PUSHING) {
       this.resolvePusherOverlapsWithBoxes(player3);
     }
     if (
       replayer3 &&
       replayer3.isReplaying &&
-      replayer3._supportingType === "pushing"
+      replayer3._supportingType === SUPPORT_TYPES.PUSHING
     ) {
       this.resolvePusherOverlapsWithBoxes(replayer3);
     }
 
     // Enemy collision detection with other DYNAMIC/STATIC entities (platforms, walls, etc.)
     for (const dyn of this._dynamicEntities) {
-      if (dyn.type === "enemy") {
+      if (isEnemy(dyn)) {
         for (const sta of this._staticEntities) {
-          if (dyn !== sta && sta.type !== "spike") {
+          if (dyn !== sta && !isType(sta, ENTITY_TYPES.SPIKE)) {
             this.processDynamicStaticPair(dyn, sta);
           }
         }
@@ -135,7 +151,7 @@ export class CollisionSystem {
 
     // 每帧重置所有按钮状态，碰撞检测时会重新按下仍被踩到的按钮
     for (const tri of this._triggerEntities) {
-      if (tri.type === "button" && tri.isPressed) {
+      if (isButton(tri) && tri.isPressed) {
         tri.releaseButton();
       }
     }
@@ -148,7 +164,7 @@ export class CollisionSystem {
 
     // Enemy collision detection with TRIGGER entities (buttons, spikes, etc.)
     for (const sta of this._staticEntities) {
-      if (sta.type === "enemy") {
+      if (isEnemy(sta)) {
         for (const tri of this._triggerEntities) {
           this.processEnemyTriggerPair(sta, tri, eventBus);
         }
@@ -163,7 +179,7 @@ export class CollisionSystem {
   }
   getReplayer() {
     for (const dyn of this._dynamicEntities) {
-      if (dyn.type === "replayer") {
+      if (isReplayer(dyn)) {
         return dyn;
       }
     }
@@ -171,7 +187,7 @@ export class CollisionSystem {
   }
   getPlayer() {
     for (const dyn of this._dynamicEntities) {
-      if (dyn.type === "player") {
+      if (isPlayer(dyn)) {
         return dyn;
       }
     }
@@ -189,7 +205,7 @@ export class CollisionSystem {
 
     for (const entity of this.entities) {
       // Skip entities without a collider (e.g., KeyPrompt which is purely visual)
-      if (!entity.collider) {
+      if (!hasCollider(entity)) {
         continue;
       }
 
@@ -272,7 +288,7 @@ export class CollisionSystem {
   }
 
   processAllBoxPairs() {
-    const boxes = this._dynamicEntities.filter((dyn) => dyn.type === "box");
+    const boxes = this.getDynamicBoxes();
     if (boxes.length < 2) return;
 
     for (let i = 0; i < boxes.length; i++) {
@@ -285,7 +301,7 @@ export class CollisionSystem {
   }
 
   processAllBoxStaticPairs() {
-    const boxes = this._dynamicEntities.filter((dyn) => dyn.type === "box");
+    const boxes = this.getDynamicBoxes();
     if (boxes.length === 0 || this._staticEntities.length === 0) return;
 
     for (const box of boxes) {
@@ -297,7 +313,7 @@ export class CollisionSystem {
 
   stabilizeBoxCollisions() {
     // Iterate to converge chain pushes: box-box influences box-static and vice versa.
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < BOX_STABILIZATION_PASSES; i++) {
       this.processAllBoxPairs();
       this.processAllBoxStaticPairs();
       this.enforceBoxNoPenetrationWithStatics();
@@ -305,7 +321,7 @@ export class CollisionSystem {
   }
 
   enforceBoxNoPenetrationWithStatics() {
-    const boxes = this._dynamicEntities.filter((dyn) => dyn.type === "box");
+    const boxes = this.getDynamicBoxes();
     if (boxes.length < 2) return;
 
     for (let i = 0; i < boxes.length; i++) {
@@ -374,11 +390,11 @@ export class CollisionSystem {
   resolvePusherOverlapsWithBoxes(pusher) {
     if (!pusher || !pusher.collider) return;
     // Only apply this guard during active head-push state.
-    if (pusher._supportingType !== "pushing") return;
+    if (pusher._supportingType !== SUPPORT_TYPES.PUSHING) return;
 
     // Unpushed boxes should behave like regular platforms: never side-eject from them.
     const pushedBox = pusher._supportingEntity;
-    if (!pushedBox || pushedBox.type !== "box") return;
+    if (!isBox(pushedBox)) return;
 
     this.pushPusherOutOfBoxIfOverlapping(pusher, pushedBox);
   }
@@ -397,10 +413,10 @@ export class CollisionSystem {
     const boxPrevTop = boxPrevY + box.collider.h;
 
     // Landing protection: if pusher is on/near top of box, keep vertical stack resolution intact.
-    const landingTolerance = 8;
     const pusherCenterY = pusher.y + pusher.collider.h / 2;
     const boxCenterY = box.y + box.collider.h / 2;
-    const nearTopLanding = pusherBottom >= boxTop - landingTolerance;
+    const nearTopLanding =
+      pusherBottom >= boxTop - BOX_SIDE_EJECT_LANDING_TOLERANCE;
     const upperHalfRelativeToBox = pusherCenterY >= boxCenterY;
     if (nearTopLanding && upperHalfRelativeToBox) return;
 
@@ -448,53 +464,37 @@ export class CollisionSystem {
   }
 
   processEnemyPlayerPair(player, enemy) {
-    // Enemy collision detection with Player (DYNAMIC-DYNAMIC pairs)
-    if (player.deathState && player.deathState.isDead) {
-      return;
-    }
-    if (enemy.deathState && enemy.deathState.isDead) {
-      return;
-    }
-
-    const playerShape = player.collider.colliderShape;
-    const enemyShape = enemy.collider.colliderShape;
-
-    const typePair = "DYNAMIC-DYNAMIC";
-    const shapePair = `${playerShape}-${enemyShape}`;
-    const fullKey = `${typePair}-${shapePair}`;
-
-    const detectFunc = detectorMap[shapePair];
-    const detectResult = detectFunc(player, enemy);
-    if (detectResult) {
-      const resolveFunc = resolverMap[fullKey];
-      const collisionMsg = resolveFunc(player, enemy);
-
-      const responseFunc = responderMap[typePair];
-      responseFunc(player, enemy, collisionMsg);
-    }
+    this.processEnemyCharacterPair(player, enemy);
   }
 
   processEnemyReplayerPair(replayer, enemy) {
-    // Enemy collision detection with Replayer (DYNAMIC-DYNAMIC pairs)
+    this.processEnemyCharacterPair(replayer, enemy);
+  }
+
+  processEnemyCharacterPair(actor, enemy) {
+    // Enemy collision detection with Player (DYNAMIC-DYNAMIC pairs)
+    if (actor.deathState && actor.deathState.isDead) {
+      return;
+    }
     if (enemy.deathState && enemy.deathState.isDead) {
       return;
     }
 
-    const replayerShape = replayer.collider.colliderShape;
+    const actorShape = actor.collider.colliderShape;
     const enemyShape = enemy.collider.colliderShape;
 
     const typePair = "DYNAMIC-DYNAMIC";
-    const shapePair = `${replayerShape}-${enemyShape}`;
+    const shapePair = `${actorShape}-${enemyShape}`;
     const fullKey = `${typePair}-${shapePair}`;
 
     const detectFunc = detectorMap[shapePair];
-    const detectResult = detectFunc(replayer, enemy);
+    const detectResult = detectFunc(actor, enemy);
     if (detectResult) {
       const resolveFunc = resolverMap[fullKey];
-      const collisionMsg = resolveFunc(replayer, enemy);
+      const collisionMsg = resolveFunc(actor, enemy);
 
       const responseFunc = responderMap[typePair];
-      responseFunc(replayer, enemy, collisionMsg);
+      responseFunc(actor, enemy, collisionMsg);
     }
   }
 
@@ -530,7 +530,7 @@ export class CollisionSystem {
     if (cc.abilityCondition["isOnGround"]) return;
 
     // If pusher is standing on something, keep existing stack semantics.
-    if (pusher._supportingType === "standing") return;
+    if (pusher._supportingType === SUPPORT_TYPES.STANDING) return;
 
     const candidates = [];
 
@@ -560,24 +560,20 @@ export class CollisionSystem {
     pusher._supportingEntity = primaryTarget;
     for (const candidate of candidates) {
       candidate.target._supportingEntity = pusher;
-      candidate.target._supportingType = "standing";
+      candidate.target._supportingType = SUPPORT_TYPES.STANDING;
     }
-    if (pusher._supportingType !== "support") {
-      pusher._supportingType = "pushing";
+    if (pusher._supportingType !== SUPPORT_TYPES.SUPPORT) {
+      pusher._supportingType = SUPPORT_TYPES.PUSHING;
     }
   }
 
   isHeadPushTargetForPusher(pusher, target) {
-    if (target.type === "box") {
+    if (isBox(target)) {
       return true;
     }
 
     // Player can also head-push active replayer in easy/hard levels.
-    if (
-      pusher.type === "player" &&
-      target.type === "replayer" &&
-      target.isReplaying
-    ) {
+    if (isPlayer(pusher) && isActiveReplayer(target)) {
       return true;
     }
 
@@ -593,19 +589,17 @@ export class CollisionSystem {
     const pusherTop = pusher.y + pusher.collider.h;
     const targetBottom = target.y;
 
-    const verticalTolerance = 8;
     const verticalGap = Math.abs(targetBottom - pusherTop);
-    if (verticalGap > verticalTolerance) return null;
+    if (verticalGap > HEAD_PUSH_VERTICAL_TOLERANCE) return null;
 
     const pusherLeft = pusher.x;
     const pusherRight = pusher.x + pusher.collider.w;
     const targetLeft = target.x;
     const targetRight = target.x + target.collider.w;
 
-    const horizontalTolerance = 6;
     const overlapX =
-      pusherLeft < targetRight + horizontalTolerance &&
-      pusherRight > targetLeft - horizontalTolerance;
+      pusherLeft < targetRight + HEAD_PUSH_HORIZONTAL_TOLERANCE &&
+      pusherRight > targetLeft - HEAD_PUSH_HORIZONTAL_TOLERANCE;
 
     if (!overlapX) return null;
 
@@ -614,5 +608,48 @@ export class CollisionSystem {
     const targetCenterX = targetLeft + target.collider.w / 2;
     const centerDistance = Math.abs(pusherCenterX - targetCenterX);
     return verticalGap * 1000 + centerDistance;
+  }
+
+  getDynamicBoxes() {
+    return this._dynamicEntities.filter((dyn) => isBox(dyn));
+  }
+
+  processEnemyCollisionsForActor(actor, handler) {
+    for (const dyn of this._dynamicEntities) {
+      if (isEnemy(dyn) && dyn !== actor) {
+        handler(actor, dyn);
+      }
+    }
+  }
+
+  processPusherBoxInteractions(pusher) {
+    for (const dyn of this._dynamicEntities) {
+      if (!isBox(dyn) || dyn === pusher) {
+        continue;
+      }
+
+      this.processDynamicDynamicPair(pusher, dyn);
+
+      const boxCorrection = this.resolveBoxAgainstStatics(dyn);
+      if (boxCorrection !== 0) {
+        pusher.x += boxCorrection;
+        if (pusher.movementComponent) {
+          pusher.movementComponent.velX = 0;
+        }
+      }
+
+      this.pushPusherOutOfBoxIfOverlapping(pusher, dyn);
+    }
+  }
+
+  resolveBoxAgainstStatics(box) {
+    // [FIX] 推箱穿模：DD 推完箱子后立即补一次 DS，防止箱子停在墙内。
+    const boxXBeforeDS = box.x;
+    for (const sta of this._staticEntities) {
+      this.processDynamicStaticPair(box, sta);
+    }
+
+    // [FIX] DS 把箱子弹回时，将同等修正量施加给推动者，防止推动者陷入箱内。
+    return box.x - boxXBeforeDS;
   }
 }

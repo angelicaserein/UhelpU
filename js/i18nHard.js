@@ -8,6 +8,14 @@ registerTranslations({
     hard_level1_title: "Hard Level 1",
     hard_level1_info_left: "Hard Level 1",
     hard_level1_info_right: "Difficulty\nHard",
+    hard_hint_level1:
+      "Press the matching buttons to retract the linked spikes. The second room also gates the portal behind a button, so plan your route before you start recording.",
+    hard_level1_npc_line1: "Welcome to hard mode!",
+    hard_level1_npc_line2: "Use your brain!",
+    hard_level1_npc_line3:
+      "If you don't understand, don't ask me. Ask the designer!",
+    hard_level1_npc_exhausted:
+      "If you still don't understand, go ask the designer!",
 
     hard_level2_title: "Hard Level 2",
     hard_level2_info_left: "Hard Level 2",
@@ -50,6 +58,12 @@ registerTranslations({
     hard_level1_title: "困难关卡 1",
     hard_level1_info_left: "困难关卡 1",
     hard_level1_info_right: "难度\n困难",
+    hard_hint_level1:
+      "踩下对应按钮可以收回相连的地刺。第二个房间里的传送门也由按钮控制，开始录制前先把路线想清楚。",
+    hard_level1_npc_line1: "欢迎来到困难模式！",
+    hard_level1_npc_line2: "开动脑筋吧！",
+    hard_level1_npc_line3: "有不懂的不要问我，去问设计师！",
+    hard_level1_npc_exhausted: "还是不懂的话，就继续去问设计师！",
 
     hard_level2_title: "困难关卡 2",
     hard_level2_info_left: "困难关卡 2",

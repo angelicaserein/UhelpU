@@ -738,7 +738,7 @@ export class StaticPageWorldSelect extends PageBase {
     const FIRESTORE_API = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
     try {
-      const levelFormats = ["easy_level", "demo2_level", "level"];
+      const levelFormats = ["easy_level", "hard_level", "demo2_level", "level"];
       let totalQueryCount = 0;
       let totalUpdateCount = 0;
       let levelIdsChecked = [];

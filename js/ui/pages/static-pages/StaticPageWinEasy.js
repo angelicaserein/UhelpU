@@ -15,6 +15,10 @@ export class StaticPageWinEasy extends PageBase {
     console.log("[WinEasy] Constructor - levelIndex:", this.levelIndex);
 
     const levelNum = parseInt(this.levelIndex.replace(/.*level/, ""), 10);
+    const nextLevelId = this.levelIndex.replace(
+      /level\d+$/,
+      `level${levelNum + 1}`,
+    );
     const TOTAL_LEVELS = 10;
 
     const btnW = 180;
@@ -40,7 +44,7 @@ export class StaticPageWinEasy extends PageBase {
         () => {
           this.eventBus.publish(
             EventTypes.LOAD_LEVEL,
-            `easy_level${levelNum + 1}`,
+            nextLevelId,
           );
         },
         "win-action-button",
@@ -53,7 +57,7 @@ export class StaticPageWinEasy extends PageBase {
         callback: () => {
           this.eventBus.publish(
             EventTypes.LOAD_LEVEL,
-            `easy_level${levelNum + 1}`,
+            nextLevelId,
           );
         },
       });

@@ -108,7 +108,7 @@ async function _getLeaderboardFallback(levelId, limitCount) {
       const response = await fetch(url);
       if (!response.ok) {
         console.warn(`[Firebase] Fetch failed: ${response.status}`);
-        break;
+        throw new Error(`Network request failed: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -149,6 +149,6 @@ async function _getLeaderboardFallback(levelId, limitCount) {
     return leaderboard;
   } catch (error) {
     console.error("[Firebase] Fallback failed:", error);
-    return [];
+    throw error; // 重新抛出错误，让UI显示网络连接错误
   }
 }

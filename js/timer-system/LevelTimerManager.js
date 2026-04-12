@@ -139,8 +139,10 @@ export class LevelTimerManager {
         console.log(`[LevelTimerManager] Saved finalScore to window: ${elapsedTime}s`);
 
         // 自动上报成绩到Firebase（异步执行，不阻塞）
+        const supportsLeaderboard =
+          this.levelId.startsWith("easy_") || this.levelId.startsWith("hard_");
         if (
-          this.levelId.startsWith("easy_") &&
+          supportsLeaderboard &&
           window.submitScore &&
           window.playerName
         ) {
@@ -157,9 +159,9 @@ export class LevelTimerManager {
               );
             });
         } else {
-          if (!this.levelId.startsWith("easy_")) {
+          if (!supportsLeaderboard) {
             console.log(
-              "[LevelTimerManager] Not Easy difficulty, skipping score submission",
+              "[LevelTimerManager] Leaderboard disabled for this difficulty, skipping score submission",
             );
           }
           if (!window.submitScore) {

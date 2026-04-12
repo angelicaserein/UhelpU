@@ -74,9 +74,8 @@ export class Level1 extends BaseLevel {
 
     this._bsBtn_4 = new Button(1190, 240, 34, 16);
     this._bsSpike_4 = new Spike(360, 80, 100, 20);
-
     this._bsBtn_5 = new Button(1050, 80, 34, 16);
-    this._bsSpike_5 = new Spike(1094, 270, 240, 20); //每个参数分别是x、y、width、height
+    this._bsSpike_5 = new Spike(1094, 270, 240, 20);
 
     const room0 = new Room(
       [
@@ -96,10 +95,11 @@ export class Level1 extends BaseLevel {
           eventBus: this.eventBus,
           npcId: "hard_level1_npc",
           dialogueLines: [
-            "前面开始有机关了。",
-            "先记按钮位置，再决定要不要录制分身。",
+            "hard_level1_npc_line1",
+            "hard_level1_npc_line2",
+            "hard_level1_npc_line3",
           ],
-          exhaustedLine: "剩下的就靠你自己试了。",
+          exhaustedLine: "hard_level1_npc_exhausted",
         }),
         new CheckpointDemo2(320, 290, 40, 70, () => this._player),
         new CheckpointDemo2(970, 340, 40, 70, () => this._player),

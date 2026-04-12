@@ -435,7 +435,7 @@ export class NameInputPage extends PageBase {
 
   async _transferGuestScores(guestName, newUsername) {
     console.log(`[NameInputPage] Transferring scores from "${guestName}" to "${newUsername}"`);
-    const levelFormats = ["easy_level", "demo2_level", "level"];
+    const levelFormats = ["easy_level", "hard_level", "demo2_level", "level"];
     for (const format of levelFormats) {
       for (let i = 1; i <= 10; i++) {
         const levelId = `${format}${i}`;

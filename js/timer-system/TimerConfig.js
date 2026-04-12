@@ -20,6 +20,18 @@ export const TIMER_CONFIG = {
   easy_level9: { enabled: true },
   easy_level10: { enabled: true },
 
+  // ── 困难难度（启用计时） ────────────────────────────────────
+  hard_level1: { enabled: true },
+  hard_level2: { enabled: true },
+  hard_level3: { enabled: true },
+  hard_level4: { enabled: true },
+  hard_level5: { enabled: true },
+  hard_level6: { enabled: true },
+  hard_level7: { enabled: true },
+  hard_level8: { enabled: true },
+  hard_level9: { enabled: true },
+  hard_level10: { enabled: true },
+
   // ── Demo1 难度（禁用计时） ────────────────────────────────────
   level1: { enabled: false },
   level2: { enabled: false },

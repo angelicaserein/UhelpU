@@ -65,8 +65,11 @@ export class CollisionSystem {
             player3.x += boxCorrection;
             if (player3.movementComponent) player3.movementComponent.velX = 0;
           }
+          this.pushPusherOutOfBoxIfOverlapping(player3, dyn);
         }
       }
+
+      this.maintainHeadPushSupportRelations(player3);
     }
 
     // Replayer collision detection with enemies (DYNAMIC-DYNAMIC pairs)
@@ -94,10 +97,29 @@ export class CollisionSystem {
           const boxCorrection = dyn.x - boxXBeforeDS;
           if (boxCorrection !== 0) {
             replayer3.x += boxCorrection;
-            if (replayer3.movementComponent) replayer3.movementComponent.velX = 0;
+            if (replayer3.movementComponent)
+              replayer3.movementComponent.velX = 0;
           }
+          this.pushPusherOutOfBoxIfOverlapping(replayer3, dyn);
         }
       }
+
+      this.maintainHeadPushSupportRelations(replayer3);
+    }
+
+    // Keep all box colliders physically solid against both boxes and static world.
+    this.stabilizeBoxCollisions();
+
+    // Final guard: if box stabilization moved boxes into pusher, separate them immediately.
+    if (player3 && player3._supportingType === "pushing") {
+      this.resolvePusherOverlapsWithBoxes(player3);
+    }
+    if (
+      replayer3 &&
+      replayer3.isReplaying &&
+      replayer3._supportingType === "pushing"
+    ) {
+      this.resolvePusherOverlapsWithBoxes(replayer3);
     }
 
     // Enemy collision detection with other DYNAMIC/STATIC entities (platforms, walls, etc.)
@@ -217,29 +239,196 @@ export class CollisionSystem {
     }
   }
 
-  processDynamicDynamicPair(player, replayer) {
-    // 死亡的玩家无视与分身的碰撞
-    if (player.deathState && player.deathState.isDead) {
+  processDynamicDynamicPair(a, b) {
+    if (!a || !b || !a.collider || !b.collider) {
       return;
     }
 
-    const playerShape = player.collider.colliderShape;
-    const replayerShape = replayer.collider.colliderShape;
+    // 死亡实体不参与 DD
+    if (a.deathState && a.deathState.isDead) {
+      return;
+    }
+    if (b.deathState && b.deathState.isDead) {
+      return;
+    }
+
+    const aShape = a.collider.colliderShape;
+    const bShape = b.collider.colliderShape;
 
     const typePair = "DYNAMIC-DYNAMIC";
-    const shapePair = `${playerShape}-${replayerShape}`;
+    const shapePair = `${aShape}-${bShape}`;
     const fullKey = `${typePair}-${shapePair}`;
 
     const detectFunc = detectorMap[shapePair];
-    const detectResult = detectFunc(player, replayer); //dynamic-dynamic
+    const detectResult = detectFunc(a, b); //dynamic-dynamic
 
     if (detectResult) {
-      console.log("player and replayer collided");
       const resolveFunc = resolverMap[fullKey];
-      const collisionMsg = resolveFunc(player, replayer);
+      const collisionMsg = resolveFunc(a, b);
 
       const responseFunc = responderMap[typePair];
-      responseFunc(player, replayer, collisionMsg);
+      responseFunc(a, b, collisionMsg);
+    }
+  }
+
+  processAllBoxPairs() {
+    const boxes = this._dynamicEntities.filter((dyn) => dyn.type === "box");
+    if (boxes.length < 2) return;
+
+    for (let i = 0; i < boxes.length; i++) {
+      for (let j = i + 1; j < boxes.length; j++) {
+        const a = boxes[i];
+        const b = boxes[j];
+        this.processDynamicDynamicPair(a, b);
+      }
+    }
+  }
+
+  processAllBoxStaticPairs() {
+    const boxes = this._dynamicEntities.filter((dyn) => dyn.type === "box");
+    if (boxes.length === 0 || this._staticEntities.length === 0) return;
+
+    for (const box of boxes) {
+      for (const sta of this._staticEntities) {
+        this.processDynamicStaticPair(box, sta);
+      }
+    }
+  }
+
+  stabilizeBoxCollisions() {
+    // Iterate to converge chain pushes: box-box influences box-static and vice versa.
+    for (let i = 0; i < 4; i++) {
+      this.processAllBoxPairs();
+      this.processAllBoxStaticPairs();
+      this.enforceBoxNoPenetrationWithStatics();
+    }
+  }
+
+  enforceBoxNoPenetrationWithStatics() {
+    const boxes = this._dynamicEntities.filter((dyn) => dyn.type === "box");
+    if (boxes.length < 2) return;
+
+    for (let i = 0; i < boxes.length; i++) {
+      for (let j = i + 1; j < boxes.length; j++) {
+        const a = boxes[i];
+        const b = boxes[j];
+        if (!this.isOverlapping(a, b)) continue;
+
+        const vectorX = a.x + a.collider.w / 2 - (b.x + b.collider.w / 2);
+        const vectorY = a.y + a.collider.h / 2 - (b.y + b.collider.h / 2);
+        const overlapX =
+          a.collider.w / 2 + b.collider.w / 2 - Math.abs(vectorX);
+        const overlapY =
+          a.collider.h / 2 + b.collider.h / 2 - Math.abs(vectorY);
+
+        if (overlapX <= 0 || overlapY <= 0) continue;
+
+        const aBlockedByStatic = this.isEntityOverlappingAnyStatic(a);
+        const bBlockedByStatic = this.isEntityOverlappingAnyStatic(b);
+
+        if (overlapX <= overlapY) {
+          const dir = vectorX >= 0 ? 1 : -1;
+          if (aBlockedByStatic && !bBlockedByStatic) {
+            b.x -= dir * overlapX;
+          } else if (bBlockedByStatic && !aBlockedByStatic) {
+            a.x += dir * overlapX;
+          } else {
+            const push = dir * (overlapX / 2);
+            a.x += push;
+            b.x -= push;
+          }
+        } else {
+          const dir = vectorY >= 0 ? 1 : -1;
+          if (aBlockedByStatic && !bBlockedByStatic) {
+            b.y -= dir * overlapY;
+          } else if (bBlockedByStatic && !aBlockedByStatic) {
+            a.y += dir * overlapY;
+          } else {
+            const push = dir * (overlapY / 2);
+            a.y += push;
+            b.y -= push;
+          }
+        }
+      }
+    }
+  }
+
+  isEntityOverlappingAnyStatic(entity) {
+    if (!entity || !entity.collider) return false;
+    for (const sta of this._staticEntities) {
+      const shapePair = `${entity.collider.colliderShape}-${sta.collider.colliderShape}`;
+      const detectFunc = detectorMap[shapePair];
+      if (!detectFunc) continue;
+      if (detectFunc(entity, sta)) return true;
+    }
+    return false;
+  }
+
+  isOverlapping(a, b) {
+    const shapePair = `${a.collider.colliderShape}-${b.collider.colliderShape}`;
+    const detectFunc = detectorMap[shapePair];
+    if (!detectFunc) return false;
+    return detectFunc(a, b);
+  }
+
+  resolvePusherOverlapsWithBoxes(pusher) {
+    if (!pusher || !pusher.collider) return;
+    // Only apply this guard during active head-push state.
+    if (pusher._supportingType !== "pushing") return;
+
+    // Unpushed boxes should behave like regular platforms: never side-eject from them.
+    const pushedBox = pusher._supportingEntity;
+    if (!pushedBox || pushedBox.type !== "box") return;
+
+    this.pushPusherOutOfBoxIfOverlapping(pusher, pushedBox);
+  }
+
+  pushPusherOutOfBoxIfOverlapping(pusher, box) {
+    if (!pusher || !box || !pusher.collider || !box.collider) return;
+    if (!this.isOverlapping(pusher, box)) return;
+
+    const pusherPrevY = pusher.prevY !== undefined ? pusher.prevY : pusher.y;
+    const boxPrevY = box.prevY !== undefined ? box.prevY : box.y;
+    const pusherBottom = pusher.y;
+    const boxTop = box.y + box.collider.h;
+    const pusherPrevBottom = pusherPrevY;
+    const pusherPrevTop = pusherPrevY + pusher.collider.h;
+    const boxPrevBottom = boxPrevY;
+    const boxPrevTop = boxPrevY + box.collider.h;
+
+    // Landing protection: if pusher is on/near top of box, keep vertical stack resolution intact.
+    const landingTolerance = 8;
+    const pusherCenterY = pusher.y + pusher.collider.h / 2;
+    const boxCenterY = box.y + box.collider.h / 2;
+    const nearTopLanding = pusherBottom >= boxTop - landingTolerance;
+    const upperHalfRelativeToBox = pusherCenterY >= boxCenterY;
+    if (nearTopLanding && upperHalfRelativeToBox) return;
+
+    // Preserve standing/stacking semantics: do not override vertical placement.
+    const verticallyStacked =
+      pusherPrevBottom >= boxPrevTop || boxPrevBottom >= pusherPrevTop;
+    if (verticallyStacked) return;
+
+    const vectorX =
+      pusher.x + pusher.collider.w / 2 - (box.x + box.collider.w / 2);
+    const overlapX =
+      pusher.collider.w / 2 + box.collider.w / 2 - Math.abs(vectorX);
+    if (overlapX <= 0) return;
+
+    const vectorY =
+      pusher.y + pusher.collider.h / 2 - (box.y + box.collider.h / 2);
+    const overlapY =
+      pusher.collider.h / 2 + box.collider.h / 2 - Math.abs(vectorY);
+    if (overlapY <= 0) return;
+
+    // Only resolve clear side-penetration; ignore vertical/top contacts.
+    if (overlapX >= overlapY) return;
+
+    // Side-penetration guard only: resolve on X axis.
+    pusher.x += vectorX >= 0 ? overlapX : -overlapX;
+
+    if (pusher.movementComponent) {
+      pusher.movementComponent.velX = 0;
     }
   }
   processDynamicTriggerPair(dyn, tri, eventBus = this.eventBus) {
@@ -327,5 +516,103 @@ export class CollisionSystem {
       const responseFunc = responderMap[typePair];
       responseFunc(enemy, tri, eventBus);
     }
+  }
+
+  maintainHeadPushSupportRelations(pusher) {
+    if (!pusher || !pusher.collider) return;
+
+    const cc =
+      pusher.controllerManager &&
+      pusher.controllerManager.currentControlComponent;
+    if (!cc) return;
+
+    // Limit to airborne frames to avoid affecting normal ground-side push logic.
+    if (cc.abilityCondition["isOnGround"]) return;
+
+    // If pusher is standing on something, keep existing stack semantics.
+    if (pusher._supportingType === "standing") return;
+
+    const candidates = [];
+
+    for (const target of this._dynamicEntities) {
+      if (
+        !target ||
+        target === pusher ||
+        !target.collider ||
+        !this.isHeadPushTargetForPusher(pusher, target)
+      )
+        continue;
+      if (target._supportingType) continue;
+
+      const contactScore = this.getHeadPushContactScore(pusher, target);
+      if (contactScore === null) continue;
+      candidates.push({ target, contactScore });
+    }
+
+    if (candidates.length === 0) return;
+
+    // Deterministic order: closest contact first.
+    candidates.sort((a, b) => a.contactScore - b.contactScore);
+
+    // Keep current semantics: pusher marks one representative pushed target,
+    // while every contacted target gets standing relation for propagation.
+    const primaryTarget = candidates[0].target;
+    pusher._supportingEntity = primaryTarget;
+    for (const candidate of candidates) {
+      candidate.target._supportingEntity = pusher;
+      candidate.target._supportingType = "standing";
+    }
+    if (pusher._supportingType !== "support") {
+      pusher._supportingType = "pushing";
+    }
+  }
+
+  isHeadPushTargetForPusher(pusher, target) {
+    if (target.type === "box") {
+      return true;
+    }
+
+    // Player can also head-push active replayer in easy/hard levels.
+    if (
+      pusher.type === "player" &&
+      target.type === "replayer" &&
+      target.isReplaying
+    ) {
+      return true;
+    }
+
+    // Extensible hook: future dynamic entities can opt in without touching core logic.
+    if (target.allowHeadPushSupport === true) {
+      return true;
+    }
+
+    return false;
+  }
+
+  getHeadPushContactScore(pusher, target) {
+    const pusherTop = pusher.y + pusher.collider.h;
+    const targetBottom = target.y;
+
+    const verticalTolerance = 8;
+    const verticalGap = Math.abs(targetBottom - pusherTop);
+    if (verticalGap > verticalTolerance) return null;
+
+    const pusherLeft = pusher.x;
+    const pusherRight = pusher.x + pusher.collider.w;
+    const targetLeft = target.x;
+    const targetRight = target.x + target.collider.w;
+
+    const horizontalTolerance = 6;
+    const overlapX =
+      pusherLeft < targetRight + horizontalTolerance &&
+      pusherRight > targetLeft - horizontalTolerance;
+
+    if (!overlapX) return null;
+
+    // Lower score means better candidate: prioritize vertical alignment, then center proximity.
+    const pusherCenterX = pusherLeft + pusher.collider.w / 2;
+    const targetCenterX = targetLeft + target.collider.w / 2;
+    const centerDistance = Math.abs(pusherCenterX - targetCenterX);
+    return verticalGap * 1000 + centerDistance;
   }
 }

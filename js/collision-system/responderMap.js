@@ -22,6 +22,38 @@ function handleBoxCollision(boxEntity, otherEntity, msg) {
   }
 }
 
+function applyHeadPushSupportRelation(pusher, box) {
+  box._supportingEntity = pusher;
+  box._supportingType = "standing";
+  pusher._supportingEntity = box;
+  pusher._supportingType = "pushing";
+}
+
+function shouldKeepHeadPushRelation(pusher, box) {
+  if (!pusher || !box || !pusher.collider || !box.collider) return false;
+
+  const pusherTopY = pusher.y + pusher.collider.h;
+  const boxBottomY = box.y;
+
+  // Vertical tolerance keeps relation stable across short classify jitter.
+  const verticalTolerance = 8;
+  const nearHeadContact =
+    Math.abs(boxBottomY - pusherTopY) <= verticalTolerance;
+
+  const pusherLeft = pusher.x;
+  const pusherRight = pusher.x + pusher.collider.w;
+  const boxLeft = box.x;
+  const boxRight = box.x + box.collider.w;
+
+  // Horizontal tolerance avoids relation drop on exact-edge switch frames.
+  const horizontalTolerance = 6;
+  const overlapX =
+    pusherLeft < boxRight + horizontalTolerance &&
+    pusherRight > boxLeft - horizontalTolerance;
+
+  return nearHeadContact && overlapX;
+}
+
 function basicBlockResponse(a, b, msg) {
   // Box collision with static platform
   if (a && a.type === "box") {
@@ -174,8 +206,17 @@ function dynDynBlockResponse(a, b, msg) {
   }
 
   // Player/Replayer pushing Box (lateral collision)
-  if (a && b && (a.type === "player" || a.type === "replayer") && b.type === "box") {
+  if (
+    a &&
+    b &&
+    (a.type === "player" || a.type === "replayer") &&
+    b.type === "box"
+  ) {
     if (msg === "allowed collision") {
+      // Keep pushing chain in jump direction-switch frames when head contact still exists.
+      if (shouldKeepHeadPushRelation(a, b)) {
+        applyHeadPushSupportRelation(a, b);
+      }
       return;
     }
     if (msg === "a_on_b") {
@@ -191,7 +232,9 @@ function dynDynBlockResponse(a, b, msg) {
       // [FIX] 落地速度异常：重力每帧累积到 velY，走下边缘时爆发成超快下落。
       // 同步 velY 为实体当前速度（静止时为0），防止累积，离开时从自然重力起步。
       if (a.movementComponent) {
-        a.movementComponent.velY = b.movementComponent ? b.movementComponent.velY : 0;
+        a.movementComponent.velY = b.movementComponent
+          ? b.movementComponent.velY
+          : 0;
       }
       // [NEW] 支撑链velX传递：记录 a 站在 box 上的支撑关系
       a._supportingEntity = b;
@@ -211,13 +254,12 @@ function dynDynBlockResponse(a, b, msg) {
       }
       // [FIX] 落地速度异常：同上，b 站在 box 上时同步 velY 防止重力累积。
       if (b.movementComponent) {
-        b.movementComponent.velY = a.movementComponent ? a.movementComponent.velY : 0;
+        b.movementComponent.velY = a.movementComponent
+          ? a.movementComponent.velY
+          : 0;
       }
       // [NEW] 支撑链velX传递：记录 b 站在 a 上（a 顶推 b）的支撑关系
-      b._supportingEntity = a;
-      b._supportingType = "standing";
-      a._supportingEntity = b;
-      a._supportingType = "pushing";
+      applyHeadPushSupportRelation(a, b);
     }
     return;
   }
@@ -272,9 +314,14 @@ function dynDynBlockResponse(a, b, msg) {
       ] = b.movementComponent ? b.movementComponent.velY : 0;
     }
     // [FIX] 落地速度异常：重力每帧累积到 velY，走下边缘时爆发成超快下落。
-    // 同步 velY 为实体当前速度（静止时为0），防止累积，离开时从自然重力起步。
+    // 同步 velY 为实体当前速度，防止累积，离开时从自然重力起步。
+    // [FIX] 分身空中跳跃时player无法跳跃：完全同步 velY 会让 player 与 replayer
+    // 每帧位移量完全相同，导致 AABB 无重叠 → isOnGround 永远不被设置 →
+    // coyote time 耗尽后跳不起来。偏移 -1 确保 player 每帧比 replayer 慢 1px，
+    // 产生持续微小穿模，碰撞检测可正常触发 isOnGround = true。
     if (a.movementComponent) {
-      a.movementComponent.velY = b.movementComponent ? b.movementComponent.velY : 0;
+      a.movementComponent.velY =
+        (b.movementComponent ? b.movementComponent.velY : 0) - 1;
     }
     // 标记玩家正在踩在分身上，这样当分身离开时我们知道玩家需要下落
     if (b.type === "replayer") {
@@ -303,7 +350,9 @@ function dynDynBlockResponse(a, b, msg) {
     }
     // [FIX] 落地速度异常：同上，b 站在动态实体上时同步 velY 防止重力累积。
     if (b.movementComponent) {
-      b.movementComponent.velY = a.movementComponent ? a.movementComponent.velY : 0;
+      b.movementComponent.velY = a.movementComponent
+        ? a.movementComponent.velY
+        : 0;
     }
     // 标记玩家正在踩在分身上
     if (a.type === "replayer" && b.type === "player") {

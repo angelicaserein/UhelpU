@@ -63,19 +63,29 @@ export class PhysicsSystem {
 
   // [FIX] velX链修复：完整 BFS 从底层向上传播 velX，替换原有两阶段 flat 遍历。
   velXPropagationEntry() {
-    // 第一步：构建 supporter → rider 的反向映射
-    // standing：entity 站在 _supportingEntity 头上 → riderOf[supporter] = entity
-    // pushing：entity 在顶着 _supportingEntity    → riderOf[entity]     = _supportingEntity
-    const riderOf = new Map();
+    // 第一步：构建 supporter → riders[] 邻接表
+    // standing：entity 站在 _supportingEntity 头上 → ridersOf[supporter].push(entity)
+    // pushing：entity 在顶着 _supportingEntity    → ridersOf[entity].push(_supportingEntity)
+    const ridersOf = new Map();
+    const appendRider = (supporter, rider) => {
+      if (!supporter || !rider) return;
+      let list = ridersOf.get(supporter);
+      if (!list) {
+        list = [];
+        ridersOf.set(supporter, list);
+      }
+      list.push(rider);
+    };
+
     for (const entity of this.entities) {
       if (!entity.movementComponent) continue;
       if (entity._supportingType === "standing" && entity._supportingEntity) {
-        riderOf.set(entity._supportingEntity, entity);
+        appendRider(entity._supportingEntity, entity);
       } else if (
         entity._supportingType === "pushing" &&
         entity._supportingEntity
       ) {
-        riderOf.set(entity, entity._supportingEntity);
+        appendRider(entity, entity._supportingEntity);
       }
     }
 
@@ -93,41 +103,42 @@ export class PhysicsSystem {
 
     // 第三步：BFS 从根节点向上传播 velX
     const queue = [...roots];
-    const visited = new Set(roots);
+    const visited = new Set();
+    const movedRiders = new Set();
 
     while (queue.length > 0) {
       const supporter = queue.shift();
-      const rider = riderOf.get(supporter);
-      if (!rider || visited.has(rider)) continue;
+      if (!supporter || visited.has(supporter)) continue;
+      visited.add(supporter);
 
-      // [FIX] velX链修复：跳跃起飞帧切断整条链，不传递也不继续往上
-      const isJumping =
-        rider.controllerManager &&
-        rider.controllerManager.currentControlComponent.abilityCondition[
-          "jumpCooldown"
-        ] === 6;
-      if (isJumping) continue;
+      const riders = ridersOf.get(supporter);
+      if (!riders || riders.length === 0) continue;
 
-      if (!rider.movementComponent) continue;
+      const supporterDeltaX =
+        supporter._lastFrameDeltaX ?? supporter.movementComponent.velX;
 
-      if (supporter._supportingType === "pushing") {
-        // [FIX] standing跟随：supporter 下方支撑 rider（如 player 站着 replayer 踩在上面）。
-        // 与 standing 分支同理：rider 有 controller 会每帧覆盖 velX，必须直接改 x。
-        const supporterDeltaX =
-          supporter._lastFrameDeltaX ?? supporter.movementComponent.velX;
+      for (const rider of riders) {
+        if (
+          !rider ||
+          !rider.movementComponent ||
+          visited.has(rider) ||
+          movedRiders.has(rider)
+        )
+          continue;
+
+        // [FIX] velX链修复：跳跃起飞帧切断该 rider 分支，不影响其他同层 rider。
+        const isJumping =
+          rider.controllerManager &&
+          rider.controllerManager.currentControlComponent.abilityCondition[
+            "jumpCooldown"
+          ] === 6;
+        if (isJumping) continue;
+
+        // 直接改位置，避免被 controller.tick() 覆盖 velX。
         rider.x += supporterDeltaX;
-      } else {
-        // [FIX] standing跟随：box 由 DD resolver 直接修改 x 位置，velX 恒为 0 无法反映真实移动。
-        // 改用上一帧的实际位移量 _lastFrameDeltaX，准确捕捉 box 被推动时的真实水平位移。
-        // [FIX] standing跟随：不能加到 velX，因为 controller.tick() 每帧都会覆盖 velX=0，
-        // 直接加到 rider.x，确保位移在本帧生效，不被 controller 覆盖。
-        const supporterDeltaX =
-          supporter._lastFrameDeltaX ?? supporter.movementComponent.velX;
-        rider.x += supporterDeltaX;
+        movedRiders.add(rider);
+        queue.push(rider);
       }
-
-      visited.add(rider);
-      queue.push(rider);
     }
   }
 }

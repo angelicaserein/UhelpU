@@ -371,7 +371,7 @@ export class StaticPageWinEasy extends PageBase {
         // 加载完成但无数据
         p.fill(200, 180, 255, 150);
         p.textAlign(p.CENTER, p.TOP);
-        p.text("No records yet", baseX, baseY + rowHeight);
+        p.text(t('no_records_yet'), baseX, baseY + rowHeight);
       } else {
         // 加载完成 - 显示数据并做淡入动画
         this._drawLeaderboardEntries(p, baseX, baseY, rowHeight, panelWidth);
@@ -381,7 +381,7 @@ export class StaticPageWinEasy extends PageBase {
       p.fill(255, 100, 100, 200);
       p.textAlign(p.CENTER, p.TOP);
       p.textSize(14);
-      p.text("网络连接失败，请重试", baseX, baseY + rowHeight);
+      p.text(t('network_error'), baseX, baseY + rowHeight);
     }
   }
 
@@ -605,14 +605,14 @@ export class StaticPageWinEasy extends PageBase {
     // 本次成绩
     if (this._currentScore !== null) {
       p.fill(255, 200, 100, 255);
-      const text1 = `本次成绩：${this._currentScore.toFixed(2)}s`;
+      const text1 = `${t('current_score')}${this._currentScore.toFixed(2)}s`;
       p.text(text1, infoStartX, infoStartY);
     }
 
     // 本次排名
     if (this._currentRank !== null) {
       p.fill(255, 200, 100, 255);
-      const text2 = `本次排名：第 ${this._currentRank} 名`;
+      const text2 = `${t('current_rank')}#${this._currentRank}`;
       p.text(text2, infoStartX, infoStartY + lineHeight);
     }
 
@@ -620,7 +620,7 @@ export class StaticPageWinEasy extends PageBase {
     if (this._bestScore !== null && this._bestRank !== null) {
       p.fill(200, 180, 255, 255);
       const bestScoreStr = typeof this._bestScore === 'number' ? this._bestScore.toFixed(2) : this._bestScore;
-      const text3 = `历史最佳：${bestScoreStr}s（#${this._bestRank}）`;
+      const text3 = `${t('best_score')}${bestScoreStr}s（#${this._bestRank}）`;
       p.text(text3, infoStartX, infoStartY + lineHeight * 2);
     }
   }

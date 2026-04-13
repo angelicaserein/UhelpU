@@ -68,6 +68,45 @@ export class CollisionSystem {
     this.partitionEntitiesByType();
   }
 
+  hasWalkableSupportAhead(entity, direction, options = {}) {
+    if (!entity?.collider) {
+      return false;
+    }
+
+    const probeDistance = options.probeDistance ?? 1;
+    const probePadding = options.probePadding ?? 1;
+    const maxStepDown = options.maxStepDown ?? 6;
+    const maxStepUp = options.maxStepUp ?? 2;
+
+    const probeX =
+      direction >= 0
+        ? entity.x + entity.collider.w + probeDistance
+        : entity.x - probeDistance;
+    const footY = entity.y;
+
+    for (const sta of this._staticEntities) {
+      if (!sta?.collider) {
+        continue;
+      }
+
+      const left = sta.x - probePadding;
+      const right = sta.x + sta.collider.w + probePadding;
+      if (probeX < left || probeX > right) {
+        continue;
+      }
+
+      const supportTop = sta.y + sta.collider.h;
+      const topDelta = supportTop - footY;
+      if (topDelta > maxStepUp || topDelta < -maxStepDown) {
+        continue;
+      }
+
+      return true;
+    }
+
+    return false;
+  }
+
   collisionEntry(eventBus = this.eventBus) {
     // [NEW] 支撑链velX传递：每帧开始清空支撑关系，由本帧碰撞检测重新建立
     for (const dyn of this._dynamicEntities) {

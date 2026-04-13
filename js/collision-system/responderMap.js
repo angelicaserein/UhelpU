@@ -226,8 +226,14 @@ function basicBlockResponse(a, b, msg) {
       a.movementComponent.velY = 0;
       a.blockedBottomThisFrame = true;
       if (b && b.collider) {
-        a._supportLeft = b.x;
-        a._supportRight = b.x + b.collider.w;
+        const supportLeft = b.x;
+        const supportRight = b.x + b.collider.w;
+        a._supportLeft = Number.isFinite(a._supportLeft)
+          ? Math.min(a._supportLeft, supportLeft)
+          : supportLeft;
+        a._supportRight = Number.isFinite(a._supportRight)
+          ? Math.max(a._supportRight, supportRight)
+          : supportRight;
       }
     }
     return;

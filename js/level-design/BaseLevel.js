@@ -173,6 +173,9 @@ export class BaseLevel {
     }
     // 更新所有游戏实体（如 Signboard 的交互检测）
     for (const entity of this.entities) {
+      if (entity.type === "enemy") {
+        entity.worldCollisionSystem = this.collisionSystem;
+      }
       if (entity.update && typeof entity.update === "function") {
         entity.update(this.p);
       }

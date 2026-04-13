@@ -62,32 +62,19 @@ export class Enemy extends GameEntity {
         this._direction = -1;
       }
 
-      // Edge guard (early turn): if front foot is already near/over support edge,
-      // reverse immediately instead of waiting to fully leave the platform.
-      if (
-        this._wasGroundedLastFrame &&
-        Number.isFinite(this._supportLeft) &&
-        Number.isFinite(this._supportRight)
-      ) {
-        const frontX =
-          this._direction === 1 ? this.x + this.collider.w : this.x;
+      const hasSupportAhead =
+        !this._wasGroundedLastFrame ||
+        !this.worldCollisionSystem ||
+        this.worldCollisionSystem.hasWalkableSupportAhead(
+          this,
+          this._direction,
+          {
+            probeDistance: this._speed + this._edgeTurnMargin,
+            maxStepDown: this.collider.h / 2,
+          },
+        );
 
-        const tooFarRight =
-          this._direction === 1 &&
-          frontX >= this._supportRight - this._edgeTurnMargin;
-        const tooFarLeft =
-          this._direction === -1 &&
-          frontX <= this._supportLeft + this._edgeTurnMargin;
-
-        if (tooFarRight || tooFarLeft) {
-          this.x -= this._direction * this._speed;
-          this._direction *= -1;
-        }
-      }
-
-      // Edge guard: if last frame was grounded but this frame is not,
-      // treat as "no road ahead" and turn around instead of walking off.
-      if (this._wasGroundedLastFrame && !this.blockedBottomThisFrame) {
+      if (this._wasGroundedLastFrame && !hasSupportAhead) {
         this.x -= this._direction * this._speed;
         this._direction *= -1;
       }
@@ -100,6 +87,8 @@ export class Enemy extends GameEntity {
       this.blockedLeftThisFrame = false;
       this.blockedRightThisFrame = false;
       this.blockedBottomThisFrame = false;
+      this._supportLeft = Number.NEGATIVE_INFINITY;
+      this._supportRight = Number.POSITIVE_INFINITY;
     } else {
       // Stop movement when dead
       this.movementComponent.velX = 0;

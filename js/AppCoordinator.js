@@ -19,6 +19,8 @@ export class AppCoordinator {
     this.eventBus = new EventBus();
     this.switcher = new SwitcherMain(p, this.eventBus);
     this.levelManager = new LevelManager(p, this.eventBus);
+    this._pendingLevelReload = null;
+    this._pendingTimerSnapshot = null;
   }
 
   init() {
@@ -27,11 +29,22 @@ export class AppCoordinator {
   }
 
   bindEvents() {
-    this.eventBus.subscribe(EventTypes.LOAD_LEVEL, (levelIndex) => {
+    this.eventBus.subscribe(EventTypes.LOAD_LEVEL, (loadRequest) => {
+      const { levelIndex, startCheckpoint, preserveTimer } =
+        this._normalizeLoadLevelRequest(loadRequest);
       console.log(
-        "[AppCoordinator.LOAD_LEVEL] Event received with levelIndex:",
-        levelIndex,
+        "[AppCoordinator.LOAD_LEVEL] Event received with payload:",
+        loadRequest,
       );
+      if (!levelIndex) {
+        console.warn(
+          "[AppCoordinator.LOAD_LEVEL] Missing levelIndex in payload",
+        );
+        return;
+      }
+      this._pendingTimerSnapshot = preserveTimer
+        ? this._captureActiveGamePageTimerSnapshot()
+        : null;
       this.switcher.clearOverlay(this.p);
       if (this.levelManager.level) {
         this.levelManager.setPaused(false);
@@ -41,21 +54,28 @@ export class AppCoordinator {
 
       this.playLevelBgm(levelIndex);
 
-      console.log(
-        "[AppCoordinator.LOAD_LEVEL] Calling loadLevel with:",
+      console.log("[AppCoordinator.LOAD_LEVEL] Calling loadLevel with:", {
         levelIndex,
-      );
-      this.levelManager.loadLevel(levelIndex, this.p, this.eventBus);
+        startCheckpoint,
+      });
+      this.levelManager.loadLevel(levelIndex, this.p, this.eventBus, {
+        startCheckpoint,
+      });
       this.switcher.gameSwitcher.runtimeLevelManager = this.levelManager;
 
       const gamePage = this.switcher.gameSwitcher.createLevelPage(
         levelIndex,
         this.p,
       );
+      if (this._pendingTimerSnapshot) {
+        gamePage?.restoreTimerSnapshot?.(this._pendingTimerSnapshot);
+        this._pendingTimerSnapshot = null;
+      }
       this.switcher.switchToGame(gamePage, this.p);
     });
 
     this.eventBus.subscribe(EventTypes.UNLOAD_LEVEL, () => {
+      this._pendingTimerSnapshot = null;
       this.switcher.clearOverlay(this.p);
       this.levelManager.setPaused(false);
       this.levelManager.unloadLevel(this.p, this.eventBus);
@@ -64,6 +84,7 @@ export class AppCoordinator {
     });
 
     this.eventBus.subscribe(EventTypes.RETURN_LEVEL_CHOICE, () => {
+      this._pendingTimerSnapshot = null;
       const levelIndex = this.levelManager.currentLevelIndex;
       const isDemo2 =
         typeof levelIndex === "string" && levelIndex.startsWith("demo2_");
@@ -98,6 +119,7 @@ export class AppCoordinator {
       const isHard = levelIndex.startsWith("hard_");
 
       if (result === "autoResult1") {
+        this._pendingTimerSnapshot = null;
         this.levelManager.unloadLevel(this.p, this.eventBus);
         this.switcher.gameSwitcher.runtimeLevelManager = null;
 
@@ -127,7 +149,9 @@ export class AppCoordinator {
       this.levelManager.setPaused(true);
       // Easy/Hard 难度用 Demo2 的 Result 页面，Demo2 和 Demo1 各用各自的
       const ResultPage =
-        isDemo2 || isEasy || isHard ? StaticPageResultDemo2 : StaticPageResultDemo1;
+        isDemo2 || isEasy || isHard
+          ? StaticPageResultDemo2
+          : StaticPageResultDemo1;
       const resultPage = new ResultPage(
         result,
         levelIndex,
@@ -154,13 +178,53 @@ export class AppCoordinator {
     });
   }
 
+  _normalizeLoadLevelRequest(loadRequest) {
+    if (typeof loadRequest === "string") {
+      return {
+        levelIndex: loadRequest,
+        startCheckpoint: null,
+        preserveTimer: false,
+      };
+    }
+
+    if (loadRequest && typeof loadRequest === "object") {
+      return {
+        levelIndex: loadRequest.levelIndex ?? null,
+        startCheckpoint: loadRequest.startCheckpoint ?? null,
+        preserveTimer: loadRequest.preserveTimer === true,
+      };
+    }
+
+    return {
+      levelIndex: null,
+      startCheckpoint: null,
+      preserveTimer: false,
+    };
+  }
+
+  _captureActiveGamePageTimerSnapshot() {
+    return (
+      this.switcher?.gameSwitcher?.currentPage?.captureTimerSnapshot?.() ?? null
+    );
+  }
+
+  _flushPendingLevelReload() {
+    if (!this._pendingLevelReload) {
+      return;
+    }
+
+    const pendingLoadRequest = this._pendingLevelReload;
+    this._pendingLevelReload = null;
+    this.eventBus.publish(EventTypes.LOAD_LEVEL, pendingLoadRequest);
+  }
+
   playLevelBgm(levelIndex) {
     const normalizedLevelIndex =
       typeof levelIndex === "string" && levelIndex.startsWith("easy_")
         ? levelIndex.replace("easy_", "")
         : typeof levelIndex === "string" && levelIndex.startsWith("hard_")
-        ? levelIndex.replace("hard_", "")
-        : levelIndex;
+          ? levelIndex.replace("hard_", "")
+          : levelIndex;
 
     if (normalizedLevelIndex === "level1") {
       AudioManager.playBGM("level1");
@@ -206,9 +270,16 @@ export class AppCoordinator {
   }
 
   updateFrame() {
+    this._flushPendingLevelReload();
     this.switcher.update(this.p);
     this.switcher.draw(this.p);
     this.levelManager.update(this.p, this.eventBus);
+
+    const deathReloadRequest = this.levelManager.consumePendingDeathReload();
+    if (deathReloadRequest) {
+      this._pendingLevelReload = deathReloadRequest;
+    }
+
     // Draw overlay after level rendering (game over, etc.)
     if (this.switcher.overlay) {
       this.p.push();

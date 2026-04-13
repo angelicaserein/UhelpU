@@ -139,6 +139,18 @@ export class GamePageBaseDemo1 extends PageBase {
   }
 
   // Override in subclasses that need extra behaviour when hint is pressed
+  captureTimerSnapshot() {
+    return this._timerManager?.captureSnapshot?.() ?? null;
+  }
+
+  restoreTimerSnapshot(snapshot) {
+    const restored = this._timerManager?.restoreSnapshot?.(snapshot) ?? false;
+    if (restored && this._gameTimer) {
+      this._gameTimer.update(this._timerManager.getElapsedTime());
+    }
+    return restored;
+  }
+
   _onHint() {
     this._windowHint.open();
   }

@@ -80,7 +80,13 @@ export class LevelTimerManager {
     console.log("[LevelTimerManager] Starting to bind event listeners...");
 
     // 1. 关卡加载→重置计时器
-    this._onLoadLevel = (levelId) => {
+    this._onLoadLevel = (loadRequest) => {
+      const levelId =
+        typeof loadRequest === "string"
+          ? loadRequest
+          : loadRequest && typeof loadRequest === "object"
+            ? loadRequest.levelIndex
+            : null;
       console.log(
         `[LevelTimerManager] LOAD_LEVEL event received for: ${levelId}`,
       );
@@ -136,16 +142,14 @@ export class LevelTimerManager {
 
         // 保存通关时间到全局变量（供Win Page读取）
         window.finalScore = elapsedTime;
-        console.log(`[LevelTimerManager] Saved finalScore to window: ${elapsedTime}s`);
+        console.log(
+          `[LevelTimerManager] Saved finalScore to window: ${elapsedTime}s`,
+        );
 
         // 自动上报成绩到Firebase（异步执行，不阻塞）
         const supportsLeaderboard =
           this.levelId.startsWith("easy_") || this.levelId.startsWith("hard_");
-        if (
-          supportsLeaderboard &&
-          window.submitScore &&
-          window.playerName
-        ) {
+        if (supportsLeaderboard && window.submitScore && window.playerName) {
           console.log(
             `[LevelTimerManager] Auto-reporting score for ${this.levelId}...`,
           );
@@ -232,6 +236,35 @@ export class LevelTimerManager {
       return "disabled";
     }
     return this.timerSystem.getState();
+  }
+
+  captureSnapshot() {
+    if (!this.enabled || !this.timerSystem) {
+      return null;
+    }
+
+    return {
+      levelId: this.levelId,
+      firstInputDetected: this._firstInputDetected,
+      timer: this.timerSystem.exportSnapshot(),
+    };
+  }
+
+  restoreSnapshot(snapshot) {
+    if (
+      !this.enabled ||
+      !this.timerSystem ||
+      !snapshot ||
+      snapshot.levelId !== this.levelId
+    ) {
+      return false;
+    }
+
+    this.timerSystem.restoreSnapshot(snapshot.timer);
+    this._firstInputDetected =
+      snapshot.firstInputDetected === true ||
+      this.timerSystem.getState() !== "idle";
+    return true;
   }
 
   /**

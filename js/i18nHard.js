@@ -24,6 +24,12 @@ registerTranslations({
     hard_level3_title: "Hard Level 3",
     hard_level3_info_left: "Hard Level 3",
     hard_level3_info_right: "Difficulty\nHard",
+    hard_level3_npc_line1:
+      "Buttons can create paths just as easily as they can erase them.",
+    hard_level3_npc_line2:
+      "Room two only looks crowded. The real trap is pressing things in the wrong order.",
+    hard_level3_npc_exhausted:
+      "If the route disappears under your feet, you pressed the wrong button first.",
 
     hard_level4_title: "Hard Level 4",
     hard_level4_info_left: "Hard Level 4",
@@ -72,6 +78,9 @@ registerTranslations({
     hard_level3_title: "困难关卡 3",
     hard_level3_info_left: "困难关卡 3",
     hard_level3_info_right: "难度\n困难",
+    hard_level3_npc_line1: "按钮既能造路，也能把路收回去。",
+    hard_level3_npc_line2: "第二个房间看起来杂乱，真正的陷阱是按按钮的顺序。",
+    hard_level3_npc_exhausted: "如果路在脚下消失了，那就是你先按错按钮了。",
 
     hard_level4_title: "困难关卡 4",
     hard_level4_info_left: "困难关卡 4",

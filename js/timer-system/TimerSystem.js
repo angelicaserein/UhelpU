@@ -114,6 +114,50 @@ export class TimerSystem {
     console.log("[TimerSystem] Reset");
   }
 
+  exportSnapshot() {
+    return {
+      state: this._state,
+      elapsedMs: Math.round(this.getElapsedTime() * 1000),
+    };
+  }
+
+  restoreSnapshot(snapshot) {
+    if (!snapshot || typeof snapshot !== "object") {
+      this.reset();
+      return;
+    }
+
+    const elapsedMs = Math.max(0, Number(snapshot.elapsedMs) || 0);
+    const state = snapshot.state || "idle";
+
+    if (state === "idle") {
+      this.reset();
+      return;
+    }
+
+    const now = performance.now();
+    this._startTime = now - elapsedMs;
+    this._resumeTime = null;
+    this._accumulatedPausedTime = 0;
+    this._finalTime = null;
+
+    if (state === "paused") {
+      this._state = "paused";
+      this._pauseTime = now;
+      return;
+    }
+
+    if (state === "finished") {
+      this._state = "finished";
+      this._pauseTime = null;
+      this._finalTime = now;
+      return;
+    }
+
+    this._state = "running";
+    this._pauseTime = null;
+  }
+
   /**
    * 获取已用时间（秒，包含小数）
    * 计算方式：

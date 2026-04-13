@@ -179,6 +179,7 @@ export class EditorPreview {
       );
       p.noStroke();
       p.fill(140, 140, 160, PREVIEW_ALPHA * 0.4);
+      p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
     } else if (tool === EntityTool.BOX) {
       p.stroke(200, 140, 100, PREVIEW_ALPHA);
       this._dashedRect(

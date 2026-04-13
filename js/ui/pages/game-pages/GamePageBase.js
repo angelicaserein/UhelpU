@@ -42,14 +42,14 @@ export class GamePageBase extends PageBase {
     if (timerConfig.enabled) {
       this._timerManager = new LevelTimerManager(switcher.eventBus, {
         levelId: levelIndex,
-        enabled: true
+        enabled: true,
       });
 
       this._gameTimer = new GameTimer(p, {
         x: p.width - 90,
         y: 120,
         fontSize: 28,
-        enableTimer: true
+        enableTimer: true,
       });
 
       // 每帧更新UI时间显示（约20fps更新一次）
@@ -167,6 +167,18 @@ export class GamePageBase extends PageBase {
   }
 
   // Override in subclasses that need extra behaviour when hint is pressed
+  captureTimerSnapshot() {
+    return this._timerManager?.captureSnapshot?.() ?? null;
+  }
+
+  restoreTimerSnapshot(snapshot) {
+    const restored = this._timerManager?.restoreSnapshot?.(snapshot) ?? false;
+    if (restored && this._gameTimer) {
+      this._gameTimer.update(this._timerManager.getElapsedTime());
+    }
+    return restored;
+  }
+
   _onHint() {
     this._windowHint.open();
   }

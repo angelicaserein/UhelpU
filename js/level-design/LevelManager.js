@@ -110,6 +110,7 @@ export class LevelManager {
 
     // 传送点系统
     this._teleportPointSystem = new TeleportPointSystem(() => this.level);
+    this._pendingDeathReload = null;
 
     // Portal transition effect
     this.portalTransition = null;
@@ -222,7 +223,7 @@ export class LevelManager {
       (targetNudge - this.cameraNudgeX) * this.cameraNudgeLerp;
   }
 
-  loadLevel(levelIndex, p = this.p, eventBus = this.eventBus) {
+  loadLevel(levelIndex, p = this.p, eventBus = this.eventBus, options = {}) {
     console.log(
       "[LevelManager.loadLevel] Attempting to load levelIndex:",
       levelIndex,
@@ -248,10 +249,13 @@ export class LevelManager {
       this.level.__levelIndex = levelIndex;
       this.level.__editorPersistenceKey = levelIndex;
       this.currentLevelIndex = levelIndex;
+      this._pendingDeathReload = null;
+      this._checkpointSystem.resetLevelState();
       console.log(
         "[LevelManager.loadLevel] Set currentLevelIndex to:",
         this.currentLevelIndex,
       );
+      this._restoreStartCheckpoint(options.startCheckpoint);
       this.cameraNudgeX = 0;
       this.startLevelTitleOverlay(levelIndex, p);
       this._teleportPointSystem.registerTeleportPoints(this.level.entities);
@@ -267,6 +271,8 @@ export class LevelManager {
     if (this.level) {
       this.level.clearLevel(p, eventBus);
       this.level = null;
+      this._pendingDeathReload = null;
+      this._checkpointSystem.resetLevelState();
       this.cameraNudgeX = 0;
       // 卸载关卡后强制清空画布，防止残留
       if (p && typeof p.clear === "function") {
@@ -275,6 +281,33 @@ export class LevelManager {
         p.background(255);
       }
       console.log("unload level");
+    }
+  }
+
+  _restoreStartCheckpoint(startCheckpoint) {
+    if (!this.level || !startCheckpoint) {
+      return;
+    }
+
+    const checkpoint =
+      this._checkpointSystem.resolveCheckpointFromSnapshot(startCheckpoint);
+    const player = this.level.getPlayer?.();
+    if (!checkpoint || !player) {
+      return;
+    }
+
+    checkpoint.activated = true;
+    this._checkpointSystem.recordCheckpointActivation(checkpoint);
+    player.x = checkpoint.x;
+    player.y = checkpoint.y;
+
+    if (player.movementComponent) {
+      player.movementComponent.velX = 0;
+      player.movementComponent.velY = 0;
+    }
+
+    if (player.controllerManager) {
+      player.controllerManager.resetInputState();
     }
   }
   update(p = this.p, eventBus = this.eventBus) {
@@ -336,6 +369,12 @@ export class LevelManager {
         this._checkpointSystem.recordCheckpointActivation(entity);
       }
     }
+  }
+
+  consumePendingDeathReload() {
+    const pendingDeathReload = this._pendingDeathReload;
+    this._pendingDeathReload = null;
+    return pendingDeathReload;
   }
 
   setPaused(paused) {
@@ -412,14 +451,13 @@ export class LevelManager {
         player.y > viewBounds.maxY ||
         player.y + player.collider.h < viewBounds.minY
       ) {
-        // 查找最后激活的存档点
-        const checkpoint =
-          this._checkpointSystem.findLastActivatedCheckpoint(player);
-        if (checkpoint) {
-          this._checkpointSystem.respawnPlayerAtCheckpoint(player, checkpoint);
-        } else {
-          // 没有存档点，发布结算事件
-          eventBus && eventBus.publish(EventTypes.AUTO_RESULT, "autoResult2");
+        if (!this._pendingDeathReload) {
+          this._pendingDeathReload = {
+            levelIndex: this.currentLevelIndex,
+            startCheckpoint:
+              this._checkpointSystem.getLastActivatedCheckpointSnapshot(),
+            preserveTimer: true,
+          };
         }
       }
     }

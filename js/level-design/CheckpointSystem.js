@@ -2,7 +2,7 @@ import { isGamePaused } from "../game-runtime/GamePauseState.js";
 import { KeyBindingManager } from "../key-binding-system/KeyBindingManager.js";
 
 /**
- * 存档点系统 —— 管理存档点的查找、重生、传送等逻辑
+ * 存档点系统 —— 管理存档点的记录、解析与传送逻辑
  */
 export class CheckpointSystem {
   /**
@@ -13,6 +13,7 @@ export class CheckpointSystem {
     this._keyBindingManager = KeyBindingManager.getInstance();
     this._lastActivatedCheckpoint = null;
     this._checkpointActivationOrder = []; // 记录checkpoint激活顺序
+    this._activatedCheckpointSet = new Set();
 
     this._onTeleportKeyDown = (e) => {
       const teleportKey =
@@ -78,62 +79,74 @@ export class CheckpointSystem {
     return this._lastActivatedCheckpoint;
   }
 
+  resetLevelState() {
+    this._lastActivatedCheckpoint = null;
+    this._checkpointActivationOrder = [];
+    this._activatedCheckpointSet.clear();
+  }
+
+  _getCheckpointIndex(checkpoint) {
+    const level = this._getLevel();
+    if (!level || !checkpoint) return -1;
+
+    let checkpointIndex = 0;
+    for (const entity of level.entities) {
+      if (entity.type !== "checkpoint") {
+        continue;
+      }
+      if (entity === checkpoint) {
+        return checkpointIndex;
+      }
+      checkpointIndex += 1;
+    }
+
+    return -1;
+  }
+
+  getLastActivatedCheckpointSnapshot() {
+    const checkpointIndex = this._getCheckpointIndex(
+      this._lastActivatedCheckpoint,
+    );
+    if (checkpointIndex < 0) {
+      return null;
+    }
+
+    return { checkpointIndex };
+  }
+
+  resolveCheckpointFromSnapshot(snapshot) {
+    const level = this._getLevel();
+    if (!level || !snapshot || snapshot.checkpointIndex == null) {
+      return null;
+    }
+
+    let checkpointIndex = 0;
+    for (const entity of level.entities) {
+      if (entity.type !== "checkpoint") {
+        continue;
+      }
+      if (checkpointIndex === snapshot.checkpointIndex) {
+        return entity;
+      }
+      checkpointIndex += 1;
+    }
+
+    return null;
+  }
+
   /**
    * 记录checkpoint激活（在checkpoint激活时调用）
    * @param {object} checkpoint
    */
   recordCheckpointActivation(checkpoint) {
-    if (checkpoint && checkpoint.activated) {
+    if (
+      checkpoint &&
+      checkpoint.activated &&
+      !this._activatedCheckpointSet.has(checkpoint)
+    ) {
+      this._activatedCheckpointSet.add(checkpoint);
       this._lastActivatedCheckpoint = checkpoint;
       this._checkpointActivationOrder.push(checkpoint);
-    }
-  }
-
-  /**
-   * 在存档点位置重生玩家，并清除已有的分身和重置录制系统
-   * @param {object} player
-   * @param {object} checkpoint
-   */
-  respawnPlayerAtCheckpoint(player, checkpoint) {
-    const level = this._getLevel();
-
-    // 清除已有的分身（replayer）
-    if (level) {
-      const replayer = level.getReplayer?.();
-      if (replayer) {
-        if (typeof replayer.clearEventListeners === "function") {
-          replayer.clearEventListeners();
-        }
-        level.entities.delete(replayer);
-        if (typeof level.syncSystemsEntities === "function") {
-          level.syncSystemsEntities();
-        }
-      }
-
-      // 重置所有支持inLevelReset的实体（box, enemy等）
-      for (const entity of level.entities) {
-        if (entity.type !== "player" && typeof entity.inLevelReset === "function") {
-          entity.inLevelReset();
-        }
-      }
-
-      // 重置录制系统到待录制状态（"准备捕捉"）
-      if (level.recordSystem && typeof level.recordSystem.resetToReadyToRecord === "function") {
-        level.recordSystem.resetToReadyToRecord();
-      }
-    }
-
-    player.x = checkpoint.x;
-    player.y = checkpoint.y;
-    player.deathState.isDead = false;
-    player.deathState.initialized = false;
-    player.deathState.deathType = null;
-    if (player.movementComponent) {
-      player.movementComponent.velX = 0;
-      player.movementComponent.velY = 0;
-    }
-    if (player.controllerManager) {
-      player.controllerManager.resetInputState();
     }
   }
 

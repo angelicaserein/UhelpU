@@ -16,6 +16,7 @@ import { ButtonPlatformLinkSystem } from "../../mechanism-system/demo2/ButtonPla
 import { Assets } from "../../AssetsManager.js";
 import { BaseLevel } from "../BaseLevel.js";
 import { Room } from "../Room.js";
+import { MapEditor } from "../../develop-mode/MapEditor.js";
 
 export class Level2 extends BaseLevel {
   constructor(p, eventBus) {
@@ -35,6 +36,9 @@ export class Level2 extends BaseLevel {
     this.entities = this._buildEntities();
     this.initSystems(this._player, 5000, { uiClass: Demo2RecordUI });
     this._initButtonPlatformSystems();
+
+    // ── 开发模式：地图编辑器（按 M 开关） ──
+    this._mapEditor = new MapEditor(this);
   }
 
   _buildRooms(p) {
@@ -46,8 +50,8 @@ export class Level2 extends BaseLevel {
     this._bsBtn_1 = new Button(504, 380, 34, 16);
     this._bsSpike_1 = new Spike(254, 380, 210, 20);
 
-    this._wpBtn_0 = new Button(1014, 80, 34, 16);
-    this._wpPortal_0 = new Portal(1284, 80, 50, 50);
+    this._wpBtn_0 = new Button(1024, 80, 34, 16);
+    this._wpPortal_0 = new Portal(1254, 80, 50, 50);
 
     this._bpBtn_0 = new Button(320, 226, 34, 16);
     this._bpPlat_0_0 = new Platform(360, 230, 30, 100);
@@ -317,6 +321,11 @@ export class Level2 extends BaseLevel {
     return { minX: cameraX, maxX: cameraX + p.width, minY: 0, maxY: p.height };
   }
 
+  clearLevel(p = this.p, eventBus = this.eventBus) {
+    if (this._mapEditor) this._mapEditor.destroy();
+    super.clearLevel(p, eventBus);
+  }
+
   clearCanvas(p = this.p, cameraNudgeX = 0, bgParallaxFactor = 1) {
     const cameraX = this._getCameraX(p);
     const bgOffsetX = cameraNudgeX * bgParallaxFactor;
@@ -382,5 +391,8 @@ export class Level2 extends BaseLevel {
     p.pop();
 
     this.recordSystem.draw && this.recordSystem.draw(p);
+
+    // ── 开发模式：编辑器叠加绘制 ──
+    if (this._mapEditor) this._mapEditor.draw(p);
   }
 }

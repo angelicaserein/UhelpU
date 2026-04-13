@@ -11,6 +11,7 @@ import { Assets } from "../../AssetsManager.js";
 import { BaseLevel } from "../BaseLevel.js";
 import { Room } from "../Room.js";
 import { Demo2RecordUI } from "../../record-system/Demo2RecordUI.js";
+import { MapEditor } from "../../develop-mode/MapEditor.js";
 
 export class Level9 extends BaseLevel {
   constructor(p, eventBus) {
@@ -28,6 +29,9 @@ export class Level9 extends BaseLevel {
 
     this.entities = this._buildEntities();
     this.initSystems(this._player, 5000, { uiClass: Demo2RecordUI });
+
+    // ── 开发模式：地图编辑器（按 M 开关） ──
+    this._mapEditor = new MapEditor(this);
   }
 
   _buildRooms(p) {
@@ -137,6 +141,11 @@ export class Level9 extends BaseLevel {
     return { minX: cameraX, maxX: cameraX + p.width, minY: 0, maxY: p.height };
   }
 
+  clearLevel(p = this.p, eventBus = this.eventBus) {
+    if (this._mapEditor) this._mapEditor.destroy();
+    super.clearLevel(p, eventBus);
+  }
+
   clearCanvas(p = this.p, cameraNudgeX = 0, bgParallaxFactor = 1) {
     const cameraX = this._getCameraX(p);
     const bgOffsetX = cameraNudgeX * bgParallaxFactor;
@@ -186,5 +195,8 @@ export class Level9 extends BaseLevel {
     p.pop();
 
     this.recordSystem.draw && this.recordSystem.draw(p);
+
+    // ── 开发模式：编辑器叠加绘制 ──
+    if (this._mapEditor) this._mapEditor.draw(p);
   }
 }

@@ -88,7 +88,7 @@ const _dict = {
     world_2: "World 2",
     world_3: "Demo 1",
     world_easy: "Easy",
-    world_difficult: "Difficult",
+    world_difficult: "Hard",
     world_memorial_title: "Memorial Versions",
     world_legacy_title: "Iterative Versions",
     world_legacy_demo1: "Demo 1 (6 Levels)",
@@ -128,7 +128,8 @@ const _dict = {
     auth_username_placeholder: "Username (max 12 chars)",
     auth_login_error: "Login failed. Check your email and password.",
     auth_register_error: "Registration failed. Please try again.",
-    auth_transfer_guest_prompt: 'Guest "{NAME}" detected. Transfer guest scores to your account?',
+    auth_transfer_guest_prompt:
+      'Guest "{NAME}" detected. Transfer guest scores to your account?',
     auth_transfer_confirm: "Transfer",
     auth_transfer_skip: "Skip",
     player_logout_button: "Log Out",
@@ -271,7 +272,8 @@ const _dict = {
     auth_username_placeholder: "用户名（最多12字）",
     auth_login_error: "登录失败，请检查邮箱和密码。",
     auth_register_error: "注册失败，请重试。",
-    auth_transfer_guest_prompt: '检测到你有游客身份"{NAME}"，是否将游客成绩转移到账号？',
+    auth_transfer_guest_prompt:
+      '检测到你有游客身份"{NAME}"，是否将游客成绩转移到账号？',
     auth_transfer_confirm: "转移",
     auth_transfer_skip: "跳过",
     player_logout_button: "登出",
@@ -294,12 +296,12 @@ const _dict = {
   },
 };
 
-const LANG_STORAGE_KEY = 'kinoko_lang';
+const LANG_STORAGE_KEY = "kinoko_lang";
 
 // 从 localStorage 中恢复语言设置，如果没有则默认使用英文
 function _loadLanguageFromStorage() {
   const saved = localStorage.getItem(LANG_STORAGE_KEY);
-  return (saved && _dict[saved]) ? saved : "en";
+  return saved && _dict[saved] ? saved : "en";
 }
 
 let _lang = _loadLanguageFromStorage();

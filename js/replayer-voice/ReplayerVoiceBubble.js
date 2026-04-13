@@ -1,0 +1,297 @@
+const FONT_STACK = '"HYPixel11", "PixelFont", "Courier New", monospace';
+
+export class ReplayerVoiceBubble {
+  constructor(options = {}) {
+    this.durationMs = options.durationMs ?? 4000;
+    this.enterDurationMs =
+      options.enterDurationMs ?? Math.round((20 / 60) * 1000);
+    this.exitDurationMs = options.exitDurationMs ?? 260;
+    this.labelText = options.labelText ?? "幻影";
+    this.text = "";
+    this.isVisible = false;
+    this._phase = "hidden";
+    this._enterStartedAt = 0;
+    this._exitStartedAt = 0;
+    this._hideTimer = null;
+  }
+
+  showBubble(text) {
+    const nextText = typeof text === "string" ? text.trim() : "";
+    if (!nextText) {
+      this.hideBubble();
+      return;
+    }
+
+    this.text = nextText;
+    this.isVisible = true;
+    this._phase = "entering";
+    this._enterStartedAt = performance.now();
+    this._exitStartedAt = 0;
+
+    if (this._hideTimer) {
+      clearTimeout(this._hideTimer);
+    }
+
+    this._hideTimer = setTimeout(() => {
+      this._startExit();
+    }, this.durationMs);
+  }
+
+  hideBubble() {
+    if (this._hideTimer) {
+      clearTimeout(this._hideTimer);
+      this._hideTimer = null;
+    }
+
+    this.text = "";
+    this.isVisible = false;
+    this._phase = "hidden";
+    this._enterStartedAt = 0;
+    this._exitStartedAt = 0;
+  }
+
+  draw(p) {
+    if (!this.isVisible || !this.text || !p) {
+      return;
+    }
+
+    const canvasWidth = Number.isFinite(p.width) ? p.width : 0;
+    const canvasHeight = Number.isFinite(p.height) ? p.height : 0;
+    if (canvasWidth <= 0 || canvasHeight <= 0) {
+      return;
+    }
+
+    const animation = this._getAnimationState();
+    if (!animation.visible) {
+      return;
+    }
+
+    const bubbleMaxWidth = Math.min(400, Math.max(260, canvasWidth - 48));
+    const paddingX = 18;
+    const paddingTop = 16;
+    const paddingBottom = 18;
+    const labelHeight = 28;
+    const labelWidth = 72;
+    const lineHeight = 22;
+    const textSize = 16;
+    const radius = 10;
+    const innerWidth = bubbleMaxWidth - paddingX * 2;
+
+    p.push();
+    if (typeof p.resetMatrix === "function") {
+      p.resetMatrix();
+    }
+
+    this._applyTextStyle(p, textSize, lineHeight);
+    const lines = this._wrapText(p, this.text, innerWidth);
+    const textBlockHeight = Math.max(lineHeight, lines.length * lineHeight);
+    const bubbleHeight =
+      paddingTop + labelHeight + 10 + textBlockHeight + paddingBottom;
+    const baseX = canvasWidth / 2;
+    const anchorY = canvasHeight - 80;
+    const minCenterY = bubbleHeight / 2 + 12;
+    const maxCenterY = canvasHeight - bubbleHeight / 2 - 12;
+    const centerY =
+      Math.min(Math.max(anchorY, minCenterY), maxCenterY) + animation.offsetY;
+    const left = Math.round(baseX - bubbleMaxWidth / 2);
+    const top = Math.round(centerY - bubbleHeight / 2);
+    const right = left + bubbleMaxWidth;
+    const bottom = top + bubbleHeight;
+    const labelLeft = left + 14;
+    const labelTop = top - 12;
+
+    p.noStroke();
+    p.fill(12, 10, 31, 45 * animation.alpha);
+    p.rect(left + 6, top + 8, bubbleMaxWidth, bubbleHeight, radius);
+
+    p.stroke(98, 255, 234, 70 * animation.alpha);
+    p.strokeWeight(4);
+    p.noFill();
+    p.rect(left, top, bubbleMaxWidth, bubbleHeight, radius);
+
+    p.stroke(192, 170, 255, 255 * animation.alpha);
+    p.strokeWeight(1.5);
+    p.fill(24, 16, 47, 236 * animation.alpha);
+    p.rect(left, top, bubbleMaxWidth, bubbleHeight, radius);
+
+    p.noStroke();
+    p.fill(34, 24, 67, 215 * animation.alpha);
+    p.rect(left + 8, top + 8, bubbleMaxWidth - 16, bubbleHeight - 16, 6);
+
+    p.stroke(124, 232, 255, 150 * animation.alpha);
+    p.strokeWeight(1);
+    p.line(left + 12, top + 42, right - 12, top + 42);
+    p.line(left + 12, top + 43, right - 12, top + 43);
+
+    p.noStroke();
+    p.fill(20, 16, 44, 246 * animation.alpha);
+    p.rect(labelLeft, labelTop, labelWidth, labelHeight, 4);
+    p.stroke(125, 231, 255, 220 * animation.alpha);
+    p.strokeWeight(1.25);
+    p.noFill();
+    p.rect(labelLeft, labelTop, labelWidth, labelHeight, 4);
+
+    p.noStroke();
+    p.fill(228, 247, 255, 255 * animation.alpha);
+    this._applyTextStyle(p, 13, 16);
+    p.textAlign(p.CENTER, p.CENTER);
+    p.text(
+      this.labelText,
+      labelLeft + labelWidth / 2,
+      labelTop + labelHeight / 2 + 1,
+    );
+
+    this._applyTextStyle(p, textSize, lineHeight);
+    p.textAlign(p.LEFT, p.TOP);
+    p.fill(225, 248, 255, 255 * animation.alpha);
+    p.text(
+      lines.join("\n"),
+      left + paddingX,
+      top + paddingTop + labelHeight + 8,
+    );
+
+    p.fill(122, 232, 255, 130 * animation.alpha);
+    p.rect(left + 12, bottom - 10, 56, 2);
+    p.fill(201, 173, 255, 105 * animation.alpha);
+    p.rect(right - 74, bottom - 10, 62, 2);
+
+    p.pop();
+  }
+
+  destroy() {
+    this.hideBubble();
+  }
+
+  _startExit() {
+    if (!this.isVisible || this._phase === "exiting") {
+      return;
+    }
+
+    if (this._hideTimer) {
+      clearTimeout(this._hideTimer);
+      this._hideTimer = null;
+    }
+
+    this._phase = "exiting";
+    this._exitStartedAt = performance.now();
+  }
+
+  _getAnimationState() {
+    if (!this.isVisible || this._phase === "hidden") {
+      return { visible: false, alpha: 0, offsetY: 0 };
+    }
+
+    const now = performance.now();
+
+    if (this._phase === "entering") {
+      const progress = this._clamp01(
+        (now - this._enterStartedAt) / this.enterDurationMs,
+      );
+      if (progress >= 1) {
+        this._phase = "visible";
+      }
+      return {
+        visible: true,
+        alpha: progress,
+        offsetY: (1 - progress) * 28,
+      };
+    }
+
+    if (this._phase === "exiting") {
+      const progress = this._clamp01(
+        (now - this._exitStartedAt) / this.exitDurationMs,
+      );
+      if (progress >= 1) {
+        this.hideBubble();
+        return { visible: false, alpha: 0, offsetY: 0 };
+      }
+      return {
+        visible: true,
+        alpha: 1 - progress,
+        offsetY: 0,
+      };
+    }
+
+    return { visible: true, alpha: 1, offsetY: 0 };
+  }
+
+  _wrapText(p, text, maxWidth) {
+    const paragraphs = String(text).split(/\n+/);
+    const lines = [];
+
+    for (const paragraph of paragraphs) {
+      const words = paragraph.split(/\s+/).filter(Boolean);
+      if (words.length === 0) {
+        lines.push("");
+        continue;
+      }
+
+      let currentLine = "";
+      for (const word of words) {
+        const candidate = currentLine ? `${currentLine} ${word}` : word;
+        if (p.textWidth(candidate) <= maxWidth) {
+          currentLine = candidate;
+          continue;
+        }
+
+        if (currentLine) {
+          lines.push(currentLine);
+        }
+
+        if (p.textWidth(word) <= maxWidth) {
+          currentLine = word;
+          continue;
+        }
+
+        const fragments = this._breakLongToken(p, word, maxWidth);
+        for (let index = 0; index < fragments.length - 1; index += 1) {
+          lines.push(fragments[index]);
+        }
+        currentLine = fragments[fragments.length - 1] || "";
+      }
+
+      if (currentLine) {
+        lines.push(currentLine);
+      }
+    }
+
+    return lines.length > 0 ? lines : [""];
+  }
+
+  _breakLongToken(p, token, maxWidth) {
+    const chars = Array.from(token);
+    const fragments = [];
+    let current = "";
+
+    for (const char of chars) {
+      const candidate = current + char;
+      if (current && p.textWidth(candidate) > maxWidth) {
+        fragments.push(current);
+        current = char;
+      } else {
+        current = candidate;
+      }
+    }
+
+    if (current) {
+      fragments.push(current);
+    }
+
+    return fragments.length > 0 ? fragments : [token];
+  }
+
+  _applyTextStyle(p, textSize, lineHeight) {
+    if (typeof p.textFont === "function") {
+      p.textFont(FONT_STACK);
+    }
+    if (p.drawingContext) {
+      p.drawingContext.font = `${textSize}px ${FONT_STACK}`;
+    }
+    p.textSize(textSize);
+    p.textLeading(lineHeight);
+  }
+
+  _clamp01(value) {
+    return Math.min(1, Math.max(0, value));
+  }
+}

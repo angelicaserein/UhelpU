@@ -38,6 +38,16 @@ import { Level7 as HardLevel7 } from "./hard/Level7.js";
 import { Level8 as HardLevel8 } from "./hard/Level8.js";
 import { Level9 as HardLevel9 } from "./hard/Level9.js";
 import { Level10 as HardLevel10 } from "./hard/Level10.js";
+import { Level1 as SpecialLevel1 } from "./special/Level1.js";
+import { Level2 as SpecialLevel2 } from "./special/Level2.js";
+import { Level3 as SpecialLevel3 } from "./special/Level3.js";
+import { Level4 as SpecialLevel4 } from "./special/Level4.js";
+import { Level5 as SpecialLevel5 } from "./special/Level5.js";
+import { Level6 as SpecialLevel6 } from "./special/Level6.js";
+import { Level7 as SpecialLevel7 } from "./special/Level7.js";
+import { Level8 as SpecialLevel8 } from "./special/Level8.js";
+import { Level9 as SpecialLevel9 } from "./special/Level9.js";
+import { Level10 as SpecialLevel10 } from "./special/Level10.js";
 import { setGamePaused, isGamePaused } from "../game-runtime/GamePauseState.js";
 import { EventTypes } from "../event-system/EventTypes.js";
 import { Assets } from "../AssetsManager.js";
@@ -90,6 +100,16 @@ export class LevelManager {
       hard_level8: HardLevel8,
       hard_level9: HardLevel9,
       hard_level10: HardLevel10,
+      special_level1: SpecialLevel1,
+      special_level2: SpecialLevel2,
+      special_level3: SpecialLevel3,
+      special_level4: SpecialLevel4,
+      special_level5: SpecialLevel5,
+      special_level6: SpecialLevel6,
+      special_level7: SpecialLevel7,
+      special_level8: SpecialLevel8,
+      special_level9: SpecialLevel9,
+      special_level10: SpecialLevel10,
     };
     this.level = null;
     this.currentLevelIndex = null;
@@ -126,6 +146,9 @@ export class LevelManager {
     } else if (num.startsWith("hard_level")) {
       prefix = "hard_level";
       num = num.replace("hard_level", "");
+    } else if (num.startsWith("special_level")) {
+      prefix = "special_level";
+      num = num.replace("special_level", "");
     } else if (num.startsWith("demo2_level")) {
       prefix = "demo2_level";
       num = num.replace("demo2_level", "");

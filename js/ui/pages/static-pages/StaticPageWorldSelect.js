@@ -27,6 +27,7 @@ export class StaticPageWorldSelect extends PageBase {
     // 添加欢迎信息和改名按钮
     this._createPlayerNameSection();
 
+    const { leaderboardBtn } = this._createLeaderboardPanel();
     const { legacyDemo1Btn, legacyDemo2Btn } = this._createLegacyDemoPanel();
     this._createMemorialLinks();
 
@@ -41,6 +42,11 @@ export class StaticPageWorldSelect extends PageBase {
         cls: "world-button world-button-2 world-mode-button",
         label: t("world_difficult"),
         action: () => this.switcher.showLevelChoiceHard(p),
+      },
+      {
+        cls: "world-button world-button-2 world-mode-button",
+        label: t("world_special"),
+        action: () => this.switcher.showLevelChoiceSpecial(p),
       },
     ];
 
@@ -73,12 +79,16 @@ export class StaticPageWorldSelect extends PageBase {
       });
     }
 
-    // 注册键盘导航（BackButton + 迭代版本按钮 + 主区域难度按钮）
+    // 注册键盘导航（BackButton + 排行榜按钮 + 迭代版本按钮 + 主区域难度按钮）
     this.registerNavButtons(
       [
         {
           btn: backBtn.btn,
           callback: () => this.switcher.showMainMenu(p),
+        },
+        {
+          btn: leaderboardBtn,
+          callback: () => this.switcher.showLeaderboardPage(p),
         },
         {
           btn: legacyDemo1Btn,
@@ -1081,5 +1091,37 @@ export class StaticPageWorldSelect extends PageBase {
     this.addElement(legacyDemo2Btn);
 
     return { legacyDemo1Btn, legacyDemo2Btn };
+  }
+
+  _createLeaderboardPanel() {
+    const p = this.p;
+    const panelWidth = 190;
+    const memorialPanelX = p.width - 340 - 28;
+    const legacyPanelX = memorialPanelX - 220 - 12;
+    const panelX = legacyPanelX - panelWidth - 12;
+    const panelY = 28;
+
+    const panel = p.createDiv("");
+    panel.addClass("world-memorial-panel");
+    panel.style("width", panelWidth + "px");
+    panel.position(panelX, panelY);
+
+    const title = p.createDiv(t("world_leaderboard_title"));
+    title.addClass("world-memorial-title");
+    title.parent(panel);
+
+    const leaderboardBtn = p.createButton(t("world_leaderboard_button"));
+    leaderboardBtn.addClass("world-memorial-link");
+    leaderboardBtn.addClass("world-memorial-link-button");
+    leaderboardBtn.parent(panel);
+    leaderboardBtn.mousePressed(() => {
+      AudioManager.playSFX("click");
+      this.switcher.showLeaderboardPage(p);
+    });
+
+    this.addElement(panel);
+    this.addElement(leaderboardBtn);
+
+    return { leaderboardBtn };
   }
 }

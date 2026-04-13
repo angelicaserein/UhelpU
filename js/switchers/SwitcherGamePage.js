@@ -1,4 +1,5 @@
 import { SwitcherBase } from "./SwitcherBase.js";
+import { EventTypes } from "../event-system/EventTypes.js";
 import { GamePageLevel1 } from "../ui/pages/game-pages/demo1/GamePageLevel1.js";
 import { GamePageLevel2 } from "../ui/pages/game-pages/demo1/GamePageLevel2.js";
 import { GamePageLevel3 } from "../ui/pages/game-pages/demo1/GamePageLevel3.js";
@@ -39,6 +40,16 @@ import { GamePageLevel7 as HardGamePageLevel7 } from "../ui/pages/game-pages/har
 import { GamePageLevel8 as HardGamePageLevel8 } from "../ui/pages/game-pages/hard/GamePageLevel8.js";
 import { GamePageLevel9 as HardGamePageLevel9 } from "../ui/pages/game-pages/hard/GamePageLevel9.js";
 import { GamePageLevel10 as HardGamePageLevel10 } from "../ui/pages/game-pages/hard/GamePageLevel10.js";
+import { GamePageLevel1 as SpecialGamePageLevel1 } from "../ui/pages/game-pages/special/GamePageLevel1.js";
+import { GamePageLevel2 as SpecialGamePageLevel2 } from "../ui/pages/game-pages/special/GamePageLevel2.js";
+import { GamePageLevel3 as SpecialGamePageLevel3 } from "../ui/pages/game-pages/special/GamePageLevel3.js";
+import { GamePageLevel4 as SpecialGamePageLevel4 } from "../ui/pages/game-pages/special/GamePageLevel4.js";
+import { GamePageLevel5 as SpecialGamePageLevel5 } from "../ui/pages/game-pages/special/GamePageLevel5.js";
+import { GamePageLevel6 as SpecialGamePageLevel6 } from "../ui/pages/game-pages/special/GamePageLevel6.js";
+import { GamePageLevel7 as SpecialGamePageLevel7 } from "../ui/pages/game-pages/special/GamePageLevel7.js";
+import { GamePageLevel8 as SpecialGamePageLevel8 } from "../ui/pages/game-pages/special/GamePageLevel8.js";
+import { GamePageLevel9 as SpecialGamePageLevel9 } from "../ui/pages/game-pages/special/GamePageLevel9.js";
+import { GamePageLevel10 as SpecialGamePageLevel10 } from "../ui/pages/game-pages/special/GamePageLevel10.js";
 
 export class SwitcherGamePage extends SwitcherBase {
   constructor(mainSwitcher, eventBus) {
@@ -87,6 +98,16 @@ export class SwitcherGamePage extends SwitcherBase {
       hard_level8: HardGamePageLevel8,
       hard_level9: HardGamePageLevel9,
       hard_level10: HardGamePageLevel10,
+      special_level1: SpecialGamePageLevel1,
+      special_level2: SpecialGamePageLevel2,
+      special_level3: SpecialGamePageLevel3,
+      special_level4: SpecialGamePageLevel4,
+      special_level5: SpecialGamePageLevel5,
+      special_level6: SpecialGamePageLevel6,
+      special_level7: SpecialGamePageLevel7,
+      special_level8: SpecialGamePageLevel8,
+      special_level9: SpecialGamePageLevel9,
+      special_level10: SpecialGamePageLevel10,
     };
   }
 
@@ -96,5 +117,17 @@ export class SwitcherGamePage extends SwitcherBase {
       throw new Error(`Unknown level page: ${levelIndex}`);
     }
     return new PageClass(this, p);
+  }
+
+  showLevelSpecial(p, n) {
+    const levelNumber = Number(n);
+    if (!Number.isInteger(levelNumber) || levelNumber < 1 || levelNumber > 10) {
+      throw new Error(`Invalid special level number: ${n}`);
+    }
+
+    this.eventBus?.publish(
+      EventTypes.LOAD_LEVEL,
+      `special_level${levelNumber}`,
+    );
   }
 }

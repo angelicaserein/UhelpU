@@ -93,6 +93,264 @@ body {
   font-family: "HYPixel11", "PixelFont", sans-serif;
 }
 
+.leaderboard-page {
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.leaderboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 2px solid rgba(245, 220, 255, 0.72);
+  background: rgba(23, 13, 41, 0.84);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.34);
+}
+
+.leaderboard-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.leaderboard-page-title {
+  color: #fff1ff;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.04em;
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+}
+
+.leaderboard-page-subtitle {
+  color: rgba(236, 214, 255, 0.82);
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.leaderboard-tabs {
+  display: inline-flex;
+  gap: 10px;
+}
+
+.leaderboard-tab-button {
+  min-width: 116px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 2px solid rgba(122, 63, 140, 0.78);
+  background: rgba(84, 50, 114, 0.66);
+  color: #fff3fd;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(120, 50, 160, 0.18);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.leaderboard-tab-button:hover {
+  transform: translateY(-1px);
+  background: rgba(112, 71, 150, 0.86);
+  box-shadow: 0 0 18px rgba(160, 80, 200, 0.34);
+}
+
+.leaderboard-tab-button.leaderboard-tab-active {
+  background: linear-gradient(
+    90deg,
+    rgba(176, 113, 219, 0.96),
+    rgba(110, 73, 186, 0.94)
+  );
+  border-color: rgba(248, 210, 255, 0.95);
+  box-shadow:
+    0 0 0 1px rgba(255, 246, 255, 0.35),
+    0 0 18px rgba(200, 123, 255, 0.42);
+}
+
+.leaderboard-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-auto-rows: 248px;
+  gap: 14px;
+  justify-content: center;
+  align-content: center;
+  flex: 1;
+  min-height: 0;
+}
+
+.leaderboard-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 248px;
+  min-height: 248px;
+  max-height: 248px;
+  border-radius: 14px;
+  border: 2px solid rgba(215, 185, 255, 0.7);
+  background: linear-gradient(
+    180deg,
+    rgba(45, 24, 66, 0.94),
+    rgba(26, 13, 43, 0.96)
+  );
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34);
+  overflow: hidden;
+}
+
+.leaderboard-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(230, 210, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.leaderboard-card-title {
+  color: #fff7ff;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.leaderboard-card-badge {
+  color: rgba(255, 223, 173, 0.9);
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.leaderboard-card-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 8px 10px 8px;
+}
+
+.leaderboard-card-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.leaderboard-card-body::-webkit-scrollbar-thumb {
+  background: rgba(158, 116, 206, 0.6);
+  border-radius: 999px;
+}
+
+.leaderboard-entry-row {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px;
+  border-radius: 8px;
+  color: #efe9ff;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 12px;
+}
+
+.leaderboard-entry-row + .leaderboard-entry-row {
+  margin-top: 4px;
+}
+
+.leaderboard-entry-current {
+  background: rgba(255, 208, 107, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(255, 224, 130, 0.22);
+}
+
+.leaderboard-entry-rank {
+  color: #dfc3ff;
+}
+
+.leaderboard-entry-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  color: #fff;
+}
+
+.leaderboard-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-entry-time {
+  color: rgba(255, 243, 214, 0.92);
+  white-space: nowrap;
+}
+
+.leaderboard-crown {
+  flex: 0 0 auto;
+}
+
+.leaderboard-you-tag {
+  color: #ffd56a;
+  white-space: nowrap;
+}
+
+.leaderboard-empty,
+.leaderboard-error {
+  padding: 18px 10px;
+  color: rgba(238, 229, 255, 0.82);
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 12px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.leaderboard-error {
+  color: rgba(255, 168, 168, 0.92);
+}
+
+.leaderboard-card-footer {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 8px 12px 10px;
+  border-top: 1px solid rgba(230, 210, 255, 0.12);
+  background: rgba(255, 220, 120, 0.06);
+  color: #ffd56a;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 12px;
+}
+
+.leaderboard-skeleton-row {
+  position: relative;
+  height: 22px;
+  margin-top: 6px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(121, 88, 155, 0.2);
+}
+
+.leaderboard-skeleton-row::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.18),
+    rgba(255, 255, 255, 0)
+  );
+  animation: leaderboard-shimmer 1.2s linear infinite;
+}
+
+@keyframes leaderboard-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
 /* 玩家名字面板（欢迎信息 + 改名按钮） */
 .player-name-panel {
   z-index: 20;
@@ -2157,7 +2415,9 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
 .tutorial-prompt-highlight {
   background: rgba(255, 100, 130, 0.1);
   border: 2px solid #ff6482 !important;
-  box-shadow: 0 0 20px rgba(255, 100, 130, 0.4), 0 4px 20px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    0 0 20px rgba(255, 100, 130, 0.4),
+    0 4px 20px rgba(0, 0, 0, 0.6);
   color: #ffb3cc;
 }
 

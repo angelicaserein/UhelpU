@@ -2,6 +2,7 @@ import "./i18nDemo1.js"; // 注册 Demo1 关卡专属文案
 import "./i18nDemo2.js"; // 注册 Demo2 关卡专属文案
 import "./i18nEasy.js"; // 注册 Easy 模式关卡专属文案
 import "./i18nHard.js"; // 注册 Hard 模式关卡专属文案
+import "./i18nSpecial.js"; // 注册 Special 模式关卡专属文案
 import { SwitcherMain } from "./switchers/SwitcherMain.js";
 import { EventBus } from "./event-system/EventBus.js";
 import { EventTypes } from "./event-system/EventTypes.js";
@@ -92,6 +93,8 @@ export class AppCoordinator {
         typeof levelIndex === "string" && levelIndex.startsWith("easy_");
       const isHard =
         typeof levelIndex === "string" && levelIndex.startsWith("hard_");
+      const isSpecial =
+        typeof levelIndex === "string" && levelIndex.startsWith("special_");
 
       this.switcher.clearOverlay(this.p);
       this.levelManager.setPaused(false);
@@ -104,6 +107,8 @@ export class AppCoordinator {
         this.switcher.staticSwitcher.showLevelChoiceEasy(this.p);
       } else if (isHard) {
         this.switcher.staticSwitcher.showLevelChoiceHard(this.p);
+      } else if (isSpecial) {
+        this.switcher.staticSwitcher.showLevelChoiceSpecial(this.p);
       } else if (typeof levelIndex === "string") {
         this.switcher.staticSwitcher.showLevelChoice(this.p);
       } else {
@@ -117,6 +122,7 @@ export class AppCoordinator {
       const isDemo2 = levelIndex.startsWith("demo2_");
       const isEasy = levelIndex.startsWith("easy_");
       const isHard = levelIndex.startsWith("hard_");
+      const isSpecial = levelIndex.startsWith("special_");
 
       if (result === "autoResult1") {
         this._pendingTimerSnapshot = null;
@@ -128,6 +134,8 @@ export class AppCoordinator {
         if (isEasy) {
           WinPage = StaticPageWinEasy;
         } else if (isHard) {
+          WinPage = StaticPageWinEasy;
+        } else if (isSpecial) {
           WinPage = StaticPageWinEasy;
         } else if (isDemo2) {
           WinPage = StaticPageWinDemo2;
@@ -149,7 +157,7 @@ export class AppCoordinator {
       this.levelManager.setPaused(true);
       // Easy/Hard 难度用 Demo2 的 Result 页面，Demo2 和 Demo1 各用各自的
       const ResultPage =
-        isDemo2 || isEasy || isHard
+        isDemo2 || isEasy || isHard || isSpecial
           ? StaticPageResultDemo2
           : StaticPageResultDemo1;
       const resultPage = new ResultPage(
@@ -224,7 +232,9 @@ export class AppCoordinator {
         ? levelIndex.replace("easy_", "")
         : typeof levelIndex === "string" && levelIndex.startsWith("hard_")
           ? levelIndex.replace("hard_", "")
-          : levelIndex;
+          : typeof levelIndex === "string" && levelIndex.startsWith("special_")
+            ? levelIndex.replace("special_", "")
+            : levelIndex;
 
     if (normalizedLevelIndex === "level1") {
       AudioManager.playBGM("level1");

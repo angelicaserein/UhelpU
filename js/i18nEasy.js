@@ -6,44 +6,44 @@ import { registerTranslations } from "./i18n.js";
 registerTranslations({
   en: {
     // ── Level titles & info ──────────────────────────────────────────
-    easy_level1_title: "Easy Level 1",
-    easy_level1_info_left: "Easy Level 1",
+    easy_level1_title: "Rules",
+    easy_level1_info_left: "Level 1\nRules",
     easy_level1_info_right: "Difficulty\nBeginner",
 
-    easy_level2_title: "Easy Level 2",
-    easy_level2_info_left: "Easy Level 2",
+    easy_level2_title: "Higher",
+    easy_level2_info_left: "Level 2\nHigher",
     easy_level2_info_right: "Difficulty\nBeginner",
 
-    easy_level3_title: "Easy Level 3",
-    easy_level3_info_left: "Easy Level 3",
+    easy_level3_title: "Spikes",
+    easy_level3_info_left: "Level 3\nSpikes",
     easy_level3_info_right: "Difficulty\nBeginner",
 
-    easy_level4_title: "Easy Level 4",
-    easy_level4_info_left: "Easy Level 4",
+    easy_level4_title: "Illusions",
+    easy_level4_info_left: "Level 4\nIllusions",
     easy_level4_info_right: "Difficulty\nBeginner",
 
-    easy_level5_title: "Easy Level 5",
-    easy_level5_info_left: "Easy Level 5",
+    easy_level5_title: "Ghosts",
+    easy_level5_info_left: "Level 5\nGhosts",
     easy_level5_info_right: "Difficulty\nBeginner",
 
-    easy_level6_title: "Easy Level 6",
-    easy_level6_info_left: "Easy Level 6",
+    easy_level6_title: "Teleport",
+    easy_level6_info_left: "Level 6\nTeleport",
     easy_level6_info_right: "Difficulty\nBeginner",
 
-    easy_level7_title: "Easy Level 7",
-    easy_level7_info_left: "Easy Level 7",
+    easy_level7_title: "Boxes",
+    easy_level7_info_left: "Level 7\nBoxes",
     easy_level7_info_right: "Difficulty\nBeginner",
 
     easy_level8_title: "Easy Level 8",
-    easy_level8_info_left: "Easy Level 8",
+    easy_level8_info_left: "Level 8\nEasy Level 8",
     easy_level8_info_right: "Difficulty\nBeginner",
 
     easy_level9_title: "Easy Level 9",
-    easy_level9_info_left: "Easy Level 9",
+    easy_level9_info_left: "Level 9\nEasy Level 9",
     easy_level9_info_right: "Difficulty\nBeginner",
 
     easy_level10_title: "Easy Level 10",
-    easy_level10_info_left: "Easy Level 10",
+    easy_level10_info_left: "Level 10\nEasy Level 10",
     easy_level10_info_right: "Difficulty\nBeginner",
 
     // ── Easy NPC (EasyNPC1) ──────────────────────────────────────────
@@ -53,7 +53,8 @@ registerTranslations({
 
     // ── Easy Level 2 — NPC ────────────────────────────────────────────
     easy_level2_npc_line1: "Step on the buttons to clear the spikes!",
-    easy_level2_npc_line2: "You can reach the portal on the right side after clearing them!",
+    easy_level2_npc_line2:
+      "You can reach the portal on the right side after clearing them!",
     easy_level2_npc_exhausted: "Don't give up! Keep trying!",
 
     // ── Easy Level 1 — Signboard ──────────────────────────────────
@@ -62,7 +63,8 @@ registerTranslations({
     easy_signboard_tutorial: "Start Tutorial",
 
     // ── Easy Level 2 — Hint ────────────────────────────────────────
-    easy_hint_level2: "Step on the buttons to retract the spikes, then reach the portal to complete the level.",
+    easy_hint_level2:
+      "Step on the buttons to retract the spikes, then reach the portal to complete the level.",
 
     // ── Prompts ───────────────────────────────────────────────────
     prompt_ad: "A/D",
@@ -70,49 +72,50 @@ registerTranslations({
     prompt_space: "Space",
     prompt_w: "W",
     prompt_up: "↑",
-    win_press_space_or_enter: "Press Space or Enter to proceed to the next level",
+    win_press_space_or_enter:
+      "Press Space or Enter to proceed to the next level",
   },
 
   zh: {
     // ── Level titles & info ──────────────────────────────────────────
-    easy_level1_title: "简易关卡 1",
-    easy_level1_info_left: "简易关卡 1",
+    easy_level1_title: "规则",
+    easy_level1_info_left: "第一关\n规则",
     easy_level1_info_right: "难度\n初级",
 
-    easy_level2_title: "简易关卡 2",
-    easy_level2_info_left: "简易关卡 2",
+    easy_level2_title: "登高",
+    easy_level2_info_left: "第二关\n登高",
     easy_level2_info_right: "难度\n初级",
 
-    easy_level3_title: "简易关卡 3",
-    easy_level3_info_left: "简易关卡 3",
+    easy_level3_title: "地刺",
+    easy_level3_info_left: "第三关\n地刺",
     easy_level3_info_right: "难度\n初级",
 
-    easy_level4_title: "简易关卡 4",
-    easy_level4_info_left: "简易关卡 4",
+    easy_level4_title: "虚实",
+    easy_level4_info_left: "第四关\n虚实",
     easy_level4_info_right: "难度\n初级",
 
-    easy_level5_title: "简易关卡 5",
-    easy_level5_info_left: "简易关卡 5",
+    easy_level5_title: "幽灵",
+    easy_level5_info_left: "第五关\n幽灵",
     easy_level5_info_right: "难度\n初级",
 
-    easy_level6_title: "简易关卡 6",
-    easy_level6_info_left: "简易关卡 6",
+    easy_level6_title: "传送",
+    easy_level6_info_left: "第六关\n传送",
     easy_level6_info_right: "难度\n初级",
 
-    easy_level7_title: "简易关卡 7",
-    easy_level7_info_left: "简易关卡 7",
+    easy_level7_title: "木箱",
+    easy_level7_info_left: "第七关\n木箱",
     easy_level7_info_right: "难度\n初级",
 
     easy_level8_title: "简易关卡 8",
-    easy_level8_info_left: "简易关卡 8",
+    easy_level8_info_left: "第八关\n简易关卡 8",
     easy_level8_info_right: "难度\n初级",
 
     easy_level9_title: "简易关卡 9",
-    easy_level9_info_left: "简易关卡 9",
+    easy_level9_info_left: "第九关\n简易关卡 9",
     easy_level9_info_right: "难度\n初级",
 
     easy_level10_title: "简易关卡 10",
-    easy_level10_info_left: "简易关卡 10",
+    easy_level10_info_left: "第十关\n简易关卡 10",
     easy_level10_info_right: "难度\n初级",
 
     // ── Easy NPC (EasyNPC1) ──────────────────────────────────────────
@@ -121,9 +124,9 @@ registerTranslations({
     easy_npc1_exhausted: "简单模式的关卡超级简单！",
 
     // ── Easy Level 2 — NPC ────────────────────────────────────────────
-    easy_level2_npc_line1: "踩下按钮可以清除地刺！",
-    easy_level2_npc_line2: "清除了之后就可以到达右边的传送门了！",
-    easy_level2_npc_exhausted: "别放弃！继续加油！",
+    easy_level2_npc_line1: "嗨嗨！又见面了！",
+    easy_level2_npc_line2: "这些颜色好像很重要？",
+    easy_level2_npc_exhausted: "死亡之后你的幻影也会损坏！",
 
     // ── Easy Level 1 — Signboard ──────────────────────────────────
     easy_signboard_level1_front:

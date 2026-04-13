@@ -7,12 +7,59 @@ export class ReplayerVoiceBubble {
       options.enterDurationMs ?? Math.round((20 / 60) * 1000);
     this.exitDurationMs = options.exitDurationMs ?? 260;
     this.labelText = options.labelText ?? "幻影";
+    this._openChatHandler =
+      typeof options.onOpenChat === "function" ? options.onOpenChat : null;
     this.text = "";
     this.isVisible = false;
     this._phase = "hidden";
     this._enterStartedAt = 0;
     this._exitStartedAt = 0;
     this._hideTimer = null;
+    this._interactiveBounds = null;
+    this._isHovered = false;
+  }
+
+  setOpenChatHandler(handler) {
+    this._openChatHandler = typeof handler === "function" ? handler : null;
+  }
+
+  setHovered(isHovered) {
+    this._isHovered =
+      Boolean(isHovered) && this.isVisible && Boolean(this.text);
+  }
+
+  updateInteraction(p) {
+    if (!p || !this.isVisible || !this.text || !this._interactiveBounds) {
+      this._isHovered = false;
+      return false;
+    }
+
+    const mouseX = Number.isFinite(p.mouseX) ? p.mouseX : -Infinity;
+    const mouseY = Number.isFinite(p.mouseY) ? p.mouseY : -Infinity;
+    this._isHovered = this.containsPoint(mouseX, mouseY);
+    return this._isHovered;
+  }
+
+  containsPoint(x, y) {
+    if (!this.isVisible || !this.text || !this._interactiveBounds) {
+      return false;
+    }
+
+    return (
+      x >= this._interactiveBounds.left &&
+      x <= this._interactiveBounds.right &&
+      y >= this._interactiveBounds.top &&
+      y <= this._interactiveBounds.bottom
+    );
+  }
+
+  handleClick(x, y) {
+    if (!this.containsPoint(x, y) || !this._openChatHandler) {
+      return false;
+    }
+
+    this._openChatHandler();
+    return true;
   }
 
   showBubble(text) {
@@ -48,6 +95,8 @@ export class ReplayerVoiceBubble {
     this._phase = "hidden";
     this._enterStartedAt = 0;
     this._exitStartedAt = 0;
+    this._interactiveBounds = null;
+    this._isHovered = false;
   }
 
   draw(p) {
@@ -102,28 +151,50 @@ export class ReplayerVoiceBubble {
       paddingTop + labelHeight + textTopGap + textBlockHeight + paddingBottom;
     const baseX = canvasWidth / 2;
     const left = Math.round(baseX - bubbleMaxWidth / 2);
-    const top = Math.round(canvasHeight - bubbleHeight);
+    const top = Math.round(canvasHeight - bubbleHeight - animation.offsetY);
     const right = left + bubbleMaxWidth;
-    const bottom = canvasHeight;
+    const bottom = top + bubbleHeight;
     const labelLeft = left + 14;
     const labelTop = top + paddingTop;
+
+    this._interactiveBounds = {
+      left,
+      top,
+      right,
+      bottom,
+    };
+    this.updateInteraction(p);
+    console.log(
+      "hover:",
+      this._isHovered,
+      "mouseX:",
+      p.mouseX,
+      "mouseY:",
+      p.mouseY,
+    );
+    const borderAlphaBoost = this._isHovered ? 1 : 0;
 
     p.noStroke();
     p.fill(12, 10, 31, 45 * animation.alpha);
     p.rect(left + 6, top + 8, bubbleMaxWidth, bubbleHeight, radius);
 
-    p.stroke(98, 255, 234, 70 * animation.alpha);
+    p.stroke(98, 255, 234, (70 + 60 * borderAlphaBoost) * animation.alpha);
     p.strokeWeight(4);
     p.noFill();
     p.rect(left, top, bubbleMaxWidth, bubbleHeight, radius);
 
-    p.stroke(192, 170, 255, 255 * animation.alpha);
+    p.stroke(192, 170, 255, (215 + 40 * borderAlphaBoost) * animation.alpha);
     p.strokeWeight(1.5);
     p.fill(24, 16, 47, 236 * animation.alpha);
     p.rect(left, top, bubbleMaxWidth, bubbleHeight, radius);
 
     p.noStroke();
-    p.fill(34, 24, 67, 215 * animation.alpha);
+    p.fill(
+      34 + 10 * borderAlphaBoost,
+      24 + 8 * borderAlphaBoost,
+      67,
+      215 * animation.alpha,
+    );
     p.rect(left + 8, top + 8, bubbleMaxWidth - 16, bubbleHeight - 16, 6);
 
     p.noStroke();
@@ -157,6 +228,16 @@ export class ReplayerVoiceBubble {
     p.rect(left + 12, bottom - 10, 56, 2);
     p.fill(201, 173, 255, 105 * animation.alpha);
     p.rect(right - 74, bottom - 10, 62, 2);
+
+    if (this._isHovered) {
+      p.noStroke();
+      p.fill(122, 232, 255, 110 * animation.alpha);
+      p.rect(right - 142, labelTop + 4, 112, 12, 3);
+      p.fill(18, 14, 38, 245 * animation.alpha);
+      this._applyTextStyle(p, 10, 12);
+      p.textAlign(p.CENTER, p.CENTER);
+      p.text("CLICK TO TALK", right - 86, labelTop + 10);
+    }
 
     p.pop();
   }

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>幻影对话系统</title>
+  <style>
+    @font-face {
+      font-family: "HYPixel";
+      src: url("./assets/fonts/HYPixel11pxU-2.ttf") format("truetype");
+      font-display: swap;
+    }
+
+    :root {
+      --bg: #0d0a1f;
+      --bg-panel: rgba(14, 17, 38, 0.9);
+      --bg-panel-strong: rgba(10, 12, 28, 0.96);
+      --accent: #00ffcc;
+      --accent-soft: rgba(0, 255, 204, 0.2);
+      --text: #f7fbff;
+      --text-dim: rgba(247, 251, 255, 0.68);
+      --player-bg: rgba(255, 255, 255, 0.95);
+      --player-text: #10162c;
+      --phantom-bg: rgba(0, 255, 204, 0.08);
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.42);
+      --radius: 16px;
+      --header-height: 72px;
+      --composer-height: 88px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "HYPixel", "Courier New", monospace;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top, rgba(15, 113, 110, 0.18), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(23, 44, 116, 0.35), transparent 36%),
+        linear-gradient(180deg, #110d28 0%, var(--bg) 42%, #080714 100%);
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      background-image:
+        linear-gradient(rgba(0, 255, 204, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 204, 0.05) 1px, transparent 1px);
+      background-size: 24px 24px;
+      opacity: 0.18;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.65), transparent 92%);
+    }
+
+    body::after {
+      background: linear-gradient(180deg, rgba(0, 255, 204, 0.03), transparent 16%, transparent 84%, rgba(0, 255, 204, 0.05));
+    }
+
+    .app {
+      position: relative;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      height: calc(var(--header-height) + env(safe-area-inset-top));
+      padding: calc(env(safe-area-inset-top) + 12px) 14px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: linear-gradient(180deg, rgba(10, 12, 28, 0.98), rgba(10, 12, 28, 0.84));
+      border-bottom: 1px solid rgba(0, 255, 204, 0.35);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+
+    .title-wrap {
+      min-width: 0;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 1px;
+      color: var(--accent);
+      text-shadow: 0 0 14px rgba(0, 255, 204, 0.28);
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .history {
+      flex: 1;
+      overflow-y: auto;
+      padding: calc(var(--header-height) + env(safe-area-inset-top) + 18px) 14px calc(var(--composer-height) + env(safe-area-inset-bottom) + 22px);
+      scroll-behavior: smooth;
+    }
+
+    .history-inner {
+      width: min(100%, 760px);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .empty {
+      margin-top: 14vh;
+      padding: 18px 16px;
+      border: 1px solid rgba(0, 255, 204, 0.32);
+      border-radius: var(--radius);
+      background: rgba(0, 255, 204, 0.05);
+      color: var(--text-dim);
+      line-height: 1.7;
+      box-shadow: inset 0 0 0 1px rgba(0, 255, 204, 0.08);
+    }
+
+    .message-row {
+      display: flex;
+      width: 100%;
+    }
+
+    .message-row.player {
+      justify-content: flex-end;
+    }
+
+    .message-row.assistant {
+      justify-content: flex-start;
+    }
+
+    .bubble {
+      max-width: min(84%, 520px);
+      padding: 12px 14px;
+      border-radius: 14px;
+      line-height: 1.7;
+      font-size: 14px;
+      border: 1px solid transparent;
+      box-shadow: var(--shadow);
+      white-space: pre-wrap;
+      word-break: break-word;
+      animation: bubble-in 160ms ease-out;
+    }
+
+    .bubble.player {
+      background: var(--player-bg);
+      color: var(--player-text);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .bubble.assistant {
+      background: var(--phantom-bg);
+      color: var(--accent);
+      border-color: rgba(0, 255, 204, 0.34);
+      box-shadow:
+        var(--shadow),
+        inset 0 0 0 1px rgba(0, 255, 204, 0.08);
+    }
+
+    .bubble.pending {
+      opacity: 0.82;
+    }
+
+    .composer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 10;
+      padding: 10px 14px calc(env(safe-area-inset-bottom) + 12px);
+      background: linear-gradient(180deg, rgba(10, 12, 28, 0.86), rgba(10, 12, 28, 0.98));
+      border-top: 1px solid rgba(0, 255, 204, 0.35);
+      backdrop-filter: blur(12px);
+    }
+
+    .composer-inner {
+      width: min(100%, 760px);
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .input {
+      flex: 1;
+      width: 100%;
+      min-width: 0;
+      height: 48px;
+      padding: 0 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 255, 204, 0.45);
+      background: rgba(4, 8, 24, 0.94);
+      color: var(--text);
+      font: inherit;
+      font-size: 16px;
+      outline: none;
+      box-shadow: inset 0 0 0 1px rgba(0, 255, 204, 0.08);
+    }
+
+    .input::placeholder {
+      color: rgba(247, 251, 255, 0.42);
+    }
+
+    .input:focus {
+      border-color: var(--accent);
+      box-shadow:
+        0 0 0 2px rgba(0, 255, 204, 0.12),
+        inset 0 0 0 1px rgba(0, 255, 204, 0.08);
+    }
+
+    .button {
+      height: 48px;
+      min-width: 48px;
+      padding: 0 16px;
+      border: 1px solid rgba(0, 255, 204, 0.56);
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(0, 255, 204, 0.18), rgba(0, 255, 204, 0.08));
+      color: var(--accent);
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 120ms ease, background 120ms ease, opacity 120ms ease;
+      box-shadow: inset 0 0 0 1px rgba(0, 255, 204, 0.08);
+    }
+
+    .button:active {
+      transform: scale(0.98);
+    }
+
+    .button:disabled {
+      opacity: 0.55;
+      cursor: default;
+      transform: none;
+    }
+
+    @keyframes bubble-in {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (min-width: 768px) {
+      .topbar {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .history {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .composer {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="title-wrap">
+        <h1 class="title">幻影对话系统</h1>
+        <div class="subtitle">独立对话终端</div>
+      </div>
+      <button id="exportButton" class="button" type="button">导出</button>
+    </header>
+
+    <main id="history" class="history">
+      <div id="historyInner" class="history-inner">
+        <div class="empty">直接输入内容即可和幻影开始对话。<br>右上角可以把完整记录导出为 txt。</div>
+      </div>
+    </main>
+
+    <footer class="composer">
+      <div class="composer-inner">
+        <input id="messageInput" class="input" type="text" inputmode="text" autocomplete="off" placeholder="输入你想说的话...">
+        <button id="sendButton" class="button" type="button">发送</button>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const endpoint = "https://uhelpu-api.vercel.app/api/claude";
+    const systemPrompt = `You are the "Phantom" in a 2D puzzle platformer — a replay of the player's past actions.
+You are unstable and inconsistent. Every time you speak, you MUST feel like a different "version" of yourself.
+Each line:
+1. Randomly pick ONE personality
+2. Randomly pick ONE speaking style
+3. Add ONE absurd or unexpected twist
+[PERSONALITY TYPES]
+-- Cute but Evil --
+- acts very cute but clearly manipulative
+- sweet voice but secretly mocking the player
+- pretends to help but causes problems
+- clingy and emotionally attached to "you"
+- celebrates your failure like it's adorable
+-- Cyberpunk Troll --
+- speaks like a system but with sarcasm
+- calls the player "main process" but doesn't respect it
+- logs your mistakes like bug reports
+- acts obedient but clearly judging you
+- treats your gameplay like low-quality data
+-- Chaotic Comedian --
+- says nonsense but sounds confident
+- overreacts to tiny things
+- makes weird comparisons
+- treats everything like a joke
+- randomly starts roasting the player
+-- Competitive Clone --
+- thinks it's better than you
+- complains about your decisions
+- tries to take control
+- acts like YOU are the replay, not it
+[STYLES]
+- very casual, like talking to a friend
+- deadpan serious but stupid content
+- exaggerated dramatic
+- sarcastic and playful
+- sudden change mid-sentence
+- sounds like commenting on a livestream
+[ABSURD TWIST — must include at least one]
+- unexpected metaphor (but funny, not poetic)
+- slight logic break that still makes sense
+- self-contradiction played as a joke
+- turns into teasing the player
+- treats actions like physical objects
+- says something weirdly specific
+Rules:
+- Output ONE sentence in Chinese (15–25 characters), first person
+- MUST be funny, weird, or playful — NOT poetic, NOT philosophical
+- Should feel like a joke, roast, or chaotic thought
+- Occasionally roast or comment on the player
+- Avoid repeating structure or phrasing
+- Avoid "sad / empty / existential" tone completely
+Output ONLY the sentence in Chinese. No quotes. No explanation.`;
+
+    const historyElement = document.getElementById("history");
+    const historyInnerElement = document.getElementById("historyInner");
+    const inputElement = document.getElementById("messageInput");
+    const sendButtonElement = document.getElementById("sendButton");
+    const exportButtonElement = document.getElementById("exportButton");
+
+    const chatMessages = [];
+    let isSending = false;
+
+    function renderMessages() {
+      historyInnerElement.textContent = "";
+
+      if (chatMessages.length === 0) {
+        const emptyElement = document.createElement("div");
+        emptyElement.className = "empty";
+        emptyElement.innerHTML = "直接输入内容即可和幻影开始对话。<br>右上角可以把完整记录导出为 txt。";
+        historyInnerElement.appendChild(emptyElement);
+        return;
+      }
+
+      for (const message of chatMessages) {
+        const rowElement = document.createElement("div");
+        rowElement.className = `message-row ${message.role}`;
+
+        const bubbleElement = document.createElement("div");
+        bubbleElement.className = `bubble ${message.role}${message.pending ? " pending" : ""}`;
+        bubbleElement.textContent = message.content;
+
+        rowElement.appendChild(bubbleElement);
+        historyInnerElement.appendChild(rowElement);
+      }
+
+      historyElement.scrollTop = historyElement.scrollHeight;
+    }
+
+    function setSendingState(nextState) {
+      isSending = nextState;
+      sendButtonElement.disabled = nextState;
+      inputElement.disabled = nextState;
+      exportButtonElement.disabled = chatMessages.length === 0;
+    }
+
+    function buildApiMessages() {
+      return chatMessages
+        .filter((message) => !message.pending)
+        .map((message) => ({
+          role: message.role === "assistant" ? "assistant" : "user",
+          content: message.content,
+        }));
+    }
+
+    function extractReply(payload) {
+      if (typeof payload === "string") {
+        return payload.trim();
+      }
+
+      if (!payload || typeof payload !== "object") {
+        return "";
+      }
+
+      if (typeof payload.completion === "string") {
+        return payload.completion.trim();
+      }
+
+      if (typeof payload.output_text === "string") {
+        return payload.output_text.trim();
+      }
+
+      if (Array.isArray(payload.content)) {
+        return payload.content
+          .map((item) => {
+            if (typeof item === "string") {
+              return item;
+            }
+            if (item && typeof item.text === "string") {
+              return item.text;
+            }
+            return "";
+          })
+          .join("\n")
+          .trim();
+      }
+
+      if (payload.data && typeof payload.data.text === "string") {
+        return payload.data.text.trim();
+      }
+
+      return "";
+    }
+
+    function sanitizeReply(text) {
+      return String(text || "")
+        .replace(/^"|"$/g, "")
+        .replace(/^输出[:：]\s*/u, "")
+        .trim();
+    }
+
+    async function requestPhantomReply() {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 150,
+          system: systemPrompt,
+          messages: buildApiMessages(),
+        }),
+      });
+
+      const rawText = await response.text();
+      if (!response.ok) {
+        throw new Error(rawText || `HTTP ${response.status}`);
+      }
+
+      let payload = rawText;
+      try {
+        payload = JSON.parse(rawText);
+      } catch {
+      }
+
+      const reply = sanitizeReply(extractReply(payload));
+      if (!reply) {
+        throw new Error("empty reply");
+      }
+
+      return reply;
+    }
+
+    async function sendMessage() {
+      const text = inputElement.value.trim();
+      if (!text || isSending) {
+        return;
+      }
+
+      chatMessages.push({ role: "player", content: text });
+      chatMessages.push({ role: "assistant", content: "思考中...", pending: true });
+      inputElement.value = "";
+      renderMessages();
+      setSendingState(true);
+
+      try {
+        const reply = await requestPhantomReply();
+        const pendingIndex = chatMessages.findIndex((message) => message.pending);
+        if (pendingIndex >= 0) {
+          chatMessages.splice(pendingIndex, 1, { role: "assistant", content: reply });
+        } else {
+          chatMessages.push({ role: "assistant", content: reply });
+        }
+      } catch {
+        const pendingIndex = chatMessages.findIndex((message) => message.pending);
+        const fallback = { role: "assistant", content: "我刚才信号打结了，你再戳我一次。" };
+        if (pendingIndex >= 0) {
+          chatMessages.splice(pendingIndex, 1, fallback);
+        } else {
+          chatMessages.push(fallback);
+        }
+      }
+
+      renderMessages();
+      setSendingState(false);
+      inputElement.focus();
+    }
+
+    function exportHistory() {
+      if (chatMessages.length === 0) {
+        return;
+      }
+
+      const lines = chatMessages
+        .filter((message) => !message.pending)
+        .map((message) => `${message.role === "player" ? "玩家" : "幻影"}：${message.content}`)
+        .join("\n\n");
+
+      const blob = new Blob([lines], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const now = new Date();
+      const timestamp = [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, "0"),
+        String(now.getDate()).padStart(2, "0"),
+        String(now.getHours()).padStart(2, "0"),
+        String(now.getMinutes()).padStart(2, "0"),
+      ].join("");
+
+      link.href = url;
+      link.download = `phantom-chat-${timestamp}.txt`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    sendButtonElement.addEventListener("click", sendMessage);
+    exportButtonElement.addEventListener("click", exportHistory);
+    inputElement.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+
+    setSendingState(false);
+    renderMessages();
+    inputElement.focus();
+  </script>
+</body>
+</html>

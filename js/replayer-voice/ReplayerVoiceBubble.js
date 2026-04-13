@@ -68,13 +68,15 @@ export class ReplayerVoiceBubble {
 
     const bubbleMaxWidth = Math.min(400, Math.max(260, canvasWidth - 48));
     const paddingX = 18;
-    const paddingTop = 16;
-    const paddingBottom = 18;
-    const labelHeight = 28;
+    const paddingTop = 8;
+    const paddingBottom = 10;
+    const labelHeight = 20;
     const labelWidth = 72;
-    const lineHeight = 22;
-    const textSize = 16;
+    const lineHeight = 16;
+    const textSize = 14;
     const radius = 10;
+    const maxBubbleHeight = 80;
+    const textTopGap = 6;
     const innerWidth = bubbleMaxWidth - paddingX * 2;
 
     p.push();
@@ -83,22 +85,25 @@ export class ReplayerVoiceBubble {
     }
 
     this._applyTextStyle(p, textSize, lineHeight);
-    const lines = this._wrapText(p, this.text, innerWidth);
+    const maxTextBlockHeight = Math.max(
+      lineHeight,
+      maxBubbleHeight - paddingTop - labelHeight - textTopGap - paddingBottom,
+    );
+    const maxLineCount = Math.max(
+      1,
+      Math.floor(maxTextBlockHeight / lineHeight),
+    );
+    const lines = this._wrapText(p, this.text, innerWidth).slice(0, maxLineCount);
     const textBlockHeight = Math.max(lineHeight, lines.length * lineHeight);
     const bubbleHeight =
-      paddingTop + labelHeight + 10 + textBlockHeight + paddingBottom;
+      paddingTop + labelHeight + textTopGap + textBlockHeight + paddingBottom;
     const baseX = canvasWidth / 2;
-    const anchorY = canvasHeight - 80;
-    const minCenterY = bubbleHeight / 2 + 12;
-    const maxCenterY = canvasHeight - bubbleHeight / 2 - 12;
-    const centerY =
-      Math.min(Math.max(anchorY, minCenterY), maxCenterY) + animation.offsetY;
     const left = Math.round(baseX - bubbleMaxWidth / 2);
-    const top = Math.round(centerY - bubbleHeight / 2);
+    const top = Math.round(canvasHeight - bubbleHeight);
     const right = left + bubbleMaxWidth;
-    const bottom = top + bubbleHeight;
+    const bottom = canvasHeight;
     const labelLeft = left + 14;
-    const labelTop = top - 12;
+    const labelTop = top + paddingTop;
 
     p.noStroke();
     p.fill(12, 10, 31, 45 * animation.alpha);
@@ -117,11 +122,6 @@ export class ReplayerVoiceBubble {
     p.noStroke();
     p.fill(34, 24, 67, 215 * animation.alpha);
     p.rect(left + 8, top + 8, bubbleMaxWidth - 16, bubbleHeight - 16, 6);
-
-    p.stroke(124, 232, 255, 150 * animation.alpha);
-    p.strokeWeight(1);
-    p.line(left + 12, top + 42, right - 12, top + 42);
-    p.line(left + 12, top + 43, right - 12, top + 43);
 
     p.noStroke();
     p.fill(20, 16, 44, 246 * animation.alpha);
@@ -147,7 +147,7 @@ export class ReplayerVoiceBubble {
     p.text(
       lines.join("\n"),
       left + paddingX,
-      top + paddingTop + labelHeight + 8,
+      top + paddingTop + labelHeight + textTopGap,
     );
 
     p.fill(122, 232, 255, 130 * animation.alpha);

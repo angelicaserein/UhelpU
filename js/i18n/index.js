@@ -1,5 +1,5 @@
-// js/i18n.js — 国际化 / Internationalization
-// 用法：import { i18n, t } from '../i18n.js';
+// js/i18n/index.js — 国际化 / Internationalization
+// 用法：import { i18n, t } from '../i18n/index.js';
 //       t('key') 获取当前语言对应的文字
 
 const _dict = {

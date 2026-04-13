@@ -1,6 +1,6 @@
 ﻿// WindowSettingSidebar.js 鈥?璁剧疆椤典晶杈规爮鎮诞绐?
 import { WindowSidebarBase } from "./WindowSidebarBase.js";
-import { i18n, t } from "../../i18n.js";
+import { i18n, t } from "../../i18n/index.js";
 import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
 import { KEY_ALIASES } from "../../key-binding-system/KeyBindingConfig.js";
 

@@ -5,7 +5,7 @@ import { EventTypes } from "../../event-system/EventTypes.js";
 import { Assets } from "../../AssetsManager.js";
 import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
 import { keyCodeToLabel } from "../../record-system/RecordKeyUtil.js";
-import { t } from "../../i18n.js";
+import { t } from "../../i18n/index.js";
 
 /**
  * NPC — 可交互对话角色
@@ -339,7 +339,7 @@ export class NPC extends GameEntity {
       this._dialogueIndex < this.dialogueLines.length - 1
     ) {
       const interactKey = keyCodeToLabel(
-        this._keyBindingManager.getKeyByIntent("interaction")
+        this._keyBindingManager.getKeyByIntent("interaction"),
       );
       const hintText = t("npc_continue_hint").replace("{KEY}", interactKey);
       p.push();
@@ -418,13 +418,13 @@ export class NPC extends GameEntity {
 
     // CSS rainbow-color 关键帧颜色停靠点
     const colorStops = [
-      [0.00, [255, 78,  80 ]],  // #ff4e50
-      [0.16, [255, 159, 67 ]],  // #ff9f43
-      [0.33, [254, 202, 87 ]],  // #feca57
-      [0.50, [72,  219, 251]],  // #48dbfb
-      [0.66, [162, 155, 254]],  // #a29bfe
-      [0.83, [253, 121, 168]],  // #fd79a8
-      [1.00, [255, 78,  80 ]],  // #ff4e50（回到起点）
+      [0.0, [255, 78, 80]], // #ff4e50
+      [0.16, [255, 159, 67]], // #ff9f43
+      [0.33, [254, 202, 87]], // #feca57
+      [0.5, [72, 219, 251]], // #48dbfb
+      [0.66, [162, 155, 254]], // #a29bfe
+      [0.83, [253, 121, 168]], // #fd79a8
+      [1.0, [255, 78, 80]], // #ff4e50（回到起点）
     ];
 
     const timeMs = p.millis();

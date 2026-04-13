@@ -1,6 +1,6 @@
 // WindowPause.js — 暂停悬浮窗
 import { WindowBase } from "./WindowBase.js";
-import { i18n, t } from "../../i18n.js";
+import { i18n, t } from "../../i18n/index.js";
 
 export class WindowPause extends WindowBase {
   /**

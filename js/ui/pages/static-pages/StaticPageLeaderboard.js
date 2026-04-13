@@ -2,7 +2,7 @@ import { PageBase } from "../PageBase.js";
 import { BackButton } from "../../components/BackButton.js";
 import { Assets } from "../../../AssetsManager.js";
 import { AudioManager } from "../../../AudioManager.js";
-import { i18n, t } from "../../../i18n.js";
+import { i18n, t } from "../../../i18n/index.js";
 
 const CARD_COUNT = 10;
 const RANK_LOOKUP_LIMIT = 999;

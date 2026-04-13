@@ -17,7 +17,7 @@ import { BaseLevel } from "../BaseLevel.js";
 import { Assets } from "../../AssetsManager.js";
 import { Room } from "../Room.js";
 import { ButtonPlatformLinkSystem } from "../../mechanism-system/demo1/ButtonPlatformLinkSystem.js";
-import { t } from "../../i18n.js";
+import { t } from "../../i18n/index.js";
 import { SignboardDemo2 } from "../../game-entity-model/interactables/SignboardDemo2.js";
 import { WindowPrompt } from "../../ui/windows/WindowPrompt.js";
 

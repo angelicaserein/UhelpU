@@ -1,4 +1,4 @@
-import { t } from "../../i18n.js";
+import { t } from "../../i18n/index.js";
 import { Assets } from "../../AssetsManager.js";
 import { KeyPrompt } from "./KeyPrompt.js";
 import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";

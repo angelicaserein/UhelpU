@@ -1,7 +1,7 @@
 // js/tutorial-system/TutorialUI.js — 教学系统 UI 管理
 
 import { TutorialOverlay } from "./TutorialOverlay.js";
-import { t, i18n } from "../i18n.js";
+import { t, i18n } from "../i18n/index.js";
 
 /**
  * TutorialUI - 管理教学系统的所有 UI 元素
@@ -259,7 +259,8 @@ export class TutorialUI {
    */
   _removeAllPrompts() {
     this._promptBoxes.forEach((box) => {
-      if (box && box !== this._escHintEl) { // 不删除 ESC 提示
+      if (box && box !== this._escHintEl) {
+        // 不删除 ESC 提示
         box.style.animation = "fadeOut 0.2s ease";
         setTimeout(() => {
           if (box && box.parentNode) {

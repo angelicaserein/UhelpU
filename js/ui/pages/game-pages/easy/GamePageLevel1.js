@@ -3,7 +3,7 @@ import { TutorialManager } from "../../../../tutorial-system/TutorialManager.js"
 import { EventTypes } from "../../../../event-system/EventTypes.js";
 
 // 自动导入 i18n-tutorial.js 以注册翻译
-import "../../../../tutorial-system/i18n-tutorial.js";
+import "../../../../i18n/i18n-tutorial.js";
 
 export class GamePageLevel1 extends GamePageBaseDemo2 {
   constructor(switcher, p) {

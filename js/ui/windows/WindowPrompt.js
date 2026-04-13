@@ -1,7 +1,7 @@
 // WindowPrompt.js - 轻量级提示浮窗
 // 特点：在画布居中显示，点击关闭
 
-import { i18n, t } from "../../i18n.js";
+import { i18n, t } from "../../i18n/index.js";
 import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
 
 export class WindowPrompt {

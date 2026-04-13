@@ -7,7 +7,7 @@ import { WindowSetting } from "../../windows/WindowSetting.js";
 import { WindowHint } from "../../windows/WindowHint.js";
 import { AudioManager } from "../../../AudioManager.js";
 import { EventTypes } from "../../../event-system/EventTypes.js";
-import { i18n } from "../../../i18n.js";
+import { i18n } from "../../../i18n/index.js";
 import { GameTimer } from "../../components/GameTimer.js";
 import { LevelTimerManager } from "../../../timer-system/LevelTimerManager.js";
 import { TIMER_CONFIG } from "../../../timer-system/TimerConfig.js";

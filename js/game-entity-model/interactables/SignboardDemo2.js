@@ -5,7 +5,7 @@ import { EventTypes } from "../../event-system/EventTypes.js";
 import { Assets } from "../../AssetsManager.js";
 import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
 import { keyCodeToLabel } from "../../record-system/RecordKeyUtil.js";
-import { t } from "../../i18n.js";
+import { t } from "../../i18n/index.js";
 
 /**
  * SignboardContent — 木牌交互弹出内容
@@ -373,7 +373,7 @@ export class SignboardDemo2 extends GameEntity {
         if (this._onTutorialClick) {
           this._signboardContent.setTutorialButton(
             this._onTutorialClick,
-            this._tutorialButtonTextKey
+            this._tutorialButtonTextKey,
           );
         } else {
           this._signboardContent.setTutorialButton(null);

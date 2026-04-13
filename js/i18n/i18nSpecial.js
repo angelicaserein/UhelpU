@@ -1,4 +1,4 @@
-import { registerTranslations } from "./i18n.js";
+import { registerTranslations } from "./index.js";
 
 registerTranslations({
   en: {

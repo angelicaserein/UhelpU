@@ -2,7 +2,7 @@
 // 负责录制系统的 UI 状态生成和渲染
 import { keyCodeToLabel } from "./RecordKeyUtil.js";
 import { KeyBindingManager } from "../key-binding-system/KeyBindingManager.js";
-import { t } from "../i18n.js";
+import { t } from "../i18n/index.js";
 import { isGamePaused } from "../game-runtime/GamePauseState.js";
 import { Assets } from "../AssetsManager.js";
 

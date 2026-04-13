@@ -1,7 +1,7 @@
 ﻿// WindowSetting.js — 设置悬浮窗
 // 包含：BGM 音量、SFX 音量、语言切换、按键设置
 import { WindowBase } from "./WindowBase.js";
-import { i18n, t } from "../../i18n.js";
+import { i18n, t } from "../../i18n/index.js";
 import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
 import { KEY_ALIASES } from "../../key-binding-system/KeyBindingConfig.js";
 

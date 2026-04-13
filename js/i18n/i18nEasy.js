@@ -1,7 +1,7 @@
 // js/i18nEasy.js — Easy 模式关卡专属文案
 // 导入即自动注册到全局 i18n 字典
 
-import { registerTranslations } from "./i18n.js";
+import { registerTranslations } from "./index.js";
 
 registerTranslations({
   en: {

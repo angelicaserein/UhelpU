@@ -5,7 +5,7 @@ import { EventTypes } from "../../event-system/EventTypes.js";
 import { Assets } from "../../AssetsManager.js";
 import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
 import { keyCodeToLabel } from "../../record-system/RecordKeyUtil.js";
-import { t } from "../../i18n.js";
+import { t } from "../../i18n/index.js";
 
 /**
  * NPC — 可交互对话角色

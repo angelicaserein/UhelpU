@@ -2,7 +2,7 @@
 // 核心色系：深紫黑 #2A1433 + 中深紫 #6B4A7A + 浅紫灰 #8A6A99 + 淡紫/极浅紫背景
 import { keyCodeToLabel } from "./RecordKeyUtil.js";
 import { KeyBindingManager } from "../key-binding-system/KeyBindingManager.js";
-import { t } from "../i18n.js";
+import { t } from "../i18n/index.js";
 import { isGamePaused } from "../game-runtime/GamePauseState.js";
 import { Assets } from "../AssetsManager.js";
 
@@ -65,7 +65,9 @@ export class Demo2RecordUI {
           title:
             t("rec_demo2_recording") + " - " + t("rec_demo2_recording_sub"),
           subtitle: "",
-          stateLabel: isPausedRecording ? `◼ ${t("rec_state_paused")}` : `● ${t("rec_state_rec")}`,
+          stateLabel: isPausedRecording
+            ? `◼ ${t("rec_state_paused")}`
+            : `● ${t("rec_state_rec")}`,
           progress: Math.min(1, elapsedMs / maxRecordTime),
           timeStr: `${elapsedSec}s`,
           isRecording: true,
@@ -97,7 +99,9 @@ export class Demo2RecordUI {
           ...base,
           title: t("rec_demo2_replaying"),
           subtitle: "",
-          stateLabel: isPausedReplaying ? `◼ ${t("rec_state_paused")}` : `▶ ${t("rec_state_play")}`,
+          stateLabel: isPausedReplaying
+            ? `◼ ${t("rec_state_paused")}`
+            : `▶ ${t("rec_state_play")}`,
           progress: Math.min(1, replayElapsedMs / totalMs),
           timeStr: `${replayElapsedSec}s/${totalReplaySec}s`,
           isReplaying: true,
@@ -363,16 +367,37 @@ export class Demo2RecordUI {
 
     let hints = [];
     if (state === "Recording") {
-      hints = [{ key: ui.recordKey, desc: t("rec_press_to_stop").replace("{KEY}", ui.recordKey) }];
+      hints = [
+        {
+          key: ui.recordKey,
+          desc: t("rec_press_to_stop").replace("{KEY}", ui.recordKey),
+        },
+      ];
     } else if (state === "ReadyToRecord") {
-      hints = [{ key: ui.recordKey, desc: t("rec_press_to_start").replace("{KEY}", ui.recordKey) }];
+      hints = [
+        {
+          key: ui.recordKey,
+          desc: t("rec_press_to_start").replace("{KEY}", ui.recordKey),
+        },
+      ];
     } else if (state === "ReadyToReplay") {
       hints = [
-        { key: ui.replayKey, desc: t("rec_press_to_replay").replace("{KEY}", ui.replayKey) },
-        { key: ui.recordKey, desc: t("rec_press_to_rerecord").replace("{KEY}", ui.recordKey) },
+        {
+          key: ui.replayKey,
+          desc: t("rec_press_to_replay").replace("{KEY}", ui.replayKey),
+        },
+        {
+          key: ui.recordKey,
+          desc: t("rec_press_to_rerecord").replace("{KEY}", ui.recordKey),
+        },
       ];
     } else if (state === "Replaying") {
-      hints = [{ key: ui.replayKey, desc: t("rec_press_to_exit").replace("{KEY}", ui.replayKey) }];
+      hints = [
+        {
+          key: ui.replayKey,
+          desc: t("rec_press_to_exit").replace("{KEY}", ui.replayKey),
+        },
+      ];
     }
 
     // 绘制每个操作提示
@@ -636,7 +661,13 @@ export class Demo2RecordUI {
         p.stroke(255, 255, 255, 255);
         p.strokeWeight(2);
         p.noFill();
-        p.rect(actionX - keySize / 2, y + 14 - keySize / 2, keySize, keySize, 2);
+        p.rect(
+          actionX - keySize / 2,
+          y + 14 - keySize / 2,
+          keySize,
+          keySize,
+          2,
+        );
         p.pop();
 
         // 操作图标

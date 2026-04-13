@@ -4,7 +4,7 @@ import { BackButton } from "../../components/BackButton.js";
 import { HintButton } from "../../components/HintButton.js";
 import { ScrollTextModule } from "../../components/ScrollTextModule.js";
 import { Assets } from "../../../AssetsManager.js";
-import { i18n, t } from "../../../i18n.js";
+import { i18n, t } from "../../../i18n/index.js";
 import { AudioManager } from "../../../AudioManager.js";
 
 export class StaticPageOpeningStoryDemo1 extends PageBase {

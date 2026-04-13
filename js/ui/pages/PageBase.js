@@ -1,5 +1,5 @@
 import { KeyboardNavigationManager } from "../keyboard/KeyboardNavigationManager.js";
-import { i18n } from "../../i18n.js";
+import { i18n } from "../../i18n/index.js";
 
 export class PageBase {
   constructor(switcher) {

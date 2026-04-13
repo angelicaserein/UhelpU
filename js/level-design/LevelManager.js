@@ -51,7 +51,7 @@ import { Level10 as SpecialLevel10 } from "./special/Level10.js";
 import { setGamePaused, isGamePaused } from "../game-runtime/GamePauseState.js";
 import { EventTypes } from "../event-system/EventTypes.js";
 import { Assets } from "../AssetsManager.js";
-import { t } from "../i18n.js";
+import { t } from "../i18n/index.js";
 import { CheckpointSystem } from "./CheckpointSystem.js";
 import { TeleportPointSystem } from "./TeleportPointSystem.js";
 

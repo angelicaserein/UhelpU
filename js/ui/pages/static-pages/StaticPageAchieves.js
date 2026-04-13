@@ -4,7 +4,7 @@ import { BackButton } from "../../components/BackButton.js";
 import { Assets } from "../../../AssetsManager.js";
 import { AudioManager } from "../../../AudioManager.js";
 import { Demo1AchievementData } from "../../../achievement system/Demo1AchievementData.js";
-import { i18n, t } from "../../../i18n.js";
+import { i18n, t } from "../../../i18n/index.js";
 
 export class StaticPageAchieves extends PageBase {
   constructor(switcher, p) {

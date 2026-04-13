@@ -2,7 +2,7 @@ import { PageBase } from "../PageBase.js";
 import { ButtonBase } from "../../components/ButtonBase.js";
 import { FollowImage } from "../../components/FollowImage.js";
 import { Assets } from "../../../AssetsManager.js";
-import { t } from "../../../i18n.js";
+import { t } from "../../../i18n/index.js";
 import { AudioManager } from "../../../AudioManager.js";
 
 export class StaticPageMenu extends PageBase {

@@ -24,7 +24,7 @@ import { AchievementToast } from "../../achievement system/AchievementToast.js";
 import { Demo1AchievementData } from "../../achievement system/Demo1AchievementData.js";
 import { WindowPrompt } from "../../ui/windows/WindowPrompt.js";
 import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
-import { t } from "../../i18n.js";
+import { t } from "../../i18n/index.js";
 
 export class Level4 extends BaseLevel {
   constructor(p, eventBus) {

@@ -1,6 +1,6 @@
 // LevelInfo.js — 关卡信息悬浮展示组件
 // 在 FollowImage 两侧显示关卡信息，鼠标悬浮到关卡按钮时触发
-import { t } from "../../i18n.js";
+import { t } from "../../i18n/index.js";
 import { Assets } from "../../AssetsManager.js";
 
 export class LevelInfo {

@@ -1,7 +1,7 @@
 import { PageBase } from "../PageBase.js";
 import { Assets } from "../../../AssetsManager.js";
-import { i18n } from "../../../i18n.js";
-import { t } from "../../../i18n.js";
+import { i18n } from "../../../i18n/index.js";
+import { t } from "../../../i18n/index.js";
 
 const PROJECT_ID = "uhelpu";
 const API_KEY = "AIzaSyA34riJGsAh-jx9YHME-M5Nw5OHr4ndFuI";
@@ -210,7 +210,10 @@ export class NameInputPage extends PageBase {
         const { username } = await this._getUserByUid(localId);
         overlay.remove();
         localStorage.setItem("playerName", username);
-        localStorage.setItem("playerAccount", JSON.stringify({ uid: localId, username, email, isAccount: true }));
+        localStorage.setItem(
+          "playerAccount",
+          JSON.stringify({ uid: localId, username, email, isAccount: true }),
+        );
         window.playerName = username;
         this.switcher.showWorldSelect(p);
       } catch (err) {
@@ -248,7 +251,9 @@ export class NameInputPage extends PageBase {
     titleEl.style("margin-bottom", "18px");
     titleEl.parent(dialog);
 
-    const usernameInput = p.createInput(this.inputElement ? this.inputElement.value().trim() : "");
+    const usernameInput = p.createInput(
+      this.inputElement ? this.inputElement.value().trim() : "",
+    );
     usernameInput.attribute("maxlength", "12");
     usernameInput.attribute("placeholder", t("auth_username_placeholder"));
     usernameInput.addClass("name-input-field");
@@ -286,9 +291,18 @@ export class NameInputPage extends PageBase {
       const email = emailInput.value().trim();
       const password = passwordInput.value();
 
-      if (!username) { alert(t("name_input_empty")); return; }
-      if (username.length > 12) { alert(t("name_input_too_long")); return; }
-      if (!email || !password) { alert(t("name_input_empty")); return; }
+      if (!username) {
+        alert(t("name_input_empty"));
+        return;
+      }
+      if (username.length > 12) {
+        alert(t("name_input_too_long"));
+        return;
+      }
+      if (!email || !password) {
+        alert(t("name_input_empty"));
+        return;
+      }
 
       confirmBtn.attribute("disabled", "true");
       confirmBtn.elt.style.opacity = "0.5";
@@ -332,8 +346,14 @@ export class NameInputPage extends PageBase {
 
     const messageContent = t("name_duplicate_message")
       .replace(/\n/g, "<br>")
-      .replace(/{COUNT}/g, `<span style="color: #ff9f43; font-weight: bold;">${count}</span>`)
-      .replace(/{NAME}/g, `<span style="color: #feca57; font-weight: bold;">${username}</span>`);
+      .replace(
+        /{COUNT}/g,
+        `<span style="color: #ff9f43; font-weight: bold;">${count}</span>`,
+      )
+      .replace(
+        /{NAME}/g,
+        `<span style="color: #feca57; font-weight: bold;">${username}</span>`,
+      );
 
     const message = p.createDiv(messageContent);
     message.style("color", "#e0e0e0");
@@ -374,7 +394,10 @@ export class NameInputPage extends PageBase {
       const existingGuestName = localStorage.getItem("playerName");
 
       localStorage.setItem("playerName", username);
-      localStorage.setItem("playerAccount", JSON.stringify({ uid: localId, username, email, isAccount: true }));
+      localStorage.setItem(
+        "playerAccount",
+        JSON.stringify({ uid: localId, username, email, isAccount: true }),
+      );
       window.playerName = username;
 
       if (existingGuestName && existingGuestName !== username) {
@@ -401,7 +424,10 @@ export class NameInputPage extends PageBase {
     dialog.parent(overlay);
 
     const message = p.createDiv(
-      t("auth_transfer_guest_prompt").replace(/{NAME}/g, `<span style="color: #feca57; font-weight: bold;">${guestName}</span>`)
+      t("auth_transfer_guest_prompt").replace(
+        /{NAME}/g,
+        `<span style="color: #feca57; font-weight: bold;">${guestName}</span>`,
+      ),
     );
     message.style("color", "#e0e0e0");
     message.style("font-size", "16px");
@@ -434,7 +460,9 @@ export class NameInputPage extends PageBase {
   }
 
   async _transferGuestScores(guestName, newUsername) {
-    console.log(`[NameInputPage] Transferring scores from "${guestName}" to "${newUsername}"`);
+    console.log(
+      `[NameInputPage] Transferring scores from "${guestName}" to "${newUsername}"`,
+    );
     const levelFormats = ["easy_level", "hard_level", "demo2_level", "level"];
     for (const format of levelFormats) {
       for (let i = 1; i <= 10; i++) {
@@ -455,12 +483,17 @@ export class NameInputPage extends PageBase {
               await fetch(patchUrl, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ fields: { playerName: { stringValue: newUsername } } }),
+                body: JSON.stringify({
+                  fields: { playerName: { stringValue: newUsername } },
+                }),
               });
             }
           }
         } catch (err) {
-          console.warn(`[NameInputPage] Error transferring scores for ${levelId}:`, err);
+          console.warn(
+            `[NameInputPage] Error transferring scores for ${levelId}:`,
+            err,
+          );
         }
       }
     }
@@ -499,8 +532,14 @@ export class NameInputPage extends PageBase {
 
     const messageContent = t("name_duplicate_message")
       .replace(/\n/g, "<br>")
-      .replace(/{COUNT}/g, `<span style="color: #ff9f43; font-weight: bold;">${count}</span>`)
-      .replace(/{NAME}/g, `<span style="color: #feca57; font-weight: bold;">${playerName}</span>`);
+      .replace(
+        /{COUNT}/g,
+        `<span style="color: #ff9f43; font-weight: bold;">${count}</span>`,
+      )
+      .replace(
+        /{NAME}/g,
+        `<span style="color: #feca57; font-weight: bold;">${playerName}</span>`,
+      );
 
     const message = this.p.createDiv(messageContent);
     message.style("color", "#e0e0e0");
@@ -548,10 +587,14 @@ export class NameInputPage extends PageBase {
     });
     cancelBtn.parent(buttonContainer);
 
-    confirmBtn.elt.onmouseover = () => confirmBtn.style("background-color", "#ffb366");
-    confirmBtn.elt.onmouseout = () => confirmBtn.style("background-color", "#ff9f43");
-    cancelBtn.elt.onmouseover = () => cancelBtn.style("background-color", "#666");
-    cancelBtn.elt.onmouseout = () => cancelBtn.style("background-color", "#555");
+    confirmBtn.elt.onmouseover = () =>
+      confirmBtn.style("background-color", "#ffb366");
+    confirmBtn.elt.onmouseout = () =>
+      confirmBtn.style("background-color", "#ff9f43");
+    cancelBtn.elt.onmouseover = () =>
+      cancelBtn.style("background-color", "#666");
+    cancelBtn.elt.onmouseout = () =>
+      cancelBtn.style("background-color", "#555");
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -573,11 +616,19 @@ export class NameInputPage extends PageBase {
   }
 
   async _loginWithFirebaseAuth(email, password) {
-    return this._callAuthAPI("accounts:signInWithPassword", { email, password, returnSecureToken: true });
+    return this._callAuthAPI("accounts:signInWithPassword", {
+      email,
+      password,
+      returnSecureToken: true,
+    });
   }
 
   async _registerWithFirebaseAuth(email, password) {
-    return this._callAuthAPI("accounts:signUp", { email, password, returnSecureToken: true });
+    return this._callAuthAPI("accounts:signUp", {
+      email,
+      password,
+      returnSecureToken: true,
+    });
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -643,7 +694,9 @@ export class NameInputPage extends PageBase {
       await fetch(url, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fields: { count: { integerValue: currentCount + 1 } } }),
+        body: JSON.stringify({
+          fields: { count: { integerValue: currentCount + 1 } },
+        }),
       });
     } catch (error) {
       console.error(`[NameInputPage] Error incrementing name count:`, error);
@@ -662,11 +715,16 @@ export class NameInputPage extends PageBase {
         await fetch(url, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ fields: { count: { integerValue: currentCount - 1 } } }),
+          body: JSON.stringify({
+            fields: { count: { integerValue: currentCount - 1 } },
+          }),
         });
       }
     } catch (error) {
-      console.error(`[NameInputPage] Error decrementing player name count:`, error);
+      console.error(
+        `[NameInputPage] Error decrementing player name count:`,
+        error,
+      );
     }
   }
 
@@ -699,10 +757,15 @@ export class NameInputPage extends PageBase {
       await fetch(url, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fields: { count: { integerValue: currentCount + 1 } } }),
+        body: JSON.stringify({
+          fields: { count: { integerValue: currentCount + 1 } },
+        }),
       });
     } catch (error) {
-      console.error(`[NameInputPage] Error incrementing account name count:`, error);
+      console.error(
+        `[NameInputPage] Error incrementing account name count:`,
+        error,
+      );
     }
   }
 

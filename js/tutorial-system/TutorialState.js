@@ -1,6 +1,6 @@
 // js/tutorial-system/TutorialState.js — 教学系统 7 个 PHASE 状态定义
 
-import { t } from "../i18n.js";
+import { t } from "../i18n/index.js";
 import { setGamePaused, isGamePaused } from "../game-runtime/GamePauseState.js";
 
 /**
@@ -255,9 +255,11 @@ export class ReplayingState extends BaseTutorialState {
 
     // 轮询检查回放是否自动完成
     this._replayCheckInterval = setInterval(() => {
-      if (this.recordSystem &&
-          this.recordSystem.replayer &&
-          !this.recordSystem.replayer.isReplaying) {
+      if (
+        this.recordSystem &&
+        this.recordSystem.replayer &&
+        !this.recordSystem.replayer.isReplaying
+      ) {
         console.log("[ReplayingState] Replay completed automatically");
         clearInterval(this._replayCheckInterval);
         document.removeEventListener("keydown", this._onReplayKeyPress);
@@ -301,7 +303,9 @@ export class CompleteState extends BaseTutorialState {
       isHighlight: true,
     });
 
-    console.log("[CompleteState] ✓ Tutorial complete! Showing message for 3 seconds...");
+    console.log(
+      "[CompleteState] ✓ Tutorial complete! Showing message for 3 seconds...",
+    );
 
     // 3秒后自动返回 IDLE（正常游玩）
     this._completeTimer = setTimeout(() => {

@@ -2,7 +2,7 @@
 import { WindowPrompt } from "../../../windows/WindowPrompt.js";
 import { WindowPromptPause } from "../../../windows/WindowPromptPause.js";
 import { AudioManager } from "../../../../AudioManager.js";
-import { t } from "../../../../i18n.js";
+import { t } from "../../../../i18n/index.js";
 import {
   markLevel1RecordHudOpened,
   resetLevel1PromptState,
@@ -134,4 +134,3 @@ export class GamePageLevel1 extends GamePageBaseDemo1 {
     super.exit();
   }
 }
-

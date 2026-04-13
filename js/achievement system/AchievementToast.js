@@ -3,7 +3,7 @@
 // z-index 高于 WindowPrompt(9999)，不会被遮挡
 // 用法：new AchievementToast(p).show("achievement_unlocked")
 
-import { i18n, t } from "../i18n.js";
+import { i18n, t } from "../i18n/index.js";
 
 export class AchievementToast {
   /**

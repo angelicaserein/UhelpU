@@ -1,5 +1,5 @@
 import { PageBase } from "../PageBase.js";
-import { t } from "../../../i18n.js";
+import { t } from "../../../i18n/index.js";
 import { Assets } from "../../../AssetsManager.js";
 import { AudioManager } from "../../../AudioManager.js";
 import { EventTypes } from "../../../event-system/EventTypes.js";

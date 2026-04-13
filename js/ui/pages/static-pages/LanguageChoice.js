@@ -1,6 +1,6 @@
 import { PageBase } from "../PageBase.js";
 import { Assets } from "../../../AssetsManager.js";
-import { i18n } from "../../../i18n.js";
+import { i18n } from "../../../i18n/index.js";
 
 function makePanel(text, hint) {
   return (
@@ -29,7 +29,9 @@ export class LanguageChoice extends PageBase {
 
     if (savedName && savedLang) {
       // 两者都有，直接进入游戏，跳过语言和名字选择
-      console.log("[LanguageChoice] Found saved name and language, skipping to game");
+      console.log(
+        "[LanguageChoice] Found saved name and language, skipping to game",
+      );
       i18n.setLang(savedLang);
       window.playerName = savedName;
       this.switcher.showWorldSelect(p);

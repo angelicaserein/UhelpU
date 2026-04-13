@@ -66,7 +66,7 @@ export class ReplayerVoiceBubble {
       return;
     }
 
-    const bubbleMaxWidth = Math.min(400, Math.max(260, canvasWidth - 48));
+    const bubbleMaxWidth = Math.min(800, Math.max(260, canvasWidth - 48));
     const paddingX = 18;
     const paddingTop = 8;
     const paddingBottom = 10;
@@ -93,7 +93,10 @@ export class ReplayerVoiceBubble {
       1,
       Math.floor(maxTextBlockHeight / lineHeight),
     );
-    const lines = this._wrapText(p, this.text, innerWidth).slice(0, maxLineCount);
+    const lines = this._wrapText(p, this.text, innerWidth).slice(
+      0,
+      maxLineCount,
+    );
     const textBlockHeight = Math.max(lineHeight, lines.length * lineHeight);
     const bubbleHeight =
       paddingTop + labelHeight + textTopGap + textBlockHeight + paddingBottom;

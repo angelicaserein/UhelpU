@@ -1,3 +1,5 @@
+import { soundManager } from "./sound/SoundManager.js";
+
 const TRACKS = {
   menu: "assets/audio/bgm/menu.mp3",
   setting: "assets/audio/bgm/setting.mp3",
@@ -25,7 +27,7 @@ const SFX_TRACKS = {
 
 const clamp01 = (value) => Math.max(0, Math.min(1, Number(value) || 0));
 
-const FADE_INTERVAL = 50;  // ms per tick
+const FADE_INTERVAL = 50; // ms per tick
 const FADE_STEPS = 800 / FADE_INTERVAL; // 800ms total fade
 
 class AudioManagerImpl {
@@ -39,6 +41,7 @@ class AudioManagerImpl {
     this._fadeOutTimer = null;
     this._fadeInTimer = null;
     this._fadingOutBgm = null;
+    soundManager.setVolume(this._sfxVolume);
     this._bindUnlockGesture();
   }
 
@@ -94,7 +97,10 @@ class AudioManagerImpl {
         this._fadingOutBgm = null;
       }
     }
-    if (this._fadeInTimer) { clearInterval(this._fadeInTimer); this._fadeInTimer = null; }
+    if (this._fadeInTimer) {
+      clearInterval(this._fadeInTimer);
+      this._fadeInTimer = null;
+    }
   }
 
   _fadeOut(audio, onComplete) {
@@ -190,6 +196,7 @@ class AudioManagerImpl {
 
   setSFXVolume(volume01) {
     this._sfxVolume = clamp01(volume01);
+    soundManager.setVolume(this._sfxVolume);
     for (const audio of this._sfxMap.values()) {
       audio.volume = this._sfxVolume;
     }
@@ -200,6 +207,11 @@ class AudioManagerImpl {
   }
 
   playSFX(trackKey) {
+    soundManager.setVolume(this._sfxVolume);
+    if (soundManager.play(trackKey)) {
+      return;
+    }
+
     const base = this._getOrCreateSfx(trackKey);
     if (!base) {
       console.warn(`[AudioManager] Unknown SFX track: ${trackKey}`);

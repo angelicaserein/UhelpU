@@ -329,8 +329,11 @@ function dynDynBlockResponse(a, b, msg) {
         b.movementComponent.velY = 0;
         a.movementComponent.velY = Math.max(a.movementComponent.velY, 0);
       }
-      // [NEW] 支撑链velX传递：记录上方 box 站在下方 box 上的支撑关系
-      setStandingSupportRelation(b, a);
+      // [NEW] 支撑链velX传递：记录上方 box 站在下方 box 上の支撑关系
+      b._supportingEntity = a;
+      b._supportingType = "standing";
+      a._supportingEntity = b;
+      a._supportingType = "pushing";
     }
     return;
   }

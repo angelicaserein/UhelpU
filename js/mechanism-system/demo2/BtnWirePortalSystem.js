@@ -38,6 +38,7 @@ export class BtnWirePortalSystem {
 
     // 自动应用系统专属按钮配色
     this._button.color = BtnWirePortalSystem.BUTTON_COLOR;
+    this._button.isWirePortalButton = true;
 
     // 自动计算电线路径（或使用手动指定的）
     this._wirePath =

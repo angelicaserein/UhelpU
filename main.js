@@ -1,5 +1,6 @@
 import { Assets } from "./js/AssetsManager.js";
 import { AppCoordinator } from "./js/AppCoordinator.js";
+import { installSoundPatches } from "./js/sound/SoundPatches.js";
 import { initializeFirebase } from "./js/utils/firebase-init.js";
 
 console.log("[main] App starting...");
@@ -24,6 +25,7 @@ new p5((p) => {
     // 初始化游戏
     app = new AppCoordinator(p);
     app.init();
+    installSoundPatches(app.eventBus);
     console.log("[main.p5] Setup complete");
   };
 

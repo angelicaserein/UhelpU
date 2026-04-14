@@ -108,36 +108,113 @@ export class CollisionSystem {
   }
 
   collisionEntry(eventBus = this.eventBus) {
-    // Stage A - 地形基础：先解出所有 Dynamic-Static，让每个动态体拿到稳定的静态世界约束。
+    // [NEW] 支撑链velX传递：每帧开始清空支撑关系，由本帧碰撞检测重新建立
     for (const dyn of this._dynamicEntities) {
       dyn._supportingEntity = null;
       dyn._supportingType = null;
     }
-    this.processDynamicStaticPhase();
 
-    // Stage B - Box 稳定：先稳定所有 box 链，再让后续站立关系建立在稳定的底层之上。
-    this.stabilizeBoxCollisions();
+    const replayer = this.getReplayer();
+    const replayerActive = replayer && replayer.isReplaying;
 
-    // Stage C - 角色落地：角色与 box/static 的站立、推动、顶推在 box 稳定后再处理。
-    this.processCharacterBoxAndStaticPhase();
-
-    // Stage D - 角色叠站：角色与角色之间的站立关系最后建立，避免底层未稳时提早吸附。
-    this.processCharacterCharacterPhase();
-
-    // Stage E - 支撑链传播：按 standing 关系自底向上同步整条支撑链的位置与落地状态。
-    this.buildAndPropagateSupportChain();
-
-    // 推箱后的最终防穿透保护：仅对仍处于 pushing 状态的角色做额外分离。
-    for (const character of this.getActiveCharacters()) {
-      if (character._supportingType === SUPPORT_TYPES.PUSHING) {
-        this.resolvePusherOverlapsWithBoxes(character);
+    // Run dynamic-static passes first so box/platform support settles before player/replayer pairing.
+    for (let pass = 0; pass < 2; pass++) {
+      for (const dyn of this._dynamicEntities) {
+        for (const sta of this._staticEntities) {
+          this.processDynamicStaticPair(dyn, sta);
+        }
       }
     }
 
-    // Stage F - Trigger：最后处理按钮、传送门等触发器，避免中途位置修正导致误触发。
-    this.processTriggerPhase(eventBus);
+    // Player collision detection with enemies (DYNAMIC-DYNAMIC pairs)
+    const player2 = this.getPlayer();
+    if (player2) {
+      this.processEnemyCollisionsForActor(player2, (actor, enemy) =>
+        this.processEnemyPlayerPair(actor, enemy),
+      );
+    }
 
-    // 记录本帧实际位移量供下一帧的支撑/跟随逻辑使用。
+    // [FIX] 推箱穿模：DD 推箱 → DS 弹回 → 再次 DD 会用旧 prevX 把箱子重新推进墙。
+    // 改为：记录 DS 前后箱子的 x 位移量，把同等位移施加给 player，彻底消除重叠，不再做第三次 DD。
+    const player3 = this.getPlayer();
+    if (player3) {
+      this.processPusherBoxInteractions(player3);
+      this.maintainHeadPushSupportRelations(player3);
+    }
+
+    // Replayer collision detection with enemies (DYNAMIC-DYNAMIC pairs)
+    const replayer2 = this.getReplayer();
+    if (replayer2 && replayer2.isReplaying) {
+      this.processEnemyCollisionsForActor(replayer2, (actor, enemy) =>
+        this.processEnemyReplayerPair(actor, enemy),
+      );
+    }
+
+    // [FIX] 推箱穿模：replayer 推箱子与玩家推箱子同理，DD 后补 DS，再用位移量修正 replayer
+    const replayer3 = this.getReplayer();
+    if (replayer3 && replayer3.isReplaying) {
+      this.processPusherBoxInteractions(replayer3);
+      this.maintainHeadPushSupportRelations(replayer3);
+    }
+
+    // Keep all box colliders physically solid against both boxes and static world.
+    this.stabilizeBoxCollisions();
+    this.restackStandingChains();
+
+    // Resolve player/replayer standing only after box support settles for this frame.
+    if (replayerActive) {
+      const player = this.getPlayer();
+      const settledReplayer = this.getReplayer();
+      this.processDynamicDynamicPair(player, settledReplayer);
+    }
+
+    // Final guard: if box stabilization moved boxes into pusher, separate them immediately.
+    if (player3 && player3._supportingType === SUPPORT_TYPES.PUSHING) {
+      this.resolvePusherOverlapsWithBoxes(player3);
+    }
+    if (
+      replayer3 &&
+      replayer3.isReplaying &&
+      replayer3._supportingType === SUPPORT_TYPES.PUSHING
+    ) {
+      this.resolvePusherOverlapsWithBoxes(replayer3);
+    }
+
+    // Enemy collision detection with other DYNAMIC/STATIC entities (platforms, walls, etc.)
+    for (const dyn of this._dynamicEntities) {
+      if (isEnemy(dyn)) {
+        for (const sta of this._staticEntities) {
+          if (dyn !== sta && !isType(sta, ENTITY_TYPES.SPIKE)) {
+            this.processDynamicStaticPair(dyn, sta);
+          }
+        }
+      }
+    }
+
+    // 每帧重置所有按钮状态，碰撞检测时会重新按下仍被踩到的按钮
+    for (const tri of this._triggerEntities) {
+      if (isButton(tri) && tri.isPressed) {
+        tri.releaseButton();
+      }
+    }
+
+    for (const dyn of this._dynamicEntities) {
+      for (const tri of this._triggerEntities) {
+        this.processDynamicTriggerPair(dyn, tri, eventBus);
+      }
+    }
+
+    // Enemy collision detection with TRIGGER entities (buttons, spikes, etc.)
+    for (const sta of this._staticEntities) {
+      if (isEnemy(sta)) {
+        for (const tri of this._triggerEntities) {
+          this.processEnemyTriggerPair(sta, tri, eventBus);
+        }
+      }
+    }
+
+    // [FIX] standing跟随：box 由 DD resolver 直接修改 x 位置而非 velX，
+    // 记录本帧实际位移量供下帧 velXPropagationEntry 使用（box.velX 恒为 0，不能反映真实移动）
     for (const dyn of this._dynamicEntities) {
       dyn._lastFrameDeltaX = dyn.x - dyn.prevX;
     }
@@ -285,108 +362,14 @@ export class CollisionSystem {
     }
   }
 
-  processDynamicStaticPhase() {
-    for (let pass = 0; pass < 2; pass++) {
-      for (const dyn of this._dynamicEntities) {
-        for (const sta of this._staticEntities) {
-          this.processDynamicStaticPair(dyn, sta);
-        }
-      }
-    }
-
-    // 保留静态 enemy 的兼容处理。
-    for (const sta of this._staticEntities) {
-      if (!isEnemy(sta)) continue;
-      for (const otherSta of this._staticEntities) {
-        if (sta !== otherSta && !isType(otherSta, ENTITY_TYPES.SPIKE)) {
-          this.processDynamicStaticPair(sta, otherSta);
-        }
-      }
-    }
-  }
-
-  processCharacterBoxAndStaticPhase() {
-    for (const character of this.getActiveCharacters()) {
-      for (const sta of this._staticEntities) {
-        this.processDynamicStaticPair(character, sta);
-      }
-      this.processPusherBoxInteractions(character);
-      this.maintainHeadPushSupportRelations(character);
-    }
-  }
-
-  processCharacterCharacterPhase() {
-    const player = this.getPlayer();
-    const replayer = this.getReplayer();
-
-    if (player) {
-      this.processEnemyCollisionsForActor(player, (actor, enemy) =>
-        this.processEnemyPlayerPair(actor, enemy),
-      );
-    }
-
-    if (replayer && replayer.isReplaying) {
-      this.processEnemyCollisionsForActor(replayer, (actor, enemy) =>
-        this.processEnemyReplayerPair(actor, enemy),
-      );
-    }
-
-    if (player && replayer && replayer.isReplaying) {
-      this.processDynamicDynamicPair(player, replayer);
-    }
-  }
-
-  processTriggerPhase(eventBus = this.eventBus) {
-    for (const tri of this._triggerEntities) {
-      if (isButton(tri) && tri.isPressed) {
-        tri.releaseButton();
-      }
-    }
-
-    for (const dyn of this._dynamicEntities) {
-      for (const tri of this._triggerEntities) {
-        this.processDynamicTriggerPair(dyn, tri, eventBus);
-      }
-    }
-
-    for (const sta of this._staticEntities) {
-      if (isEnemy(sta)) {
-        for (const tri of this._triggerEntities) {
-          this.processEnemyTriggerPair(sta, tri, eventBus);
-        }
-      }
-    }
-  }
-
-  getActiveCharacters() {
-    return this._dynamicEntities.filter(
-      (entity) => isPlayer(entity) || isActiveReplayer(entity),
-    );
-  }
-
-  markSupportChainGroundState(rider, supporter, groundVelY) {
-    const controlComponent = rider?.controllerManager?.currentControlComponent;
-    if (controlComponent?.abilityCondition) {
-      controlComponent.abilityCondition["isOnGround"] = true;
-      controlComponent.abilityCondition["groundVelY"] = groundVelY;
-    }
-
-    if (isReplayer(supporter)) {
-      rider._currentlyOnReplayer = true;
-      rider._wasStandingOnReplayer = true;
-    }
-  }
-
-  buildAndPropagateSupportChain() {
+  restackStandingChains() {
     const ridersOf = new Map();
-    const dynamicSet = new Set(this._dynamicEntities);
 
     for (const dyn of this._dynamicEntities) {
       if (
         dyn &&
         dyn._supportingType === SUPPORT_TYPES.STANDING &&
-        dyn._supportingEntity &&
-        dynamicSet.has(dyn._supportingEntity)
+        dyn._supportingEntity
       ) {
         let riders = ridersOf.get(dyn._supportingEntity);
         if (!riders) {
@@ -398,42 +381,31 @@ export class CollisionSystem {
     }
 
     const visited = new Set();
-    const queue = [];
-
-    for (const dyn of this._dynamicEntities) {
-      const supporter = dyn?._supportingEntity;
-      const hasDynamicSupporter =
-        dyn?._supportingType === SUPPORT_TYPES.STANDING &&
-        supporter &&
-        dynamicSet.has(supporter);
-
-      if (!hasDynamicSupporter) {
-        queue.push(dyn);
-      }
-    }
-
-    while (queue.length > 0) {
-      const supporter = queue.shift();
-      if (!supporter || visited.has(supporter)) continue;
+    const restackFromSupporter = (supporter) => {
+      if (!supporter || visited.has(supporter)) return;
       visited.add(supporter);
 
       const riders = ridersOf.get(supporter);
-      if (!riders || riders.length === 0) continue;
+      if (!riders || riders.length === 0) return;
 
-      const deltaX =
-        supporter.prevX !== undefined ? supporter.x - supporter.prevX : 0;
-      const deltaY =
+      const supporterDeltaY =
         supporter.prevY !== undefined ? supporter.y - supporter.prevY : 0;
 
       for (const rider of riders) {
-        if (!rider || visited.has(rider)) continue;
+        rider.y += supporterDeltaY;
+        rider.prevY = rider.y;
+        restackFromSupporter(rider);
+      }
+    };
 
-        if (!(isBox(rider) && isBox(supporter))) {
-          rider.x += deltaX;
-        }
-        rider.y += deltaY;
-        this.markSupportChainGroundState(rider, supporter, deltaY);
-        queue.push(rider);
+    for (const dyn of this._dynamicEntities) {
+      if (
+        dyn &&
+        (dyn._supportingType === SUPPORT_TYPES.SUPPORT ||
+          dyn._supportingType === SUPPORT_TYPES.PUSHING ||
+          !dyn._supportingEntity)
+      ) {
+        restackFromSupporter(dyn);
       }
     }
   }
@@ -743,13 +715,6 @@ export class CollisionSystem {
   processPusherBoxInteractions(pusher) {
     for (const dyn of this._dynamicEntities) {
       if (!isBox(dyn) || dyn === pusher) {
-        continue;
-      }
-
-      if (
-        dyn === pusher._supportingEntity &&
-        pusher._supportingType === SUPPORT_TYPES.STANDING
-      ) {
         continue;
       }
 

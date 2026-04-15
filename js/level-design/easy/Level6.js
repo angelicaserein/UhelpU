@@ -9,7 +9,6 @@
   Button,
   Portal,
   WireRenderer,
-  Box,
 } from "../../game-entity-model/index.js";
 import { BaseLevel } from "../BaseLevel.js";
 import { Demo2RecordUI } from "../../record-system/Demo2RecordUI.js";
@@ -40,9 +39,6 @@ export class Level6 extends BaseLevel {
 
     // Spike
     this.entities.add(new Spike(440, 360, 50, 20));
-
-    // Box - pushable box that can be stood on
-    this.entities.add(new Box(600, 350, 40, 40));
 
     // Checkpoint
     this.entities.add(new Checkpoint(230, 360, 40, 70, () => this._player));

@@ -123,15 +123,15 @@ export class StaticPageWorldSelect extends PageBase {
     this.addElement(panel);
 
     // 判断账号 or 游客
+    const rawAccount = localStorage.getItem("playerAccount");
     let savedAccount = null;
     try {
-      const raw = localStorage.getItem("playerAccount");
-      if (raw) savedAccount = JSON.parse(raw);
+      if (rawAccount) savedAccount = JSON.parse(rawAccount);
     } catch (e) {
       /* ignore */
     }
 
-    const isAccount = !!savedAccount;
+    const isAccount = !!rawAccount;
     const playerName = isAccount
       ? savedAccount.username || "Player"
       : localStorage.getItem("playerName") || "Player";
@@ -191,6 +191,15 @@ export class StaticPageWorldSelect extends PageBase {
       renameBtn.addClass("player-rename-button");
       renameBtn.parent(panel);
       renameBtn.mousePressed(() => this._showRenameInputDialog());
+
+      const registerBtn = p.createButton("注册账号 / Register");
+      registerBtn.addClass("player-rename-button");
+      registerBtn.style("margin-left", "8px");
+      registerBtn.parent(panel);
+      registerBtn.mousePressed(() => {
+        if (localStorage.getItem("playerAccount")) return;
+        this.switcher.showNameInput(p, { openRegisterForm: true });
+      });
     }
   }
 

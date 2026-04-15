@@ -128,8 +128,7 @@ export class PhysicsSystem {
   velXPropagationEntry() {
     // 第一步：构建 supporter → riders[] 邻接表
     // standing：entity 站在 _supportingEntity 头上 → ridersOf[supporter].push(entity)
-    // 仅传播真正的 standing 支撑链；顶头 pushing 链改由 collision 阶段的
-    // buildAndPropagateSupportChain() 统一处理，避免同帧重复叠加 deltaX。
+    // pushing：entity 在顶着 _supportingEntity    → ridersOf[entity].push(_supportingEntity)
     const ridersOf = new Map();
 
     for (const entity of this.entities) {
@@ -139,14 +138,22 @@ export class PhysicsSystem {
         entity._supportingEntity
       ) {
         appendMapList(ridersOf, entity._supportingEntity, entity);
+      } else if (
+        entity._supportingType === SUPPORT_TYPES.PUSHING &&
+        entity._supportingEntity
+      ) {
+        appendMapList(ridersOf, entity, entity._supportingEntity);
       }
     }
 
-    // 第二步：找根节点（链底层）：仅从 support 类型出发。
+    // 第二步：找根节点（链底层）：support 或 pushing 类型的实体
     const roots = [];
     for (const entity of this.entities) {
       if (!hasMovement(entity)) continue;
-      if (entity._supportingType === SUPPORT_TYPES.SUPPORT) {
+      if (
+        entity._supportingType === SUPPORT_TYPES.SUPPORT ||
+        entity._supportingType === SUPPORT_TYPES.PUSHING
+      ) {
         roots.push(entity);
       }
     }
@@ -175,8 +182,6 @@ export class PhysicsSystem {
           movedRiders.has(rider)
         )
           continue;
-
-        if (rider.type === "box" && supporter.type === "box") continue;
 
         // [FIX] velX链修复：跳跃起飞帧切断该 rider 分支，不影响其他同层 rider。
         if (isTakeoffFrame(rider)) continue;

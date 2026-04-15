@@ -10,12 +10,12 @@ registerTranslations({
     easy_level1_info_left: "Level 1\nRules",
     easy_level1_info_right: "Difficulty\nBeginner",
 
-    easy_level2_title: "Higher",
-    easy_level2_info_left: "Level 2\nHigher",
+    easy_level2_title: "Spikes",
+    easy_level2_info_left: "Level 2\nSpikes",
     easy_level2_info_right: "Difficulty\nBeginner",
 
-    easy_level3_title: "Spikes",
-    easy_level3_info_left: "Level 3\nSpikes",
+    easy_level3_title: "Higher",
+    easy_level3_info_left: "Level 3\nHigher",
     easy_level3_info_right: "Difficulty\nBeginner",
 
     easy_level4_title: "Illusions",
@@ -82,12 +82,12 @@ registerTranslations({
     easy_level1_info_left: "第一关\n规则",
     easy_level1_info_right: "难度\n初级",
 
-    easy_level2_title: "登高",
-    easy_level2_info_left: "第二关\n登高",
+    easy_level2_title: "地刺",
+    easy_level2_info_left: "第二关\n地刺",
     easy_level2_info_right: "难度\n初级",
 
-    easy_level3_title: "地刺",
-    easy_level3_info_left: "第三关\n地刺",
+    easy_level3_title: "登高",
+    easy_level3_info_left: "第三关\n登高",
     easy_level3_info_right: "难度\n初级",
 
     easy_level4_title: "虚实",

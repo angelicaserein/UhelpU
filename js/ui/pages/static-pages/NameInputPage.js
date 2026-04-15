@@ -9,9 +9,10 @@ const FIRESTORE_API = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID
 const AUTH_API = `https://identitytoolkit.googleapis.com/v1`;
 
 export class NameInputPage extends PageBase {
-  constructor(switcher, p) {
+  constructor(switcher, p, options = {}) {
     super(switcher);
     this.p = p;
+    this.options = options;
     this.inputElement = null;
     this._onKeyDown = null;
   }
@@ -20,10 +21,11 @@ export class NameInputPage extends PageBase {
     super.enter();
 
     const p = this.p;
+    const forceRegisterForm = this.options.openRegisterForm === true;
 
     // 账号用户优先
     const savedAccount = localStorage.getItem("playerAccount");
-    if (savedAccount) {
+    if (!forceRegisterForm && savedAccount) {
       try {
         window.playerName = JSON.parse(savedAccount).username;
       } catch (e) {
@@ -37,7 +39,7 @@ export class NameInputPage extends PageBase {
 
     // 游客
     const savedName = localStorage.getItem("playerName");
-    if (savedName) {
+    if (!forceRegisterForm && savedName) {
       window.playerName = savedName;
       setTimeout(() => this.switcher.showWorldSelect(p), 100);
       return;
@@ -105,6 +107,10 @@ export class NameInputPage extends PageBase {
     document.addEventListener("keydown", this._onKeyDown);
 
     setTimeout(() => this.inputElement.elt.focus(), 100);
+
+    if (forceRegisterForm) {
+      setTimeout(() => this._showRegisterForm(), 0);
+    }
   }
 
   exit() {
@@ -479,12 +485,15 @@ export class NameInputPage extends PageBase {
             const fields = doc.fields || {};
             const docIsAccount = fields.isAccount?.booleanValue || false;
             if (fields.playerName?.stringValue === guestName && !docIsAccount) {
-              const patchUrl = `${doc.name}?key=${API_KEY}&updateMask.fieldPaths=playerName`;
+              const patchUrl = `${doc.name}?key=${API_KEY}&updateMask.fieldPaths=playerName&updateMask.fieldPaths=isAccount`;
               await fetch(patchUrl, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  fields: { playerName: { stringValue: newUsername } },
+                  fields: {
+                    playerName: { stringValue: newUsername },
+                    isAccount: { booleanValue: true },
+                  },
                 }),
               });
             }

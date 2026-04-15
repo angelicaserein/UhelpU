@@ -52,8 +52,8 @@ export class SwitcherStaticPage extends SwitcherBase {
     this.main.switchToStatic(page, p);
   }
 
-  showNameInput(p = this.p) {
-    const page = new NameInputPage(this, p);
+  showNameInput(p = this.p, options = {}) {
+    const page = new NameInputPage(this, p, options);
     this.main.switchToStatic(page, p);
   }
 

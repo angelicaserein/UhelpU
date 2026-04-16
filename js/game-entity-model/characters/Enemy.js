@@ -2,7 +2,6 @@ import { GameEntity } from "../base/GameEntity.js";
 import { RectangleCollider } from "../../collision-system/CollideComponent.js";
 import { ColliderType } from "../../collision-system/enumerator.js";
 import { MovementComponent } from "../../physics-system/MovementComponent.js";
-import { AudioManager } from "../../AudioManager.js";
 import { Assets } from "../../AssetsManager.js";
 
 export class Enemy extends GameEntity {
@@ -154,7 +153,6 @@ export class Enemy extends GameEntity {
     if (this.deathState.isDead) return;
     this.deathState.isDead = true;
     this.deathState.deathFrameCounter = 0; // Reset frame counter
-    AudioManager.playSFX("dead");
   }
 
   isDeadAnimationComplete() {

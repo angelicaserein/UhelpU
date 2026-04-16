@@ -5,8 +5,8 @@ import { registerTranslations } from "./index.js";
 
 registerTranslations({
   en: {
-    hard_level1_title: "Hard Level 1",
-    hard_level1_info_left: "Thorns",
+    hard_level1_title: "Thorns",
+    hard_level1_info_left: "Hard level 1\nThorns",
     hard_level1_info_right: "Difficulty\nHard",
     hard_hint_level1:
       "Press the matching buttons to retract the linked spikes. The second room also gates the portal behind a button, so plan your route before you start recording.",
@@ -17,12 +17,12 @@ registerTranslations({
     hard_level1_npc_exhausted:
       "If you still don't understand, go ask the designer!",
 
-    hard_level2_title: "Hard Level 2",
-    hard_level2_info_left: "Jail",
+    hard_level2_title: "Jail",
+    hard_level2_info_left: "Hard level 2\nJail",
     hard_level2_info_right: "Difficulty\nHard",
 
-    hard_level3_title: "Hard Level 3",
-    hard_level3_info_left: "Symbiosis",
+    hard_level3_title: "Symbiosis",
+    hard_level3_info_left: "Hard level 3\nSymbiosis",
     hard_level3_info_right: "Difficulty\nHard",
     hard_level3_npc_line1:
       "Buttons can create paths just as easily as they can erase them.",

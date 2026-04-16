@@ -450,6 +450,13 @@ export class MapEditor {
   // ══════════════════════════════════════════════════════════════
 
   async _handleSave() {
+    const rawLevelClassName = window.prompt("请输入关卡类名", "LevelX");
+    if (rawLevelClassName === null) {
+      return;
+    }
+
+    const levelClassName =
+      EditorExporter.normalizeLevelClassName(rawLevelClassName);
     const entities = this._entityMgr.getAll();
     const code = await EditorExporter.copyToClipboard(
       entities,
@@ -462,8 +469,9 @@ export class MapEditor {
         w: this._spawnPlayerW,
         h: this._spawnPlayerH,
       },
+      levelClassName,
     );
-    this._ui.showToast(`✅ 已复制代码到剪贴板（含出生点）`);
+    this._ui.showToast(`已复制完整 ${levelClassName}.js 到剪贴板`);
     console.log("[MapEditor] 导出代码:\n" + code);
   }
 

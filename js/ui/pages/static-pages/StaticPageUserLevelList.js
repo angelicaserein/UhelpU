@@ -163,6 +163,10 @@ export class StaticPageUserLevelList extends PageBase {
     // 自定义滚动条样式
     const style = document.createElement("style");
     style.innerHTML = `
+      @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
       .user-levels-grid::-webkit-scrollbar {
         width: 8px;
       }

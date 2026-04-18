@@ -140,24 +140,11 @@ export class StaticPageUserLevelList extends PageBase {
 
   draw() {
     const p = this.p;
-
-    // 绘制背景
-    p.background(22, 12, 38);
     if (Assets.bgImageWorldSelect) {
-      p.push();
-      p.tint(255, 205);
       p.image(Assets.bgImageWorldSelect, 0, 0, p.width, p.height);
-      p.pop();
+    } else {
+      p.background(22, 12, 38);
     }
-
-    p.noStroke();
-    p.fill(18, 10, 32, 142);
-    p.rect(0, 0, p.width, p.height);
-
-    p.fill(246, 214, 255, 24);
-    p.ellipse(p.width * 0.18, p.height * 0.18, 260, 200);
-    p.fill(134, 105, 206, 20);
-    p.ellipse(p.width * 0.84, p.height * 0.78, 320, 220);
   }
 
   exit() {

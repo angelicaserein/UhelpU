@@ -57,8 +57,11 @@ export class UserLevel extends BaseLevel {
     // Initialize physics and collision systems
     this.initSystems(this._player, 5000, { uiClass: Demo2RecordUI });
 
-    // Create BtnPlatform systems (must be after initSystems)
-    this._createButtonPlatformSystems(levelData);
+    // Create BtnPlatform systems (must be after initSystems for collisionSystem)
+    this._parseBtnPlatformSystems(levelData);
+
+    // Create WirePortal systems (must be after room offsets applied for multi-room)
+    this._createWirePortalSystems(levelData);
   }
 
   /**
@@ -381,25 +384,10 @@ export class UserLevel extends BaseLevel {
   }
 
   /**
-   * Create BtnPlatform systems after initSystems (requires collisionSystem)
-   * Also creates WirePortal systems (after room offsets applied for multi-room)
+   * Parse and create BtnPlatform systems (after initSystems, so collisionSystem exists)
    * @private
    */
-  _createButtonPlatformSystems(levelData) {
-    const canvasWidth = levelData.canvasWidth || 1366;
-    const canvasHeight = levelData.canvasHeight || 768;
-    const roomCount = levelData.roomCount || 1;
-
-    // Create WirePortal systems (after room offsets are applied)
-    if (this._pendingWirePortals && this._pendingWirePortals.length > 0) {
-      this._createWirePortalSystemsMultiRoom(
-        canvasWidth,
-        canvasHeight,
-        roomCount,
-      );
-    }
-
-    // Create BtnPlatform systems
+  _parseBtnPlatformSystems(levelData) {
     if (!this._pendingBtnPlatforms || this._pendingBtnPlatforms.length === 0) {
       return;
     }
@@ -424,12 +412,35 @@ export class UserLevel extends BaseLevel {
       );
       this._bpSystems.push(system);
 
+      // Initialize platform collider state on first update
+      system.update();
+
       // Add platforms to entities
       platforms.forEach((platform) => this.entities.add(platform));
       // Button already added to entities
     });
 
     this._pendingBtnPlatforms = [];
+  }
+
+  /**
+   * Create WirePortal systems after room offsets are applied (for multi-room)
+   * @private
+   */
+  _createWirePortalSystems(levelData) {
+    if (!this._pendingWirePortals || this._pendingWirePortals.length === 0) {
+      return;
+    }
+
+    const canvasWidth = levelData.canvasWidth || 1366;
+    const canvasHeight = levelData.canvasHeight || 768;
+    const roomCount = levelData.roomCount || 1;
+
+    this._createWirePortalSystemsMultiRoom(
+      canvasWidth,
+      canvasHeight,
+      roomCount,
+    );
   }
 
   /**
@@ -614,6 +625,8 @@ export class UserLevel extends BaseLevel {
       for (const entity of this.entities) {
         if (entity.type !== "spike" && entity.type !== "ground") entity.draw(p);
       }
+      // Draw BtnPlatform systems while camera translation is active
+      this._bpSystems.forEach((system) => system.draw?.(p));
       p.pop();
 
       // Draw recordSystem UI (outside camera translation)
@@ -623,8 +636,8 @@ export class UserLevel extends BaseLevel {
     } else {
       // Single-room: use default drawing
       super.draw(p);
+      // Draw BtnPlatform systems (no camera translation needed)
+      this._bpSystems.forEach((system) => system.draw?.(p));
     }
-
-    this._bpSystems.forEach((system) => system.draw?.(p));
   }
 }

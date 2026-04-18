@@ -351,8 +351,8 @@ function createSingleRoomConstructor(
   const constructorLines = [
     'this.bgAssetKey = "bgImageDemo2Level";',
     "",
-    `this.entities.add(new Wall(0, 0, 20, ${canvasHeight}));`,
-    `this.entities.add(new Wall(${canvasWidth - 20}, 0, 20, ${canvasHeight}));`,
+    `this.entities.add(new Wall(-100, 0, 120, ${canvasHeight}));`,
+    `this.entities.add(new Wall(${canvasWidth - 20}, 0, 120, ${canvasHeight}));`,
     "this.entities.add(new Ground(0, 0, p.width, 80));",
   ];
 
@@ -494,11 +494,11 @@ function createRoomEntityLines(bucket, roomCount, canvasWidth, canvasHeight) {
   const hasRightExit = bucket.roomIndex < roomCount - 1;
 
   if (!hasLeftExit) {
-    bucket.entityRefs.push(`new Wall(0, 0, 20, ${canvasHeight})`);
+    bucket.entityRefs.push(`new Wall(-100, 0, 120, ${canvasHeight})`);
   }
   if (!hasRightExit) {
     bucket.entityRefs.push(
-      `new Wall(${canvasWidth - 20}, 0, 20, ${canvasHeight})`,
+      `new Wall(${canvasWidth - 20}, 0, 120, ${canvasHeight})`,
     );
   }
   bucket.entityRefs.push("new Ground(0, 0, p.width, 80)");
@@ -691,11 +691,11 @@ function createRoomDefinitions(records, roomCount, canvasWidth, canvasHeight) {
     const hasRightExit = bucket.roomIndex < roomCount - 1;
 
     if (!hasLeftExit) {
-      bucket.entityRefs.push(`new Wall(0, 0, 20, ${canvasHeight})`);
+      bucket.entityRefs.push(`new Wall(-100, 0, 120, ${canvasHeight})`);
     }
     if (!hasRightExit) {
       bucket.entityRefs.push(
-        `new Wall(${canvasWidth - 20}, 0, 20, ${canvasHeight})`,
+        `new Wall(${canvasWidth - 20}, 0, 120, ${canvasHeight})`,
       );
     }
     bucket.entityRefs.push("new Ground(0, 0, p.width, 80)");

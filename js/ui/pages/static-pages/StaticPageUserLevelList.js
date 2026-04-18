@@ -163,7 +163,7 @@ export class StaticPageUserLevelList extends PageBase {
     const viewportHeight = p.height - CARD_START_Y - 60;
     const maxScroll = Math.max(
       0,
-      this._levelList.length * (CARD_HEIGHT + CARD_GAP) - viewportHeight
+      this._levelList.length * (CARD_HEIGHT + CARD_GAP) - viewportHeight,
     );
 
     // 限制滚动范围

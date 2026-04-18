@@ -19,6 +19,7 @@ import { Room } from "../level-design/Room.js";
 import { ButtonSpikeLinkSystem } from "../mechanism-system/demo2/ButtonSpikeLinkSystem.js";
 import { BtnWirePortalSystem } from "../mechanism-system/demo2/BtnWirePortalSystem.js";
 import { ButtonPlatformLinkSystem } from "../mechanism-system/demo2/ButtonPlatformLinkSystem.js";
+import { Assets } from "../AssetsManager.js";
 
 /**
  * UserLevel — Runtime parser for user-created level JSON
@@ -39,6 +40,11 @@ export class UserLevel extends BaseLevel {
     this._bsSystems = [];
     this._wpSystems = [];
     this._bpSystems = [];
+
+    // Multi-room support
+    this._currentRoomIndex = 0;
+    this._transition = null;
+    this._transitionDurationMs = 260;
 
     this.bgAssetKey = "bgImageDemo2Level";
 
@@ -67,7 +73,7 @@ export class UserLevel extends BaseLevel {
 
     // Single-room level: add entities directly
     if (roomCount === 1) {
-      this._parseEntitiesSingleRoom(entities);
+      this._parseEntitiesSingleRoom(entities, canvasHeight);
     } else {
       // Multi-room level: create rooms and apply offsets
       this._parseEntitiesMultiRoom(
@@ -84,7 +90,18 @@ export class UserLevel extends BaseLevel {
    * Parse entities for single-room level
    * @private
    */
-  _parseEntitiesSingleRoom(entities) {
+  _parseEntitiesSingleRoom(entities, canvasHeight = 768) {
+    // Add boundary walls
+    this.entities.add(
+      new Wall(-100, 0, 120, canvasHeight)
+    );
+    this.entities.add(
+      new Wall(1346, 0, 120, canvasHeight)
+    );
+    // Add ground
+    this.entities.add(new Ground(0, 0, this.p.width, 80));
+
+    // Add user-placed entities
     for (const entity of entities) {
       const runtimeEntity = this._createEntity(entity);
       if (runtimeEntity) {
@@ -119,6 +136,26 @@ export class UserLevel extends BaseLevel {
 
     // Create Room objects for each room
     this.rooms = Array.from({ length: roomCount }, () => new Room([]));
+
+    // Add boundary walls and ground to each room
+    for (let roomIndex = 0; roomIndex < roomCount; roomIndex++) {
+      // Add left wall (first room only)
+      if (roomIndex === 0) {
+        this.rooms[roomIndex].entities.add(
+          new Wall(-100, 0, 120, canvasHeight)
+        );
+      }
+      // Add right wall (last room only)
+      if (roomIndex === roomCount - 1) {
+        this.rooms[roomIndex].entities.add(
+          new Wall(1346, 0, 120, canvasHeight)
+        );
+      }
+      // Add ground to every room
+      this.rooms[roomIndex].entities.add(
+        new Ground(0, 0, canvasWidth, 80)
+      );
+    }
 
     // Add entities to respective rooms
     entities.forEach((entity, index) => {
@@ -416,10 +453,167 @@ export class UserLevel extends BaseLevel {
   }
 
   /**
+   * Get camera X position for multi-room levels
+   * @private
+   */
+  _getCameraX(p) {
+    if (!this._transition) return this._currentRoomIndex * p.width;
+    const t = Math.min(
+      1,
+      this._transition.elapsedMs / this._transitionDurationMs,
+    );
+    const eased = this._easeOutCubic(t);
+    const fromX = this._transition.fromRoomIndex * p.width;
+    const toX = this._transition.toRoomIndex * p.width;
+    return fromX + (toX - fromX) * eased;
+  }
+
+  /**
+   * Easing function for room transitions
+   * @private
+   */
+  _easeOutCubic(t) {
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  /**
+   * Update room transition animation
+   * @private
+   */
+  _updateTransition(p) {
+    if (!this._transition) return;
+    this._transition.elapsedMs += p.deltaTime || 16;
+    if (this._transition.elapsedMs >= this._transitionDurationMs)
+      this._transition = null;
+  }
+
+  /**
+   * Check if player crossed room boundary
+   * @private
+   */
+  _checkRoomTransition(p) {
+    if (!this.rooms || this.rooms.length <= 1) return;
+
+    const player = this._player;
+    const room = this.rooms[this._currentRoomIndex];
+    const leftBound = this._currentRoomIndex * p.width;
+    const rightBound = leftBound + p.width;
+    const playerCenterX = player.x + player.collider.w / 2;
+
+    if (playerCenterX > rightBound && room.exit?.right) {
+      this._switchRoom(room.exit.right.targetRoomIndex, "right");
+    } else if (playerCenterX < leftBound && room.exit?.left) {
+      this._switchRoom(room.exit.left.targetRoomIndex, "left");
+    }
+  }
+
+  /**
+   * Switch to a different room
+   * @private
+   */
+  _switchRoom(roomIndex, direction) {
+    if (roomIndex === this._currentRoomIndex) return;
+    const fromRoomIndex = this._currentRoomIndex;
+    this._currentRoomIndex = roomIndex;
+    this._transition = {
+      fromRoomIndex,
+      toRoomIndex: roomIndex,
+      direction,
+      elapsedMs: 0,
+    };
+  }
+
+  /**
+   * Clear canvas and draw background for multi-room levels
+   */
+  clearCanvas(p = this.p, cameraNudgeX = 0, bgParallaxFactor = 1) {
+    // Only override for multi-room levels
+    if (!this.rooms || this.rooms.length <= 1) {
+      // For single-room, use default background
+      p.background(220);
+      return;
+    }
+
+    // Multi-room: draw background for each room
+    const cameraX = this._getCameraX(p);
+    const bgOffsetX = cameraNudgeX * bgParallaxFactor;
+    const bg = Assets.bgImageDemo2Level;
+
+    if (bg) {
+      p.push();
+      p.translate(-cameraX - bgOffsetX, 0);
+      p.scale(1, -1);
+      for (let i = 0; i < this.rooms.length; i++) {
+        const scaleX = p.width / bg.width;
+        const scaleY = p.height / bg.height;
+        const scale = Math.max(scaleX, scaleY) * 1.05;
+        p.image(
+          bg,
+          i * p.width,
+          -p.height,
+          bg.width * scale,
+          bg.height * scale,
+        );
+      }
+      p.pop();
+    } else {
+      p.background(220);
+    }
+  }
+
+  /**
+   * Get view bounds for camera culling
+   */
+  getViewBounds(p = this.p) {
+    const cameraX = this.rooms && this.rooms.length > 1 ? this._getCameraX(p) : 0;
+    return { minX: cameraX, maxX: cameraX + p.width, minY: 0, maxY: p.height };
+  }
+
+  /**
+   * Update collision for multi-room levels
+   */
+  updateCollision(p = this.p, eventBus = this.eventBus) {
+    super.updateCollision(p, eventBus);
+
+    // Only handle room transitions for multi-room levels
+    if (!this.rooms || this.rooms.length <= 1) return;
+
+    if (this._transition) {
+      this._updateTransition(p);
+      return;
+    }
+    this._checkRoomTransition(p);
+  }
+
+  /**
    * Draw composite systems if needed (e.g., BtnPlatform)
    */
   draw(p) {
-    super.draw(p);
+    // Multi-room: use camera translation
+    if (this.rooms && this.rooms.length > 1) {
+      const cameraX = this._getCameraX(p);
+      p.push();
+      p.translate(-cameraX, 0);
+      for (const entity of this.entities) {
+        if (entity.type === "spike") entity.draw(p);
+      }
+      for (const entity of this.entities) {
+        if (entity.type === "ground") entity.draw(p);
+      }
+      for (const entity of this.entities) {
+        if (entity.type !== "spike" && entity.type !== "ground") entity.draw(p);
+      }
+      p.pop();
+
+      // Draw recordSystem UI (outside camera translation)
+      if (this.recordSystem && typeof this.recordSystem.draw === "function") {
+        this.recordSystem.draw(p);
+      }
+    } else {
+      // Single-room: use default drawing
+      super.draw(p);
+    }
+
     this._bpSystems.forEach((system) => system.draw?.(p));
   }
 }

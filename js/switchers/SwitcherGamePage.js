@@ -10,7 +10,10 @@ export class SwitcherGamePage extends SwitcherBase {
 
     // Build page map from the central registry — single source of truth.
     this._pageMap = Object.fromEntries(
-      Object.entries(LEVEL_REGISTRY).map(([id, { PageClass }]) => [id, PageClass])
+      Object.entries(LEVEL_REGISTRY).map(([id, { PageClass }]) => [
+        id,
+        PageClass,
+      ]),
     );
   }
 

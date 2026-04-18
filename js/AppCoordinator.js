@@ -134,6 +134,14 @@ export class AppCoordinator {
     this.eventBus.subscribe(EventTypes.RETURN_LEVEL_CHOICE, () => {
       // Handle user-created levels
       if (this._currentLevelType === "user") {
+        this.switcher.clearOverlay(this.p);
+        if (this.levelManager.level) {
+          this.levelManager.setPaused(false);
+          this.levelManager.unloadLevel(this.p, this.eventBus);
+          this.switcher.gameSwitcher.runtimeLevelManager = null;
+        }
+        this._currentLevelType = null;
+        this._currentUserLevelId = null;
         this.switcher.staticSwitcher.showUserLevelList(this.p);
         return;
       }

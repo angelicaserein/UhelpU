@@ -339,11 +339,13 @@ export class UserLevel extends BaseLevel {
           entityData.portal.w,
           entityData.portal.h,
         );
-        const system = new BtnWirePortalSystem({ button, portal });
-        // WirePortal systems need to be created after multi-room offset application
-        // Store for later creation if multi-room
-        this._wpSystems.push({ button, portal, system, entityData });
-        return [button, portal, new WireRenderer(system)];
+        // WirePortal systems must be created AFTER room offsets applied (multi-room)
+        // Create a temporary WireRenderer; system will be set later
+        const wireRenderer = new WireRenderer(null);
+        // Store for later creation
+        this._pendingWirePortals = this._pendingWirePortals || [];
+        this._pendingWirePortals.push({ button, portal, wireRenderer, entityData });
+        return [button, portal, wireRenderer];
       }
 
       case "BtnPlatform": {
@@ -380,25 +382,26 @@ export class UserLevel extends BaseLevel {
 
   /**
    * Create BtnPlatform systems after initSystems (requires collisionSystem)
+   * Also creates WirePortal systems (after room offsets applied for multi-room)
    * @private
    */
   _createButtonPlatformSystems(levelData) {
-    if (!this._pendingBtnPlatforms || this._pendingBtnPlatforms.length === 0) {
-      return;
-    }
-
     const canvasWidth = levelData.canvasWidth || 1366;
+    const canvasHeight = levelData.canvasHeight || 768;
     const roomCount = levelData.roomCount || 1;
 
-    // If multi-room, re-apply offsets to WirePortal systems
-    if (roomCount > 1 && this._wpSystems.length > 0) {
-      const canvasHeight = levelData.canvasHeight || 768;
+    // Create WirePortal systems (after room offsets are applied)
+    if (this._pendingWirePortals && this._pendingWirePortals.length > 0) {
       this._createWirePortalSystemsMultiRoom(
         canvasWidth,
         canvasHeight,
         roomCount,
       );
-      this._wpSystems = []; // Clear after processing
+    }
+
+    // Create BtnPlatform systems
+    if (!this._pendingBtnPlatforms || this._pendingBtnPlatforms.length === 0) {
+      return;
     }
 
     this._pendingBtnPlatforms.forEach((pending) => {
@@ -434,12 +437,20 @@ export class UserLevel extends BaseLevel {
    * @private
    */
   _createWirePortalSystemsMultiRoom(canvasWidth, canvasHeight, roomCount) {
-    this._wpSystems.forEach((wpData) => {
-      const { button, portal, system } = wpData;
-      // Button and portal are already added to entities with offsets applied
-      // WireRenderer was already created and added
-      // Just ensure system is tracked (already in array)
+    if (!this._pendingWirePortals || this._pendingWirePortals.length === 0) {
+      return;
+    }
+
+    this._pendingWirePortals.forEach((wpData) => {
+      const { button, portal, wireRenderer, entityData } = wpData;
+      // Now button and portal have correct world coordinates (offsets applied)
+      const system = new BtnWirePortalSystem({ button, portal });
+      this._wpSystems.push({ button, portal, system, entityData });
+      // Update WireRenderer to use the newly created system
+      wireRenderer._wireSystem = system;
     });
+
+    this._pendingWirePortals = [];
   }
 
   /**

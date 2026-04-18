@@ -37,6 +37,7 @@ export class AppCoordinator {
       // Check if this is a user-created level
       if (loadRequest?.levelType === "user" || this._currentLevelType === "user") {
         const levelId = loadRequest?.levelId || this._currentUserLevelId;
+        const startCheckpoint = loadRequest?.startCheckpoint || null;
         window.getUserLevel(levelId)
           .then((levelJSON) => {
             try {
@@ -51,7 +52,9 @@ export class AppCoordinator {
                 this.switcher.gameSwitcher.runtimeLevelManager = null;
               }
 
-              this.levelManager.loadLevelInstance(userLevel, this.p);
+              this.levelManager.loadLevelInstance(userLevel, this.p, {
+                startCheckpoint,
+              });
               this.switcher.gameSwitcher.runtimeLevelManager = this.levelManager;
 
               this._currentLevelType = "user";

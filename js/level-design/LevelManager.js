@@ -218,7 +218,7 @@ export class LevelManager {
    * @param {BaseLevel} levelInstance - An instance of a level (typically UserLevel)
    * @param {p5} p - The p5 instance
    */
-  loadLevelInstance(levelInstance, p = this.p) {
+  loadLevelInstance(levelInstance, p = this.p, options = {}) {
     if (!this.level) {
       this.level = levelInstance;
       this.level.__editorPersistenceKey = this.level.levelId || "user_level";
@@ -228,6 +228,8 @@ export class LevelManager {
       this.cameraNudgeX = 0;
       this.startLevelTitleOverlay(this.currentLevelIndex, p);
       this._teleportPointSystem.registerTeleportPoints(this.level.entities);
+      // Restore from checkpoint if provided (same as loadLevel)
+      this._restoreStartCheckpoint(options.startCheckpoint);
       console.log(
         "[LevelManager.loadLevelInstance] Loaded user level:",
         this.currentLevelIndex,

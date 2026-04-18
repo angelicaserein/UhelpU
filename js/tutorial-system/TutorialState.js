@@ -118,8 +118,10 @@ export class GuideRecordState extends BaseTutorialState {
     // 游戏暂停
     setGamePaused(true);
 
-    // 全屏黑幕（不镂空）
-    this.ui.showOverlay({ type: "full" });
+    // 黑幕可按阶段配置镂空矩形
+    this.ui.showOverlay(
+      this.manager.getOverlayOptionsForPhase(TutorialStates.GUIDE_RECORD),
+    );
 
     // 提示居中显示
     this.ui.showPrompt("tutorial_guide_record_msg", {
@@ -146,8 +148,10 @@ export class GuideTimelineState extends BaseTutorialState {
     // 游戏暂停
     setGamePaused(true);
 
-    // 全屏黑幕
-    this.ui.showOverlay({ type: "full" });
+    // 黑幕可按阶段配置镂空矩形
+    this.ui.showOverlay(
+      this.manager.getOverlayOptionsForPhase(TutorialStates.GUIDE_TIMELINE),
+    );
 
     // 提示居中显示
     this.ui.showPrompt("tutorial_guide_timeline_msg", {
@@ -179,7 +183,7 @@ export class RecordingState extends BaseTutorialState {
 
     // 显示提示文字（醒目样式）
     this.ui.showPrompt("tutorial_recording_msg", {
-      position: "top-center",
+      position: "center",
       isPersistent: true,
       isHighlight: true, // 醒目样式
     });
@@ -204,8 +208,10 @@ export class GuideReplayState extends BaseTutorialState {
     // 游戏暂停
     setGamePaused(true);
 
-    // 全屏黑幕（不镂空）
-    this.ui.showOverlay({ type: "full" });
+    // 黑幕可按阶段配置镂空矩形
+    this.ui.showOverlay(
+      this.manager.getOverlayOptionsForPhase(TutorialStates.GUIDE_REPLAY),
+    );
 
     // 提示居中显示
     this.ui.showPrompt("tutorial_guide_replay_msg", {

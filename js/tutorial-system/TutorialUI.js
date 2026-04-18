@@ -125,7 +125,7 @@ export class TutorialUI {
 
     promptBox.style.position = "fixed";
     promptBox.style.zIndex = "5500";
-    promptBox.style.maxWidth = "600px";
+    promptBox.style.maxWidth = "960px";
     promptBox.style.padding = "20px";
     promptBox.style.textAlign = "center";
     promptBox.style.animation = "fadeIn 0.3s ease";
@@ -138,7 +138,7 @@ export class TutorialUI {
           : text
         : text;
 
-    promptBox.textContent = translatedText;
+    this._setPromptContent(promptBox, translatedText);
 
     // 存储原始 text 用于语言切换更新
     promptBox._tutorialTextKey = text;
@@ -197,7 +197,7 @@ export class TutorialUI {
 
         promptBox.style.position = "fixed";
         promptBox.style.zIndex = "5500";
-        promptBox.style.maxWidth = "600px";
+        promptBox.style.maxWidth = "960px";
         promptBox.style.padding = "20px";
         promptBox.style.textAlign = "center";
         promptBox.style.animation = "fadeIn 0.3s ease";
@@ -209,7 +209,7 @@ export class TutorialUI {
               : text
             : text;
 
-        promptBox.textContent = translatedText;
+        this._setPromptContent(promptBox, translatedText);
         promptBox._tutorialTextKey = text;
 
         document.body.appendChild(promptBox);
@@ -236,7 +236,7 @@ export class TutorialUI {
               : box._tutorialTextKey
             : box._tutorialTextKey;
 
-        box.textContent = translatedText;
+        this._setPromptContent(box, translatedText);
       }
     });
 
@@ -270,6 +270,27 @@ export class TutorialUI {
       }
     });
     this._promptBoxes = [];
+  }
+
+  _setPromptContent(promptBox, text) {
+    if (!promptBox) return;
+
+    promptBox.replaceChildren();
+
+    const content = String(text ?? "");
+    const [primaryLine, ...secondaryLines] = content.split("\n");
+
+    const primaryEl = document.createElement("div");
+    primaryEl.className = "tutorial-prompt-primary";
+    primaryEl.textContent = primaryLine || "";
+    promptBox.appendChild(primaryEl);
+
+    if (secondaryLines.length > 0) {
+      const secondaryEl = document.createElement("div");
+      secondaryEl.className = "tutorial-prompt-secondary";
+      secondaryEl.textContent = secondaryLines.join("\n");
+      promptBox.appendChild(secondaryEl);
+    }
   }
 
   /**

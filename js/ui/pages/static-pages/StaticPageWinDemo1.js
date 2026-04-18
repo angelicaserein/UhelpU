@@ -83,7 +83,7 @@ export class StaticPageWinDemo1 extends PageBase {
   enter() {
     super.enter();
 
-    AudioManager.playBGM("gameWin");
+    AudioManager.playSFX("gameWin");
   }
 
   draw() {

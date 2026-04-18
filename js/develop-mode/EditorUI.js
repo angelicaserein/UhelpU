@@ -116,10 +116,10 @@ export class EditorUI {
       h: BTN_H,
     };
     this._btnBox = {
-      x: startX + (BTN_W + BTN_GAP) * 8,
-      y: toolbarTop + BTN_Y_OFFSET,
-      w: BTN_W,
-      h: BTN_H,
+      x: startX + (BTN_W2 + BTN_GAP2) * 7,
+      y: toolbarTop + BTN_Y_OFFSET + BTN_H + 4,
+      w: BTN_W2,
+      h: BTN_H2,
     };
 
     // 第二行按钮
@@ -148,14 +148,20 @@ export class EditorUI {
       w: BTN_W2,
       h: BTN_H2,
     };
-    this._btnSpawn = {
+    this._btnTextPrompt = {
       x: startX + (BTN_W2 + BTN_GAP2) * 4,
       y: row2Top,
       w: BTN_W2,
       h: BTN_H2,
     };
-    this._btnTeleportPoint = {
+    this._btnSpawn = {
       x: startX + (BTN_W2 + BTN_GAP2) * 5,
+      y: row2Top,
+      w: BTN_W2,
+      h: BTN_H2,
+    };
+    this._btnTeleportPoint = {
+      x: startX + (BTN_W2 + BTN_GAP2) * 6,
       y: row2Top,
       w: BTN_W2,
       h: BTN_H2,
@@ -346,6 +352,14 @@ export class EditorUI {
       this.activeTool === EntityTool.ENEMY,
       [100, 200, 100],
     );
+    // TextPrompt 按钮
+    this._drawButton(
+      p,
+      this._btnTextPrompt,
+      "TxtPrompt",
+      this.activeTool === EntityTool.TEXT_PROMPT,
+      [100, 220, 200],
+    );
     // Spawn 按钮
     this._drawButton(
       p,
@@ -418,15 +432,17 @@ export class EditorUI {
                       ? "NPC"
                       : this.activeTool === EntityTool.SIGNBOARD
                         ? "木牌 (Signboard)"
-                        : this.activeTool === EntityTool.CHECKPOINT
-                          ? "存档点 (Checkpoint)"
-                          : this.activeTool === EntityTool.ENEMY
-                            ? "敌人 (Enemy)"
-                            : this.activeTool === EntityTool.SPAWN
-                              ? "出生点 (Spawn)"
-                              : this.activeTool === EntityTool.TELEPORT_POINT
-                                ? "传送点 (TeleportPoint)"
-                                : "传送门 (Portal)";
+                        : this.activeTool === EntityTool.TEXT_PROMPT
+                          ? "文本提示 (TextPrompt)"
+                          : this.activeTool === EntityTool.CHECKPOINT
+                            ? "存档点 (Checkpoint)"
+                            : this.activeTool === EntityTool.ENEMY
+                              ? "敌人 (Enemy)"
+                              : this.activeTool === EntityTool.SPAWN
+                                ? "出生点 (Spawn)"
+                                : this.activeTool === EntityTool.TELEPORT_POINT
+                                  ? "传送点 (TeleportPoint)"
+                                  : "传送门 (Portal)";
     p.text(`正在放置：${toolLabel}`, statusX, statusY);
 
     if (this.activeTool === EntityTool.ENEMY) {
@@ -633,6 +649,11 @@ export class EditorUI {
     // Enemy 按钮
     if (this._insideRect(mx, my, this._btnEnemy)) {
       this.activeTool = EntityTool.ENEMY;
+      return true;
+    }
+    // TextPrompt 按钮
+    if (this._insideRect(mx, my, this._btnTextPrompt)) {
+      this.activeTool = EntityTool.TEXT_PROMPT;
       return true;
     }
     // Spawn 按钮

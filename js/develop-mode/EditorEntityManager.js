@@ -19,6 +19,7 @@ import {
   BTN_PLATFORM_DEFAULTS,
   NPC_SIZE,
   SIGNBOARD_SIZE,
+  TEXT_PROMPT_DEFAULTS,
   CHECKPOINT_SIZE,
   ENEMY_DEFAULTS,
   DELETE_BTN_SIZE,
@@ -36,6 +37,7 @@ import { ButtonSpikeLinkSystem } from "../mechanism-system/demo2/ButtonSpikeLink
 import { ButtonPlatformLinkSystem } from "../mechanism-system/demo2/ButtonPlatformLinkSystem.js";
 import { NPCDemo1 } from "../game-entity-model/interactables/NPCDemo1.js";
 import { SignboardDemo2 } from "../game-entity-model/interactables/SignboardDemo2.js";
+import { TextPrompt } from "../game-entity-model/prompts/TextPrompt.js";
 import { Checkpoint } from "../game-entity-model/interactables/Checkpoint.js";
 import { Enemy } from "../game-entity-model/characters/Enemy.js";
 import { TeleportPoint } from "../game-entity-model/interactables/TeleportPoint.js";
@@ -214,6 +216,14 @@ export class EditorEntityManager {
         SIGNBOARD_SIZE.width,
         SIGNBOARD_SIZE.height,
       );
+    } else if (tool === EntityTool.TEXT_PROMPT) {
+      gameEntity = new TextPrompt(x, y, this._level, {
+        textKey: options.textKey || "todo_text_prompt",
+        width: options.width || TEXT_PROMPT_DEFAULTS.width,
+        height: options.height || TEXT_PROMPT_DEFAULTS.height,
+        textSize: options.textSize || TEXT_PROMPT_DEFAULTS.textSize,
+        lineHeight: options.lineHeight || TEXT_PROMPT_DEFAULTS.lineHeight,
+      });
     } else if (tool === EntityTool.CHECKPOINT) {
       gameEntity = new Checkpoint(
         x,
@@ -337,6 +347,13 @@ export class EditorEntityManager {
       if (record.direction !== undefined) {
         base.direction = record.direction;
       }
+      if (record.tool === EntityTool.TEXT_PROMPT) {
+        base.textKey = record.gameEntity?.textKey || "";
+        base.textPromptWidth = record.gameEntity?._boxWidth;
+        base.textPromptHeight = record.gameEntity?._boxHeight;
+        base.textPromptTextSize = record.gameEntity?._textSizeValue;
+        base.textPromptLineHeight = record.gameEntity?._lineHeight;
+      }
 
       return base;
     });
@@ -428,7 +445,15 @@ export class EditorEntityManager {
         gameEntity.h,
         record.tool === EntityTool.ENEMY
           ? { direction: record.direction }
-          : undefined,
+          : record.tool === EntityTool.TEXT_PROMPT
+            ? {
+                textKey: record.textKey,
+                width: record.textPromptWidth,
+                height: record.textPromptHeight,
+                textSize: record.textPromptTextSize,
+                lineHeight: record.textPromptLineHeight,
+              }
+            : undefined,
       );
       if (restored?.gameEntity) {
         this._applySerializedEntity(restored.gameEntity, gameEntity);
@@ -436,6 +461,9 @@ export class EditorEntityManager {
       if (record.tool === EntityTool.ENEMY && record.direction !== undefined) {
         restored.direction = record.direction;
         restored.gameEntity._direction = record.direction;
+      }
+      if (record.tool === EntityTool.TEXT_PROMPT) {
+        restored.gameEntity.textKey = record.textKey || "";
       }
     }
 
@@ -491,8 +519,7 @@ export class EditorEntityManager {
     for (let i = this._records.length - 1; i >= 0; i--) {
       const rec = this._records[i];
       const e = rec.gameEntity;
-      const w = e.collider ? e.collider.w : 50;
-      const h = e.collider ? e.collider.h : 50;
+      const { w, h } = this._getEntityBounds(e);
       // 删除按钮位于实体右上角偏移
       const bx = e.x + w - bs / 2;
       const by = e.y + h + 2;
@@ -568,14 +595,14 @@ export class EditorEntityManager {
         rec.tool === EntityTool.BTN_PLATFORM ||
         rec.tool === EntityTool.NPC ||
         rec.tool === EntityTool.SIGNBOARD ||
+        rec.tool === EntityTool.TEXT_PROMPT ||
         rec.tool === EntityTool.CHECKPOINT ||
         rec.tool === EntityTool.TELEPORT_POINT ||
         rec.tool === EntityTool.ENEMY
       )
         continue;
       const e = rec.gameEntity;
-      const w = e.collider ? e.collider.w : 0;
-      const h = e.collider ? e.collider.h : 0;
+      const { w, h } = this._getEntityBounds(e, 0, 0);
       if (
         worldX >= e.x &&
         worldX <= e.x + w &&
@@ -641,15 +668,7 @@ export class EditorEntityManager {
       const e = rec.gameEntity;
 
       // 获取实体尺寸
-      let w = 50; // 默认值
-      let h = 50;
-      if (e.collider) {
-        w = e.collider.w;
-        h = e.collider.h;
-      } else if (e.w !== undefined && e.h !== undefined) {
-        w = e.w;
-        h = e.h;
-      }
+      const { w, h } = this._getEntityBounds(e);
 
       // 检查是否在删除按钮区域（右上角）
       const bs = DELETE_BTN_SIZE;
@@ -1156,12 +1175,20 @@ export class EditorEntityManager {
 
   _serializeEntity(entity) {
     if (!entity) return null;
-    return {
+    const serialized = {
       x: entity.x,
       y: entity.y,
-      w: entity.collider?.w ?? entity.w ?? 0,
-      h: entity.collider?.h ?? entity.h ?? 0,
+      w: this._getEntityBounds(entity, 0, 0).w,
+      h: this._getEntityBounds(entity, 0, 0).h,
     };
+    if (entity.type === "textprompt") {
+      serialized.textKey = entity.textKey || "";
+      serialized.textPromptWidth = entity._boxWidth;
+      serialized.textPromptHeight = entity._boxHeight;
+      serialized.textPromptTextSize = entity._textSizeValue;
+      serialized.textPromptLineHeight = entity._lineHeight;
+    }
+    return serialized;
   }
 
   _applySerializedEntity(entity, snapshot) {
@@ -1174,6 +1201,35 @@ export class EditorEntityManager {
     }
     if ("w" in entity) entity.w = snapshot.w;
     if ("h" in entity) entity.h = snapshot.h;
+    if (entity.type === "textprompt") {
+      entity.textKey = snapshot.textKey || entity.textKey || "";
+      if (snapshot.textPromptWidth !== undefined) {
+        entity._boxWidth = snapshot.textPromptWidth;
+      }
+      if (snapshot.textPromptHeight !== undefined) {
+        entity._boxHeight = snapshot.textPromptHeight;
+      }
+      if (snapshot.textPromptTextSize !== undefined) {
+        entity._textSizeValue = snapshot.textPromptTextSize;
+      }
+      if (snapshot.textPromptLineHeight !== undefined) {
+        entity._lineHeight = snapshot.textPromptLineHeight;
+      }
+    }
+  }
+
+  _getEntityBounds(entity, fallbackW = 50, fallbackH = 50) {
+    return {
+      w: entity?.collider?.w ?? entity?._boxWidth ?? entity?.w ?? fallbackW,
+      h: entity?.collider?.h ?? entity?._boxHeight ?? entity?.h ?? fallbackH,
+    };
+  }
+
+  setTextPromptText(record, textKey) {
+    if (!record || record.tool !== EntityTool.TEXT_PROMPT) return false;
+    const text = String(textKey || "").trim();
+    record.gameEntity.textKey = text;
+    return true;
   }
 
   /** 同步物理和碰撞系统的实体引用 */
@@ -1385,8 +1441,7 @@ export class EditorEntityManager {
       }
 
       const e = rec.gameEntity;
-      const w = e.collider ? e.collider.w : 50;
-      const h = e.collider ? e.collider.h : 50;
+      const { w, h } = this._getEntityBounds(e);
       const isSelected = rec === this._selected;
 
       p.push();
@@ -1406,6 +1461,8 @@ export class EditorEntityManager {
         p.stroke(60, 200, 220, 180);
       } else if (rec.tool === EntityTool.SIGNBOARD) {
         p.stroke(200, 160, 80, 180);
+      } else if (rec.tool === EntityTool.TEXT_PROMPT) {
+        p.stroke(100, 220, 200, 180);
       } else if (rec.tool === EntityTool.CHECKPOINT) {
         p.stroke(200, 80, 180, 180);
       } else if (rec.tool === EntityTool.TELEPORT_POINT) {
@@ -1423,6 +1480,7 @@ export class EditorEntityManager {
         rec.tool !== EntityTool.PORTAL &&
         rec.tool !== EntityTool.NPC &&
         rec.tool !== EntityTool.SIGNBOARD &&
+        rec.tool !== EntityTool.TEXT_PROMPT &&
         rec.tool !== EntityTool.CHECKPOINT &&
         rec.tool !== EntityTool.TELEPORT_POINT
       ) {
@@ -1454,6 +1512,9 @@ export class EditorEntityManager {
         p.text("NPC", 3, 3);
       } else if (rec.tool === EntityTool.SIGNBOARD) {
         p.text("Sign", 3, 3);
+      } else if (rec.tool === EntityTool.TEXT_PROMPT) {
+        const brief = rec.gameEntity?.textKey || "(empty)";
+        p.text(`Txt ${brief.slice(0, 18)}`, 3, 3);
       } else if (rec.tool === EntityTool.CHECKPOINT) {
         p.text("CkPt", 3, 3);
       } else if (rec.tool === EntityTool.TELEPORT_POINT) {

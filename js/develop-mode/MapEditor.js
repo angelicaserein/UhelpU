@@ -229,6 +229,20 @@ export class MapEditor {
       return;
     }
 
+    // E 键编辑选中的 TextPrompt 文本
+    if ((e.key === "e" || e.key === "E") && this._entityMgr.selected) {
+      const selected = this._entityMgr.selected;
+      if (selected.tool === EntityTool.TEXT_PROMPT) {
+        const currentText = selected.gameEntity?.textKey || "";
+        const nextText = window.prompt("编辑 TextPrompt 文本", currentText);
+        if (nextText !== null) {
+          this._entityMgr.setTextPromptText(selected, nextText);
+          this._ui.showToast("TextPrompt 文本已更新");
+        }
+      }
+      return;
+    }
+
     // Delete 清空全部
     if (e.key === "Delete") {
       this._entityMgr.clear();
@@ -362,6 +376,16 @@ export class MapEditor {
       const options = {};
       if (this._ui.activeTool === EntityTool.BTN_PLATFORM) {
         options.platformCount = this._ui.btnPlatformCount;
+      }
+      if (this._ui.activeTool === EntityTool.TEXT_PROMPT) {
+        const text = window.prompt(
+          "请输入 TextPrompt 文本（可后续按 E 再编辑）",
+          "todo_text_prompt",
+        );
+        if (text === null) {
+          return;
+        }
+        options.textKey = text;
       }
       this._entityMgr.place(
         this._ui.activeTool,

@@ -2390,7 +2390,7 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
 
 /* 黑幕层 */
 .tutorial-overlay {
-  background: rgba(0, 0, 0, 0.85);
+  background: transparent;
   pointer-events: none;
 }
 
@@ -2516,6 +2516,16 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   font-size: 13px;
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.72);
+  text-align: left;
+}
+
+.auth-form-error-text {
+  width: 100%;
+  margin: 0 auto 16px auto;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #ff8f8f;
   text-align: left;
 }
 

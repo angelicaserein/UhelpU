@@ -1,6 +1,7 @@
 import { GamePageBaseDemo2 } from "../GamePageBaseDemo2.js";
 import { TutorialManager } from "../../../../tutorial-system/TutorialManager.js";
 import { EventTypes } from "../../../../event-system/EventTypes.js";
+import { TutorialStates } from "../../../../tutorial-system/TutorialState.js";
 
 // 自动导入 i18n-tutorial.js 以注册翻译
 import "../../../../i18n/i18n-tutorial.js";
@@ -34,12 +35,61 @@ export class GamePageLevel1 extends GamePageBaseDemo2 {
         "[GamePageLevel1] ✓ Got level instance from window._easyLevel1Current",
       );
 
+      const guideRecordHoleRect = {
+        coordinateSpace: "canvas",
+        x: Math.max(this._p.width - 480, 8),
+        y: 8,
+        width: 320,
+        height: 80,
+        padding: 8,
+      };
+
+      const guideTimelineHoleRect = {
+        coordinateSpace: "canvas",
+        x: 8,
+        y: 8,
+        width: this._p.width - 16,
+        height: 140,
+        padding: 6,
+      };
+
+      const guideReplayHoleRect = {
+        coordinateSpace: "canvas",
+        x: Math.max(this._p.width - 480, 8),
+        y: 8,
+        width: 320,
+        height: 80,
+        padding: 8,
+      };
+
+      const guideReplayBottomLeftRect = {
+        coordinateSpace: "canvas",
+        x: 460,
+        y: Math.max(this._p.height - 148, 8),
+        width: 120,
+        height: 100,
+        padding: 8,
+      };
+
       this.tutorial = new TutorialManager(
         document.body,
         this._level,
         this._level.recordSystem,
         this.switcher.eventBus,
         this._p, // 传递 p5 实例
+        {
+          overlayConfig: {
+            [TutorialStates.GUIDE_RECORD]: {
+              visibleRects: [guideRecordHoleRect],
+            },
+            [TutorialStates.GUIDE_TIMELINE]: {
+              visibleRects: [guideTimelineHoleRect],
+            },
+            [TutorialStates.GUIDE_REPLAY]: {
+              visibleRects: [guideReplayHoleRect, guideReplayBottomLeftRect],
+            },
+          },
+        },
       );
 
       this._onTutorialStartRequested = () => {

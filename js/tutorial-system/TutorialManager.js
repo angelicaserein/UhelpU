@@ -34,6 +34,7 @@ export class TutorialManager {
     recordSystem,
     eventBus,
     p5Instance = null,
+    options = {},
   ) {
     this.gamePageContainer = gamePageContainer;
     this.level = level;
@@ -46,6 +47,7 @@ export class TutorialManager {
 
     // UI 系统
     this.ui = new TutorialUI(this.p, gamePageContainer);
+    this._overlayConfig = options.overlayConfig || {};
 
     // 状态管理
     this._currentPhase = TutorialStates.IDLE;
@@ -64,6 +66,11 @@ export class TutorialManager {
 
     // ESC 全局处理
     this._globalEscHandler = null;
+
+    // 视口变化时需要重新计算镂空区域
+    this._resizeHandler = () => {
+      this._refreshCurrentPhaseOverlay();
+    };
 
     console.log("[TutorialManager] ✓ Initialized");
   }
@@ -112,6 +119,76 @@ export class TutorialManager {
       width: width,
       height: height,
     };
+  }
+
+  /**
+   * 获取某个教程阶段的黑幕配置。
+   * 默认全屏黑幕；配置了 visibleRects 后会自动挖空。
+   */
+  getOverlayOptionsForPhase(phaseType) {
+    const phaseConfig = this._overlayConfig?.[phaseType];
+    if (!phaseConfig) {
+      return { type: "full" };
+    }
+
+    const visibleRects = Array.isArray(phaseConfig.visibleRects)
+      ? phaseConfig.visibleRects
+          .map((rect) => this._resolveOverlayRect(rect))
+          .filter(Boolean)
+      : [];
+
+    if (visibleRects.length === 0) {
+      return { type: "full" };
+    }
+
+    return {
+      type: "partial",
+      visibleRects,
+    };
+  }
+
+  /**
+   * 运行时更新某个阶段的黑幕配置。
+   */
+  setOverlayConfigForPhase(phaseType, config) {
+    this._overlayConfig[phaseType] = config || null;
+    this._refreshCurrentPhaseOverlay();
+  }
+
+  _resolveOverlayRect(rectConfig) {
+    if (!rectConfig) return null;
+
+    const width = Number(rectConfig.width ?? rectConfig.w) || 0;
+    const height = Number(rectConfig.height ?? rectConfig.h) || 0;
+    if (width <= 0 || height <= 0) {
+      return null;
+    }
+
+    const x = Number(rectConfig.x) || 0;
+    const y = Number(rectConfig.y) || 0;
+    const paddingX = Number(rectConfig.paddingX ?? rectConfig.padding) || 0;
+    const paddingY = Number(rectConfig.paddingY ?? rectConfig.padding) || 0;
+    const coordinateSpace =
+      rectConfig.coordinateSpace || rectConfig.space || "window";
+
+    const baseRect =
+      coordinateSpace === "canvas"
+        ? this._canvasToWindowCoords(x, y, width, height)
+        : { x, y, width, height };
+
+    return {
+      x: baseRect.x - paddingX,
+      y: baseRect.y - paddingY,
+      width: baseRect.width + paddingX * 2,
+      height: baseRect.height + paddingY * 2,
+    };
+  }
+
+  _refreshCurrentPhaseOverlay() {
+    const overlayOptions = this.getOverlayOptionsForPhase(this._currentPhase);
+    if (this.ui?.getOverlay()?.isVisible()) {
+      this.ui.showOverlay(overlayOptions);
+    }
   }
 
   /**
@@ -184,6 +261,7 @@ export class TutorialManager {
     this._setupKeyboardListeners();
     this._setupRecordSystemPolling();
     this._setupGlobalEscHandler();
+    window.addEventListener("resize", this._resizeHandler);
 
     // 禁用暂停菜单
     this._disablePauseMenu();
@@ -271,6 +349,7 @@ export class TutorialManager {
     this._cleanupKeyboardListeners();
     this._cleanupRecordSystemPolling();
     this._cleanupGlobalEscHandler();
+    window.removeEventListener("resize", this._resizeHandler);
 
     // 恢复开始状态
     this._restorePauseMenu();
@@ -322,6 +401,7 @@ export class TutorialManager {
       this._cleanupKeyboardListeners();
       this._cleanupRecordSystemPolling();
       this._cleanupGlobalEscHandler();
+      window.removeEventListener("resize", this._resizeHandler);
       this._restorePauseMenu();
       this._restoreRecordSystem(); // ← 恢复 RecordSystem
       setGamePaused(false);

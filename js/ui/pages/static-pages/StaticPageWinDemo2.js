@@ -134,7 +134,7 @@ export class StaticPageWinDemo2 extends PageBase {
   enter() {
     super.enter();
 
-    AudioManager.playBGM("gameWin");
+    AudioManager.playSFX("gameWin");
 
     // 底部提示条 HTML（类似 LanguageChoice 风格）
     const hintBar = this.p.createDiv(

@@ -3,19 +3,17 @@ import { soundManager } from "./sound/SoundManager.js";
 const TRACKS = {
   menu: "assets/audio/bgm/menu.mp3",
   setting: "assets/audio/bgm/setting.mp3",
-  level1: "assets/audio/bgm/level1.mp3",
-  level2: "assets/audio/bgm/level2.mp3",
-  level3: "assets/audio/bgm/level3.mp3",
-  level4: "assets/audio/bgm/level4.mp3",
-  level5: "assets/audio/bgm/level5.mp3",
-  level6: "assets/audio/bgm/level6.mp3",
-  level7: "assets/audio/bgm/level7.mp3",
-  level8: "assets/audio/bgm/level8.mp3",
-  level9: "assets/audio/bgm/level9.mp3",
-  level10: "assets/audio/bgm/level10.mp3",
+  level1: "assets/audio/bgm/level/level1.mp3",
+  level2: "assets/audio/bgm/level/level2.mp3",
+  level3: "assets/audio/bgm/level/level3.mp3",
+  level4: "assets/audio/bgm/level/level4.mp3",
+  level5: "assets/audio/bgm/level/level5.mp3",
+  level6: "assets/audio/bgm/level/level6.mp3",
+  level7: "assets/audio/bgm/level/level7.mp3",
+  level8: "assets/audio/bgm/level/level8.mp3",
+  level9: "assets/audio/bgm/level/level9.mp3",
+  level10: "assets/audio/bgm/level/level10.mp3",
   levelChoice: "assets/audio/bgm/levelchoice.mp3",
-  gameOver: "assets/audio/bgm/gameover.mp3",
-  gameWin: "assets/audio/bgm/gamewin.mp3",
   openingStory: "assets/audio/bgm/openingstory.mp3",
   achieves: "assets/audio/bgm/achieves.mp3",
 };
@@ -23,6 +21,7 @@ const TRACKS = {
 const SFX_TRACKS = {
   click: "assets/audio/sxf/click.mp3",
   dead: "assets/audio/sxf/dead.mp3",
+  gameWin: "assets/audio/sxf/gamewin.mp3",
 };
 
 const clamp01 = (value) => Math.max(0, Math.min(1, Number(value) || 0));

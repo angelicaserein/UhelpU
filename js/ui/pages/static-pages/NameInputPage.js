@@ -288,6 +288,21 @@ export class NameInputPage extends PageBase {
     passwordHint.addClass("auth-form-helper-text");
     passwordHint.parent(dialog);
 
+    const formError = p.createDiv("");
+    formError.addClass("auth-form-error-text");
+    formError.style("display", "none");
+    formError.parent(dialog);
+
+    const showFormError = (message) => {
+      formError.html(message);
+      formError.style("display", "block");
+    };
+
+    const clearFormError = () => {
+      formError.html("");
+      formError.style("display", "none");
+    };
+
     const btnRow = p.createDiv("");
     btnRow.style("display", "flex");
     btnRow.style("gap", "12px");
@@ -302,20 +317,29 @@ export class NameInputPage extends PageBase {
       const email = emailInput.value().trim();
       const password = passwordInput.value();
 
+      clearFormError();
+
       if (!username) {
-        alert(t("name_input_empty"));
+        showFormError(t("name_input_empty"));
+        usernameInput.elt.focus();
         return;
       }
       if (username.length > 12) {
-        alert(t("name_input_too_long"));
+        showFormError(t("name_input_too_long"));
+        usernameInput.elt.focus();
         return;
       }
       if (!email || !password) {
-        alert(t("name_input_empty"));
+        showFormError(t("name_input_empty"));
+        if (!email) {
+          emailInput.elt.focus();
+        } else {
+          passwordInput.elt.focus();
+        }
         return;
       }
       if (password.length < MIN_PASSWORD_LENGTH) {
-        alert(t("auth_password_too_short"));
+        showFormError(t("auth_password_too_short"));
         passwordInput.elt.focus();
         return;
       }
@@ -334,13 +358,21 @@ export class NameInputPage extends PageBase {
           return;
         }
 
-        overlay.remove();
-        await this._doRegister(username, email, password);
+        const registerResult = await this._doRegister(
+          username,
+          email,
+          password,
+        );
+        if (registerResult.success) {
+          overlay.remove();
+        } else {
+          showFormError(registerResult.errorMessage);
+        }
       } catch (err) {
         console.error("[NameInputPage] Register check error:", err);
         confirmBtn.removeAttribute("disabled");
         confirmBtn.elt.style.opacity = "1";
-        alert(t("name_check_error"));
+        showFormError(t("name_check_error"));
       }
     });
 
@@ -378,6 +410,21 @@ export class NameInputPage extends PageBase {
     message.style("line-height", "1.6");
     message.parent(dialog);
 
+    const formError = p.createDiv("");
+    formError.addClass("auth-form-error-text");
+    formError.style("display", "none");
+    formError.parent(dialog);
+
+    const showFormError = (messageText) => {
+      formError.html(messageText);
+      formError.style("display", "block");
+    };
+
+    const clearFormError = () => {
+      formError.html("");
+      formError.style("display", "none");
+    };
+
     const btnRow = p.createDiv("");
     btnRow.style("display", "flex");
     btnRow.style("gap", "15px");
@@ -388,9 +435,21 @@ export class NameInputPage extends PageBase {
     confirmBtn.addClass("name-duplicate-confirm-btn");
     confirmBtn.parent(btnRow);
     confirmBtn.mousePressed(async () => {
-      overlay.remove();
+      clearFormError();
+      confirmBtn.attribute("disabled", "true");
+      confirmBtn.elt.style.opacity = "0.5";
+
       const finalName = username + "#" + (count + 1);
-      await this._doRegister(finalName, email, password);
+      const registerResult = await this._doRegister(finalName, email, password);
+
+      confirmBtn.removeAttribute("disabled");
+      confirmBtn.elt.style.opacity = "1";
+
+      if (registerResult.success) {
+        overlay.remove();
+      } else {
+        showFormError(registerResult.errorMessage);
+      }
     });
 
     const cancelBtn = p.createButton(t("name_duplicate_cancel_btn"));
@@ -421,9 +480,14 @@ export class NameInputPage extends PageBase {
       } else {
         this.switcher.showWorldSelect(this.p);
       }
+
+      return { success: true };
     } catch (err) {
       console.error("[NameInputPage] Registration error:", err);
-      alert(this._getRegisterErrorMessage(err));
+      return {
+        success: false,
+        errorMessage: this._getRegisterErrorMessage(err),
+      };
     }
   }
 

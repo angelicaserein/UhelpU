@@ -24,7 +24,6 @@ export class StaticPageResultDemo1 extends PageBase {
   enter() {
     super.enter();
 
-    AudioManager.playBGM("gameOver");
     document.addEventListener("keydown", this._onKeyDown);
   }
 

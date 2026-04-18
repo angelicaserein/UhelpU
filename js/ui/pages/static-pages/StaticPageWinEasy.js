@@ -135,7 +135,7 @@ export class StaticPageWinEasy extends PageBase {
   enter() {
     super.enter();
 
-    AudioManager.playBGM("gameWin");
+    AudioManager.playSFX("gameWin");
 
     // 加载排行榜数据（等待1秒确保成绩已上报）
     setTimeout(() => {

@@ -14,6 +14,7 @@ export const EntityTool = Object.freeze({
   BTN_PLATFORM: "btnPlatform",
   NPC: "npc",
   SIGNBOARD: "signboard",
+  TEXT_PROMPT: "textPrompt",
   CHECKPOINT: "checkpoint",
   ENEMY: "enemy",
   SPAWN: "spawn",
@@ -117,6 +118,14 @@ export const NPC_SIZE = {
 export const SIGNBOARD_SIZE = {
   width: 100,
   height: 65,
+};
+
+/** TextPrompt 默认大小 */
+export const TEXT_PROMPT_DEFAULTS = {
+  width: 280,
+  height: 72,
+  textSize: 14,
+  lineHeight: 18,
 };
 
 /** Checkpoint 固定大小 */

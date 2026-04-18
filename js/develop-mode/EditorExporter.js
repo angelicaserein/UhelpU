@@ -23,6 +23,7 @@ const NORMAL_TOOL_ORDER = [
   EntityTool.PORTAL,
   EntityTool.NPC,
   EntityTool.SIGNBOARD,
+  EntityTool.TEXT_PROMPT,
   EntityTool.CHECKPOINT,
   EntityTool.TELEPORT_POINT,
   EntityTool.ENEMY,
@@ -37,6 +38,7 @@ const TOOL_LABELS = {
   [EntityTool.PORTAL]: "Portal",
   [EntityTool.NPC]: "NPCDemo2",
   [EntityTool.SIGNBOARD]: "SignboardDemo2",
+  [EntityTool.TEXT_PROMPT]: "TextPrompt",
   [EntityTool.CHECKPOINT]: "CheckpointDemo2",
   [EntityTool.TELEPORT_POINT]: "TeleportPoint",
   [EntityTool.ENEMY]: "Enemy",
@@ -71,6 +73,16 @@ function getSpawn(spawn) {
 
 function toCodeString(value) {
   return JSON.stringify(value);
+}
+
+function getTextPromptConfig(entity) {
+  return {
+    textKey: entity?.textKey || "todo_text_prompt",
+    width: entity?._boxWidth ?? 280,
+    height: entity?._boxHeight ?? 72,
+    textSize: entity?._textSizeValue ?? 14,
+    lineHeight: entity?._lineHeight ?? 18,
+  };
 }
 
 function clampRoomIndex(index, roomCount) {
@@ -113,6 +125,9 @@ function getEntityImportList(records) {
   }
   if (normalTools.has(EntityTool.SIGNBOARD)) {
     imports.push("SignboardDemo2");
+  }
+  if (normalTools.has(EntityTool.TEXT_PROMPT)) {
+    imports.push("TextPrompt");
   }
   if (normalTools.has(EntityTool.CHECKPOINT)) {
     imports.push("CheckpointDemo2");
@@ -189,6 +204,11 @@ function createNormalEntityStatement(
     case EntityTool.SIGNBOARD: {
       const { w, h } = getEntitySize(entity, 100, 65);
       return `${scope}.add(new SignboardDemo2(${entity.x}, ${entity.y}, ${w}, ${h}, () => this._player, this.eventBus, { textKey: ${toCodeString("todo_signboard_text_key")} }));`;
+    }
+
+    case EntityTool.TEXT_PROMPT: {
+      const config = getTextPromptConfig(entity);
+      return `${scope}.add(new TextPrompt(${entity.x}, ${entity.y}, this, { textKey: ${toCodeString(config.textKey)}, width: ${config.width}, height: ${config.height}, textSize: ${config.textSize}, lineHeight: ${config.lineHeight} }));`;
     }
 
     case EntityTool.CHECKPOINT: {
@@ -530,6 +550,14 @@ function createRoomEntityLines(bucket, roomCount, canvasWidth, canvasHeight) {
           break;
         }
 
+        case EntityTool.TEXT_PROMPT: {
+          const config = getTextPromptConfig(entity);
+          bucket.entityRefs.push(
+            `new TextPrompt(${localX}, ${entity.y}, this, { textKey: ${toCodeString(config.textKey)}, width: ${config.width}, height: ${config.height}, textSize: ${config.textSize}, lineHeight: ${config.lineHeight} })`,
+          );
+          break;
+        }
+
         case EntityTool.CHECKPOINT: {
           const { w, h } = getEntitySize(entity, 40, 70);
           bucket.entityRefs.push(
@@ -715,6 +743,14 @@ function createRoomDefinitions(records, roomCount, canvasWidth, canvasHeight) {
             const { w, h } = getEntitySize(entity, 100, 65);
             bucket.entityRefs.push(
               `new SignboardDemo2(${localX}, ${entity.y}, ${w}, ${h}, () => this._player, this.eventBus, { textKey: ${toCodeString("todo_signboard_text_key")} })`,
+            );
+            break;
+          }
+
+          case EntityTool.TEXT_PROMPT: {
+            const config = getTextPromptConfig(entity);
+            bucket.entityRefs.push(
+              `new TextPrompt(${localX}, ${entity.y}, this, { textKey: ${toCodeString(config.textKey)}, width: ${config.width}, height: ${config.height}, textSize: ${config.textSize}, lineHeight: ${config.lineHeight} })`,
             );
             break;
           }

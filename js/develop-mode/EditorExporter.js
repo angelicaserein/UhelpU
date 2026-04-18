@@ -1,7 +1,7 @@
 /**
- * EditorExporter — 将编辑器放置的实体导出为可粘贴的代码
+ * EditorExporter — Export editor-placed entities as copyable code
  *
- * 生成的代码格式完全匹配项目现有实体构造方式：
+ * Generated code format fully matches project's existing entity construction:
  *   new Ground(x, y, w, h)
  *   new Portal(x, y, w, h)
  *   new Platform(x, y, w, h)
@@ -1007,7 +1007,258 @@ export class EditorExporter {
   }
 
   /**
-   * 将放置记录转换为代码字符串
+   * Serialize editor records to user-level JSON format
+   * @param {import('./EditorEntityManager.js').PlacedRecord[]} records
+   * @param {number} [roomCount=1]
+   * @param {number} [canvasWidth=1366]
+   * @param {number} [canvasHeight=768]
+   * @param {object} [spawn] - { x, y, w, h }
+   * @param {object} [meta] - { title, authorName }
+   * @returns {string} JSON string
+   */
+  static generateJSON(
+    records,
+    roomCount = 1,
+    canvasWidth = 1366,
+    canvasHeight = 768,
+    spawn = null,
+    meta = {},
+  ) {
+    const normalizedSpawn = getSpawn(spawn);
+    const levelId = `level_${Date.now()}`;
+    const createdAt = new Date().toISOString();
+
+    // Build entity array
+    const entities = [];
+    const entityIndexMap = new Map(); // track positions for room mapping
+
+    records.forEach((record, recordIndex) => {
+      const entity = record.gameEntity;
+      let entityObj = null;
+
+      switch (record.tool) {
+        case EntityTool.GROUND:
+        case EntityTool.PLATFORM:
+        case EntityTool.WALL:
+        case EntityTool.BOX:
+          entityObj = {
+            type: TOOL_LABELS[record.tool],
+            x: entity.x,
+            y: entity.y,
+            w: entity.collider.w,
+            h: entity.collider.h,
+          };
+          break;
+
+        case EntityTool.SPIKE:
+          entityObj = {
+            type: "Spike",
+            x: entity.x,
+            y: entity.y,
+            w: entity.collider.w,
+            h: entity.collider.h,
+          };
+          break;
+
+        case EntityTool.PORTAL: {
+          const { w, h } = getEntitySize(entity, 50, 50);
+          entityObj = {
+            type: "Portal",
+            x: entity.x,
+            y: entity.y,
+            w,
+            h,
+            open: !!entity.isOpen,
+          };
+          break;
+        }
+
+        case EntityTool.CHECKPOINT: {
+          const { w, h } = getEntitySize(entity, 40, 70);
+          entityObj = {
+            type: "Checkpoint",
+            x: entity.x,
+            y: entity.y,
+            w,
+            h,
+          };
+          break;
+        }
+
+        case EntityTool.TELEPORT_POINT: {
+          const { w, h } = getEntitySize(entity, 40, 70);
+          entityObj = {
+            type: "TeleportPoint",
+            x: entity.x,
+            y: entity.y,
+            w,
+            h,
+          };
+          break;
+        }
+
+        case EntityTool.TEXT_PROMPT: {
+          const { w, h } = getEntitySize(entity, 40, 40);
+          entityObj = {
+            type: "TextPrompt",
+            x: entity.x,
+            y: entity.y,
+            w,
+            h,
+            text: entity.textKey || entity.text || "todo",
+          };
+          break;
+        }
+
+        case EntityTool.ENEMY: {
+          const { w, h } = getEntitySize(entity, 40, 40);
+          const speed = entity?._speed ?? 2;
+          const direction = record.direction ?? entity?._direction ?? 1;
+          entityObj = {
+            type: "Enemy",
+            x: entity.x,
+            y: entity.y,
+            w,
+            h,
+            speed,
+            direction,
+          };
+          break;
+        }
+
+        case EntityTool.BTN_SPIKE: {
+          const button = record.gameEntity;
+          const spike = record.spikeEntity;
+          const buttonSize = getEntitySize(button, 34, 16);
+          const spikeSize = getEntitySize(spike, 100, 20);
+          entityObj = {
+            type: "BtnSpike",
+            button: {
+              x: button.x,
+              y: button.y,
+              w: buttonSize.w,
+              h: buttonSize.h,
+            },
+            spike: {
+              x: spike.x,
+              y: spike.y,
+              w: spikeSize.w,
+              h: spikeSize.h,
+            },
+            colorIndex: record.startColorIndex ?? recordIndex,
+          };
+          break;
+        }
+
+        case EntityTool.WIRE_PORTAL: {
+          const button = record.gameEntity;
+          const portal = record.portalEntity;
+          const buttonSize = getEntitySize(button, 34, 16);
+          const portalSize = getEntitySize(portal, 50, 50);
+          entityObj = {
+            type: "WirePortal",
+            button: {
+              x: button.x,
+              y: button.y,
+              w: buttonSize.w,
+              h: buttonSize.h,
+            },
+            portal: {
+              x: portal.x,
+              y: portal.y,
+              w: portalSize.w,
+              h: portalSize.h,
+            },
+            colorIndex: record.startColorIndex ?? recordIndex,
+          };
+          break;
+        }
+
+        case EntityTool.BTN_PLATFORM: {
+          const button = record.gameEntity;
+          const platforms = record.platformEntities || [];
+          const platformLinks = record.platformLinks || [];
+          const buttonSize = getEntitySize(button, 34, 16);
+          const platformConfigs = platforms.map((platform, platformIndex) => {
+            const size = getEntitySize(platform, 160, 30);
+            const mode = platformLinks[platformIndex]?.mode || "disappear";
+            return {
+              x: platform.x,
+              y: platform.y,
+              w: size.w,
+              h: size.h,
+              mode,
+            };
+          });
+          entityObj = {
+            type: "BtnPlatform",
+            button: {
+              x: button.x,
+              y: button.y,
+              w: buttonSize.w,
+              h: buttonSize.h,
+            },
+            platforms: platformConfigs,
+            colorIndex: record.startColorIndex ?? recordIndex,
+          };
+          break;
+        }
+
+        default:
+          console.warn(`[EditorExporter.generateJSON] Unsupported tool: ${record.tool}`);
+          return;
+      }
+
+      if (entityObj) {
+        entityIndexMap.set(recordIndex, entities.length);
+        entities.push(entityObj);
+      }
+    });
+
+    // Build rooms array for multi-room levels
+    let roomsArray = null;
+    if (roomCount > 1) {
+      const roomBuckets = buildRoomBuckets(records, roomCount, canvasWidth);
+      roomsArray = roomBuckets.map((bucket, roomIndex) => {
+        const entityIndices = [];
+        records.forEach((record, recordIndex) => {
+          if (entityIndexMap.has(recordIndex)) {
+            // Check if record belongs to this room
+            const sourceEntity = record.gameEntity;
+            const recordRoomIndex = getRoomIndexFromX(sourceEntity.x, roomCount, canvasWidth);
+            if (recordRoomIndex === roomIndex) {
+              entityIndices.push(entityIndexMap.get(recordIndex));
+            }
+          }
+        });
+        return { roomIndex, entityIndices };
+      });
+    }
+
+    // Build final JSON structure
+    const levelData = {
+      meta: {
+        id: levelId,
+        title: meta.title || "Untitled Level",
+        authorName: meta.authorName || "Anonymous",
+        createdAt,
+      },
+      roomCount,
+      canvasWidth,
+      canvasHeight,
+      spawn: normalizedSpawn,
+      entities,
+    };
+
+    if (roomsArray) {
+      levelData.rooms = roomsArray;
+    }
+
+    return JSON.stringify(levelData, null, 2);
+  }
+
+  /**
+   * Convert placement records to code string
    * @param {import('./EditorEntityManager.js').PlacedRecord[]} records
    * @returns {string}
    */
@@ -1117,9 +1368,9 @@ export class EditorExporter {
   }
 
   /**
-   * 生成代码并复制到剪贴板
+   * Generate code and copy to clipboard
    * @param {import('./EditorEntityManager.js').PlacedRecord[]} records
-   * @returns {Promise<string>} 生成的代码
+   * @returns {Promise<string>} Generated code
    */
   static async copyToClipboard(
     records,
@@ -1140,7 +1391,7 @@ export class EditorExporter {
     try {
       await navigator.clipboard.writeText(code);
     } catch (_e) {
-      // 降级：使用旧版 API
+      // Fallback: use legacy API
       const textarea = document.createElement("textarea");
       textarea.value = code;
       textarea.style.position = "fixed";
@@ -1153,3 +1404,4 @@ export class EditorExporter {
     return code;
   }
 }
+

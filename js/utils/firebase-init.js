@@ -152,3 +152,214 @@ async function _getLeaderboardFallback(levelId, limitCount) {
     throw error; // 重新抛出错误，让UI显示网络连接错误
   }
 }
+
+/**
+ * 上传用户自制关卡
+ */
+window.uploadUserLevel = async (levelJSON, authorName, title) => {
+  console.log(`[Firebase] uploadUserLevel: "${title}" by "${authorName}"`);
+
+  if (!levelJSON || typeof levelJSON !== "string") {
+    console.error("[Firebase] levelJSON must be a valid JSON string");
+    return false;
+  }
+
+  try {
+    // 解析 levelJSON 获取 meta.id
+    let levelData;
+    try {
+      levelData = JSON.parse(levelJSON);
+    } catch (parseError) {
+      console.error("[Firebase] Invalid levelJSON format:", parseError);
+      return false;
+    }
+
+    const levelId = levelData.meta?.id;
+    if (!levelId) {
+      console.error("[Firebase] levelJSON missing meta.id");
+      return false;
+    }
+
+    const createdAt = levelData.meta?.createdAt || new Date().toISOString();
+
+    const docData = {
+      fields: {
+        id: { stringValue: levelId },
+        title: { stringValue: title.trim() },
+        authorName: { stringValue: authorName.trim() },
+        createdAt: { stringValue: createdAt },
+        levelData: { stringValue: levelJSON },
+      },
+    };
+
+    const url = `${FIRESTORE_API}/userLevels/${levelId}?key=${API_KEY}`;
+
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(docData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    console.log(`[Firebase] ✓ User level uploaded! ID: ${levelId}`);
+    return true;
+  } catch (error) {
+    console.error("[Firebase] Error uploading user level:", error);
+    return false;
+  }
+};
+
+/**
+ * 获取用户自制关卡列表
+ */
+window.getUserLevelList = async () => {
+  console.log("[Firebase] getUserLevelList");
+
+  try {
+    const allDocs = [];
+    let pageToken = null;
+
+    // 翻页获取所有关卡
+    do {
+      let url = `${FIRESTORE_API}/userLevels?key=${API_KEY}&pageSize=100`;
+      if (pageToken) url += `&pageToken=${encodeURIComponent(pageToken)}`;
+
+      const response = await fetch(url);
+      if (!response.ok) {
+        console.warn(`[Firebase] Fetch failed: ${response.status}`);
+        throw new Error(`Network request failed: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      if (data.documents && Array.isArray(data.documents)) {
+        allDocs.push(...data.documents);
+      }
+      pageToken = data.nextPageToken || null;
+    } while (pageToken);
+
+    console.log(`[Firebase] Fetched ${allDocs.length} user levels`);
+
+    // 提取必要字段并排序
+    const levelList = allDocs
+      .map((doc) => {
+        const fields = doc.fields || {};
+        return {
+          id: fields.id?.stringValue || "",
+          title: fields.title?.stringValue || "Untitled",
+          authorName: fields.authorName?.stringValue || "Anonymous",
+          createdAt: fields.createdAt?.stringValue || "",
+        };
+      })
+      .sort((a, b) => {
+        // 按 createdAt 倒序（最新的在前）
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+
+    console.log(`[Firebase] ✓ User level list ready: ${levelList.length} levels`);
+    return levelList;
+  } catch (error) {
+    console.error("[Firebase] Error fetching user level list:", error);
+    return [];
+  }
+};
+
+/**
+ * 获取单个用户自制关卡数据
+ */
+window.getUserLevel = async (levelId) => {
+  console.log(`[Firebase] getUserLevel: ${levelId}`);
+
+  if (!levelId) {
+    console.error("[Firebase] levelId is required");
+    return null;
+  }
+
+  try {
+    const url = `${FIRESTORE_API}/userLevels/${levelId}?key=${API_KEY}`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        console.warn(`[Firebase] Level not found: ${levelId}`);
+        return null;
+      }
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const levelDataStr = data.fields?.levelData?.stringValue;
+
+    if (!levelDataStr) {
+      console.warn("[Firebase] levelData field not found");
+      return null;
+    }
+
+    console.log(`[Firebase] ✓ User level loaded: ${levelId}`);
+    return levelDataStr;
+  } catch (error) {
+    console.error("[Firebase] Error fetching user level:", error);
+    return null;
+  }
+};
+
+/**
+ * 删除用户自制关卡（需要权限验证）
+ */
+window.deleteUserLevel = async (levelId, authorName) => {
+  console.log(`[Firebase] deleteUserLevel: ${levelId}`);
+
+  if (!levelId) {
+    console.error("[Firebase] levelId is required");
+    return false;
+  }
+
+  try {
+    // 先获取文档验证 authorName
+    const url = `${FIRESTORE_API}/userLevels/${levelId}?key=${API_KEY}`;
+
+    const getResponse = await fetch(url);
+
+    if (!getResponse.ok) {
+      if (getResponse.status === 404) {
+        console.warn("[Firebase] Level not found");
+        return false;
+      }
+      throw new Error(`HTTP ${getResponse.status}: ${getResponse.statusText}`);
+    }
+
+    const data = await getResponse.json();
+    const docAuthorName = data.fields?.authorName?.stringValue;
+
+    // 验证权限
+    if (docAuthorName !== authorName) {
+      console.warn(
+        `[Firebase] Permission denied: expected "${authorName}", got "${docAuthorName}"`,
+      );
+      return false;
+    }
+
+    // 执行删除
+    const deleteResponse = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!deleteResponse.ok) {
+      throw new Error(`HTTP ${deleteResponse.status}: ${deleteResponse.statusText}`);
+    }
+
+    console.log(`[Firebase] ✓ User level deleted: ${levelId}`);
+    return true;
+  } catch (error) {
+    console.error("[Firebase] Error deleting user level:", error);
+    return false;
+  }
+};

@@ -1,12 +1,12 @@
 /**
- * EditorUI — 编辑器底部工具栏 UI
+ * EditorUI — Editor bottom toolbar UI
  *
- * 负责：
- *   - 绘制底部工具栏（Ground / Portal 按钮、当前状态提示、保存按钮）
- *   - Ground 宽度/高度滑块
- *   - 处理工具栏区域的鼠标点击
+ * Responsible for:
+ *   - Draw bottom toolbar (Ground / Portal buttons, current status hint, save button)
+ *   - Ground width/height sliders
+ *   - Handle mouse clicks in toolbar area
  *
- * 所有绘制和坐标均在 **屏幕空间**（p5 原始坐标，未翻转）执行。
+ * All drawing and coordinates executed in **screen space** (p5 original coordinates, not flipped).
  */
 
 import {
@@ -15,16 +15,16 @@ import {
   CAMERA_MOVE_SPEED,
 } from "./EditorConfig.js";
 
-// ── 内部布局常量 ──────────────────────────────────────────────
-// ── 第一行按钮尺寸
-// ── 第二行按钮尺寸稍小
+// ── Internal layout constants ──────────────────────────────────────────────
+// ── First row button size
+// ── Second row button size slightly smaller
 const BTN_W = 110;
 const BTN_H = 36;
 const BTN_W2 = 100;
 const BTN_H2 = 30;
 const BTN_GAP = 14;
 const BTN_GAP2 = 10;
-const BTN_Y_OFFSET = 4; // 第一行按钮距工具栏顶部
+const BTN_Y_OFFSET = 4; // First row button distance from toolbar top
 
 const SAVE_BTN_W = 90;
 const SAVE_BTN_H = 36;
@@ -63,7 +63,7 @@ export class EditorUI {
     this._btnPlatformModePanel = null;
     this.onToggleBtnPlatformMode = null;
 
-    // ── 预计算按钮矩形 ──────────────────────────────────────
+    // ── Pre-calculate button rectangles ──────────────────────────────────
     const toolbarTop = this._ch - TOOLBAR_HEIGHT;
     const startX = 20;
 
@@ -122,7 +122,7 @@ export class EditorUI {
       h: BTN_H2,
     };
 
-    // 第二行按钮
+    // Second row buttons
     const row2Top = toolbarTop + BTN_Y_OFFSET + BTN_H + 4;
     this._btnNpc = {
       x: startX,
@@ -167,7 +167,7 @@ export class EditorUI {
       h: BTN_H2,
     };
 
-    // BtnPlatform 平台数量 +/- 按钮（第二行，Spawn 按钮右侧）
+    // BtnPlatform platform count +/- buttons (second row, right of Spawn button)
     const PLAT_COUNT_BTN_W = 28;
     const platCountStartX = this._btnSpawn.x + BTN_W2 + BTN_GAP2 + 10;
     this._btnPlatCountMinus = {
@@ -185,7 +185,7 @@ export class EditorUI {
     this._platCountLabelX = platCountStartX + PLAT_COUNT_BTN_W + 4 + 15;
     this._platCountLabelY = row2Top + BTN_H2 / 2;
 
-    // 保存按钮 — 右侧
+    // Save button — right side
     this._btnSave = {
       x: this._cw - SAVE_BTN_W - 20,
       y: toolbarTop + BTN_Y_OFFSET,
@@ -193,7 +193,7 @@ export class EditorUI {
       h: BTN_H,
     };
 
-    // 摄像机左/右移动按钮 — 屏幕左右两侧垂直居中（在工具栏上方区域）
+    // Camera left/right movement buttons — both sides of screen vertically centered (in toolbar upper area)
     const camBtnY = (this._ch - TOOLBAR_HEIGHT) / 2 - CAM_BTN_H / 2;
     this._btnCamLeft = {
       x: 6,
@@ -208,7 +208,7 @@ export class EditorUI {
       h: CAM_BTN_H,
     };
 
-    // 房间管理按钮 — 保存按钮左侧
+    // Room management buttons — left of save button
     const ROOM_BTN_W = 80;
     this._btnDelRoom = {
       x: this._btnSave.x - ROOM_BTN_W - BTN_GAP,
@@ -223,27 +223,27 @@ export class EditorUI {
       h: BTN_H,
     };
 
-    /** 房间管理回调（由 MapEditor 注入） */
+    /** Room management callbacks (injected by MapEditor) */
     this.onAddRoom = null;
     this.onDelRoom = null;
 
-    /** 当前房间数量（用于显示，由 MapEditor 设置） */
+    /** Current room count (used for display, set by MapEditor) */
     this.roomCount = 2;
 
     this._rebuildBtnPlatformModeButtons();
   }
 
   // ══════════════════════════════════════════════════════════════
-  // 绘制
+  // Draw
   // ══════════════════════════════════════════════════════════════
 
   draw(p) {
     p.push();
-    p.resetMatrix(); // 回到屏幕空间
+    p.resetMatrix(); // Back to screen space
 
     const toolbarTop = this._ch - TOOLBAR_HEIGHT;
 
-    // 工具栏背景
+    // Toolbar background
     p.fill(30, 30, 35, 220);
     p.noStroke();
     p.rect(0, toolbarTop, this._cw, TOOLBAR_HEIGHT);
@@ -251,28 +251,28 @@ export class EditorUI {
     p.strokeWeight(1);
     p.line(0, toolbarTop, this._cw, toolbarTop);
 
-    // Ground 按钮
+    // Ground button
     this._drawButton(
       p,
       this._btnGround,
       "Ground",
       this.activeTool === EntityTool.GROUND,
     );
-    // Portal 按钮
+    // Portal button
     this._drawButton(
       p,
       this._btnPortal,
       "Portal",
       this.activeTool === EntityTool.PORTAL,
     );
-    // Platform 按钮
+    // Platform button
     this._drawButton(
       p,
       this._btnPlatform,
       "Platform",
       this.activeTool === EntityTool.PLATFORM,
     );
-    // Spike 按钮
+    // Spike button
     this._drawButton(
       p,
       this._btnSpike,
@@ -280,7 +280,7 @@ export class EditorUI {
       this.activeTool === EntityTool.SPIKE,
       [180, 60, 60],
     );
-    // Wall 按钮
+    // Wall button
     this._drawButton(
       p,
       this._btnWall,
@@ -288,7 +288,7 @@ export class EditorUI {
       this.activeTool === EntityTool.WALL,
       [100, 100, 120],
     );
-    // WirePortal 按钮
+    // WirePortal button
     this._drawButton(
       p,
       this._btnWirePortal,
@@ -296,7 +296,7 @@ export class EditorUI {
       this.activeTool === EntityTool.WIRE_PORTAL,
       [180, 100, 240],
     );
-    // BtnSpike 按钮
+    // BtnSpike button
     this._drawButton(
       p,
       this._btnBtnSpike,
@@ -304,7 +304,7 @@ export class EditorUI {
       this.activeTool === EntityTool.BTN_SPIKE,
       [240, 160, 30],
     );
-    // BtnPlatform 按钮
+    // BtnPlatform button
     this._drawButton(
       p,
       this._btnBtnPlatform,
@@ -312,7 +312,7 @@ export class EditorUI {
       this.activeTool === EntityTool.BTN_PLATFORM,
       [60, 180, 140],
     );
-    // Box 按钮
+    // Box button
     this._drawButton(
       p,
       this._btnBox,
@@ -320,7 +320,7 @@ export class EditorUI {
       this.activeTool === EntityTool.BOX,
       [200, 140, 100],
     );
-    // NPC 按钮
+    // NPC button
     this._drawButton(
       p,
       this._btnNpc,
@@ -328,7 +328,7 @@ export class EditorUI {
       this.activeTool === EntityTool.NPC,
       [60, 200, 220],
     );
-    // Signboard 按钮
+    // Signboard button
     this._drawButton(
       p,
       this._btnSignboard,
@@ -336,7 +336,7 @@ export class EditorUI {
       this.activeTool === EntityTool.SIGNBOARD,
       [200, 160, 80],
     );
-    // Checkpoint 按钮
+    // Checkpoint button
     this._drawButton(
       p,
       this._btnCheckpoint,
@@ -344,7 +344,7 @@ export class EditorUI {
       this.activeTool === EntityTool.CHECKPOINT,
       [200, 80, 180],
     );
-    // Enemy 按钮
+    // Enemy button
     this._drawButton(
       p,
       this._btnEnemy,
@@ -352,7 +352,7 @@ export class EditorUI {
       this.activeTool === EntityTool.ENEMY,
       [100, 200, 100],
     );
-    // TextPrompt 按钮
+    // TextPrompt button
     this._drawButton(
       p,
       this._btnTextPrompt,
@@ -360,7 +360,7 @@ export class EditorUI {
       this.activeTool === EntityTool.TEXT_PROMPT,
       [100, 220, 200],
     );
-    // Spawn 按钮
+    // Spawn button
     this._drawButton(
       p,
       this._btnSpawn,
@@ -368,7 +368,7 @@ export class EditorUI {
       this.activeTool === EntityTool.SPAWN,
       [255, 180, 0],
     );
-    // TeleportPoint 按钮
+    // TeleportPoint button
     this._drawButton(
       p,
       this._btnTeleportPoint,
@@ -377,18 +377,18 @@ export class EditorUI {
       [100, 180, 255],
     );
 
-    // BtnPlatform 平台数量控制（仅在 BtnPlatform 工具激活时显示）
+    // BtnPlatform platform count control (only show when BtnPlatform tool is active)
     if (this.activeTool === EntityTool.BTN_PLATFORM) {
-      // 标题
+      // Title
       p.fill(180, 220, 255);
       p.noStroke();
       p.textSize(11);
       p.textAlign(p.CENTER, p.BOTTOM);
-      p.text("平台数量", this._platCountLabelX, this._btnPlatCountMinus.y - 2);
+      p.text("Platform Count", this._platCountLabelX, this._btnPlatCountMinus.y - 2);
 
-      // - 按钮
+      // - button
       this._drawButton(p, this._btnPlatCountMinus, "−", false, [180, 80, 80]);
-      // 数量显示
+      // Count display
       p.fill(255);
       p.noStroke();
       p.textSize(15);
@@ -398,7 +398,7 @@ export class EditorUI {
         this._platCountLabelX,
         this._platCountLabelY,
       );
-      // + 按钮
+      // + button
       this._drawButton(p, this._btnPlatCountPlus, "+", false, [80, 180, 80]);
     }
 
@@ -406,7 +406,7 @@ export class EditorUI {
       this._drawBtnPlatformModePanel(p);
     }
 
-    // 状态提示
+    // Status hint
     const statusX = this._btnSpawn.x + BTN_W2 + 20;
     const statusY = toolbarTop + TOOLBAR_HEIGHT / 2 + 8;
     p.fill(200);
@@ -415,51 +415,51 @@ export class EditorUI {
     p.textAlign(p.LEFT, p.CENTER);
     const toolLabel =
       this.activeTool === EntityTool.GROUND
-        ? "地面 (Ground)"
+        ? "Ground (Ground)"
         : this.activeTool === EntityTool.PLATFORM
-          ? "平台 (Platform)"
+          ? "Platform (Platform)"
           : this.activeTool === EntityTool.SPIKE
-            ? "地刺 (Spike)"
+            ? "Spike (Spike)"
             : this.activeTool === EntityTool.WALL
-              ? "墙壁 (Wall)"
+              ? "Wall (Wall)"
               : this.activeTool === EntityTool.WIRE_PORTAL
-                ? "按钮传送门 (WirePortal)"
+                ? "Button Portal (WirePortal)"
                 : this.activeTool === EntityTool.BTN_SPIKE
-                  ? "按钮地刺 (BtnSpike)"
+                  ? "Button Spike (BtnSpike)"
                   : this.activeTool === EntityTool.BTN_PLATFORM
-                    ? `按钮消失平台 ×${this.btnPlatformCount} (BtnPlatform)`
+                    ? `Button Disappearing Platform ×${this.btnPlatformCount} (BtnPlatform)`
                     : this.activeTool === EntityTool.NPC
                       ? "NPC"
                       : this.activeTool === EntityTool.SIGNBOARD
-                        ? "木牌 (Signboard)"
+                        ? "Signboard (Signboard)"
                         : this.activeTool === EntityTool.TEXT_PROMPT
-                          ? "文本提示 (TextPrompt)"
+                          ? "Text Prompt (TextPrompt)"
                           : this.activeTool === EntityTool.CHECKPOINT
-                            ? "存档点 (Checkpoint)"
+                            ? "Checkpoint (Checkpoint)"
                             : this.activeTool === EntityTool.ENEMY
-                              ? "敌人 (Enemy)"
+                              ? "Enemy (Enemy)"
                               : this.activeTool === EntityTool.SPAWN
-                                ? "出生点 (Spawn)"
+                                ? "Spawn Point (Spawn)"
                                 : this.activeTool === EntityTool.TELEPORT_POINT
-                                  ? "传送点 (TeleportPoint)"
-                                  : "传送门 (Portal)";
-    p.text(`正在放置：${toolLabel}`, statusX, statusY);
+                                  ? "Teleport Point (TeleportPoint)"
+                                  : "Portal (Portal)";
+    p.text(`Placing: ${toolLabel}`, statusX, statusY);
 
     if (this.activeTool === EntityTool.ENEMY) {
       p.fill(170, 220, 170);
       p.textSize(12);
       p.textAlign(p.LEFT, p.CENTER);
-      p.text("提示：放置后选中敌人按 F 可翻转方向", statusX, statusY + 18);
+      p.text("Tip: After placing, select enemy and press F to flip direction", statusX, statusY + 18);
     }
 
-    // 保存按钮
-    this._drawButton(p, this._btnSave, "💾 保存", false, [60, 180, 100]);
+    // Save button
+    this._drawButton(p, this._btnSave, "💾 Save", false, [60, 180, 100]);
 
-    // 房间管理按钮
+    // Room management buttons
     this._drawButton(p, this._btnAddRoom, "+ Room", false, [60, 140, 180]);
     this._drawButton(p, this._btnDelRoom, "- Room", false, [180, 100, 60]);
 
-    // 房间数量标签
+    // Room count label
     p.fill(180, 220, 255);
     p.noStroke();
     p.textSize(11);
@@ -470,7 +470,7 @@ export class EditorUI {
       this._btnAddRoom.y - 2,
     );
 
-    // 摄像机左右移动按钮
+    // Camera left/right movement buttons
     this._drawCamButton(p, this._btnCamLeft, "◀", this._camLeftPressed);
     this._drawCamButton(p, this._btnCamRight, "▶", this._camRightPressed);
 
@@ -507,7 +507,7 @@ export class EditorUI {
     p.text(label, rect.x + rect.w / 2, rect.y + rect.h / 2);
   }
 
-  /** 绘制摄像机方向按钮 */
+  /** Draw camera direction button */
   _drawCamButton(p, rect, label, pressed) {
     const hover = this._insideRect(p.mouseX, p.mouseY, rect);
     if (pressed) {
@@ -542,10 +542,10 @@ export class EditorUI {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // 交互
+  // Interaction
   // ══════════════════════════════════════════════════════════════
 
-  /** 鼠标按下事件（屏幕坐标）。返回 true 表示事件被工具栏消费。 */
+  /** Mouse press event (screen coordinates). Returns true means event consumed by toolbar. */
   handleMousePressed(mx, my) {
     if (this._btnPlatformModePanel) {
       for (const btn of this._btnPlatformModeButtons) {
@@ -561,62 +561,62 @@ export class EditorUI {
       }
     }
 
-    // 摄像机左移按钮
+    // Camera left move button
     if (this._insideRect(mx, my, this._btnCamLeft)) {
       this._camLeftPressed = true;
       return true;
     }
-    // 摄像机右移按钮
+    // Camera right move button
     if (this._insideRect(mx, my, this._btnCamRight)) {
       this._camRightPressed = true;
       return true;
     }
-    // Ground 按钮
+    // Ground button
     if (this._insideRect(mx, my, this._btnGround)) {
       this.activeTool = EntityTool.GROUND;
       return true;
     }
-    // Portal 按钮
+    // Portal button
     if (this._insideRect(mx, my, this._btnPortal)) {
       this.activeTool = EntityTool.PORTAL;
       return true;
     }
-    // Platform 按钮
+    // Platform button
     if (this._insideRect(mx, my, this._btnPlatform)) {
       this.activeTool = EntityTool.PLATFORM;
       return true;
     }
-    // Spike 按钮
+    // Spike button
     if (this._insideRect(mx, my, this._btnSpike)) {
       this.activeTool = EntityTool.SPIKE;
       return true;
     }
-    // Wall 按钮
+    // Wall button
     if (this._insideRect(mx, my, this._btnWall)) {
       this.activeTool = EntityTool.WALL;
       return true;
     }
-    // WirePortal 按钮
+    // WirePortal button
     if (this._insideRect(mx, my, this._btnWirePortal)) {
       this.activeTool = EntityTool.WIRE_PORTAL;
       return true;
     }
-    // BtnSpike 按钮
+    // BtnSpike button
     if (this._insideRect(mx, my, this._btnBtnSpike)) {
       this.activeTool = EntityTool.BTN_SPIKE;
       return true;
     }
-    // BtnPlatform 按钮
+    // BtnPlatform button
     if (this._insideRect(mx, my, this._btnBtnPlatform)) {
       this.activeTool = EntityTool.BTN_PLATFORM;
       return true;
     }
-    // Box 按钮
+    // Box button
     if (this._insideRect(mx, my, this._btnBox)) {
       this.activeTool = EntityTool.BOX;
       return true;
     }
-    // BtnPlatform 平台数量 +/- 按钮
+    // BtnPlatform platform count +/- buttons
     if (
       this.activeTool === EntityTool.BTN_PLATFORM &&
       this._insideRect(mx, my, this._btnPlatCountMinus)
@@ -631,75 +631,75 @@ export class EditorUI {
       if (this.btnPlatformCount < 8) this.btnPlatformCount++;
       return true;
     }
-    // NPC 按钮
+    // NPC button
     if (this._insideRect(mx, my, this._btnNpc)) {
       this.activeTool = EntityTool.NPC;
       return true;
     }
-    // Signboard 按钮
+    // Signboard button
     if (this._insideRect(mx, my, this._btnSignboard)) {
       this.activeTool = EntityTool.SIGNBOARD;
       return true;
     }
-    // Checkpoint 按钮
+    // Checkpoint button
     if (this._insideRect(mx, my, this._btnCheckpoint)) {
       this.activeTool = EntityTool.CHECKPOINT;
       return true;
     }
-    // Enemy 按钮
+    // Enemy button
     if (this._insideRect(mx, my, this._btnEnemy)) {
       this.activeTool = EntityTool.ENEMY;
       return true;
     }
-    // TextPrompt 按钮
+    // TextPrompt button
     if (this._insideRect(mx, my, this._btnTextPrompt)) {
       this.activeTool = EntityTool.TEXT_PROMPT;
       return true;
     }
-    // Spawn 按钮
+    // Spawn button
     if (this._insideRect(mx, my, this._btnSpawn)) {
       this.activeTool = EntityTool.SPAWN;
       return true;
     }
-    // TeleportPoint 按钮
+    // TeleportPoint button
     if (this._insideRect(mx, my, this._btnTeleportPoint)) {
       this.activeTool = EntityTool.TELEPORT_POINT;
       return true;
     }
-    // 添加房间按钮
+    // Add room button
     if (this._insideRect(mx, my, this._btnAddRoom)) {
       if (this.onAddRoom) this.onAddRoom();
       return true;
     }
-    // 删除房间按钮
+    // Delete room button
     if (this._insideRect(mx, my, this._btnDelRoom)) {
       if (this.onDelRoom) this.onDelRoom();
       return true;
     }
-    // 保存按钮
+    // Save button
     if (this._insideRect(mx, my, this._btnSave)) {
       if (this.onSave) this.onSave();
       return true;
     }
-    // 点击在工具栏区域内 → 消费事件但不做动作
+    // Click in toolbar area → consume event but no action
     if (my >= this._ch - TOOLBAR_HEIGHT) return true;
     return false;
   }
 
-  /** 鼠标拖拽（屏幕坐标） */
+  /** Mouse drag (screen coordinates) */
   handleMouseDragged(_mx, _my) {
     return false;
   }
 
-  /** 鼠标释放 */
+  /** Mouse release */
   handleMouseReleased() {
     this._camLeftPressed = false;
     this._camRightPressed = false;
   }
 
   /**
-   * 获取当前摄像机移动方向（每帧调用）
-   * @returns {number} -1 左移, +1 右移, 0 无
+   * Get current camera move direction (called each frame)
+   * @returns {number} -1 move left, +1 move right, 0 none
    */
   getCameraMoveDirection() {
     if (this._camLeftPressed) return -1;
@@ -707,17 +707,17 @@ export class EditorUI {
     return 0;
   }
 
-  /** 显示 toast 提示 */
+  /** Show toast hint */
   showToast(text, durationMs = 2000) {
     this._toast = { text, endTime: Date.now() + durationMs };
   }
 
-  /** 鼠标是否在工具栏区域内 */
+  /** Whether mouse is inside toolbar area */
   isInsideToolbar(mx, my) {
     return my >= this._ch - TOOLBAR_HEIGHT;
   }
 
-  // ── 内部工具方法 ──────────────────────────────────────────
+  // ── Internal utility methods ──────────────────────────────────
 
   _insideRect(mx, my, rect) {
     return (

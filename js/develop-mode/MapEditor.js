@@ -1,16 +1,16 @@
 /**
- * MapEditor — 极简地图实体编辑器（主协调器）
+ * MapEditor — Minimal map entity editor (main coordinator)
  *
- * 使用方法：
- *   在需要编辑的关卡（如 Level10）中：
+ * Usage:
+ *   In the level you want to edit (e.g. Level10):
  *   1. import { MapEditor } from "../../develop-mode/MapEditor.js";
- *   2. 在构造函数末尾: this._mapEditor = new MapEditor(this);
- *   3. 在 draw() 末尾:  this._mapEditor.draw(p);
+ *   2. At the end of constructor: this._mapEditor = new MapEditor(this);
+ *   3. At the end of draw():  this._mapEditor.draw(p);
  *
- * 设计原则：
- *   - 不修改 Level10 原有逻辑，仅在渲染层叠加
- *   - 所有编辑器 UI 在屏幕空间绘制（resetMatrix）
- *   - 所有实体预览/已放置实体在世界空间绘制（与关卡相同坐标系）
+ * Design principles:
+ *   - Do not modify Level10's original logic, only overlay on render layer
+ *   - All editor UI drawn in screen space (resetMatrix)
+ *   - All entity previews/placed entities drawn in world space (same coordinate system as level)
  */
 
 import { EditorUI } from "./EditorUI.js";
@@ -34,7 +34,7 @@ const EDITOR_SESSION_STORE = new Map();
 
 export class MapEditor {
   /**
-   * @param {object} level  — 宿主关卡实例（需要有 p, _getCameraX 等属性/方法）
+   * @param {object} level - Host level instance (must have p, _getCameraX properties/methods)
    */
   constructor(level) {
     this._level = level;
@@ -46,10 +46,10 @@ export class MapEditor {
     this._entityMgr = new EditorEntityManager(level);
     this._sessionKey = this._getSessionKey();
 
-    /** 编辑器手动摄像机偏移（叠加在关卡摄像机之上，单位：世界像素） */
+    /** Editor manual camera offset (stacked on level camera, unit: world pixels) */
     this._cameraOffset = 0;
 
-    // 玩家出生点（从关卡的 _player 读取初始值，若无则使用默认值）
+    // Player spawn point (read initial value from level._player, use default if not present)
     const player = level._player;
     this._spawnX = player ? player._startX : SPAWN_DEFAULTS.x;
     this._spawnY = player ? player._startY : SPAWN_DEFAULTS.y;
@@ -57,12 +57,12 @@ export class MapEditor {
       player && player.collider ? player.collider.w : SPAWN_DEFAULTS.playerW;
     this._spawnPlayerH =
       player && player.collider ? player.collider.h : SPAWN_DEFAULTS.playerH;
-    /** 是否正在拖拽出生点标记 */
+    /** Whether currently dragging spawn marker */
     this._draggingSpawn = false;
     this._spawnDragOffsetX = 0;
     this._spawnDragOffsetY = 0;
 
-    // 劫持关卡的 _getCameraX，让关卡自身的 draw/clearCanvas 也应用编辑器偏移
+    // Hijack level's _getCameraX so level's draw/clearCanvas also applies editor offset
     this._originalGetCameraX =
       typeof level._getCameraX === "function"
         ? level._getCameraX.bind(level)
@@ -75,7 +75,7 @@ export class MapEditor {
       };
     }
 
-    // 房间管理
+    // Room management
     this._roomCount = DEFAULT_ROOM_COUNT;
     this._ui.roomCount = this._roomCount;
     this._ui.onAddRoom = () => this._addRoom();
@@ -83,16 +83,16 @@ export class MapEditor {
     this._ui.onToggleBtnPlatformMode = (platformIdx) =>
       this._toggleSelectedBtnPlatformMode(platformIdx);
 
-    // 注入保存回调
+    // Inject save callback
     this._ui.onSave = () => this._handleSave();
 
-    // 绑定键盘/鼠标事件
+    // Bind keyboard/mouse events
     this._boundKeyPressed = (e) => this._onKeyPressed(e);
     this._boundMousePressed = () => this._onMousePressed();
     this._boundMouseDragged = () => this._onMouseDragged();
     this._boundMouseReleased = () => this._onMouseReleased();
 
-    // 用 p5 实例注册事件（不覆盖原有事件，用 addEventListener）
+    // Register events with p5 instance (don't override existing events, use addEventListener)
     document.addEventListener("keydown", this._boundKeyPressed);
     const canvas = this._p.canvas || this._p.drawingContext?.canvas;
     if (canvas) {
@@ -104,28 +104,28 @@ export class MapEditor {
     this._restoreSessionSnapshot();
   }
 
-  /** 编辑器是否激活 */
+  /** Whether editor is active */
   get active() {
     return this._active;
   }
 
-  /** 外部直接激活编辑器（跳过同帧的 M 键 toggle） */
+  /** Externally activate editor (skip M key toggle on same frame) */
   activate() {
     this._active = true;
     this._skipNextToggle = true;
   }
 
   // ══════════════════════════════════════════════════════════════
-  // 每帧绘制 — 在 Level 的 draw() 结束后调用
+  // Draw each frame — called at end of Level's draw()
   // ══════════════════════════════════════════════════════════════
 
   /**
-   * @param {object} p — p5 实例
+   * @param {object} p - p5 instance
    */
   draw(p) {
     if (!this._active) return;
 
-    // 每帧根据按钮按住状态累加摄像机偏移
+    // Each frame accumulate camera offset based on button press state
     const camDir = this._ui.getCameraMoveDirection();
     if (camDir !== 0) {
       this._cameraOffset += camDir * CAMERA_MOVE_SPEED;
@@ -133,7 +133,7 @@ export class MapEditor {
 
     const cameraX = this._getCameraX(p);
 
-    // ── 更新预览位置 ─────────────────────────────────────
+    // ── Update preview position ─────────────────────────────────────
     this._preview.update(
       p.mouseX,
       p.mouseY,
@@ -151,53 +151,53 @@ export class MapEditor {
         this._entityMgr.selected !== null,
     );
 
-    // ── 更新编辑器放置的机制系统 ───────────────────────────
+    // ── Update mechanism system placed by editor ───────────────────────────
     for (const rec of this._entityMgr.getAll()) {
       if (rec.platformLinkSystem) rec.platformLinkSystem.update();
     }
 
-    // ── 世界空间绘制 ────────────────────────────────────
-    // 此时 LevelManager 已经做了 flipY（Y 轴已翻转），
-    // 只需再加上摄像机平移即可进入世界坐标系
+    // ── Draw in world space ────────────────────────────────────
+    // At this point LevelManager has already done flipY (Y axis already flipped),
+    // just need to add camera translation to enter world coordinates
     p.push();
     p.translate(-cameraX, 0);
 
-    // 绘制房间边界和自动墙壁指示
+    // Draw room boundaries and auto-wall indicators
     this._drawRoomBoundaries(p);
 
-    // 绘制出生点标记
+    // Draw spawn marker
     this._drawSpawnMarker(p);
 
-    // 绘制已放置的实体
+    // Draw placed entities
     this._entityMgr.draw(p);
 
-    // 绘制消失平台的半透明效果
+    // Draw semi-transparent effect of disappearing platforms
     for (const rec of this._entityMgr.getAll()) {
       if (rec.platformLinkSystem) rec.platformLinkSystem.draw(p);
     }
 
-    // 绘制预览
+    // Draw preview
     this._preview.draw(p, this._ui.activeTool);
 
-    // 绘制网格辅助线（轻量）
+    // Draw grid helper lines (lightweight)
     this._drawGrid(p, cameraX);
 
     p.pop();
 
-    // ── 屏幕空间绘制 UI ──────────────────────────────────
+    // ── Draw UI in screen space ──────────────────────────────
     this._ui.setBtnPlatformInspector(this._entityMgr.selected);
     this._ui.draw(p);
 
-    // 编辑模式标识
+    // Edit mode badge
     this._drawEditorBadge(p);
   }
 
   // ══════════════════════════════════════════════════════════════
-  // 事件处理
+  // Event handling
   // ══════════════════════════════════════════════════════════════
 
   _onKeyPressed(e) {
-    // M 键切换编辑模式
+    // M key toggle edit mode
     if (e.key === "m" || e.key === "M") {
       if (this._skipNextToggle) {
         this._skipNextToggle = false;
@@ -210,43 +210,43 @@ export class MapEditor {
 
     if (!this._active) return;
 
-    // Ctrl+Z 撤销
+    // Ctrl+Z undo
     if (e.ctrlKey && (e.key === "z" || e.key === "Z")) {
       this._entityMgr.undoLast();
       return;
     }
 
-    // F 键翻转选中 Enemy 的方向
+    // F key flip direction of selected Enemy
     if ((e.key === "f" || e.key === "F") && this._entityMgr.selected) {
       const selected = this._entityMgr.selected;
       if (selected.tool === EntityTool.ENEMY) {
         selected.direction = selected.direction === 1 ? -1 : 1;
         selected.gameEntity._direction = selected.direction;
         this._ui.showToast(
-          `敌人方向已切换为 ${selected.direction === 1 ? "→" : "←"}`,
+          `Enemy direction switched to ${selected.direction === 1 ? "→" : "←"}`,
         );
       }
       return;
     }
 
-    // E 键编辑选中的 TextPrompt 文本
+    // E key edit text of selected TextPrompt
     if ((e.key === "e" || e.key === "E") && this._entityMgr.selected) {
       const selected = this._entityMgr.selected;
       if (selected.tool === EntityTool.TEXT_PROMPT) {
         const currentText = selected.gameEntity?.textKey || "";
-        const nextText = window.prompt("编辑 TextPrompt 文本", currentText);
+        const nextText = window.prompt("Edit TextPrompt text:", currentText);
         if (nextText !== null) {
           this._entityMgr.setTextPromptText(selected, nextText);
-          this._ui.showToast("TextPrompt 文本已更新");
+          this._ui.showToast("TextPrompt text updated");
         }
       }
       return;
     }
 
-    // Delete 清空全部
+    // Delete clear all
     if (e.key === "Delete") {
       this._entityMgr.clear();
-      this._ui.showToast("已清空所有编辑器实体");
+      this._ui.showToast("All editor entities cleared");
     }
   }
 
@@ -259,7 +259,7 @@ export class MapEditor {
 
     this._ui.setBtnPlatformInspector(this._entityMgr.selected);
 
-    // 先让 UI 处理（按钮）
+    // Let UI handle first (buttons)
     const preserveSelection = this._ui.isInsideBtnPlatformInspector(mx, my);
     if (this._ui.handleMousePressed(mx, my)) {
       if (!preserveSelection) {
@@ -268,12 +268,12 @@ export class MapEditor {
       return;
     }
 
-    // 屏幕 → 世界坐标
+    // Screen → world coordinates
     const cameraX = this._getCameraX(p);
     const worldX = mx + cameraX;
     const worldY = p.height - my;
 
-    // 0) 检查是否点击了出生点标记 → 开始拖拽
+    // 0) Check if clicked on spawn marker → start dragging
     if (this._isInsideSpawnMarker(worldX, worldY)) {
       this._draggingSpawn = true;
       this._spawnDragOffsetX = worldX - this._spawnX;
@@ -282,38 +282,38 @@ export class MapEditor {
       return;
     }
 
-    // 0.5) Spawn 工具模式：点击空白区域重新设置出生点
+    // 0.5) Spawn tool mode: click blank area to reset spawn point
     if (this._ui.activeTool === EntityTool.SPAWN) {
       this._spawnX = Math.round(worldX / GRID_SIZE) * GRID_SIZE;
       this._spawnY = Math.round(worldY / GRID_SIZE) * GRID_SIZE;
       this._applySpawnToPlayer();
-      this._ui.showToast(`出生点已设置为 (${this._spawnX}, ${this._spawnY})`);
+      this._ui.showToast(`Spawn set to (${this._spawnX}, ${this._spawnY})`);
       return;
     }
 
-    // 1) 检查是否点击了某个实体的删除按钮
+    // 1) Check if clicked on delete button of an entity
     const delTarget = this._entityMgr.getDeleteBtnHit(worldX, worldY);
     if (delTarget) {
       this._entityMgr.remove(delTarget);
-      this._ui.showToast("已删除实体");
+      this._ui.showToast("Entity deleted");
       return;
     }
 
-    // 2) 检查是否点击了选中实体的拖拽手柄
+    // 2) Check if clicked on drag handle of selected entity
     const handle = this._entityMgr.getHandleAt(worldX, worldY);
     if (handle) {
       this._entityMgr.startResize(handle);
       return;
     }
 
-    // 2.5) 检查是否点击了 WirePortal 的子实体（按钮或传送门） → 开始拖动
+    // 2.5) Check if clicked on WirePortal sub-entity (button or portal) → start dragging
     const wpHit = this._entityMgr.findWirePortalSubEntity(worldX, worldY);
     if (wpHit) {
       this._entityMgr.startMove(wpHit.record, wpHit.entity, worldX, worldY);
       return;
     }
 
-    // 2.6) 检查是否点击了 BtnSpike 地刺的调整手柄 → 开始调整大小
+    // 2.6) Check if clicked on BtnSpike spike adjustment handle → start resizing
     const bsHandleHit = this._entityMgr.getBtnSpikeHandleAt(worldX, worldY);
     if (bsHandleHit) {
       this._entityMgr.startBtnSpikeResize(
@@ -323,14 +323,14 @@ export class MapEditor {
       return;
     }
 
-    // 2.7) 检查是否点击了 BtnSpike 的子实体（按钮或地刺） → 开始拖动
+    // 2.7) Check if clicked on BtnSpike sub-entity (button or spike) → start dragging
     const bsHit = this._entityMgr.findBtnSpikeSubEntity(worldX, worldY);
     if (bsHit) {
       this._entityMgr.startMove(bsHit.record, bsHit.entity, worldX, worldY);
       return;
     }
 
-    // 2.8) 检查是否点击了 BtnPlatform 平台的调整手柄 → 开始调整大小
+    // 2.8) Check if clicked on BtnPlatform platform adjustment handle → start resizing
     const bpHandleHit = this._entityMgr.getBtnPlatformHandleAt(worldX, worldY);
     if (bpHandleHit) {
       this._entityMgr.select(bpHandleHit.record);
@@ -342,7 +342,7 @@ export class MapEditor {
       return;
     }
 
-    // 2.9) 检查是否点击了 BtnPlatform 的子实体（按钮或平台） → 开始拖动
+    // 2.9) Check if clicked on BtnPlatform sub-entity (button or platform) → start dragging
     const bpHit = this._entityMgr.findBtnPlatformSubEntity(worldX, worldY);
     if (bpHit) {
       this._entityMgr.select(bpHit.record);
@@ -350,7 +350,7 @@ export class MapEditor {
       return;
     }
 
-    // 2.10) 检查是否点击了可拖拽的实体（Ground/Platform/Spike/Wall/NPC/Signboard/Checkpoint/Portal）→ 开始拖动
+    // 2.10) Check if clicked on draggable entity (Ground/Platform/Spike/Wall/NPC/Signboard/Checkpoint/Portal) → start dragging
     const dragTarget = this._entityMgr.findDraggableAt(worldX, worldY);
     if (dragTarget) {
       this._entityMgr.select(dragTarget);
@@ -358,20 +358,20 @@ export class MapEditor {
       return;
     }
 
-    // 3) 检查是否点击了已放置的 Ground → 选中
+    // 3) Check if clicked on placed Ground → select
     const found = this._entityMgr.findAt(worldX, worldY);
     if (found) {
       this._entityMgr.select(found);
       return;
     }
 
-    // 4) 有选中实体时，点击空白区域 → 仅取消选中，回到放置模式
+    // 4) With entity selected, click blank area → deselect only, return to placement mode
     if (this._entityMgr.selected) {
       this._entityMgr.deselect();
       return;
     }
 
-    // 5) 没有选中实体时，点击空白区域 → 放置新实体
+    // 5) No entity selected, click blank area → place new entity
     if (this._preview.visible) {
       const options = {};
       if (this._ui.activeTool === EntityTool.BTN_PLATFORM) {
@@ -379,7 +379,7 @@ export class MapEditor {
       }
       if (this._ui.activeTool === EntityTool.TEXT_PROMPT) {
         const text = window.prompt(
-          "请输入 TextPrompt 文本（可后续按 E 再编辑）",
+          "Enter TextPrompt text (can edit later with E):",
           "todo_text_prompt",
         );
         if (text === null) {
@@ -402,7 +402,7 @@ export class MapEditor {
     if (!this._active) return;
     if (this._ui.handleMouseDragged(this._p.mouseX, this._p.mouseY)) return;
 
-    // 拖拽出生点标记
+    // Drag spawn marker
     if (this._draggingSpawn) {
       const cameraX = this._getCameraX(this._p);
       const worldX = this._p.mouseX + cameraX;
@@ -415,7 +415,7 @@ export class MapEditor {
       return;
     }
 
-    // 拖拽调整大小
+    // Drag to resize
     if (this._entityMgr.isResizing()) {
       const cameraX = this._getCameraX(this._p);
       const worldX = this._p.mouseX + cameraX;
@@ -423,7 +423,7 @@ export class MapEditor {
       this._entityMgr.updateResize(worldX, worldY);
     }
 
-    // 拖拽调整 BtnSpike 地刺大小
+    // Drag to resize BtnSpike spike
     if (this._entityMgr.isBtnSpikeResizing()) {
       const cameraX = this._getCameraX(this._p);
       const worldX = this._p.mouseX + cameraX;
@@ -431,7 +431,7 @@ export class MapEditor {
       this._entityMgr.updateBtnSpikeResize(worldX, worldY);
     }
 
-    // 拖拽调整 BtnPlatform 平台大小
+    // Drag to resize BtnPlatform platform
     if (this._entityMgr.isBtnPlatformResizing()) {
       const cameraX = this._getCameraX(this._p);
       const worldX = this._p.mouseX + cameraX;
@@ -439,7 +439,7 @@ export class MapEditor {
       this._entityMgr.updateBtnPlatformResize(worldX, worldY);
     }
 
-    // 拖动 WirePortal / BtnSpike 子实体
+    // Drag WirePortal / BtnSpike sub-entity
     if (this._entityMgr.isMoving()) {
       const cameraX = this._getCameraX(this._p);
       const worldX = this._p.mouseX + cameraX;
@@ -447,7 +447,7 @@ export class MapEditor {
       this._entityMgr.updateMove(worldX, worldY);
     }
 
-    // 拖拽整体实体
+    // Drag entire entity
     if (this._entityMgr.isDragging()) {
       const cameraX = this._getCameraX(this._p);
       const worldX = this._p.mouseX + cameraX;
@@ -470,11 +470,11 @@ export class MapEditor {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // 导出
+  // Export
   // ══════════════════════════════════════════════════════════════
 
   async _handleSave() {
-    const rawLevelClassName = window.prompt("请输入关卡类名", "LevelX");
+    const rawLevelClassName = window.prompt("Enter level class name:", "LevelX");
     if (rawLevelClassName === null) {
       return;
     }
@@ -495,8 +495,8 @@ export class MapEditor {
       },
       levelClassName,
     );
-    this._ui.showToast(`已复制完整 ${levelClassName}.js 到剪贴板`);
-    console.log("[MapEditor] 导出代码:\n" + code);
+    this._ui.showToast(`Complete ${levelClassName}.js copied to clipboard`);
+    console.log("[MapEditor] Exported code:\n" + code);
   }
 
   _toggleSelectedBtnPlatformMode(platformIdx) {
@@ -505,14 +505,14 @@ export class MapEditor {
     const mode = this._entityMgr.toggleBtnPlatformMode(record, platformIdx);
     if (!mode) return;
     this._ui.setBtnPlatformInspector(record);
-    this._ui.showToast(`平台 ${platformIdx + 1} 已切换为 ${mode}`);
+    this._ui.showToast(`Platform ${platformIdx + 1} switched to ${mode}`);
   }
 
   // ══════════════════════════════════════════════════════════════
-  // 出生点管理
+  // Spawn point management
   // ══════════════════════════════════════════════════════════════
 
-  /** 判断世界坐标是否在出生点标记范围内 */
+  /** Check if world coordinates are inside spawn marker range */
   _isInsideSpawnMarker(worldX, worldY) {
     const half = SPAWN_MARKER_SIZE + 6;
     return (
@@ -523,7 +523,7 @@ export class MapEditor {
     );
   }
 
-  /** 将出生点应用到关卡的 Player 实体 */
+  /** Apply spawn point to level's Player entity */
   _applySpawnToPlayer() {
     const player = this._level._player;
     if (!player) return;
@@ -533,7 +533,7 @@ export class MapEditor {
     player._startY = this._spawnY;
   }
 
-  /** 绘制出生点标记（世界空间，已在 push/translate 内） */
+  /** Draw spawn marker (world space, already in push/translate) */
   _drawSpawnMarker(p) {
     const sx = this._spawnX;
     const sy = this._spawnY;
@@ -541,13 +541,13 @@ export class MapEditor {
     const ph = this._spawnPlayerH;
     const m = SPAWN_MARKER_SIZE;
 
-    // 玩家轮廓虚线框
+    // Player outline dashed frame
     p.stroke(255, 180, 0, 200);
     p.strokeWeight(2);
     p.noFill();
     this._drawDashedRect(p, sx, sy, pw, ph);
 
-    // 十字线标记（中心在玩家底部中点）
+    // Crosshair marker (center at player bottom center)
     const cx = sx + pw / 2;
     const cy = sy;
     p.stroke(255, 100, 0, 240);
@@ -555,13 +555,13 @@ export class MapEditor {
     p.line(cx - m, cy, cx + m, cy);
     p.line(cx, cy - m, cx, cy + m);
 
-    // 小圆圈
+    // Small circle
     p.noFill();
     p.stroke(255, 180, 0, 200);
     p.strokeWeight(2);
     p.ellipse(cx, cy, m * 1.4, m * 1.4);
 
-    // 坐标标签（需要翻转 Y 回来让文字正常显示）
+    // Coordinate label (need to flip Y back so text displays normally)
     p.push();
     p.translate(sx, sy + ph + 14);
     p.scale(1, -1);
@@ -573,7 +573,7 @@ export class MapEditor {
     p.pop();
   }
 
-  /** 绘制虚线矩形（世界空间） */
+  /** Draw dashed rectangle (world space) */
   _drawDashedRect(p, x, y, w, h) {
     this._drawDashedLine(p, x, y, x + w, y);
     this._drawDashedLine(p, x + w, y, x + w, y + h);
@@ -582,11 +582,11 @@ export class MapEditor {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // 内部绘制辅助
+  // Internal draw helpers
   // ══════════════════════════════════════════════════════════════
 
   /**
-   * 获取当前摄像机 X（兼容多房间关卡和单房间关卡的无相机情况）
+   * Get current camera X (compatible with multi-room levels and single-room levels without camera)
    */
   _getCameraX(p) {
     if (typeof this._level._getCameraX === "function") {
@@ -596,38 +596,38 @@ export class MapEditor {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // 房间管理
+  // Room management
   // ══════════════════════════════════════════════════════════════
 
   _addRoom() {
     this._roomCount++;
     this._ui.roomCount = this._roomCount;
-    this._ui.showToast(`已添加房间，当前 ${this._roomCount} 个房间`);
+    this._ui.showToast(`Room added, total ${this._roomCount} rooms`);
   }
 
   _deleteRoom() {
     if (this._roomCount <= 1) {
-      this._ui.showToast("至少需要 1 个房间");
+      this._ui.showToast("At least 1 room required");
       return;
     }
     this._roomCount--;
     this._ui.roomCount = this._roomCount;
-    this._ui.showToast(`已删除最后一个房间，当前 ${this._roomCount} 个房间`);
+    this._ui.showToast(`Room deleted, total ${this._roomCount} rooms`);
   }
 
-  /** 绘制房间边界虚线和自动墙壁指示（世界空间） */
+  /** Draw room boundary dashed lines and auto-wall indicators (world space) */
   _drawRoomBoundaries(p) {
     const roomWidth = this._p.width;
     const wallThick = WALL_THICKNESS;
     const h = this._p.height;
 
-    // 自动墙壁半透明指示
+    // Auto-wall semi-transparent indicator
     p.noStroke();
     p.fill(100, 100, 160, 50);
     p.rect(0, 0, wallThick, h);
     p.rect(this._roomCount * roomWidth - wallThick, 0, wallThick, h);
 
-    // 房间边界虚线
+    // Room boundary dashed lines
     for (let i = 0; i <= this._roomCount; i++) {
       const bx = i * roomWidth;
       p.stroke(255, 200, 0, 160);
@@ -635,7 +635,7 @@ export class MapEditor {
       this._drawDashedLine(p, bx, 0, bx, h);
     }
 
-    // 房间标签
+    // Room labels
     for (let i = 0; i < this._roomCount; i++) {
       const cx = i * roomWidth + roomWidth / 2;
       const ly = h - 40;
@@ -651,7 +651,7 @@ export class MapEditor {
     }
   }
 
-  /** 绘制虚线 */
+  /** Draw dashed line */
   _drawDashedLine(p, x1, y1, x2, y2, dashLen = 10, gapLen = 8) {
     const dx = x2 - x1;
     const dy = y2 - y1;
@@ -668,7 +668,7 @@ export class MapEditor {
     }
   }
 
-  /** 绘制轻量网格（仅可视区域） */
+  /** Draw lightweight grid (visible area only) */
   _drawGrid(p, cameraX) {
     const gridSize = 50;
     const startX = Math.floor(cameraX / gridSize) * gridSize;
@@ -685,7 +685,7 @@ export class MapEditor {
     }
   }
 
-  /** 左上角编辑模式标识 */
+  /** Editor mode badge top-left */
   _drawEditorBadge(p) {
     p.push();
     p.resetMatrix();
@@ -695,18 +695,18 @@ export class MapEditor {
     p.fill(255);
     p.textSize(13);
     p.textAlign(p.LEFT, p.CENTER);
-    p.text("🛠 编辑模式  [M] 关闭", 8, 14);
+    p.text("🛠 Edit Mode  [M] Close", 8, 14);
     p.pop();
   }
 
   // ══════════════════════════════════════════════════════════════
-  // 清理
+  // Cleanup
   // ══════════════════════════════════════════════════════════════
 
   destroy() {
     this._saveSessionSnapshot();
 
-    // 恢复关卡原始的 _getCameraX
+    // Restore level's original _getCameraX
     if (this._originalGetCameraX) {
       this._level._getCameraX = this._originalGetCameraX;
     }

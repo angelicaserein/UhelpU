@@ -11,7 +11,9 @@ export class Spike extends GameEntity {
     this.type = "spike";
     this.zIndex = -20;
     this.movementComponent = null;
-    this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
+    // 缩小判定范围比例，使其比视觉贴图稍小
+    const colliderScale = 0.8;
+    this.collider = new RectangleCollider(ColliderType.TRIGGER, w * colliderScale, h * colliderScale);
     this.color = options.color || null;
   }
 

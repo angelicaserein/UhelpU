@@ -3,6 +3,8 @@ import { BackButton } from "../../components/BackButton.js";
 import { Assets } from "../../../AssetsManager.js";
 import { AudioManager } from "../../../AudioManager.js";
 import { EventTypes } from "../../../event-system/EventTypes.js";
+import { t, i18n } from "../../../i18n/index.js";
+import "../../../i18n/i18nUserLevel.js";
 
 export class StaticPageUserLevelList extends PageBase {
   constructor(switcher, p, eventBus) {
@@ -25,28 +27,54 @@ export class StaticPageUserLevelList extends PageBase {
     const backBtn = new BackButton(p, () => this.switcher.showWorldSelect(p));
     this.addElement(backBtn);
 
-    // 创建主容器
+    // 创建主容器 - 对齐排行榜样式
     const container = p.createDiv("");
+    container.addClass("leaderboard-card");
     container.style("position", "fixed");
     container.style("top", "50%");
     container.style("left", "50%");
     container.style("transform", "translate(-50%, -50%)");
-    container.style("width", "480px");
-    container.style("max-height", "500px");
-    container.style("overflow-y", "auto");
-    container.style("background", "rgba(20,20,35,0.92)");
-    container.style("border-radius", "14px");
-    container.style("padding", "28px 24px");
-    container.style("box-sizing", "border-box");
+    container.style("width", "60vw");
+    container.style("max-width", "800px");
+    container.style("height", "65vh");
+    container.style("min-height", "400px");
+    container.style("padding", "36px 40px");
+    container.style("overflow", "hidden");
+    container.style("display", "flex");
+    container.style("flex-direction", "column");
     this.addElement(container);
     this._container = container;
 
-    // 显示加载中提示
-    const loading = p.createDiv("加载中...");
-    loading.parent(this._container);
-    loading.style("text-align", "center");
-    loading.style("color", "#888");
-    loading.style("padding", "40px 0");
+    // 创建搜索框
+    const searchWrap = p.createDiv("");
+    searchWrap.parent(container);
+    searchWrap.style("padding", "0 0 16px 0");
+
+    const searchInput = p.createElement("input");
+    searchInput.parent(searchWrap);
+    searchInput.attribute("placeholder", t("user_level_search_placeholder"));
+    searchInput.addClass("leaderboard-tab-button");
+    searchInput.style("width", "100%");
+    searchInput.style("box-sizing", "border-box");
+    searchInput.style("background", "rgba(255,255,255,0.07)");
+    searchInput.style("border", "1px solid rgba(255,255,255,0.15)");
+    searchInput.style("border-radius", "6px");
+    searchInput.style("color", "#fff");
+    searchInput.style("padding", "10px 16px");
+    searchInput.style("font-size", "15px");
+    searchInput.style("outline", "none");
+    this._searchInput = searchInput;
+
+    searchInput.elt.addEventListener("input", () => {
+      this._renderCards();
+    });
+
+    // 创建可滚动列表区域
+    const listWrap = p.createDiv("");
+    listWrap.parent(container);
+    listWrap.style("height", "calc(65vh - 120px)");
+    listWrap.style("overflow-y", "auto");
+    this._listWrap = listWrap;
 
     // 初始化状态
     this._levelList = [];
@@ -60,6 +88,19 @@ export class StaticPageUserLevelList extends PageBase {
       };
       canvas.addEventListener("wheel", this._wheelHandler, { passive: false });
     }
+
+    // 显示加载中提示
+    const loading = document.createElement("div");
+    loading.className = "leaderboard-empty";
+    loading.textContent = t("user_level_loading");
+    this._listWrap.elt.appendChild(loading);
+
+    // 注册语言变化监听器
+    this._langChangeHandler = (lang) => {
+      searchInput.attribute("placeholder", t("user_level_search_placeholder"));
+      this._renderCards();
+    };
+    i18n.onChange(this._langChangeHandler);
 
     // 异步获取关卡列表
     this._fetchLevels();
@@ -78,60 +119,81 @@ export class StaticPageUserLevelList extends PageBase {
       this._levelList = [];
     } finally {
       this._isLoaded = true;
-
-      // 清空容器
-      if (this._container) {
-        this._container.elt.innerHTML = "";
-
-        const p = this.p;
-
-        // 如果列表为空
-        if (this._levelList.length === 0) {
-          const empty = p.createDiv("还没有玩家上传关卡");
-          empty.parent(this._container);
-          empty.style("color", "#888");
-          empty.style("text-align", "center");
-          empty.style("padding", "40px 0");
-          return;
-        }
-
-        // 遍历关卡列表，创建卡片
-        for (const item of this._levelList) {
-          const card = p.createDiv("");
-          card.parent(this._container);
-          card.style("padding", "14px 18px");
-          card.style("margin-bottom", "10px");
-          card.style("background", "rgba(255,255,255,0.06)");
-          card.style("border-radius", "8px");
-          card.style("cursor", "pointer");
-          card.style("transition", "background 0.15s");
-
-          card.elt.addEventListener("mouseenter", () => {
-            card.style("background", "rgba(255,255,255,0.14)");
-          });
-          card.elt.addEventListener("mouseleave", () => {
-            card.style("background", "rgba(255,255,255,0.06)");
-          });
-          card.elt.addEventListener("click", () => {
-            this.eventBus.publish(EventTypes.LOAD_LEVEL, {
-              levelType: "user",
-              levelId: item.id,
-            });
-          });
-
-          const title = p.createDiv(item.title || "未命名关卡");
-          title.parent(card);
-          title.style("color", "#ffffff");
-          title.style("font-size", "16px");
-          title.style("margin-bottom", "6px");
-
-          const author = p.createDiv("by " + (item.authorName || "匿名"));
-          author.parent(card);
-          author.style("color", "#aaaacc");
-          author.style("font-size", "12px");
-        }
-      }
+      this._renderCards();
     }
+  }
+
+  _renderCards() {
+    if (!this._listWrap) return;
+    const query = this._searchInput?.elt.value.toLowerCase() || "";
+    const filtered = this._levelList.filter(item =>
+      (item.title || "").toLowerCase().includes(query) ||
+      (item.authorName || "").toLowerCase().includes(query)
+    );
+
+    this._listWrap.elt.innerHTML = "";
+
+    if (filtered.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "leaderboard-empty";
+      empty.textContent = query ? t("user_level_no_match") : t("user_level_empty");
+      this._listWrap.elt.appendChild(empty);
+      return;
+    }
+
+    filtered.forEach(item => {
+      const row = document.createElement("div");
+      row.style.cssText = `
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        padding: 20px 26px;
+        margin-bottom: 14px;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      `;
+
+      const title = document.createElement("div");
+      title.style.cssText = `
+        font-size: 18px;
+        color: #ffffff;
+        font-weight: 600;
+        text-align: left;
+        word-break: break-all;
+        white-space: normal;
+        overflow: visible;
+      `;
+      title.textContent = item.title || t("user_level_unnamed");
+
+      const author = document.createElement("div");
+      author.style.cssText = `
+        font-size: 13px;
+        color: rgba(200,180,255,0.7);
+        text-align: left;
+      `;
+      author.textContent = t("user_level_by_prefix") + (item.authorName || t("user_level_anonymous_author"));
+
+      row.appendChild(title);
+      row.appendChild(author);
+
+      row.addEventListener("mouseenter", () => {
+        row.style.background = "rgba(255,255,255,0.11)";
+        row.style.borderColor = "rgba(255,255,255,0.2)";
+      });
+      row.addEventListener("mouseleave", () => {
+        row.style.background = "rgba(255,255,255,0.05)";
+        row.style.borderColor = "rgba(255,255,255,0.08)";
+      });
+      row.addEventListener("click", () => {
+        this.eventBus.publish(EventTypes.LOAD_LEVEL,
+          { levelType: "user", levelId: item.id });
+      });
+
+      this._listWrap.elt.appendChild(row);
+    });
   }
 
   update() {
@@ -155,6 +217,12 @@ export class StaticPageUserLevelList extends PageBase {
         canvas.removeEventListener("wheel", this._wheelHandler);
       }
       this._wheelHandler = null;
+    }
+
+    // 移除语言变化监听器
+    if (this._langChangeHandler) {
+      i18n.offChange(this._langChangeHandler);
+      this._langChangeHandler = null;
     }
 
     super.exit();

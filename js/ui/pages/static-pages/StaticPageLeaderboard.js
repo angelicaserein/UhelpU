@@ -71,15 +71,6 @@ export class StaticPageLeaderboard extends PageBase {
       p.image(Assets.bgImageWorldSelect, 0, 0, p.width, p.height);
       p.pop();
     }
-
-    p.noStroke();
-    p.fill(18, 10, 32, 142);
-    p.rect(0, 0, p.width, p.height);
-
-    p.fill(246, 214, 255, 24);
-    p.ellipse(p.width * 0.18, p.height * 0.18, 260, 200);
-    p.fill(134, 105, 206, 20);
-    p.ellipse(p.width * 0.84, p.height * 0.78, 320, 220);
   }
 
   _onLanguageChange() {

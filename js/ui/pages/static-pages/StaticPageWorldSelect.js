@@ -2,7 +2,8 @@ import { PageBase } from "../PageBase.js";
 import { ButtonBase } from "../../components/ButtonBase.js";
 import { BackButton } from "../../components/BackButton.js";
 import { Assets } from "../../../AssetsManager.js";
-import { t } from "../../../i18n/index.js";
+import { t, i18n } from "../../../i18n/index.js";
+import "../../../i18n/i18nUserLevel.js";
 import { AudioManager } from "../../../AudioManager.js";
 
 export class StaticPageWorldSelect extends PageBase {
@@ -50,7 +51,7 @@ export class StaticPageWorldSelect extends PageBase {
       },
       {
         cls: "world-button world-button-2 world-mode-button",
-        label: "玩家关卡",
+        label: t("user_level_button_label"),
         action: () => this.switcher.showUserLevelList(p),
       },
     ];

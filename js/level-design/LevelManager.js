@@ -1,53 +1,4 @@
-import { Level1 } from "./demo1/Level1.js";
-import { Level2 } from "./demo1/Level2.js";
-import { Level3 } from "./demo1/Level3.js";
-import { Level4 } from "./demo1/Level4.js";
-import { Level5 } from "./demo1/Level5.js";
-import { Level6 } from "./demo1/Level6.js";
-import { Level7 } from "./demo1/Level7.js";
-import { Level8 } from "./demo1/Level8.js";
-import { Level9 } from "./demo1/Level9.js";
-import { Level10 } from "./demo1/Level10.js";
-import { Level1 as Demo2Level1 } from "./demo2/Level1.js";
-import { Level2 as Demo2Level2 } from "./demo2/Level2.js";
-import { Level3 as Demo2Level3 } from "./demo2/Level3.js";
-import { Level4 as Demo2Level4 } from "./demo2/Level4.js";
-import { Level5 as Demo2Level5 } from "./demo2/Level5.js";
-import { Level6 as Demo2Level6 } from "./demo2/Level6.js";
-import { Level7 as Demo2Level7 } from "./demo2/Level7.js";
-import { Level8 as Demo2Level8 } from "./demo2/Level8.js";
-import { Level9 as Demo2Level9 } from "./demo2/Level9.js";
-import { Level10 as Demo2Level10 } from "./demo2/Level10.js";
-import { Level1 as EasyLevel1 } from "./easy/Level1.js";
-import { Level2 as EasyLevel2 } from "./easy/Level2.js";
-import { Level3 as EasyLevel3 } from "./easy/Level3.js";
-import { Level4 as EasyLevel4 } from "./easy/Level4.js";
-import { Level5 as EasyLevel5 } from "./easy/Level5.js";
-import { Level6 as EasyLevel6 } from "./easy/Level6.js";
-import { Level7 as EasyLevel7 } from "./easy/Level7.js";
-import { Level8 as EasyLevel8 } from "./easy/Level8.js";
-import { Level9 as EasyLevel9 } from "./easy/Level9.js";
-import { Level10 as EasyLevel10 } from "./easy/Level10.js";
-import { Level1 as HardLevel1 } from "./hard/Level1.js";
-import { Level2 as HardLevel2 } from "./hard/Level2.js";
-import { Level3 as HardLevel3 } from "./hard/Level3.js";
-import { Level4 as HardLevel4 } from "./hard/Level4.js";
-import { Level5 as HardLevel5 } from "./hard/Level5.js";
-import { Level6 as HardLevel6 } from "./hard/Level6.js";
-import { Level7 as HardLevel7 } from "./hard/Level7.js";
-import { Level8 as HardLevel8 } from "./hard/Level8.js";
-import { Level9 as HardLevel9 } from "./hard/Level9.js";
-import { Level10 as HardLevel10 } from "./hard/Level10.js";
-import { Level1 as SpecialLevel1 } from "./special/Level1.js";
-import { Level2 as SpecialLevel2 } from "./special/Level2.js";
-import { Level3 as SpecialLevel3 } from "./special/Level3.js";
-import { Level4 as SpecialLevel4 } from "./special/Level4.js";
-import { Level5 as SpecialLevel5 } from "./special/Level5.js";
-import { Level6 as SpecialLevel6 } from "./special/Level6.js";
-import { Level7 as SpecialLevel7 } from "./special/Level7.js";
-import { Level8 as SpecialLevel8 } from "./special/Level8.js";
-import { Level9 as SpecialLevel9 } from "./special/Level9.js";
-import { Level10 as SpecialLevel10 } from "./special/Level10.js";
+import { LEVEL_REGISTRY } from "../level-registry.js";
 import { setGamePaused, isGamePaused } from "../game-runtime/GamePauseState.js";
 import { EventTypes } from "../event-system/EventTypes.js";
 import { Assets } from "../AssetsManager.js";
@@ -59,58 +10,13 @@ export class LevelManager {
   constructor(p, eventBus) {
     this.p = p;
     this.eventBus = eventBus;
-    this.levelMap = {
-      level1: Level1,
-      level2: Level2,
-      level3: Level3,
-      level4: Level4,
-      level5: Level5,
-      level6: Level6,
-      level7: Level7,
-      level8: Level8,
-      level9: Level9,
-      level10: Level10,
-      demo2_level1: Demo2Level1,
-      demo2_level2: Demo2Level2,
-      demo2_level3: Demo2Level3,
-      demo2_level4: Demo2Level4,
-      demo2_level5: Demo2Level5,
-      demo2_level6: Demo2Level6,
-      demo2_level7: Demo2Level7,
-      demo2_level8: Demo2Level8,
-      demo2_level9: Demo2Level9,
-      demo2_level10: Demo2Level10,
-      easy_level1: EasyLevel1,
-      easy_level2: EasyLevel2,
-      easy_level3: EasyLevel3,
-      easy_level4: EasyLevel4,
-      easy_level5: EasyLevel5,
-      easy_level6: EasyLevel6,
-      easy_level7: EasyLevel7,
-      easy_level8: EasyLevel8,
-      easy_level9: EasyLevel9,
-      easy_level10: EasyLevel10,
-      hard_level1: HardLevel1,
-      hard_level2: HardLevel2,
-      hard_level3: HardLevel3,
-      hard_level4: HardLevel4,
-      hard_level5: HardLevel5,
-      hard_level6: HardLevel6,
-      hard_level7: HardLevel7,
-      hard_level8: HardLevel8,
-      hard_level9: HardLevel9,
-      hard_level10: HardLevel10,
-      special_level1: SpecialLevel1,
-      special_level2: SpecialLevel2,
-      special_level3: SpecialLevel3,
-      special_level4: SpecialLevel4,
-      special_level5: SpecialLevel5,
-      special_level6: SpecialLevel6,
-      special_level7: SpecialLevel7,
-      special_level8: SpecialLevel8,
-      special_level9: SpecialLevel9,
-      special_level10: SpecialLevel10,
-    };
+    // Build level map from the central registry — single source of truth.
+    this.levelMap = Object.fromEntries(
+      Object.entries(LEVEL_REGISTRY).map(([id, { LevelClass }]) => [
+        id,
+        LevelClass,
+      ]),
+    );
     this.level = null;
     this.currentLevelIndex = null;
     this.cameraNudgeX = 0;
@@ -474,13 +380,23 @@ export class LevelManager {
         player.y > viewBounds.maxY ||
         player.y + player.collider.h < viewBounds.minY
       ) {
-        if (!this._pendingDeathReload) {
-          this._pendingDeathReload = {
-            levelIndex: this.currentLevelIndex,
-            startCheckpoint:
-              this._checkpointSystem.getLastActivatedCheckpointSnapshot(),
-            preserveTimer: true,
-          };
+        const startCheckpoint =
+          this._checkpointSystem.getLastActivatedCheckpointSnapshot();
+
+        if (startCheckpoint) {
+          if (!this._pendingDeathReload) {
+            this._pendingDeathReload = {
+              levelIndex: this.currentLevelIndex,
+              startCheckpoint,
+              preserveTimer: true,
+            };
+          }
+          return;
+        }
+
+        if (!isGamePaused()) {
+          this.setPaused(true);
+          eventBus?.publish(EventTypes.AUTO_RESULT, "autoResult0");
         }
       }
     }

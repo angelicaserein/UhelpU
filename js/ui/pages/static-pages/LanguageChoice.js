@@ -18,10 +18,24 @@ export class LanguageChoice extends PageBase {
     this.p = p;
   }
 
+  _getPageCopy() {
+    const isChinese = i18n.getLang() === "zh";
+    return {
+      enLabel: isChinese ? "英 文" : "ENGLISH",
+      zhLabel: isChinese ? "中 文" : "CHINESE",
+      selectHint: isChinese ? "点击选择" : "Click to select",
+      footerHint: isChinese
+        ? "你可以随时在设置里调整语言。"
+        : "You can change the language anytime in Settings.",
+      title: isChinese ? "请 选 择 语 言" : "Please Select Language",
+    };
+  }
+
   enter() {
     super.enter();
 
     const p = this.p;
+    const copy = this._getPageCopy();
 
     // 检查 localStorage 中是否有保存的名字和语言
     const savedName = localStorage.getItem("playerName");
@@ -41,7 +55,7 @@ export class LanguageChoice extends PageBase {
     // 没有保存数据，显示语言选择
 
     // 左侧：英语
-    const enPanel = p.createDiv(makePanel("ENGLISH", "Click to select"));
+    const enPanel = p.createDiv(makePanel(copy.enLabel, copy.selectHint));
     enPanel.addClass("language-panel lang-panel-left");
     enPanel.mouseClicked(() => {
       i18n.setLang("en");
@@ -50,7 +64,7 @@ export class LanguageChoice extends PageBase {
     this.addElement(enPanel);
 
     // 右侧：中文
-    const zhPanel = p.createDiv(makePanel("中　文", "点击选择"));
+    const zhPanel = p.createDiv(makePanel(copy.zhLabel, copy.selectHint));
     zhPanel.addClass("language-panel lang-panel-right");
     zhPanel.mouseClicked(() => {
       i18n.setLang("zh");
@@ -84,11 +98,7 @@ export class LanguageChoice extends PageBase {
 
     // 底部呼吸灯提示条
     const hint = p.createDiv(
-      `<div class="lang-hint-text">` +
-        `You can change the language anytime in Settings.` +
-        `<br>` +
-        `可以在设置界面随时调整语言。` +
-        `</div>`,
+      `<div class="lang-hint-text">${copy.footerHint}</div>`,
     );
     hint.addClass("lang-hint-bar");
     this.addElement(hint);
@@ -131,13 +141,10 @@ export class LanguageChoice extends PageBase {
     if (Assets.customFont) p.textFont(Assets.customFont);
     p.textStyle(p.BOLD);
 
-    // 英文行
-    p.textSize(Math.floor(p.width * 0.026));
-    p.text("Please Select Language", p.width * 0.5, centerY - bandH * 0.2);
-
-    // 中文行（稍大）
-    p.textSize(Math.floor(p.width * 0.032));
-    p.text("请 选 择 语 言", p.width * 0.5, centerY + bandH * 0.22);
+    const title = this._getPageCopy().title;
+    const isChinese = i18n.getLang() === "zh";
+    p.textSize(Math.floor(p.width * (isChinese ? 0.032 : 0.026)));
+    p.text(title, p.width * 0.5, centerY);
 
     p.pop();
   }

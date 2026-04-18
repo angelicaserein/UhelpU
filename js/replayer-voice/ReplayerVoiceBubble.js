@@ -19,6 +19,10 @@ export class ReplayerVoiceBubble {
     this._isHovered = false;
   }
 
+  setLabelText(labelText) {
+    this.labelText = typeof labelText === "string" ? labelText : this.labelText;
+  }
+
   setOpenChatHandler(handler) {
     this._openChatHandler = typeof handler === "function" ? handler : null;
   }

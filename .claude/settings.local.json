@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -1 ./js/*.js)",
+      "Bash(ls -d ./js/*/)",
+      "Bash(awk -F/ '{print NF-1}')",
+      "Bash(awk '$1 >= 8 {print}')",
+      "Bash(xargs -I {} find . -type d -not -path './.git/*')",
+      "Bash(awk -F/ 'NF-1=='{print NF-1}')",
+      "Bash(awk -F/ '{depth=NF-1; print depth}')",
+      "Bash(awk -F/ '{depth=NF-1; print depth \" \" $0}')",
+      "Bash(xargs -I {} basename {})"
+    ]
+  }
+}

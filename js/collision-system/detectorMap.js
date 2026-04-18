@@ -1,26 +1,23 @@
-import { ColliderShape, ColliderType} from "./enumerator.js";
+/**
+ * @fileoverview Maps collider-shape pair strings to their collision-detection functions.
+ * Currently only RECTANGLE-RECTANGLE collision is implemented.
+ * To add a new shape, implement the detection function and add an entry here.
+ */
 
+import { ColliderShape, ColliderType } from "./enumerator.js";
+
+/** @type {Object.<string, Function>} */
 export const detectorMap = {
     "RECTANGLE-RECTANGLE": (a, b) => rectVsRect(a, b),
-    // "RECTANGLE-CIRCLE": (a, b) => rectVsCircle(a, b),
-    // "CIRCLE-RECTANGLE": (a, b) => rectVsCircle(b, a),
-    // "CIRCLE-CIRCLE": (a, b) => circleVsCircle(a, b),
-}
+};
 
 function rectVsRect(a, b) {
-    let result = false;
+    const vectorX = (a.x + a.collider.w / 2) - (b.x + b.collider.w / 2);
+    const vectorY = (a.y + a.collider.h / 2) - (b.y + b.collider.h / 2);
 
-    let vectorX = (a.x+a.collider.w/2) - (b.x+b.collider.w/2);
-    let vectorY = (a.y+a.collider.h/2) - (b.y+b.collider.h/2);
+    const combinedHalfWidths  = a.collider.w / 2 + b.collider.w / 2;
+    const combinedHalfHeights = a.collider.h / 2 + b.collider.h / 2;
 
-    let combinedHalfWidths = a.collider.w/2 + b.collider.w/2;
-    let combinedHalfHeights = a.collider.h/2 + b.collider.h/2;
-
-    if(Math.abs(vectorX) < combinedHalfWidths && Math.abs(vectorY) < combinedHalfHeights) {
-        result = true;
-    }
-
-    
-    return result;
+    return Math.abs(vectorX) < combinedHalfWidths &&
+           Math.abs(vectorY) < combinedHalfHeights;
 }
-

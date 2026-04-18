@@ -16,8 +16,8 @@ import { BaseLevel } from "../BaseLevel.js";
 import { Assets } from "../../AssetsManager.js";
 import { Room } from "../Room.js";
 import { ButtonPlatformLinkSystem } from "../../mechanism-system/demo1/ButtonPlatformLinkSystem.js";
-import { AchievementToast } from "../../achievement system/AchievementToast.js";
-import { Demo1AchievementData } from "../../achievement system/Demo1AchievementData.js";
+import { AchievementToast } from "../../achievement-system/AchievementToast.js";
+import { Demo1AchievementData } from "../../achievement-system/Demo1AchievementData.js";
 import { WindowPrompt } from "../../ui/windows/WindowPrompt.js";
 
 export class Level5 extends BaseLevel {

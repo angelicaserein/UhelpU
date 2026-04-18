@@ -1,15 +1,11 @@
-import { i18n } from "../i18n/index.js";
+import { i18n, t } from "../i18n/index.js";
 import { ReplayerVoiceBubble } from "./ReplayerVoiceBubble.js";
 
 const CLAUDE_ENDPOINT = "https://uhelpu-api.vercel.app/api/claude";
 const ANTHROPIC_VERSION = "2023-06-01";
 const CHAT_STYLE_ID = "replayer-voice-chat-style";
-const getDefaultVoiceLine = () =>
-  i18n.getLang() === "zh" ? "……（幻影沉默了）" : "...(the phantom fell silent)";
-const getDefaultChatReply = () =>
-  i18n.getLang() === "zh"
-    ? "……我暂时听不清你的声音。"
-    : "...I cannot hear you clearly right now.";
+const getDefaultVoiceLine = () => t("ai_voice_default_line");
+const getDefaultChatReply = () => t("ai_voice_default_reply");
 const HISTORY_LIMIT = 5;
 const CHAT_HISTORY_LIMIT = 24;
 
@@ -20,6 +16,7 @@ export class ReplayerVoice {
     this.levelContext =
       typeof levelContext === "string" ? levelContext.trim() : "";
     this.bubble = new ReplayerVoiceBubble({
+      labelText: t("ai_voice_label"),
       onOpenChat: () => this.openChat(),
     });
     this._voiceHistory = [];
@@ -39,6 +36,7 @@ export class ReplayerVoice {
       this._handleCanvasPointerDown(event);
     };
     this._handleLanguageChange = () => {
+      this.bubble?.setLabelText(t("ai_voice_label"));
       this._loadSystemPrompt();
       this._renderChatHistory();
     };
@@ -267,7 +265,7 @@ export class ReplayerVoice {
 
     const pendingMessage = {
       role: "assistant",
-      content: "思考中...",
+      content: "",
       pending: true,
       requestSerial: ++this._chatRequestSerial,
     };
@@ -335,24 +333,20 @@ export class ReplayerVoice {
         ? keySummaryEntries
             .map(([code, count]) => `${code}:${count}`)
             .join(", ")
-        : "无有效按键";
+        : t("ai_voice_prompt_none_key_summary");
 
     const historyText =
       this._voiceHistory.length > 0
         ? this._voiceHistory
             .map((line, index) => `${index + 1}. ${line}`)
             .join("\n")
-        : "无";
+        : t("ai_voice_prompt_none_history");
 
-    const levelContextText = this.levelContext || "无额外关卡上下文";
+    const levelContextText =
+      this.levelContext || t("ai_voice_prompt_none_level_context");
     const retryText =
-      attempt > 0
-        ? "上一条候选与历史重复，请生成一句在意义和结构上都明显不同的新台词。"
-        : "请生成一句新的幻影台词。";
-    const outputInstruction =
-      i18n.getLang() === "zh"
-        ? "Speak one sentence in Chinese."
-        : "Speak one sentence in English.";
+      attempt > 0 ? t("ai_voice_prompt_retry") : t("ai_voice_prompt_initial");
+    const outputInstruction = t("ai_voice_prompt_output_instruction");
 
     return {
       model: "claude-sonnet-4-20250514",
@@ -362,13 +356,13 @@ export class ReplayerVoice {
         {
           role: "user",
           content: [
-            "请根据本次录制痕迹生成一句幻影台词。",
-            `关卡上下文：${levelContextText}`,
-            `录制总时长：${clipSummary.totalDurationMs}ms`,
-            `keydown 总次数：${clipSummary.totalKeydowns}`,
-            `原始事件数：${clipSummary.recordCount}`,
-            `各键按下次数：${keySummaryText}`,
-            "最近 5 条台词（避免重复其意义和结构）：",
+            t("ai_voice_prompt_intro"),
+            `${t("ai_voice_prompt_level_context")}：${levelContextText}`,
+            `${t("ai_voice_prompt_total_duration")}：${clipSummary.totalDurationMs}ms`,
+            `${t("ai_voice_prompt_total_keydowns")}：${clipSummary.totalKeydowns}`,
+            `${t("ai_voice_prompt_record_count")}：${clipSummary.recordCount}`,
+            `${t("ai_voice_prompt_key_summary")}：${keySummaryText}`,
+            `${t("ai_voice_prompt_history")}：`,
             historyText,
             retryText,
             outputInstruction,
@@ -400,7 +394,9 @@ export class ReplayerVoice {
       promptParts.push(this._systemPrompt.trim());
     }
     if (this.levelContext) {
-      promptParts.push(`关卡上下文：${this.levelContext}`);
+      promptParts.push(
+        `${t("ai_voice_prompt_level_context")}：${this.levelContext}`,
+      );
     }
     return promptParts.join("\n\n");
   }
@@ -626,12 +622,12 @@ export class ReplayerVoice {
 
     const title = document.createElement("div");
     title.className = "rv-chat-title";
-    title.textContent = "幻影";
+    title.textContent = t("ai_voice_label");
 
     const exportButton = document.createElement("button");
     exportButton.type = "button";
     exportButton.className = "rv-chat-export";
-    exportButton.textContent = i18n.getLang() === "zh" ? "导出" : "Export";
+    exportButton.textContent = t("ai_voice_export");
     exportButton.addEventListener("click", () => this._exportChatHistory());
 
     const closeButton = document.createElement("button");
@@ -655,8 +651,7 @@ export class ReplayerVoice {
     const input = document.createElement("input");
     input.type = "text";
     input.className = "rv-chat-input";
-    input.placeholder =
-      i18n.getLang() === "zh" ? "输入你想说的话..." : "Say something...";
+    input.placeholder = t("ai_voice_input_placeholder");
     input.addEventListener("keydown", (event) => {
       if (event.key !== "Enter" || event.shiftKey) {
         return;
@@ -669,7 +664,7 @@ export class ReplayerVoice {
     const sendButton = document.createElement("button");
     sendButton.type = "button";
     sendButton.className = "rv-chat-send";
-    sendButton.textContent = i18n.getLang() === "zh" ? "发送" : "Send";
+    sendButton.textContent = t("ai_voice_send");
     sendButton.addEventListener("click", () => this._sendChatMessage());
 
     composer.append(input, sendButton);
@@ -679,6 +674,7 @@ export class ReplayerVoice {
 
     this._chatOverlay = overlay;
     this._chatElements = {
+      title,
       history,
       input,
       sendButton,
@@ -886,27 +882,27 @@ export class ReplayerVoice {
       return;
     }
 
-    const { history, input, sendButton, exportButton } = this._chatElements;
+    const { history, input, sendButton, exportButton, title } =
+      this._chatElements;
     history.textContent = "";
 
+    if (title) {
+      title.textContent = t("ai_voice_label");
+    }
     if (input) {
-      input.placeholder =
-        i18n.getLang() === "zh" ? "输入你想说的话..." : "Say something...";
+      input.placeholder = t("ai_voice_input_placeholder");
     }
     if (sendButton) {
-      sendButton.textContent = i18n.getLang() === "zh" ? "发送" : "Send";
+      sendButton.textContent = t("ai_voice_send");
     }
     if (exportButton) {
-      exportButton.textContent = i18n.getLang() === "zh" ? "导出" : "Export";
+      exportButton.textContent = t("ai_voice_export");
     }
 
     if (this._chatHistory.length === 0) {
       const emptyState = document.createElement("div");
       emptyState.className = "rv-chat-empty";
-      emptyState.textContent =
-        i18n.getLang() === "zh"
-          ? "点击气泡后，你就能和幻影开始对话。"
-          : "Click the bubble to start talking with the phantom.";
+      emptyState.textContent = t("ai_voice_empty_state");
       history.appendChild(emptyState);
       history.scrollTop = history.scrollHeight;
       return;
@@ -919,7 +915,7 @@ export class ReplayerVoice {
           ? "rv-chat-message--assistant"
           : "rv-chat-message--user";
       item.className = `rv-chat-message ${roleClass}${entry.pending ? " rv-chat-message--pending" : ""}`;
-      item.textContent = entry.content;
+      item.textContent = entry.pending ? t("ai_voice_pending") : entry.content;
       history.appendChild(item);
     }
 
@@ -940,14 +936,17 @@ export class ReplayerVoice {
       ? this._chatHistory
       : [];
     const lines = chatHistory
-      .map((msg) => `${msg.role === "user" ? "玩家" : "幻影"}：${msg.content}`)
+      .map(
+        (msg) =>
+          `${msg.role === "user" ? t("ai_voice_export_role_user") : t("ai_voice_export_role_assistant")}：${msg.pending ? t("ai_voice_pending") : msg.content}`,
+      )
       .join("\n\n");
 
     const blob = new Blob([lines], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `幻影对话记录_${new Date().toLocaleDateString()}.txt`;
+    a.download = `${t("ai_voice_export_filename_prefix")}_${new Date().toLocaleDateString(i18n.getLang() === "zh" ? "zh-CN" : "en-CA")}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   }

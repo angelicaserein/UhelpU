@@ -9,8 +9,8 @@ import {
 import { BaseLevel } from "../BaseLevel.js";
 import { WireRenderer } from "../../mechanism-system/demo1/WireRenderer.js";
 import { WindowPrompt } from "../../ui/windows/WindowPrompt.js";
-import { AchievementToast } from "../../achievement system/AchievementToast.js";
-import { Demo1AchievementData } from "../../achievement system/Demo1AchievementData.js";
+import { AchievementToast } from "../../achievement-system/AchievementToast.js";
+import { Demo1AchievementData } from "../../achievement-system/Demo1AchievementData.js";
 
 export class Level2 extends BaseLevel {
   constructor(p, eventBus) {

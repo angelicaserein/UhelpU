@@ -148,8 +148,8 @@ export class WindowSettingSidebar extends WindowSidebarBase {
     langRow.parent(parent);
 
     this._langSelect = this.p.createSelect();
-    this._langSelect.option("English", "en");
-    this._langSelect.option("简体中文", "zh");
+    this._langSelect.option(t("lang_option_en"), "en");
+    this._langSelect.option(t("lang_option_zh"), "zh");
     this._langSelect.addClass("window-select");
     this._langSelect.parent(langRow);
     this._langSelect.selected(i18n.getLang());
@@ -159,6 +159,16 @@ export class WindowSettingSidebar extends WindowSidebarBase {
       i18n.setLang(lang);
       if (this.onLanguageChange) this.onLanguageChange(lang);
     });
+  }
+
+  _refreshLanguageOptions() {
+    if (!this._langSelect?.elt?.options) {
+      return;
+    }
+
+    const options = this._langSelect.elt.options;
+    if (options[0]) options[0].text = t("lang_option_en");
+    if (options[1]) options[1].text = t("lang_option_zh");
   }
 
   _buildKeybindSection(parent) {
@@ -202,6 +212,7 @@ export class WindowSettingSidebar extends WindowSidebarBase {
     this._bgmLabel.html(t("win_bgm"));
     this._sfxLabel.html(t("win_sfx"));
     this._langHeader.html(t("win_language"));
+    this._refreshLanguageOptions();
     this._langSelect.selected(i18n.getLang());
 
     if (this._keyBindHeader) this._keyBindHeader.html(t("win_keybind"));

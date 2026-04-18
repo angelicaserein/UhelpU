@@ -1,1 +1,13 @@
 config.local.js
+
+# Local staging area for files pending permanent deletion
+readytodelete/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+Thumbs.db:encryptable
+
+# Editor artifacts
+*.log
+.vscode/launch.json

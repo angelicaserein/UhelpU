@@ -1,0 +1,214 @@
+================================================================
+  开发者编辑器：如何新增一个实体类型（以 Wall 为例）
+================================================================
+
+总共需要修改 6 个文件，每个文件的修改位置和代码如下：
+
+
+────────────────────────────────────────────────────────────────
+第 1 步：EditorConfig.js — 注册枚举 + 默认尺寸
+────────────────────────────────────────────────────────────────
+
+1a) 在 EntityTool 枚举中新增一项：
+
+  export const EntityTool = Object.freeze({
+    GROUND: "ground",
+    PORTAL: "portal",
+    PLATFORM: "platform",
+    SPIKE: "spike",
+    WALL: "wall",           // ← 新增
+  });
+
+1b) 新增默认尺寸常量（放在 SPIKE_DEFAULTS 后面）：
+
+  /** Wall 默认/限制 */
+  export const WALL_DEFAULTS = {
+    width: 20,        // 默认宽度
+    height: 400,      // 默认高度
+    minWidth: 10,     // 最小宽度
+    maxWidth: 100,    // 最大宽度
+    minHeight: 40,    // 最小高度
+    maxHeight: 800,   // 最大高度
+  };
+
+
+────────────────────────────────────────────────────────────────
+第 2 步：EditorUI.js — 工具栏按钮 + 状态提示 + 点击处理
+────────────────────────────────────────────────────────────────
+
+2a) constructor 中，在 _btnSpike 后面新增按钮矩形：
+
+  this._btnWall = {
+    x: startX + (BTN_W + BTN_GAP) * 4,   // 第 5 个位置
+    y: toolbarTop + BTN_Y_OFFSET,
+    w: BTN_W,
+    h: BTN_H,
+  };
+
+2b) draw() 中，在 Spike 按钮绘制之后新增：
+
+  // Wall 按钮
+  this._drawButton(
+    p,
+    this._btnWall,
+    "Wall",
+    this.activeTool === EntityTool.WALL,
+    [100, 100, 120],   // 灰蓝色基底
+  );
+
+2c) draw() 中，状态提示的 statusX 改为基于最后一个按钮：
+
+  const statusX = this._btnWall.x + BTN_W + 20;
+
+2d) draw() 中，toolLabel 判断链新增 Wall 分支：
+
+  : this.activeTool === EntityTool.WALL
+    ? "墙壁 (Wall)"
+
+2e) handleMousePressed() 中，在 Spike 判断之后新增：
+
+  // Wall 按钮
+  if (this._insideRect(mx, my, this._btnWall)) {
+    this.activeTool = EntityTool.WALL;
+    return true;
+  }
+
+
+────────────────────────────────────────────────────────────────
+第 3 步：EditorPreview.js — 预览框尺寸 + 预览绘制
+────────────────────────────────────────────────────────────────
+
+3a) import 中新增 WALL_DEFAULTS：
+
+  import {
+    EntityTool, GRID_SIZE, PORTAL_SIZE, PREVIEW_ALPHA,
+    PLATFORM_DEFAULTS, SPIKE_DEFAULTS,
+    WALL_DEFAULTS,                        // ← 新增
+  } from "./EditorConfig.js";
+
+3b) update() 中，在 SPIKE 分支之后、else（Portal）之前新增：
+
+  } else if (tool === EntityTool.WALL) {
+    this.previewW = WALL_DEFAULTS.width;
+    this.previewH = WALL_DEFAULTS.height;
+  }
+
+3c) draw() 中，在 SPIKE 绘制分支之后、else（Portal）之前新增：
+
+  } else if (tool === EntityTool.WALL) {
+    p.stroke(140, 140, 160, PREVIEW_ALPHA);        // 灰蓝色
+    this._dashedRect(p, this.previewX, this.previewY,
+                     this.previewW, this.previewH, 8);
+    p.noStroke();
+    p.fill(140, 140, 160, PREVIEW_ALPHA * 0.4);
+    p.rect(this.previewX, this.previewY,
+           this.previewW, this.previewH);
+  }
+
+
+────────────────────────────────────────────────────────────────
+第 4 步：EditorEntityManager.js — 创建实体 + 调整大小 + 绘制标注
+────────────────────────────────────────────────────────────────
+
+4a) import 新增 WALL_DEFAULTS 和 Wall 类：
+
+  import { WALL_DEFAULTS } from "./EditorConfig.js";   // 加入已有 import
+  import { Wall } from "../game-entity-model/terrain/Wall.js";
+
+4b) place() 方法中，在 SPIKE 分支之后新增：
+
+  } else if (tool === EntityTool.WALL) {
+    gameEntity = new Wall(x, y, w, h);
+  }
+
+4c) updateResize() 中，尺寸限制判断链新增 WALL 分支：
+
+  const limits =
+    this._selected.tool === EntityTool.PLATFORM ? PLATFORM_DEFAULTS
+    : this._selected.tool === EntityTool.SPIKE  ? SPIKE_DEFAULTS
+    : this._selected.tool === EntityTool.WALL   ? WALL_DEFAULTS   // ← 新增
+    : GROUND_DEFAULTS;
+
+4d) draw() 中，边框颜色判断链新增 WALL 分支：
+
+  } else if (rec.tool === EntityTool.WALL) {
+    p.stroke(isSelected ? 255 : 140, 140, 160,
+             isSelected ? 240 : 180);
+  }
+
+4e) draw() 中，标签文字判断链新增：
+
+  } else if (rec.tool === EntityTool.WALL) {
+    p.text(`W ${w}×${h}`, 3, 3);
+  }
+
+
+────────────────────────────────────────────────────────────────
+第 5 步：EditorExporter.js — 导出代码
+────────────────────────────────────────────────────────────────
+
+在 groups 数组中新增一项：
+
+  const groups = [
+    { tool: EntityTool.GROUND,    label: "Ground",    ctor: "Ground" },
+    { tool: EntityTool.PLATFORM,  label: "Platform",  ctor: "Platform" },
+    { tool: EntityTool.SPIKE,     label: "Spike",     ctor: "Spike" },
+    { tool: EntityTool.WALL,      label: "Wall",      ctor: "Wall" },   // ← 新增
+    { tool: EntityTool.PORTAL,    label: "Portal",    ctor: "Portal" },
+  ];
+
+导出时会自动生成： new Wall(x, y, w, h),
+
+
+────────────────────────────────────────────────────────────────
+第 6 步：MapEditor.js — 快捷键
+────────────────────────────────────────────────────────────────
+
+在 _onKeyPressed 的快捷键列表末尾新增：
+
+  if (e.key === "5") {
+    this._ui.activeTool = "wall";
+    return;
+  }
+
+快捷键分配规律：1=ground, 2=portal, 3=platform, 4=spike, 5=wall
+
+
+================================================================
+  新增其他实体时的通用清单（复制此模板）
+================================================================
+
+假设要加入实体 "Foo"，需要：
+
+□ EditorConfig.js
+  - EntityTool 枚举加 FOO: "foo"
+  - 新增 FOO_DEFAULTS（width/height/min/max）
+
+□ EditorUI.js
+  - constructor: 新增 _btnFoo 按钮矩形
+  - draw(): 新增按钮绘制 + toolLabel 分支
+  - handleMousePressed(): 新增按钮点击判断
+  - statusX 改为基于最后一个按钮
+
+□ EditorPreview.js
+  - import 新增 FOO_DEFAULTS
+  - update(): 新增尺寸分支
+  - draw(): 新增预览绘制分支（颜色自选）
+
+□ EditorEntityManager.js
+  - import 新增 FOO_DEFAULTS + Foo 游戏实体类
+  - place(): 新增创建分支
+  - updateResize(): limits 判断链新增 FOO_DEFAULTS
+  - draw(): 边框颜色 + 标签文字新增分支
+
+□ EditorExporter.js
+  - groups 数组新增 { tool, label, ctor }
+
+□ MapEditor.js
+  - _onKeyPressed: 新增数字快捷键
+
+提示：
+- 每种实体都有自己的颜色主题，选一个区分度高的颜色
+- 如果实体是固定大小（如 Portal），不需要 min/max，
+  直接在 EditorPreview.update() 和 place() 中用固定值
+- Portal 类型在 findAt() 中被跳过（不可选中调整大小）

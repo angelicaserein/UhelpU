@@ -7,6 +7,7 @@ const PROJECT_ID = "uhelpu";
 const API_KEY = "AIzaSyA34riJGsAh-jx9YHME-M5Nw5OHr4ndFuI";
 const FIRESTORE_API = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 const AUTH_API = `https://identitytoolkit.googleapis.com/v1`;
+const MIN_PASSWORD_LENGTH = 6;
 
 export class NameInputPage extends PageBase {
   constructor(switcher, p, options = {}) {
@@ -280,8 +281,12 @@ export class NameInputPage extends PageBase {
     passwordInput.attribute("placeholder", t("auth_password_placeholder"));
     passwordInput.addClass("name-input-field");
     passwordInput.style("display", "block");
-    passwordInput.style("margin", "0 auto 18px auto");
+    passwordInput.style("margin", "0 auto 8px auto");
     passwordInput.parent(dialog);
+
+    const passwordHint = p.createDiv(t("auth_password_hint"));
+    passwordHint.addClass("auth-form-helper-text");
+    passwordHint.parent(dialog);
 
     const btnRow = p.createDiv("");
     btnRow.style("display", "flex");
@@ -307,6 +312,11 @@ export class NameInputPage extends PageBase {
       }
       if (!email || !password) {
         alert(t("name_input_empty"));
+        return;
+      }
+      if (password.length < MIN_PASSWORD_LENGTH) {
+        alert(t("auth_password_too_short"));
+        passwordInput.elt.focus();
         return;
       }
 
@@ -413,8 +423,33 @@ export class NameInputPage extends PageBase {
       }
     } catch (err) {
       console.error("[NameInputPage] Registration error:", err);
-      alert(t("auth_register_error"));
+      alert(this._getRegisterErrorMessage(err));
     }
+  }
+
+  _getRegisterErrorMessage(error) {
+    const rawMessage = (error?.message || "").toUpperCase();
+
+    if (rawMessage.includes("EMAIL_EXISTS")) {
+      return t("auth_register_error_email_exists");
+    }
+    if (rawMessage.includes("INVALID_EMAIL")) {
+      return t("auth_register_error_invalid_email");
+    }
+    if (rawMessage.includes("WEAK_PASSWORD")) {
+      return t("auth_register_error_weak_password");
+    }
+    if (rawMessage.includes("OPERATION_NOT_ALLOWED")) {
+      return t("auth_register_error_operation_not_allowed");
+    }
+    if (rawMessage.includes("TOO_MANY_ATTEMPTS_TRY_LATER")) {
+      return t("auth_register_error_too_many_attempts");
+    }
+    if (error instanceof TypeError) {
+      return t("network_error");
+    }
+
+    return t("auth_register_error");
   }
 
   // ─────────────────────────────────────────────────────────────────────────

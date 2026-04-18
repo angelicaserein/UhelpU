@@ -4,6 +4,8 @@
 
 const _dict = {
   en: {
+    app_title: "U help U",
+
     // ── Menu ─────────────────────────────────────────────────────────
     btn_play: "PLAY",
     btn_settings: "Settings",
@@ -11,6 +13,8 @@ const _dict = {
     menu_subtitle: "----   you help you   ----",
     menu_nav_hint:
       "Navigation: WASD or Arrow Keys to move focus, Space/Enter to confirm, Esc to go back",
+    global_nav_hint:
+      "Navigation: WASD / Arrow Keys · Space/Enter Confirm · Esc Back/Pause · You can also use the mouse. In Settings, you can change in-game action keys only; navigation keys stay fixed.",
 
     // ── Result ───────────────────────────────────────────────────────
     btn_back_menu: "Back to Menu",
@@ -136,9 +140,21 @@ const _dict = {
     auth_register_title: "Create Account",
     auth_email_placeholder: "Email",
     auth_password_placeholder: "Password",
+    auth_password_hint: "Password must be at least 6 characters.",
+    auth_password_too_short: "Password must be at least 6 characters.",
     auth_username_placeholder: "Username (max 12 chars)",
     auth_login_error: "Login failed. Check your email and password.",
     auth_register_error: "Registration failed. Please try again.",
+    auth_register_error_email_exists:
+      "Registration failed. This email is already registered.",
+    auth_register_error_invalid_email:
+      "Registration failed. Please enter a valid email address.",
+    auth_register_error_weak_password:
+      "Registration failed. Password must be at least 6 characters.",
+    auth_register_error_operation_not_allowed:
+      "Registration failed. Account registration is currently unavailable.",
+    auth_register_error_too_many_attempts:
+      "Registration failed. Too many attempts. Please try again later.",
     auth_transfer_guest_prompt:
       'Guest "{NAME}" detected. Transfer guest scores to your account?',
     auth_transfer_confirm: "Transfer",
@@ -160,15 +176,52 @@ const _dict = {
     current_score: "Current Score:",
     current_rank: "Current Rank:",
     best_score: "Best Score:",
+
+    // ── Shared Language Labels ───────────────────────────────────────
+    lang_option_en: "English",
+    lang_option_zh: "Chinese",
+
+    // ── AI Voice / Phantom Chat ──────────────────────────────────────
+    ai_voice_label: "Phantom",
+    ai_voice_default_line: "...(the phantom fell silent)",
+    ai_voice_default_reply: "...I cannot hear you clearly right now.",
+    ai_voice_pending: "Thinking...",
+    ai_voice_export: "Export",
+    ai_voice_input_placeholder: "Say something...",
+    ai_voice_send: "Send",
+    ai_voice_empty_state: "Click the bubble to start talking with the phantom.",
+    ai_voice_export_role_user: "Player",
+    ai_voice_export_role_assistant: "Phantom",
+    ai_voice_export_filename_prefix: "phantom_chat_log",
+    ai_voice_prompt_intro:
+      "Generate one phantom line based on this recording trace.",
+    ai_voice_prompt_level_context: "Level context",
+    ai_voice_prompt_total_duration: "Total recording duration",
+    ai_voice_prompt_total_keydowns: "Total keydown count",
+    ai_voice_prompt_record_count: "Raw event count",
+    ai_voice_prompt_key_summary: "Per-key keydown count",
+    ai_voice_prompt_history:
+      "Recent 5 lines to avoid repeating in meaning and structure",
+    ai_voice_prompt_none_key_summary: "No valid key presses",
+    ai_voice_prompt_none_history: "None",
+    ai_voice_prompt_none_level_context: "No additional level context",
+    ai_voice_prompt_retry:
+      "The previous candidate overlapped with recent history. Generate a clearly different new line in both meaning and structure.",
+    ai_voice_prompt_initial: "Generate a new phantom line.",
+    ai_voice_prompt_output_instruction: "Speak one sentence in English.",
   },
 
   zh: {
+    app_title: "U help U",
+
     // ── Menu ─────────────────────────────────────────────────────────
     btn_play: "开始",
     btn_settings: "设置",
     btn_achieves: "成就",
     menu_subtitle: "----   能自渡者，方得天助   ----",
     menu_nav_hint: "导航: WASD/方向键移动焦点, 空格/Enter 确认, Esc 返回",
+    global_nav_hint:
+      "导航：WASD / 方向键 · Space/Enter 确认 · Esc 返回/暂停 · 也可以直接使用鼠标。你可以在设置中修改游戏内操作按键，但导航按键保持固定。",
 
     // ── Result ───────────────────────────────────────────────────────
     btn_back_menu: "返回菜单",
@@ -291,9 +344,18 @@ const _dict = {
     auth_register_title: "注册账号",
     auth_email_placeholder: "邮箱",
     auth_password_placeholder: "密码",
+    auth_password_hint: "密码至少需要 6 位。",
+    auth_password_too_short: "密码至少需要 6 位。",
     auth_username_placeholder: "用户名（最多12字）",
     auth_login_error: "登录失败，请检查邮箱和密码。",
     auth_register_error: "注册失败，请重试。",
+    auth_register_error_email_exists: "注册失败，该邮箱已被注册。",
+    auth_register_error_invalid_email: "注册失败，请输入有效的邮箱地址。",
+    auth_register_error_weak_password: "注册失败，密码至少需要 6 位。",
+    auth_register_error_operation_not_allowed:
+      "注册失败，当前暂时无法注册账号。",
+    auth_register_error_too_many_attempts:
+      "注册失败，尝试次数过多，请稍后再试。",
     auth_transfer_guest_prompt:
       '检测到你有游客身份"{NAME}"，是否将游客成绩转移到账号？',
     auth_transfer_confirm: "转移",
@@ -315,10 +377,58 @@ const _dict = {
     current_score: "本次成绩：",
     current_rank: "本次排名：",
     best_score: "历史最佳：",
+
+    // ── 通用语言标签 ────────────────────────────────────────────────
+    lang_option_en: "英文",
+    lang_option_zh: "中文",
+
+    // ── AI Voice / 幻影对话 ─────────────────────────────────────────
+    ai_voice_label: "幻影",
+    ai_voice_default_line: "……（幻影沉默了）",
+    ai_voice_default_reply: "……我暂时听不清你的声音。",
+    ai_voice_pending: "思考中...",
+    ai_voice_export: "导出",
+    ai_voice_input_placeholder: "输入你想说的话...",
+    ai_voice_send: "发送",
+    ai_voice_empty_state: "点击气泡后，你就能和幻影开始对话。",
+    ai_voice_export_role_user: "玩家",
+    ai_voice_export_role_assistant: "幻影",
+    ai_voice_export_filename_prefix: "幻影对话记录",
+    ai_voice_prompt_intro: "请根据本次录制痕迹生成一句幻影台词。",
+    ai_voice_prompt_level_context: "关卡上下文",
+    ai_voice_prompt_total_duration: "录制总时长",
+    ai_voice_prompt_total_keydowns: "keydown 总次数",
+    ai_voice_prompt_record_count: "原始事件数",
+    ai_voice_prompt_key_summary: "各键按下次数",
+    ai_voice_prompt_history: "最近 5 条台词（避免重复其意义和结构）",
+    ai_voice_prompt_none_key_summary: "无有效按键",
+    ai_voice_prompt_none_history: "无",
+    ai_voice_prompt_none_level_context: "无额外关卡上下文",
+    ai_voice_prompt_retry:
+      "上一条候选与历史重复，请生成一句在意义和结构上都明显不同的新台词。",
+    ai_voice_prompt_initial: "请生成一句新的幻影台词。",
+    ai_voice_prompt_output_instruction: "请只用中文说一句话。",
   },
 };
 
 const LANG_STORAGE_KEY = "kinoko_lang";
+
+function _syncDocumentLanguage() {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  if (document.documentElement) {
+    document.documentElement.lang = _lang === "zh" ? "zh-CN" : "en";
+  }
+
+  document.title = _dict[_lang]?.app_title ?? "U help U";
+
+  const navHint = document.getElementById("global-nav-hint");
+  if (navHint) {
+    navHint.textContent = _dict[_lang]?.global_nav_hint ?? "";
+  }
+}
 
 // 从 localStorage 中恢复语言设置，如果没有则默认使用英文
 function _loadLanguageFromStorage() {
@@ -329,6 +439,8 @@ function _loadLanguageFromStorage() {
 let _lang = _loadLanguageFromStorage();
 const _listeners = [];
 
+_syncDocumentLanguage();
+
 export const i18n = {
   /** 切换语言，触发所有已注册的监听器 */
   setLang(lang) {
@@ -336,6 +448,7 @@ export const i18n = {
     _lang = lang;
     // 保存到 localStorage
     localStorage.setItem(LANG_STORAGE_KEY, lang);
+    _syncDocumentLanguage();
     _listeners.forEach((fn) => fn(lang));
   },
 

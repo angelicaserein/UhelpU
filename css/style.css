@@ -2509,6 +2509,16 @@ body.game-paused .hint-notebook-button.scene-hint-notebook {
   color: rgba(255, 255, 255, 0.4);
 }
 
+.auth-form-helper-text {
+  width: 100%;
+  margin: 0 auto 18px auto;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.72);
+  text-align: left;
+}
+
 .name-input-confirm-button,
 .name-input-back-button {
   font-family: "HYPixel11", "PixelFont", sans-serif;

@@ -11,8 +11,17 @@ const controlComponentMap = {
   BasicModeReplayer: BasicControlComponent,
 };
 
+/**
+ * Manages input handling and control-mode switching for a single controllable character.
+ * Each character (player, replay ghost, AI) owns its own ControllerManager instance so
+ * their input pipelines remain independent.
+ */
 export class ControllerManager {
-  //多例模式，每个可操控角色拥有一个实例，比如主角、过去自己、敌人、ai控制）
+  /**
+   * @param {string}            defaultControlMode  - Key into controlModeMap / controlComponentMap
+   *                                                  (e.g. "BasicMode" or "BasicModeReplayer").
+   * @param {MovementComponent} movementComponent   - The movement data component for the owning character.
+   */
   constructor(defaultControlMode, movementComponent) {
     this.movementComponent = movementComponent;
 

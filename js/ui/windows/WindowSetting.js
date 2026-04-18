@@ -150,8 +150,8 @@ export class WindowSetting extends WindowBase {
       langRow.parent(area);
 
       this._langSelect = p.createSelect();
-      this._langSelect.option("English", "en");
-      this._langSelect.option("中文", "zh");
+      this._langSelect.option(t("lang_option_en"), "en");
+      this._langSelect.option(t("lang_option_zh"), "zh");
       this._langSelect.addClass("window-select");
       this._langSelect.parent(langRow);
       this._langSelect.selected(i18n.getLang());
@@ -206,6 +206,7 @@ export class WindowSetting extends WindowBase {
     this._bgmLabel.html(t("win_bgm"));
     this._sfxLabel.html(t("win_sfx"));
     this._langHeader.html(t("win_language"));
+    this._refreshLanguageOptions();
     this._langSelect.selected(i18n.getLang());
 
     // 刷新按键绑定相关的标签
@@ -216,6 +217,16 @@ export class WindowSetting extends WindowBase {
     for (const resetBtn of Object.values(this._keyBindResets)) {
       resetBtn.elt.title = t("keybind_reset_title");
     }
+  }
+
+  _refreshLanguageOptions() {
+    if (!this._langSelect?.elt?.options) {
+      return;
+    }
+
+    const options = this._langSelect.elt.options;
+    if (options[0]) options[0].text = t("lang_option_en");
+    if (options[1]) options[1].text = t("lang_option_zh");
   }
 
   /**

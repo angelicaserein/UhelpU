@@ -87,90 +87,55 @@ export class AppCoordinator {
     this.eventBus.subscribe(EventTypes.RETURN_LEVEL_CHOICE, () => {
       this._pendingTimerSnapshot = null;
       const levelIndex = this.levelManager.currentLevelIndex;
-      const isDemo2 =
-        typeof levelIndex === "string" && levelIndex.startsWith("demo2_");
-      const isEasy =
-        typeof levelIndex === "string" && levelIndex.startsWith("easy_");
-      const isHard =
-        typeof levelIndex === "string" && levelIndex.startsWith("hard_");
-      const isSpecial =
-        typeof levelIndex === "string" && levelIndex.startsWith("special_");
+      const mode = this._getLevelMode(levelIndex);
 
       this.switcher.clearOverlay(this.p);
       this.levelManager.setPaused(false);
       this.levelManager.unloadLevel(this.p, this.eventBus);
       this.switcher.gameSwitcher.runtimeLevelManager = null;
 
-      if (isDemo2) {
-        this.switcher.staticSwitcher.showLevelChoiceDemo2(this.p);
-      } else if (isEasy) {
-        this.switcher.staticSwitcher.showLevelChoiceEasy(this.p);
-      } else if (isHard) {
-        this.switcher.staticSwitcher.showLevelChoiceHard(this.p);
-      } else if (isSpecial) {
-        this.switcher.staticSwitcher.showLevelChoiceSpecial(this.p);
-      } else if (typeof levelIndex === "string") {
-        this.switcher.staticSwitcher.showLevelChoice(this.p);
-      } else {
-        this.switcher.staticSwitcher.showWorldSelect(this.p);
-      }
+      const choiceScreens = {
+        demo2:   () => this.switcher.staticSwitcher.showLevelChoiceDemo2(this.p),
+        easy:    () => this.switcher.staticSwitcher.showLevelChoiceEasy(this.p),
+        hard:    () => this.switcher.staticSwitcher.showLevelChoiceHard(this.p),
+        special: () => this.switcher.staticSwitcher.showLevelChoiceSpecial(this.p),
+        demo1:   () => this.switcher.staticSwitcher.showLevelChoice(this.p),
+      };
+      (choiceScreens[mode] ?? (() => this.switcher.staticSwitcher.showWorldSelect(this.p)))();
     });
 
     this.eventBus.subscribe(EventTypes.AUTO_RESULT, (result) => {
       const levelIndex = this.levelManager.currentLevelIndex;
-
-      const isDemo2 = levelIndex.startsWith("demo2_");
-      const isEasy = levelIndex.startsWith("easy_");
-      const isHard = levelIndex.startsWith("hard_");
-      const isSpecial = levelIndex.startsWith("special_");
+      const mode = this._getLevelMode(levelIndex);
 
       if (result === "autoResult1") {
         this._pendingTimerSnapshot = null;
         this.levelManager.unloadLevel(this.p, this.eventBus);
         this.switcher.gameSwitcher.runtimeLevelManager = null;
 
-        // 选择合适的通关页面
-        let WinPage;
-        if (isEasy) {
-          WinPage = StaticPageWinEasy;
-        } else if (isHard) {
-          WinPage = StaticPageWinEasy;
-        } else if (isSpecial) {
-          WinPage = StaticPageWinEasy;
-        } else if (isDemo2) {
-          WinPage = StaticPageWinDemo2;
-        } else {
-          WinPage = StaticPageWinDemo1;
-        }
-
-        const winPage = new WinPage(
-          levelIndex,
-          this.switcher,
-          this.p,
-          this.eventBus,
-        );
+        // Map difficulty mode to its win-screen class.
+        const winPageMap = {
+          demo1:   StaticPageWinDemo1,
+          demo2:   StaticPageWinDemo2,
+          easy:    StaticPageWinEasy,
+          hard:    StaticPageWinEasy,
+          special: StaticPageWinEasy,
+        };
+        const WinPage = winPageMap[mode] ?? StaticPageWinDemo1;
+        const winPage = new WinPage(levelIndex, this.switcher, this.p, this.eventBus);
         this.switcher.switchToStatic(winPage, this.p);
         return;
       }
 
-      // Lose: pause game and show overlay on top of the game
+      // Lose: pause game and show overlay on top of the game.
+      // demo1 uses its own result page; all other modes share Demo2's result page.
       this.levelManager.setPaused(true);
-      // Easy/Hard 难度用 Demo2 的 Result 页面，Demo2 和 Demo1 各用各自的
-      const ResultPage =
-        isDemo2 || isEasy || isHard || isSpecial
-          ? StaticPageResultDemo2
-          : StaticPageResultDemo1;
-      const resultPage = new ResultPage(
-        result,
-        levelIndex,
-        this.switcher,
-        this.p,
-        this.eventBus,
-      );
+      const ResultPage = mode === "demo1" ? StaticPageResultDemo1 : StaticPageResultDemo2;
+      const resultPage = new ResultPage(result, levelIndex, this.switcher, this.p, this.eventBus);
       this.switcher.setOverlay(resultPage, this.p);
     });
 
-    this.eventBus.subscribe("activateDevMode", () => {
+    this.eventBus.subscribe(EventTypes.ACTIVATE_DEV_MODE, () => {
       const level = this.levelManager.level;
       if (level && level._mapEditor) {
         level._mapEditor.activate();
@@ -184,6 +149,20 @@ export class AppCoordinator {
     this.eventBus.subscribe(EventTypes.RESUME_GAME, () => {
       this.levelManager.setPaused(false);
     });
+  }
+
+  /**
+   * Returns the difficulty mode for a levelIndex string.
+   * @param {string} levelIndex
+   * @returns {"demo1"|"demo2"|"easy"|"hard"|"special"|"unknown"}
+   */
+  _getLevelMode(levelIndex) {
+    if (typeof levelIndex !== "string") return "unknown";
+    if (levelIndex.startsWith("demo2_"))   return "demo2";
+    if (levelIndex.startsWith("easy_"))    return "easy";
+    if (levelIndex.startsWith("hard_"))    return "hard";
+    if (levelIndex.startsWith("special_")) return "special";
+    return "demo1";
   }
 
   _normalizeLoadLevelRequest(loadRequest) {
@@ -226,57 +205,20 @@ export class AppCoordinator {
     this.eventBus.publish(EventTypes.LOAD_LEVEL, pendingLoadRequest);
   }
 
+  /**
+   * Play the BGM track for a given level. easy/hard/special share the same
+   * tracks as demo1 (strip the prefix). demo2 has no BGM (stopBGM).
+   * @param {string} levelIndex
+   */
   playLevelBgm(levelIndex) {
-    const normalizedLevelIndex =
-      typeof levelIndex === "string" && levelIndex.startsWith("easy_")
-        ? levelIndex.replace("easy_", "")
-        : typeof levelIndex === "string" && levelIndex.startsWith("hard_")
-          ? levelIndex.replace("hard_", "")
-          : typeof levelIndex === "string" && levelIndex.startsWith("special_")
-            ? levelIndex.replace("special_", "")
-            : levelIndex;
-
-    if (normalizedLevelIndex === "level1") {
-      AudioManager.playBGM("level1");
-      return;
+    // Strip easy/hard/special prefix to get the base track key (e.g. "level3").
+    // demo2 levels don't match this pattern, so they fall through to stopBGM.
+    const match = String(levelIndex).match(/^(?:easy_|hard_|special_)?(level\d+)$/);
+    if (match) {
+      AudioManager.playBGM(match[1]);
+    } else {
+      AudioManager.stopBGM();
     }
-    if (normalizedLevelIndex === "level2") {
-      AudioManager.playBGM("level2");
-      return;
-    }
-    if (normalizedLevelIndex === "level3") {
-      AudioManager.playBGM("level3");
-      return;
-    }
-    if (normalizedLevelIndex === "level4") {
-      AudioManager.playBGM("level4");
-      return;
-    }
-    if (normalizedLevelIndex === "level5") {
-      AudioManager.playBGM("level5");
-      return;
-    }
-    if (normalizedLevelIndex === "level6") {
-      AudioManager.playBGM("level6");
-      return;
-    }
-    if (normalizedLevelIndex === "level7") {
-      AudioManager.playBGM("level7");
-      return;
-    }
-    if (normalizedLevelIndex === "level8") {
-      AudioManager.playBGM("level8");
-      return;
-    }
-    if (normalizedLevelIndex === "level9") {
-      AudioManager.playBGM("level9");
-      return;
-    }
-    if (normalizedLevelIndex === "level10") {
-      AudioManager.playBGM("level10");
-      return;
-    }
-    AudioManager.stopBGM();
   }
 
   updateFrame() {

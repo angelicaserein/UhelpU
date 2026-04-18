@@ -538,6 +538,10 @@ export class CollisionSystem {
     }
   }
   processDynamicTriggerPair(dyn, tri, eventBus = this.eventBus) {
+    if (dyn.deathState && dyn.deathState.isDead) {
+      return;
+    }
+
     const dynShape = dyn.collider.colliderShape;
     const triShape = tri.collider.colliderShape;
 

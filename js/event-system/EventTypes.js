@@ -27,4 +27,7 @@ export const EventTypes = Object.freeze({
   NPC_DIALOGUE_START: "npcDialogueStart",
   NPC_DIALOGUE_NEXT: "npcDialogueNext",
   NPC_DIALOGUE_END: "npcDialogueEnd",
+
+  // Developer tools
+  ACTIVATE_DEV_MODE: "activateDevMode",
 });

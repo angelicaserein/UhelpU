@@ -1,4 +1,9 @@
 /**
+ * Data model for a single screen/room in the multi-room level system.
+ * Each Room holds a set of static entities and up to four directional exits.
+ * When the player crosses a screen edge that has an exit, the level transitions
+ * to the target room and respawns the player at the configured spawn point.
+ *
  * Room — 多房间关卡系统中单个屏幕/房间的数据模型。
  *
  * 用法：
@@ -21,9 +26,10 @@
  */
 export class Room {
     /**
-     * @param {Iterable} entities  — 该房间的静态实体（Set 或数组）
-     * @param {Object}   exits     — 四方向出口配置，缺省 null 表示无出口
-     *   每个出口格式：{ targetRoomIndex: number, spawnX: number, spawnY: number }
+     * @param {Iterable} entities - Static entities for this room (Ground, Platform, Spike, etc.).
+     *                              Do NOT include Player or Replayer — those are managed by the Level.
+     * @param {Object}   exits    - Exit config for each of the four edges; omit or set to null for a solid wall.
+     *                              Each exit: { targetRoomIndex: number, spawnX: number, spawnY: number }
      */
     constructor(entities, exits = {}) {
         // 存为 Set 副本，防止外部修改影响 Room 内部状态

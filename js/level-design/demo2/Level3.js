@@ -30,8 +30,8 @@ export class Level3 extends BaseLevel {
     this.entities.add(this._player);
 
     // 自动墙壁（左/右边界）
-    this.entities.add(new Wall(0, 0, 20, 768));
-    this.entities.add(new Wall(1346, 0, 20, 768));
+    this.entities.add(new Wall(-100, 0, 120, 768));
+    this.entities.add(new Wall(1346, 0, 120, 768));
     this.entities.add(new Ground(0, 0, p.width, 80));
 
     // Ground

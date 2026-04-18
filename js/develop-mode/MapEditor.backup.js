@@ -86,9 +86,6 @@ export class MapEditor {
     // Inject save callback
     this._ui.onSave = () => this._handleSave();
 
-    // Inject upload callback
-    this._ui.onUpload = () => this._handleUpload();
-
     // Bind keyboard/mouse events
     this._boundKeyPressed = (e) => this._onKeyPressed(e);
     this._boundMousePressed = () => this._onMousePressed();
@@ -500,65 +497,6 @@ export class MapEditor {
     );
     this._ui.showToast(`Complete ${levelClassName}.js copied to clipboard`);
     console.log("[MapEditor] Exported code:\n" + code);
-  }
-
-  /**
-   * Handle user level upload
-   */
-  async _handleUpload() {
-    // 1. Prompt for level title
-    const title = window.prompt("请输入关卡标题", "我的关卡");
-    if (title === null || title.trim() === "") {
-      return;
-    }
-
-    // 2. Get current player name from localStorage
-    let authorName = "Anonymous";
-    try {
-      const acctRaw = localStorage.getItem("playerAccount");
-      if (acctRaw) {
-        const account = JSON.parse(acctRaw);
-        authorName = account.username || "Anonymous";
-      } else {
-        authorName = localStorage.getItem("playerName") || "Anonymous";
-      }
-    } catch (e) {
-      /* ignore */
-    }
-
-    // 3. Collect level data
-    const records = this._entityMgr.getAll();
-    const levelJSON = EditorExporter.generateJSON(
-      records,
-      this._roomCount,
-      this._p.width,
-      this._p.height,
-      {
-        x: this._spawnX,
-        y: this._spawnY,
-        w: this._spawnPlayerW,
-        h: this._spawnPlayerH,
-      },
-      { title: title.trim(), authorName }
-    );
-
-    // 4. Call upload function
-    try {
-      const success = await window.uploadUserLevel(
-        levelJSON,
-        authorName,
-        title.trim()
-      );
-
-      if (success) {
-        this._ui.showToast("上传成功！");
-      } else {
-        this._ui.showToast("上传失败，请检查网络");
-      }
-    } catch (error) {
-      console.error("[MapEditor] Upload error:", error);
-      this._ui.showToast("上传失败，请检查网络");
-    }
   }
 
   _toggleSelectedBtnPlatformMode(platformIdx) {

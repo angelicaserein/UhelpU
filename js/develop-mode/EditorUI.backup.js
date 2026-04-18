@@ -193,14 +193,6 @@ export class EditorUI {
       h: BTN_H,
     };
 
-    // Upload button — left of save button
-    this._btnUpload = {
-      x: this._btnSave.x - SAVE_BTN_W - BTN_GAP,
-      y: toolbarTop + BTN_Y_OFFSET,
-      w: SAVE_BTN_W,
-      h: BTN_H,
-    };
-
     // Camera left/right movement buttons — both sides of screen vertically centered (in toolbar upper area)
     const camBtnY = (this._ch - TOOLBAR_HEIGHT) / 2 - CAM_BTN_H / 2;
     this._btnCamLeft = {
@@ -216,10 +208,10 @@ export class EditorUI {
       h: CAM_BTN_H,
     };
 
-    // Room management buttons — left of upload button (整体左移一格)
+    // Room management buttons — left of save button
     const ROOM_BTN_W = 80;
     this._btnDelRoom = {
-      x: this._btnUpload.x - ROOM_BTN_W - BTN_GAP,
+      x: this._btnSave.x - ROOM_BTN_W - BTN_GAP,
       y: toolbarTop + BTN_Y_OFFSET,
       w: ROOM_BTN_W,
       h: BTN_H,
@@ -230,10 +222,6 @@ export class EditorUI {
       w: ROOM_BTN_W,
       h: BTN_H,
     };
-
-    /** Save and upload callbacks (injected by MapEditor) */
-    this.onSave = null;
-    this.onUpload = null;
 
     /** Room management callbacks (injected by MapEditor) */
     this.onAddRoom = null;
@@ -467,9 +455,6 @@ export class EditorUI {
     // Save button
     this._drawButton(p, this._btnSave, "💾 Save", false, [60, 180, 100]);
 
-    // Upload button
-    this._drawButton(p, this._btnUpload, "☁ Upload", false, [60, 120, 220]);
-
     // Room management buttons
     this._drawButton(p, this._btnAddRoom, "+ Room", false, [60, 140, 180]);
     this._drawButton(p, this._btnDelRoom, "- Room", false, [180, 100, 60]);
@@ -694,11 +679,6 @@ export class EditorUI {
     // Save button
     if (this._insideRect(mx, my, this._btnSave)) {
       if (this.onSave) this.onSave();
-      return true;
-    }
-    // Upload button
-    if (this._insideRect(mx, my, this._btnUpload)) {
-      if (this.onUpload) this.onUpload();
       return true;
     }
     // Click in toolbar area → consume event but no action

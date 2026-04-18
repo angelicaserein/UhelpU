@@ -48,11 +48,6 @@ export class StaticPageWorldSelect extends PageBase {
         label: t("world_special"),
         action: () => this.switcher.showLevelChoiceSpecial(p),
       },
-      {
-        cls: "world-button world-button-2 world-mode-button",
-        label: "玩家关卡",
-        action: () => this.switcher.showUserLevelList(p),
-      },
     ];
 
     const btnY = 0.42 * p.height;

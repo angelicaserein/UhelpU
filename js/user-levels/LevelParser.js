@@ -70,7 +70,13 @@ export class UserLevel extends BaseLevel {
       this._parseEntitiesSingleRoom(entities);
     } else {
       // Multi-room level: create rooms and apply offsets
-      this._parseEntitiesMultiRoom(entities, levelData.rooms || [], roomCount, canvasWidth, canvasHeight);
+      this._parseEntitiesMultiRoom(
+        entities,
+        levelData.rooms || [],
+        roomCount,
+        canvasWidth,
+        canvasHeight,
+      );
     }
   }
 
@@ -95,7 +101,13 @@ export class UserLevel extends BaseLevel {
    * Parse entities for multi-room level
    * @private
    */
-  _parseEntitiesMultiRoom(entities, rooms, roomCount, canvasWidth, canvasHeight) {
+  _parseEntitiesMultiRoom(
+    entities,
+    rooms,
+    roomCount,
+    canvasWidth,
+    canvasHeight,
+  ) {
     // Create a map: entityIndex -> Room
     const entityToRoom = new Map();
     rooms.forEach((room) => {
@@ -177,22 +189,42 @@ export class UserLevel extends BaseLevel {
 
     switch (type) {
       case "Ground":
-        return new Ground(entityData.x, entityData.y, entityData.w, entityData.h);
+        return new Ground(
+          entityData.x,
+          entityData.y,
+          entityData.w,
+          entityData.h,
+        );
 
       case "Wall":
         return new Wall(entityData.x, entityData.y, entityData.w, entityData.h);
 
       case "Platform":
-        return new Platform(entityData.x, entityData.y, entityData.w, entityData.h);
+        return new Platform(
+          entityData.x,
+          entityData.y,
+          entityData.w,
+          entityData.h,
+        );
 
       case "Box":
         return new Box(entityData.x, entityData.y, entityData.w, entityData.h);
 
       case "Spike":
-        return new Spike(entityData.x, entityData.y, entityData.w, entityData.h);
+        return new Spike(
+          entityData.x,
+          entityData.y,
+          entityData.w,
+          entityData.h,
+        );
 
       case "Portal": {
-        const portal = new Portal(entityData.x, entityData.y, entityData.w, entityData.h);
+        const portal = new Portal(
+          entityData.x,
+          entityData.y,
+          entityData.w,
+          entityData.h,
+        );
         if (entityData.open) {
           portal.openPortal();
         }
@@ -218,14 +250,20 @@ export class UserLevel extends BaseLevel {
         );
 
       case "TextPrompt":
-        return new TextPrompt(entityData.x, entityData.y, this.p, {
-          text: entityData.text || "todo",
+        return new TextPrompt(entityData.x, entityData.y, this, {
+          textKey: entityData.text || "todo",
         });
 
       case "Enemy": {
-        const enemy = new Enemy(entityData.x, entityData.y, entityData.w, entityData.h, {
-          speed: entityData.speed ?? 2,
-        });
+        const enemy = new Enemy(
+          entityData.x,
+          entityData.y,
+          entityData.w,
+          entityData.h,
+          {
+            speed: entityData.speed ?? 2,
+          },
+        );
         enemy._direction = entityData.direction ?? 1;
         return enemy;
       }
@@ -318,7 +356,11 @@ export class UserLevel extends BaseLevel {
     // If multi-room, re-apply offsets to WirePortal systems
     if (roomCount > 1 && this._wpSystems.length > 0) {
       const canvasHeight = levelData.canvasHeight || 768;
-      this._createWirePortalSystemsMultiRoom(canvasWidth, canvasHeight, roomCount);
+      this._createWirePortalSystemsMultiRoom(
+        canvasWidth,
+        canvasHeight,
+        roomCount,
+      );
       this._wpSystems = []; // Clear after processing
     }
 
@@ -330,7 +372,9 @@ export class UserLevel extends BaseLevel {
       );
       const platformConfigs = platforms.map((platform, idx) => ({
         platform,
-        mode: (entityData.platforms[idx] && entityData.platforms[idx].mode) || "disappear",
+        mode:
+          (entityData.platforms[idx] && entityData.platforms[idx].mode) ||
+          "disappear",
       }));
 
       const system = new ButtonPlatformLinkSystem(

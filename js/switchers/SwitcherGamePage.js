@@ -1,6 +1,7 @@
 import { SwitcherBase } from "./SwitcherBase.js";
 import { EventTypes } from "../event-system/EventTypes.js";
 import { LEVEL_REGISTRY } from "../level-registry.js";
+import { GamePageBaseDemo2 } from "../ui/pages/game-pages/GamePageBaseDemo2.js";
 
 export class SwitcherGamePage extends SwitcherBase {
   constructor(mainSwitcher, eventBus) {
@@ -14,6 +15,13 @@ export class SwitcherGamePage extends SwitcherBase {
   }
 
   createLevelPage(levelIndex, p) {
+    // Handle user-created levels with a generic game page
+    if (levelIndex === "user") {
+      return new GamePageBaseDemo2(this, p, 0, "user_level", "user_level", {
+        showButtons: false,
+      });
+    }
+
     const PageClass = this._pageMap[levelIndex];
     if (!PageClass) {
       throw new Error(`Unknown level page: ${levelIndex}`);

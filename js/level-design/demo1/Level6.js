@@ -128,7 +128,7 @@ export class Level6 extends BaseLevel {
 
     const room0 = new Room(
       [
-        new Wall(0, 0, wallThickness, p.height),
+        new Wall(-100, 0, wallThickness + 100, p.height),
         new Ground(0, 0, p.width, 80),
         this._room0NormalPlatform3,
         this._room0Checkpoint2,
@@ -164,7 +164,7 @@ export class Level6 extends BaseLevel {
 
     const room1 = new Room(
       [
-        new Wall(p.width - wallThickness, 0, wallThickness, p.height),
+        new Wall(p.width - wallThickness, 0, wallThickness + 100, p.height),
         new Ground(0, 0, p.width, 80),
         new Spike(-100, 80, p.width - wallThickness, 20),
         // 左侧悬崖

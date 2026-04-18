@@ -213,32 +213,6 @@ export class LevelManager {
     }
   }
 
-  /**
-   * Load a pre-instantiated level instance (e.g., user-created levels from JSON).
-   * @param {BaseLevel} levelInstance - An instance of a level (typically UserLevel)
-   * @param {p5} p - The p5 instance
-   */
-  loadLevelInstance(levelInstance, p = this.p) {
-    if (!this.level) {
-      this.level = levelInstance;
-      this.level.__editorPersistenceKey = this.level.levelId || "user_level";
-      this.currentLevelIndex = this.level.levelId || "user_level";
-      this._pendingDeathReload = null;
-      this._checkpointSystem.resetLevelState();
-      this.cameraNudgeX = 0;
-      this.startLevelTitleOverlay(this.currentLevelIndex, p);
-      this._teleportPointSystem.registerTeleportPoints(this.level.entities);
-      console.log(
-        "[LevelManager.loadLevelInstance] Loaded user level:",
-        this.currentLevelIndex,
-      );
-    } else {
-      console.warn(
-        "[LevelManager.loadLevelInstance] Level already exists, ignoring load request",
-      );
-    }
-  }
-
   _restoreStartCheckpoint(startCheckpoint) {
     if (!this.level || !startCheckpoint) {
       return;

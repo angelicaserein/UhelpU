@@ -193,7 +193,7 @@ export class Level4 extends BaseLevel {
 
     const room0 = new Room(
       [
-        new Wall(0, 0, wallThickness, p.height),
+        new Wall(-100, 0, wallThickness + 100, p.height),
         new Ground(0, 0, p.width, 80),
         this._room0Button,
         this._room0Spike,
@@ -235,7 +235,7 @@ export class Level4 extends BaseLevel {
 
     const room1 = new Room(
       [
-        new Wall(p.width - wallThickness, 0, wallThickness, p.height),
+        new Wall(p.width - wallThickness, 0, wallThickness + 100, p.height),
         new Ground(0, 0, p.width, 80), //每个参数分别是地面块的 x, y, width, height
         this._room1Button,
         this._room1Spike,

@@ -83,7 +83,7 @@ export class Level1 extends BaseLevel {
 
     const room0 = new Room(
       [
-        new Wall(0, 0, wallThickness, 768),
+        new Wall(-100, 0, wallThickness + 100, 768),
         new Ground(0, 0, p.width, 80),
         new Ground(290, 80, 310, 210),
         new Ground(1020, 300, 210, 40),
@@ -119,7 +119,7 @@ export class Level1 extends BaseLevel {
 
     const room1 = new Room(
       [
-        new Wall(p.width - wallThickness, 0, wallThickness, 768),
+        new Wall(p.width - wallThickness, 0, wallThickness + 100, 768),
         new Ground(0, 0, p.width, 80),
         new Ground(1084, 80, 260, 190),
         new CheckpointDemo2(925, 80, 40, 70, () => this._player),

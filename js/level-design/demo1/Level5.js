@@ -175,7 +175,7 @@ export class Level5 extends BaseLevel {
 
     const room0 = new Room(
       [
-        new Wall(0, 0, wallThickness, p.height),
+        new Wall(-100, 0, wallThickness + 100, p.height),
         new Ground(0, 0, p.width, 80),
         this._room0Button,
         this._room0DisappearPlatform,
@@ -212,7 +212,7 @@ export class Level5 extends BaseLevel {
 
     const room1 = new Room(
       [
-        new Wall(p.width - wallThickness, 0, wallThickness, p.height),
+        new Wall(p.width - wallThickness, 0, wallThickness + 100, p.height),
         new Ground(0, 0, p.width, 80),
         portal,
       ],

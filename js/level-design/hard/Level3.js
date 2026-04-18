@@ -127,7 +127,7 @@ export class Level3 extends BaseLevel {
 
     const room0 = new Room(
       [
-        new Wall(0, 0, wallThickness, 768),
+        new Wall(-100, 0, wallThickness + 100, 768),
         new Ground(0, 0, roomWidth, 80),
         new Ground(350, 80, 90, 90),
         new Ground(900, 570, 40, 250),
@@ -200,7 +200,7 @@ export class Level3 extends BaseLevel {
 
     const room1 = new Room(
       [
-        new Wall(roomWidth - wallThickness, 0, wallThickness, 768),
+        new Wall(roomWidth - wallThickness, 0, wallThickness + 100, 768),
         new Ground(0, 0, roomWidth, 80),
         new Platform(34, 530, 80, 20),
         new Platform(184, 420, 90, 20),

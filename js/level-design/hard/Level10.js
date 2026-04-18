@@ -52,7 +52,7 @@ export class Level10 extends BaseLevel {
 
     // room0: 左墙 + 地面，右侧出口
     const room0 = new Room(
-      [new Wall(0, 0, wallThickness, p.height), new Ground(0, 0, p.width, 80)],
+      [new Wall(-100, 0, wallThickness + 100, p.height), new Ground(0, 0, p.width, 80)],
       { right: { targetRoomIndex: 1 } },
     );
 
@@ -83,7 +83,7 @@ export class Level10 extends BaseLevel {
 
     const room5 = new Room(
       [
-        new Wall(p.width - wallThickness, 0, wallThickness, p.height),
+        new Wall(p.width - wallThickness, 0, wallThickness + 100, p.height),
         new Ground(0, 0, p.width, 80),
         portal,
       ],

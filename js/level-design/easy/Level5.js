@@ -19,8 +19,8 @@ export class Level5 extends BaseLevel {
     this.bgAssetKey = "bgImageDemo2Level";
 
     // ── 系统边界
-    this.entities.add(new Wall(0, 0, 20, 768));
-    this.entities.add(new Wall(1346, 0, 20, 768));
+    this.entities.add(new Wall(-100, 0, 120, 768));
+    this.entities.add(new Wall(1346, 0, 120, 768));
     this.entities.add(new Ground(0, 0, p.width, 80));
 
     // ── Ground

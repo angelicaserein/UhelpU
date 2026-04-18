@@ -39,7 +39,9 @@ window.submitScore = async (playerName, timeMs, levelId) => {
     try {
       const acctRaw = localStorage.getItem("playerAccount");
       if (acctRaw) isAccount = JSON.parse(acctRaw).isAccount === true;
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+      /* ignore */
+    }
 
     // 构建请求数据
     const docData = {
@@ -108,7 +110,9 @@ async function _getLeaderboardFallback(levelId, limitCount) {
       const response = await fetch(url);
       if (!response.ok) {
         console.warn(`[Firebase] Fetch failed: ${response.status}`);
-        throw new Error(`Network request failed: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Network request failed: ${response.status} ${response.statusText}`,
+        );
       }
 
       const data = await response.json();
@@ -145,7 +149,9 @@ async function _getLeaderboardFallback(levelId, limitCount) {
       .slice(0, limitCount)
       .map((entry, index) => ({ ...entry, rank: index + 1 }));
 
-    console.log(`[Firebase] ✓ Leaderboard ready: ${leaderboard.length} entries`);
+    console.log(
+      `[Firebase] ✓ Leaderboard ready: ${leaderboard.length} entries`,
+    );
     return leaderboard;
   } catch (error) {
     console.error("[Firebase] Fallback failed:", error);
@@ -232,7 +238,9 @@ window.getUserLevelList = async () => {
       const response = await fetch(url);
       if (!response.ok) {
         console.warn(`[Firebase] Fetch failed: ${response.status}`);
-        throw new Error(`Network request failed: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Network request failed: ${response.status} ${response.statusText}`,
+        );
       }
 
       const data = await response.json();
@@ -260,7 +268,9 @@ window.getUserLevelList = async () => {
         return new Date(b.createdAt) - new Date(a.createdAt);
       });
 
-    console.log(`[Firebase] ✓ User level list ready: ${levelList.length} levels`);
+    console.log(
+      `[Firebase] ✓ User level list ready: ${levelList.length} levels`,
+    );
     return levelList;
   } catch (error) {
     console.error("[Firebase] Error fetching user level list:", error);
@@ -353,7 +363,9 @@ window.deleteUserLevel = async (levelId, authorName) => {
     });
 
     if (!deleteResponse.ok) {
-      throw new Error(`HTTP ${deleteResponse.status}: ${deleteResponse.statusText}`);
+      throw new Error(
+        `HTTP ${deleteResponse.status}: ${deleteResponse.statusText}`,
+      );
     }
 
     console.log(`[Firebase] ✓ User level deleted: ${levelId}`);

@@ -72,7 +72,7 @@ export class Level2 extends BaseLevel {
 
     const room0 = new Room(
       [
-        new Wall(0, 0, 20, 768),
+        new Wall(-100, 0, 120, 768),
         new Ground(0, 0, p.width, 80),
         new Ground(260, 210, 200, 40),
         new Ground(330, 310, 200, 40),
@@ -116,7 +116,7 @@ export class Level2 extends BaseLevel {
     );
 
     const room1 = new Room(
-      [new Wall(1346, 0, 20, 768), new Ground(0, 0, p.width, 80)],
+      [new Wall(1346, 0, 120, 768), new Ground(0, 0, p.width, 80)],
       { left: { targetRoomIndex: 0 } },
     );
 

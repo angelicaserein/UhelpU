@@ -1126,6 +1126,34 @@ export class EditorExporter {
           break;
         }
 
+        case EntityTool.NPC: {
+          const { w, h } = getEntitySize(entity, 40, 40);
+          entityObj = {
+            type: "NPCDemo2",
+            x: entity.x,
+            y: entity.y,
+            w,
+            h,
+            npcId: "",
+            dialogueLines: [],
+            exhaustedLine: "",
+          };
+          break;
+        }
+
+        case EntityTool.SIGNBOARD: {
+          const { w, h } = getEntitySize(entity, 100, 65);
+          entityObj = {
+            type: "SignboardDemo2",
+            x: entity.x,
+            y: entity.y,
+            w,
+            h,
+            textKey: "",
+          };
+          break;
+        }
+
         case EntityTool.BTN_SPIKE: {
           const button = record.gameEntity;
           const spike = record.spikeEntity;

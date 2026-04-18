@@ -23,8 +23,8 @@ export class Level1 extends BaseLevel {
     //   Room 0: x ∈ [0, 1366)
 
     // ── 边界墙壁 ──────────────────────────────────────────────
-    this.entities.add(new Wall(0, 0, 20, 768));
-    this.entities.add(new Wall(1346, 0, 20, 768));
+    this.entities.add(new Wall(-100, 0, 120, 768));
+    this.entities.add(new Wall(1346, 0, 120, 768));
 
     // ── 地面 ──────────────────────────────────────────────────
     this.entities.add(new Ground(0, 0, p.width, 80));

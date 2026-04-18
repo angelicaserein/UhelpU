@@ -17,9 +17,9 @@ export class Level2 extends BaseLevel {
     super(p, eventBus);
     this.bgAssetKey = "bgImageLevel2";
     const wallThickness = 20;
-    this.entities.add(new Wall(0, 0, wallThickness, p.height));
+    this.entities.add(new Wall(-100, 0, wallThickness + 100, p.height));
     this.entities.add(
-      new Wall(p.width - wallThickness, 0, wallThickness, p.height),
+      new Wall(p.width - wallThickness, 0, wallThickness + 100, p.height),
     );
     // 底部地面
     this.entities.add(new Ground(0, 0, p.width, 80));

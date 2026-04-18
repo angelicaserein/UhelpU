@@ -39,7 +39,7 @@ export class Level9 extends BaseLevel {
 
     const room0 = new Room(
       [
-        new Wall(0, 0, wallThickness, 768),
+        new Wall(-100, 0, wallThickness + 100, 768),
         new Ground(0, 0, p.width, 80),
         new Ground(310, 80, 200, 40),
         new Spike(980, 90, 100, 20),
@@ -56,7 +56,7 @@ export class Level9 extends BaseLevel {
     const room1 = new Room(
       [
         new Ground(0, 0, p.width, 80),
-        new Wall(p.width - wallThickness, 0, wallThickness, 768),
+        new Wall(p.width - wallThickness, 0, wallThickness + 100, 768),
         portal,
       ],
       { left: { targetRoomIndex: 0 } },

@@ -7,7 +7,6 @@ import { SwitcherMain } from "./switchers/SwitcherMain.js";
 import { EventBus } from "./event-system/EventBus.js";
 import { EventTypes } from "./event-system/EventTypes.js";
 import { LevelManager } from "./level-design/LevelManager.js";
-import { UserLevel } from "./user-levels/LevelParser.js";
 import { StaticPageResultDemo1 } from "./ui/pages/static-pages/StaticPageResultDemo1.js";
 import { StaticPageResultDemo2 } from "./ui/pages/static-pages/StaticPageResultDemo2.js";
 import { StaticPageWinDemo1 } from "./ui/pages/static-pages/StaticPageWinDemo1.js";
@@ -23,8 +22,6 @@ export class AppCoordinator {
     this.levelManager = new LevelManager(p, this.eventBus);
     this._pendingLevelReload = null;
     this._pendingTimerSnapshot = null;
-    this._currentLevelType = null; // "normal" or "user"
-    this._currentUserLevelId = null;
   }
 
   init() {
@@ -34,47 +31,6 @@ export class AppCoordinator {
 
   bindEvents() {
     this.eventBus.subscribe(EventTypes.LOAD_LEVEL, (loadRequest) => {
-      // Check if this is a user-created level
-      if (loadRequest?.levelType === "user" || this._currentLevelType === "user") {
-        const levelId = loadRequest?.levelId || this._currentUserLevelId;
-        window.getUserLevel(levelId)
-          .then((levelJSON) => {
-            try {
-              const levelData = JSON.parse(levelJSON);
-              const userLevel = new UserLevel(this.p, this.eventBus, levelData);
-
-              this._pendingTimerSnapshot = null;
-              this.switcher.clearOverlay(this.p);
-              if (this.levelManager.level) {
-                this.levelManager.setPaused(false);
-                this.levelManager.unloadLevel(this.p, this.eventBus);
-                this.switcher.gameSwitcher.runtimeLevelManager = null;
-              }
-
-              this.levelManager.loadLevelInstance(userLevel, this.p);
-              this.switcher.gameSwitcher.runtimeLevelManager = this.levelManager;
-
-              this._currentLevelType = "user";
-              this._currentUserLevelId = levelId;
-
-              const gamePage = this.switcher.gameSwitcher.createLevelPage(
-                "user",
-                this.p,
-              );
-              this.switcher.switchToGame(gamePage, this.p);
-            } catch (error) {
-              console.error("[AppCoordinator] Failed to parse user level:", error);
-              alert("关卡数据错误，加载失败");
-            }
-          })
-          .catch((error) => {
-            console.error("[AppCoordinator] Failed to load user level:", error);
-            alert("关卡加载失败，请检查网络");
-          });
-        return;
-      }
-
-      // Original built-in level loading
       const { levelIndex, startCheckpoint, preserveTimer } =
         this._normalizeLoadLevelRequest(loadRequest);
       console.log(
@@ -108,9 +64,6 @@ export class AppCoordinator {
       });
       this.switcher.gameSwitcher.runtimeLevelManager = this.levelManager;
 
-      this._currentLevelType = "normal";
-      this._currentUserLevelId = null;
-
       const gamePage = this.switcher.gameSwitcher.createLevelPage(
         levelIndex,
         this.p,
@@ -132,12 +85,6 @@ export class AppCoordinator {
     });
 
     this.eventBus.subscribe(EventTypes.RETURN_LEVEL_CHOICE, () => {
-      // Handle user-created levels
-      if (this._currentLevelType === "user") {
-        this.switcher.staticSwitcher.showUserLevelList(this.p);
-        return;
-      }
-
       this._pendingTimerSnapshot = null;
       const levelIndex = this.levelManager.currentLevelIndex;
       const mode = this._getLevelMode(levelIndex);
@@ -182,15 +129,6 @@ export class AppCoordinator {
 
       // Lose: pause game and show overlay on top of the game.
       // demo1 uses its own result page; all other modes share Demo2's result page.
-
-      // Handle user-created levels death reload
-      if (this._currentLevelType === "user") {
-        this.levelManager.setPaused(true);
-        const resultPage = new StaticPageResultDemo2(result, "user_level", this.switcher, this.p, this.eventBus);
-        this.switcher.setOverlay(resultPage, this.p);
-        return;
-      }
-
       this.levelManager.setPaused(true);
       const ResultPage = mode === "demo1" ? StaticPageResultDemo1 : StaticPageResultDemo2;
       const resultPage = new ResultPage(result, levelIndex, this.switcher, this.p, this.eventBus);

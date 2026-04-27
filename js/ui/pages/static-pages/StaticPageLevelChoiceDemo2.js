@@ -96,7 +96,7 @@ export class StaticPageLevelChoiceDemo2 extends PageBase {
 
     // 注册键盘导航（仅10个关卡按钮使用网格布局，BackButton不参与导航但可通过ESC和鼠标点击）
     this.registerNavButtons(
-      levelBtns,  // 只有10个关卡按钮，不包括BackButton
+      levelBtns, // 只有10个关卡按钮，不包括BackButton
       {
         layout: "grid",
         cols: 5,
@@ -109,13 +109,18 @@ export class StaticPageLevelChoiceDemo2 extends PageBase {
     const followerX = p.width * 0.5;
     const followerY = p.height * 0.115;
     const followerR = 0.04 * p.width;
+    const followerSize = 80;
+    const followerMoveRadius = 0.033 * p.width;
     this.follower = new FollowImage(
       p,
-      Assets.followerImg2,
+      Assets.followerImg1,
       followerX,
       followerY,
       followerR,
-      60,
+      followerSize,
+      Assets.followerCircleImg,
+      followerSize,
+      followerMoveRadius,
     );
 
     // 关卡信息悬浮面板

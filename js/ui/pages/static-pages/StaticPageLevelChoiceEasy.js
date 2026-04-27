@@ -104,13 +104,18 @@ export class StaticPageLevelChoiceEasy extends PageBase {
     const followerX = p.width * 0.5;
     const followerY = p.height * 0.115;
     const followerR = 0.04 * p.width;
+    const followerSize = 80;
+    const followerMoveRadius = 0.033 * p.width;
     this.follower = new FollowImage(
       p,
-      Assets.followerImg2,
+      Assets.followerImg1,
       followerX,
       followerY,
       followerR,
-      60,
+      followerSize,
+      Assets.followerCircleImg,
+      followerSize,
+      followerMoveRadius,
     );
 
     this.levelInfo = new LevelInfo(
@@ -118,7 +123,7 @@ export class StaticPageLevelChoiceEasy extends PageBase {
       followerX,
       followerY + 15,
       followerR + 150,
-      'easy_level'
+      "easy_level",
     );
   }
 

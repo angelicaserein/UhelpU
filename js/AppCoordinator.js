@@ -34,11 +34,35 @@ export class AppCoordinator {
 
   bindEvents() {
     this.eventBus.subscribe(EventTypes.LOAD_LEVEL, (loadRequest) => {
+      // Handle empty editor mode
+      if (loadRequest?.levelType === "emptyEditor") {
+        this.switcher.clearOverlay(this.p);
+        if (this.levelManager.level) {
+          this.levelManager.setPaused(false);
+          this.levelManager.unloadLevel(this.p, this.eventBus);
+          this.switcher.gameSwitcher.runtimeLevelManager = null;
+        }
+        this.levelManager.loadLevel("empty_editor", this.p, this.eventBus);
+        this.switcher.gameSwitcher.runtimeLevelManager = this.levelManager;
+        const gamePage = this.switcher.gameSwitcher.createLevelPage(
+          "empty_editor",
+          this.p,
+        );
+        this.switcher.switchToGame(gamePage, this.p);
+        this._currentLevelType = "normal";
+        this._currentUserLevelId = null;
+        return;
+      }
+
       // Check if this is a user-created level
-      if (loadRequest?.levelType === "user" || this._currentLevelType === "user") {
+      if (
+        loadRequest?.levelType === "user" ||
+        this._currentLevelType === "user"
+      ) {
         const levelId = loadRequest?.levelId || this._currentUserLevelId;
         const startCheckpoint = loadRequest?.startCheckpoint || null;
-        window.getUserLevel(levelId)
+        window
+          .getUserLevel(levelId)
           .then((levelJSON) => {
             try {
               const levelData = JSON.parse(levelJSON);
@@ -55,7 +79,8 @@ export class AppCoordinator {
               this.levelManager.loadLevelInstance(userLevel, this.p, {
                 startCheckpoint,
               });
-              this.switcher.gameSwitcher.runtimeLevelManager = this.levelManager;
+              this.switcher.gameSwitcher.runtimeLevelManager =
+                this.levelManager;
 
               this._currentLevelType = "user";
               this._currentUserLevelId = levelId;
@@ -66,7 +91,10 @@ export class AppCoordinator {
               );
               this.switcher.switchToGame(gamePage, this.p);
             } catch (error) {
-              console.error("[AppCoordinator] Failed to parse user level:", error);
+              console.error(
+                "[AppCoordinator] Failed to parse user level:",
+                error,
+              );
               alert("关卡数据错误，加载失败");
             }
           })
@@ -135,8 +163,13 @@ export class AppCoordinator {
     });
 
     this.eventBus.subscribe(EventTypes.RETURN_LEVEL_CHOICE, () => {
-      // Handle user-created levels
-      if (this._currentLevelType === "user") {
+      // User-level and empty-editor flows should return to Map Plaza list.
+      const currentLevelIndex = this.levelManager.currentLevelIndex;
+      const shouldBackToUserLevelList =
+        this._currentLevelType === "user" ||
+        currentLevelIndex === "empty_editor";
+
+      if (shouldBackToUserLevelList) {
         this.switcher.clearOverlay(this.p);
         if (this.levelManager.level) {
           this.levelManager.setPaused(false);
@@ -159,13 +192,17 @@ export class AppCoordinator {
       this.switcher.gameSwitcher.runtimeLevelManager = null;
 
       const choiceScreens = {
-        demo2:   () => this.switcher.staticSwitcher.showLevelChoiceDemo2(this.p),
-        easy:    () => this.switcher.staticSwitcher.showLevelChoiceEasy(this.p),
-        hard:    () => this.switcher.staticSwitcher.showLevelChoiceHard(this.p),
-        special: () => this.switcher.staticSwitcher.showLevelChoiceSpecial(this.p),
-        demo1:   () => this.switcher.staticSwitcher.showLevelChoice(this.p),
+        demo2: () => this.switcher.staticSwitcher.showLevelChoiceDemo2(this.p),
+        easy: () => this.switcher.staticSwitcher.showLevelChoiceEasy(this.p),
+        hard: () => this.switcher.staticSwitcher.showLevelChoiceHard(this.p),
+        special: () =>
+          this.switcher.staticSwitcher.showLevelChoiceSpecial(this.p),
+        demo1: () => this.switcher.staticSwitcher.showLevelChoice(this.p),
       };
-      (choiceScreens[mode] ?? (() => this.switcher.staticSwitcher.showWorldSelect(this.p)))();
+      (
+        choiceScreens[mode] ??
+        (() => this.switcher.staticSwitcher.showWorldSelect(this.p))
+      )();
     });
 
     this.eventBus.subscribe(EventTypes.AUTO_RESULT, (result) => {
@@ -179,14 +216,19 @@ export class AppCoordinator {
 
         // Map difficulty mode to its win-screen class.
         const winPageMap = {
-          demo1:   StaticPageWinDemo1,
-          demo2:   StaticPageWinDemo2,
-          easy:    StaticPageWinEasy,
-          hard:    StaticPageWinEasy,
+          demo1: StaticPageWinDemo1,
+          demo2: StaticPageWinDemo2,
+          easy: StaticPageWinEasy,
+          hard: StaticPageWinEasy,
           special: StaticPageWinEasy,
         };
         const WinPage = winPageMap[mode] ?? StaticPageWinDemo1;
-        const winPage = new WinPage(levelIndex, this.switcher, this.p, this.eventBus);
+        const winPage = new WinPage(
+          levelIndex,
+          this.switcher,
+          this.p,
+          this.eventBus,
+        );
         this.switcher.switchToStatic(winPage, this.p);
         return;
       }
@@ -197,14 +239,27 @@ export class AppCoordinator {
       // Handle user-created levels death reload
       if (this._currentLevelType === "user") {
         this.levelManager.setPaused(true);
-        const resultPage = new StaticPageResultDemo2(result, "user_level", this.switcher, this.p, this.eventBus);
+        const resultPage = new StaticPageResultDemo2(
+          result,
+          "user_level",
+          this.switcher,
+          this.p,
+          this.eventBus,
+        );
         this.switcher.setOverlay(resultPage, this.p);
         return;
       }
 
       this.levelManager.setPaused(true);
-      const ResultPage = mode === "demo1" ? StaticPageResultDemo1 : StaticPageResultDemo2;
-      const resultPage = new ResultPage(result, levelIndex, this.switcher, this.p, this.eventBus);
+      const ResultPage =
+        mode === "demo1" ? StaticPageResultDemo1 : StaticPageResultDemo2;
+      const resultPage = new ResultPage(
+        result,
+        levelIndex,
+        this.switcher,
+        this.p,
+        this.eventBus,
+      );
       this.switcher.setOverlay(resultPage, this.p);
     });
 
@@ -231,9 +286,9 @@ export class AppCoordinator {
    */
   _getLevelMode(levelIndex) {
     if (typeof levelIndex !== "string") return "unknown";
-    if (levelIndex.startsWith("demo2_"))   return "demo2";
-    if (levelIndex.startsWith("easy_"))    return "easy";
-    if (levelIndex.startsWith("hard_"))    return "hard";
+    if (levelIndex.startsWith("demo2_")) return "demo2";
+    if (levelIndex.startsWith("easy_")) return "easy";
+    if (levelIndex.startsWith("hard_")) return "hard";
     if (levelIndex.startsWith("special_")) return "special";
     return "demo1";
   }
@@ -286,7 +341,9 @@ export class AppCoordinator {
   playLevelBgm(levelIndex) {
     // Strip easy/hard/special prefix to get the base track key (e.g. "level3").
     // demo2 levels don't match this pattern, so they fall through to stopBGM.
-    const match = String(levelIndex).match(/^(?:easy_|hard_|special_)?(level\d+)$/);
+    const match = String(levelIndex).match(
+      /^(?:easy_|hard_|special_)?(level\d+)$/,
+    );
     if (match) {
       AudioManager.playBGM(match[1]);
     } else {

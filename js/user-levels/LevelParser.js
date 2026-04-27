@@ -549,15 +549,7 @@ export class UserLevel extends BaseLevel {
    * Clear canvas and draw background for multi-room levels
    */
   clearCanvas(p = this.p, cameraNudgeX = 0, bgParallaxFactor = 1) {
-    // Only override for multi-room levels
-    if (!this.rooms || this.rooms.length <= 1) {
-      // For single-room, use default background
-      p.background(220);
-      return;
-    }
-
-    // Multi-room: draw background for each room
-    const cameraX = this._getCameraX(p);
+    const cameraX = this.rooms && this.rooms.length > 1 ? this._getCameraX(p) : 0;
     const bgOffsetX = cameraNudgeX * bgParallaxFactor;
     const bg = Assets.bgImageDemo2Level;
 
@@ -565,7 +557,10 @@ export class UserLevel extends BaseLevel {
       p.push();
       p.translate(-cameraX - bgOffsetX, 0);
       p.scale(1, -1);
-      for (let i = 0; i < this.rooms.length; i++) {
+
+      // Determine number of rooms to draw
+      const roomCount = this.rooms ? this.rooms.length : 1;
+      for (let i = 0; i < roomCount; i++) {
         const scaleX = p.width / bg.width;
         const scaleY = p.height / bg.height;
         const scale = Math.max(scaleX, scaleY) * 1.05;

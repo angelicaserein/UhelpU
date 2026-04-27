@@ -106,13 +106,18 @@ export class StaticPageMenu extends PageBase {
     );
 
     // 跟随鼠标的动图
+    const followerSize = 80;
+    const followerMoveRadius = 0.033 * p.width;
     this.follower = new FollowImage(
       p,
       Assets.followerImg1,
       p.width * 0.5,
       p.height * 0.113,
       0.04 * p.width,
-      60,
+      followerSize,
+      Assets.followerCircleImg,
+      followerSize,
+      followerMoveRadius,
     );
 
     // M 键快捷进入 Hard Level10 开发者模式

@@ -56,16 +56,20 @@ export class StaticPageWorldSelect extends PageBase {
       },
     ];
 
-    const btnY = 0.42 * p.height;
-    const btnW = 0.23 * p.width;
-    const btnH = 0.35 * p.height;
-    const btnGap = 0.03 * p.width;
-    const totalBtnsWidth = worlds.length * btnW + (worlds.length - 1) * btnGap;
-    const startX = (p.width - totalBtnsWidth) / 2;
+    // 2x2 grid layout for world buttons
+    const cardSize = 0.3 * p.height; // Square card size
+    const cardGap = 0.04 * p.height; // Gap between cards
+    const gridTotalSize = cardSize * 2 + cardGap; // Width and height of 2x2 grid
+    const gridStartX = (p.width - gridTotalSize) / 2;
+    const gridStartY = 0.22 * p.height; // Start from 22% down the screen
 
     const worldBtns = [];
     for (const [index, w] of worlds.entries()) {
-      const btnX = startX + index * (btnW + btnGap);
+      const row = Math.floor(index / 2);
+      const col = index % 2;
+      const btnX = gridStartX + col * (cardSize + cardGap);
+      const btnY = gridStartY + row * (cardSize + cardGap);
+
       const btn = new ButtonBase(
         p,
         w.label,
@@ -76,8 +80,8 @@ export class StaticPageWorldSelect extends PageBase {
         },
         w.cls,
       );
-      btn.btn.style("width", btnW + "px");
-      btn.btn.style("height", btnH + "px");
+      btn.btn.style("width", cardSize + "px");
+      btn.btn.style("height", cardSize + "px");
       this.addElement(btn);
       worldBtns.push({
         btn: btn.btn,
@@ -1070,9 +1074,11 @@ export class StaticPageWorldSelect extends PageBase {
   _createLegacyDemoPanel() {
     const p = this.p;
     const panelWidth = 220;
-    const memorialPanelX = p.width - 340 - 28;
-    const panelX = memorialPanelX - panelWidth - 12;
-    const panelY = 28;
+    // Position directly below the Memorial Versions panel
+    const memorialPanelY = 28;
+    const memorialPanelHeight = 120; // Estimated height of memorial panel
+    const panelX = p.width - 340 - 28; // Same X as memorial panel right edge
+    const panelY = memorialPanelY + memorialPanelHeight + 12; // Below memorial with gap
 
     const panel = p.createDiv("");
     panel.addClass("world-memorial-panel");
@@ -1111,9 +1117,9 @@ export class StaticPageWorldSelect extends PageBase {
   _createLeaderboardPanel() {
     const p = this.p;
     const panelWidth = 190;
+    // Position to the left of Memorial Versions, same row
     const memorialPanelX = p.width - 340 - 28;
-    const legacyPanelX = memorialPanelX - 220 - 12;
-    const panelX = legacyPanelX - panelWidth - 12;
+    const panelX = memorialPanelX - panelWidth - 12; // 12px gap between panels
     const panelY = 28;
 
     const panel = p.createDiv("");

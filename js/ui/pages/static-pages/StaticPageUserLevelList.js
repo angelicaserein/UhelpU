@@ -45,6 +45,25 @@ export class StaticPageUserLevelList extends PageBase {
     this.addElement(container);
     this._container = container;
 
+    // 创建"＋ 创建地图"按钮 - 放在画布右上角
+    const createBtn = p.createButton("＋ 创建地图");
+    createBtn.style("position", "absolute");
+    createBtn.style("top", "32px");
+    createBtn.style("right", "40px");
+    createBtn.style("padding", "10px 20px");
+    createBtn.style("background", "rgba(120,80,200,0.85)");
+    createBtn.style("color", "#fff");
+    createBtn.style("border", "1px solid rgba(255,255,255,0.2)");
+    createBtn.style("border-radius", "8px");
+    createBtn.style("font-size", "14px");
+    createBtn.style("cursor", "pointer");
+    createBtn.style("z-index", "1000");
+    createBtn.mousePressed(() => {
+      this.eventBus.publish(EventTypes.LOAD_LEVEL, { levelType: "emptyEditor" });
+    });
+    createBtn.parent(p.canvas.parentElement);
+    this.addElement(createBtn);
+
     // 创建搜索框
     const searchWrap = p.createDiv("");
     searchWrap.parent(container);

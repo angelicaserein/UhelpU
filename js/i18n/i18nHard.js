@@ -31,8 +31,8 @@ registerTranslations({
     hard_level3_npc_exhausted:
       "If the route disappears under your feet, you pressed the wrong button first.",
 
-    hard_level4_title: "Hard Level 4",
-    hard_level4_info_left: "Hard Level 4",
+    hard_level4_title: "Teleport",
+    hard_level4_info_left: "Hard Level 4\nTeleport",
     hard_level4_info_right: "Difficulty\nHard",
 
     hard_level5_title: "Hard Level 5",
@@ -82,8 +82,8 @@ registerTranslations({
     hard_level3_npc_line2: "你可以来这边自杀。",
     hard_level3_npc_exhausted: "重生可以刷新幽灵哦。",
 
-    hard_level4_title: "第四关",
-    hard_level4_info_left: "第四关\n第四关",
+    hard_level4_title: "传送",
+    hard_level4_info_left: "第四关\n传送",
     hard_level4_info_right: "难度\n困难",
 
     hard_level5_title: "第五关",

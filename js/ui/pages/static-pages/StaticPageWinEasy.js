@@ -130,6 +130,8 @@ export class StaticPageWinEasy extends PageBase {
     this._currentRank = null; // 本次排名
     this._bestScore = null; // 历史最佳成绩
     this._bestRank = null; // 历史最佳排名
+    this._leaderboardLoadAttempt = 0;
+    this._leaderboardRetryTimer = null;
   }
 
   enter() {
@@ -139,6 +141,7 @@ export class StaticPageWinEasy extends PageBase {
 
     // 加载排行榜数据（等待1秒确保成绩已上报）
     setTimeout(() => {
+      this._leaderboardLoadAttempt = 0;
       this._loadLeaderboard();
     }, 1000);
 
@@ -170,6 +173,7 @@ export class StaticPageWinEasy extends PageBase {
     }
 
     this._leaderboardStatus = "loading";
+    this._leaderboardLoadAttempt++;
 
     try {
       const allEntries = await window.getLeaderboard(this.levelIndex, 100); // 获取更多数据用于去重
@@ -306,6 +310,21 @@ export class StaticPageWinEasy extends PageBase {
         playerName: window.playerName,
       };
       console.log("[WinEasy] Stats:", window._winEasyStats);
+
+      // 新成绩上报与读取存在网络时序差时，空榜重试一次。
+      if (
+        this._leaderboard.length === 0 &&
+        this._currentScore !== null &&
+        this._leaderboardLoadAttempt < 2
+      ) {
+        if (this._leaderboardRetryTimer) {
+          clearTimeout(this._leaderboardRetryTimer);
+        }
+        this._leaderboardRetryTimer = setTimeout(() => {
+          this._leaderboardRetryTimer = null;
+          this._loadLeaderboard();
+        }, 1500);
+      }
     } catch (error) {
       console.error("[WinEasy] Failed to load leaderboard:", error);
       this._leaderboardStatus = "error";
@@ -404,6 +423,9 @@ export class StaticPageWinEasy extends PageBase {
         // 加载完成 - 显示数据并做淡入动画
         this._drawLeaderboardEntries(p, baseX, baseY, rowHeight, panelWidth);
       }
+
+      // 无论是否空榜，只要加载成功就展示当前玩家统计信息。
+      this._drawPlayerStatsInfo(p, baseX, baseY, rowHeight, panelWidth);
     } else if (this._leaderboardStatus === "error") {
       // 加载失败
       p.fill(255, 100, 100, 200);
@@ -562,9 +584,14 @@ export class StaticPageWinEasy extends PageBase {
       p.textAlign(p.RIGHT, p.TOP);
       p.text(`${entry.timeSeconds}s`, baseX + panelWidth / 2 - 12, y);
     }
+  }
 
-    // 在排行榜下方显示当前玩家的成绩和排名统计
-    this._drawPlayerStatsInfo(p, baseX, baseY, rowHeight, panelWidth);
+  exit() {
+    if (this._leaderboardRetryTimer) {
+      clearTimeout(this._leaderboardRetryTimer);
+      this._leaderboardRetryTimer = null;
+    }
+    super.exit();
   }
 
   /**

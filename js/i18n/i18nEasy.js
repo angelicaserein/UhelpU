@@ -65,6 +65,8 @@ registerTranslations({
     // ── Easy Level 2 — Hint ────────────────────────────────────────
     easy_hint_level2:
       "Step on the buttons to retract the spikes, then reach the portal to complete the level.",
+    easy_level6_teleport_hint:
+      "Press {key:interaction} to activate a teleport point, then press the number key shown above to teleport.",
 
     // ── Prompts ───────────────────────────────────────────────────
     prompt_ad: "A/D",
@@ -135,6 +137,8 @@ registerTranslations({
 
     // ── Easy Level 2 — Hint ────────────────────────────────────────
     easy_hint_level2: "踩下按钮可以收回地刺，然后到达传送门即可过关。",
+    easy_level6_teleport_hint:
+      "按 {key:interaction} 激活传送点，并按上方数字键进行传送。",
 
     // ── Prompts ───────────────────────────────────────────────────
     prompt_ad: "A/D",

@@ -6,6 +6,7 @@
   Spike,
   Checkpoint,
   TeleportPoint,
+  TextPrompt,
   Button,
   Portal,
   WireRenderer,
@@ -39,6 +40,17 @@ export class Level6 extends BaseLevel {
 
     // Spike
     this.entities.add(new Spike(440, 360, 50, 20));
+
+    // Text prompt (to the right of the spike)
+    this.entities.add(
+      new TextPrompt(540, 365, this, {
+        textKey: "easy_level6_teleport_hint",
+        width: 340,
+        height: 88,
+        showDistance: 140,
+        hideDistance: 220,
+      }),
+    );
 
     // Checkpoint
     this.entities.add(new Checkpoint(230, 360, 40, 70, () => this._player));

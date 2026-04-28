@@ -7,6 +7,7 @@ registerTranslations({
   en: {
     // ── User Level List ─────────────────────────────────────────────────
     user_level_button_label: "Map Plaza",
+    user_level_create_map: "+ Create Map",
     user_level_search_placeholder: "Search levels or authors...",
     user_level_loading: "Loading...",
     user_level_no_match: "No matching levels",
@@ -19,6 +20,7 @@ registerTranslations({
   zh: {
     // ── 玩家关卡列表 ─────────────────────────────────────────────────
     user_level_button_label: "地图广场",
+    user_level_create_map: "＋ 创建地图",
     user_level_search_placeholder: "搜索关卡或作者...",
     user_level_loading: "加载中...",
     user_level_no_match: "没有匹配的关卡",

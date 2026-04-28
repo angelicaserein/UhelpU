@@ -928,6 +928,15 @@ canvas {
   transform: translateY(-3px);
 }
 
+.leaderboard-back-button {
+  z-index: 30;
+  background: rgba(243, 218, 255, 0.85);
+  border-color: #5f2b82;
+  box-shadow:
+    0 0 0 2.5px #000000,
+    0 8px 18px rgba(17, 6, 27, 0.35);
+}
+
 /* 胜利结算页按钮 */
 .win-action-button {
   width: 180px;

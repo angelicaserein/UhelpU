@@ -89,30 +89,18 @@ export class StaticPageWorldSelect extends PageBase {
       });
     }
 
-    // 注册键盘导航（BackButton + 排行榜按钮 + 迭代版本按钮 + 主区域难度按钮）
+    // 注册键盘导航（仅 BackButton + 主区域 2x2 世界按钮）
     this.registerNavButtons(
       [
         {
           btn: backBtn.btn,
           callback: () => this.switcher.showMainMenu(p),
         },
-        {
-          btn: leaderboardBtn,
-          callback: () => this.switcher.showLeaderboardPage(p),
-        },
-        {
-          btn: legacyDemo1Btn,
-          callback: () => this.switcher.showOpeningSceneDemo1(p),
-        },
-        {
-          btn: legacyDemo2Btn,
-          callback: () => this.switcher.showLevelChoiceDemo2(p),
-        },
         ...worldBtns,
       ],
       {
-        layout: "horizontal",
-        onEsc: () => this.switcher.showLanguageChoice(p),
+        layout: "spatial",
+        onEsc: () => this.switcher.showMainMenu(p),
       },
     );
   }
@@ -202,7 +190,7 @@ export class StaticPageWorldSelect extends PageBase {
       renameBtn.parent(panel);
       renameBtn.mousePressed(() => this._showRenameInputDialog());
 
-      const registerBtn = p.createButton("注册账号 / Register");
+      const registerBtn = p.createButton(t("btn_register"));
       registerBtn.addClass("player-rename-button");
       registerBtn.style("margin-left", "8px");
       registerBtn.parent(panel);
@@ -386,7 +374,7 @@ export class StaticPageWorldSelect extends PageBase {
     const loadingContainer = p.createDiv("");
     loadingContainer.addClass("rename-loading-overlay");
     this.addElement(loadingContainer);
-    const loadingText = p.createDiv("改名中...");
+    const loadingText = p.createDiv(t("rename_loading"));
     loadingText.addClass("rename-loading-text");
     loadingText.parent(loadingContainer);
 
@@ -430,7 +418,7 @@ export class StaticPageWorldSelect extends PageBase {
       console.error("[StaticPageWorldSelect] Account rename failed:", error);
       loadingContainer.remove();
       this._isRenamingInProgress = false;
-      alert("改名失败，请重试 / Rename failed, please try again");
+      alert(t("rename_error"));
     }
   }
 
@@ -958,7 +946,7 @@ export class StaticPageWorldSelect extends PageBase {
     loadingContainer.addClass("rename-loading-overlay");
     this.addElement(loadingContainer);
 
-    const loadingText = p.createDiv("改名中...");
+    const loadingText = p.createDiv(t("rename_loading"));
     loadingText.addClass("rename-loading-text");
     loadingText.parent(loadingContainer);
 
@@ -1023,7 +1011,7 @@ export class StaticPageWorldSelect extends PageBase {
       console.error("[改名流程] ✗ 改名失败:", error);
       loadingContainer.remove();
       this._isRenamingInProgress = false;
-      alert("改名失败，请重试 / Rename failed, please try again");
+      alert(t("rename_error"));
     }
   }
 

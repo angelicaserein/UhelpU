@@ -128,7 +128,8 @@ const _dict = {
     btn_back: "Back",
     rename_input_title: "Enter New Name",
     rename_prompt: "Enter your new player name",
-    rename_error: "Error updating name",
+    rename_error: "Rename failed, please try again",
+    rename_loading: "Renaming...",
     player_welcome: "Welcome",
     player_rename_button: "Rename",
     // ── Account System ───────────────────────────────────────────────
@@ -332,7 +333,8 @@ const _dict = {
     btn_back: "返回",
     rename_input_title: "输入新的昵称",
     rename_prompt: "输入你的新玩家名字",
-    rename_error: "更新名字时发生错误",
+    rename_error: "改名失败，请重试",
+    rename_loading: "改名中...",
     player_welcome: "欢迎",
     player_rename_button: "改名",
     // ── 账号系统 ──────────────────────────────────────────────────────

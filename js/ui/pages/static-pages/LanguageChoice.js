@@ -21,13 +21,15 @@ export class LanguageChoice extends PageBase {
   _getPageCopy() {
     const isChinese = i18n.getLang() === "zh";
     return {
-      enLabel: isChinese ? "英 文" : "ENGLISH",
-      zhLabel: isChinese ? "中 文" : "CHINESE",
-      selectHint: isChinese ? "点击选择" : "Click to select",
+      enLabel: "ENGLISH",
+      zhLabel: "中 文",
+      enSelectHint: "Click to select",
+      zhSelectHint: "点击选择",
       footerHint: isChinese
         ? "你可以随时在设置里调整语言。"
         : "You can change the language anytime in Settings.",
-      title: isChinese ? "请 选 择 语 言" : "Please Select Language",
+      title: "Select Language",
+      titleZh: "请选择语言",
     };
   }
 
@@ -55,7 +57,7 @@ export class LanguageChoice extends PageBase {
     // 没有保存数据，显示语言选择
 
     // 左侧：英语
-    const enPanel = p.createDiv(makePanel(copy.enLabel, copy.selectHint));
+    const enPanel = p.createDiv(makePanel(copy.enLabel, copy.enSelectHint));
     enPanel.addClass("language-panel lang-panel-left");
     enPanel.mouseClicked(() => {
       i18n.setLang("en");
@@ -64,7 +66,7 @@ export class LanguageChoice extends PageBase {
     this.addElement(enPanel);
 
     // 右侧：中文
-    const zhPanel = p.createDiv(makePanel(copy.zhLabel, copy.selectHint));
+    const zhPanel = p.createDiv(makePanel(copy.zhLabel, copy.zhSelectHint));
     zhPanel.addClass("language-panel lang-panel-right");
     zhPanel.mouseClicked(() => {
       i18n.setLang("zh");
@@ -141,10 +143,11 @@ export class LanguageChoice extends PageBase {
     if (Assets.customFont) p.textFont(Assets.customFont);
     p.textStyle(p.BOLD);
 
-    const title = this._getPageCopy().title;
-    const isChinese = i18n.getLang() === "zh";
-    p.textSize(Math.floor(p.width * (isChinese ? 0.032 : 0.026)));
-    p.text(title, p.width * 0.5, centerY);
+    const copy = this._getPageCopy();
+    const lineSize = Math.floor(p.width * 0.024);
+    p.textSize(lineSize);
+    p.text(copy.title, p.width * 0.5, centerY - lineSize * 0.65);
+    p.text(copy.titleZh, p.width * 0.5, centerY + lineSize * 0.65);
 
     p.pop();
   }

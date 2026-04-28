@@ -29,10 +29,19 @@ export class StaticPageLeaderboard extends PageBase {
     const p = this.p;
     AudioManager.playBGM("levelChoice");
 
+    const layout = this._getLayoutMetrics();
+
     const backBtn = new BackButton(p, () => this.switcher.showWorldSelect(p));
+    const backBtnWidth = 0.04 * p.width;
+    const backBtnHeight = 0.065 * p.height;
+    backBtn.setPosition(
+      Math.max(12, layout.x - backBtnWidth - 14),
+      Math.max(12, layout.y - backBtnHeight - 10),
+    );
+    backBtn.btn.addClass("leaderboard-back-button");
     this.addElement(backBtn);
 
-    this._createLayout();
+    this._createLayout(layout);
     this._refreshTabButtons();
     this._cardsData = this._buildLoadingCards(this._activeMode);
     this._renderCards();
@@ -79,16 +88,29 @@ export class StaticPageLeaderboard extends PageBase {
     this._renderCards();
   }
 
-  _createLayout() {
+  _getLayoutMetrics() {
     const p = this.p;
     const layoutWidth = Math.min(p.width - 64, 1220);
-    const layoutHeight = Math.min(p.height - 96, 620);
+    const layoutHeight = Math.min(p.height - 112, 620);
+    const layoutX = (p.width - layoutWidth) / 2;
+    const layoutY = 86;
+
+    return {
+      width: layoutWidth,
+      height: layoutHeight,
+      x: layoutX,
+      y: layoutY,
+    };
+  }
+
+  _createLayout(layout = this._getLayoutMetrics()) {
+    const p = this.p;
 
     this._root = p.createDiv("");
     this._root.addClass("leaderboard-page");
-    this._root.position((p.width - layoutWidth) / 2, 78);
-    this._root.style("width", layoutWidth + "px");
-    this._root.style("height", layoutHeight + "px");
+    this._root.position(layout.x, layout.y);
+    this._root.style("width", layout.width + "px");
+    this._root.style("height", layout.height + "px");
 
     const header = p.createDiv("");
     header.addClass("leaderboard-header");

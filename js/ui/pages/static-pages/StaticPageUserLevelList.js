@@ -45,8 +45,8 @@ export class StaticPageUserLevelList extends PageBase {
     this.addElement(container);
     this._container = container;
 
-    // 创建"＋ 创建地图"按钮 - 放在画布右上角
-    const createBtn = p.createButton("＋ 创建地图");
+    // 创建地图按钮 - 放在画布右上角
+    const createBtn = p.createButton(t("user_level_create_map"));
     createBtn.style("position", "absolute");
     createBtn.style("top", "32px");
     createBtn.style("right", "40px");
@@ -59,7 +59,9 @@ export class StaticPageUserLevelList extends PageBase {
     createBtn.style("cursor", "pointer");
     createBtn.style("z-index", "1000");
     createBtn.mousePressed(() => {
-      this.eventBus.publish(EventTypes.LOAD_LEVEL, { levelType: "emptyEditor" });
+      this.eventBus.publish(EventTypes.LOAD_LEVEL, {
+        levelType: "emptyEditor",
+      });
     });
     createBtn.parent(p.canvas.parentElement);
     this.addElement(createBtn);
@@ -117,6 +119,7 @@ export class StaticPageUserLevelList extends PageBase {
     // 注册语言变化监听器
     this._langChangeHandler = (lang) => {
       searchInput.attribute("placeholder", t("user_level_search_placeholder"));
+      createBtn.html(t("user_level_create_map"));
       this._renderCards();
     };
     i18n.onChange(this._langChangeHandler);
@@ -145,9 +148,10 @@ export class StaticPageUserLevelList extends PageBase {
   _renderCards() {
     if (!this._listWrap) return;
     const query = this._searchInput?.elt.value.toLowerCase() || "";
-    const filtered = this._levelList.filter(item =>
-      (item.title || "").toLowerCase().includes(query) ||
-      (item.authorName || "").toLowerCase().includes(query)
+    const filtered = this._levelList.filter(
+      (item) =>
+        (item.title || "").toLowerCase().includes(query) ||
+        (item.authorName || "").toLowerCase().includes(query),
     );
 
     this._listWrap.elt.innerHTML = "";
@@ -155,12 +159,14 @@ export class StaticPageUserLevelList extends PageBase {
     if (filtered.length === 0) {
       const empty = document.createElement("div");
       empty.className = "leaderboard-empty";
-      empty.textContent = query ? t("user_level_no_match") : t("user_level_empty");
+      empty.textContent = query
+        ? t("user_level_no_match")
+        : t("user_level_empty");
       this._listWrap.elt.appendChild(empty);
       return;
     }
 
-    filtered.forEach(item => {
+    filtered.forEach((item) => {
       const row = document.createElement("div");
       row.style.cssText = `
         background: rgba(255,255,255,0.05);
@@ -193,7 +199,9 @@ export class StaticPageUserLevelList extends PageBase {
         color: rgba(200,180,255,0.7);
         text-align: left;
       `;
-      author.textContent = t("user_level_by_prefix") + (item.authorName || t("user_level_anonymous_author"));
+      author.textContent =
+        t("user_level_by_prefix") +
+        (item.authorName || t("user_level_anonymous_author"));
 
       row.appendChild(title);
       row.appendChild(author);
@@ -207,8 +215,10 @@ export class StaticPageUserLevelList extends PageBase {
         row.style.borderColor = "rgba(255,255,255,0.08)";
       });
       row.addEventListener("click", () => {
-        this.eventBus.publish(EventTypes.LOAD_LEVEL,
-          { levelType: "user", levelId: item.id });
+        this.eventBus.publish(EventTypes.LOAD_LEVEL, {
+          levelType: "user",
+          levelId: item.id,
+        });
       });
 
       this._listWrap.elt.appendChild(row);

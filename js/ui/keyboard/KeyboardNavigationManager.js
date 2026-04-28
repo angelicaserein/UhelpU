@@ -22,7 +22,7 @@ export class KeyboardNavigationManager {
     // 配置项
     this.onEsc = options.onEsc || null;
     this.onNavigate = options.onNavigate || null;
-    this.layout = options.layout || "vertical"; // 'vertical' 或 'horizontal' 或 'grid'
+    this.layout = options.layout || "vertical"; // 'vertical' 或 'horizontal' 或 'grid' 或 'spatial'
     this.rows = options.rows || 1; // 仅在 'grid' 模式下使用
     this.cols = options.cols || 1;
     this.enableActivationKeys = options.enableActivationKeys !== false;
@@ -229,6 +229,8 @@ export class KeyboardNavigationManager {
 
     if (this.layout === "grid") {
       this._navigateGrid(keyCode);
+    } else if (this.layout === "spatial") {
+      this._navigateSpatial(keyCode);
     } else if (this.layout === "horizontal") {
       this._navigateHorizontal(keyCode);
     } else {
@@ -302,6 +304,122 @@ export class KeyboardNavigationManager {
     if (newIndex < this.buttons.length) {
       this.currentIndex = newIndex;
     }
+  }
+
+  /**
+   * 空间导航（根据按钮在屏幕中的实际位置寻找目标）
+   */
+  _navigateSpatial(keyCode) {
+    const direction = this._getDirectionVector(keyCode);
+    if (!direction) return;
+
+    const currentBtn = this.getFocusedButton();
+    const currentRect = this._getButtonRect(currentBtn);
+    if (!currentRect) return;
+
+    const currentCenter = {
+      x: currentRect.left + currentRect.width / 2,
+      y: currentRect.top + currentRect.height / 2,
+    };
+
+    let bestIndex = this.currentIndex;
+    let bestScore = Number.POSITIVE_INFINITY;
+
+    for (let i = 0; i < this.buttons.length; i++) {
+      if (i === this.currentIndex) continue;
+
+      const rect = this._getButtonRect(this.buttons[i]);
+      if (!rect) continue;
+
+      const candidateCenter = {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      };
+
+      const deltaX = candidateCenter.x - currentCenter.x;
+      const deltaY = candidateCenter.y - currentCenter.y;
+
+      const primaryDelta =
+        direction.x !== 0 ? deltaX * direction.x : deltaY * direction.y;
+      if (primaryDelta <= 0) continue;
+
+      const secondaryDelta =
+        direction.x !== 0 ? Math.abs(deltaY) : Math.abs(deltaX);
+
+      const score = primaryDelta + secondaryDelta * 2;
+      if (score < bestScore) {
+        bestScore = score;
+        bestIndex = i;
+      }
+    }
+
+    if (bestIndex !== this.currentIndex) {
+      this.currentIndex = bestIndex;
+      return;
+    }
+
+    const fallback = this._findSpatialWrapTarget(direction);
+    if (fallback !== -1) {
+      this.currentIndex = fallback;
+    }
+  }
+
+  _getDirectionVector(keyCode) {
+    if (keyCode === "ArrowUp" || keyCode === "KeyW") return { x: 0, y: -1 };
+    if (keyCode === "ArrowDown" || keyCode === "KeyS") return { x: 0, y: 1 };
+    if (keyCode === "ArrowLeft" || keyCode === "KeyA") return { x: -1, y: 0 };
+    if (keyCode === "ArrowRight" || keyCode === "KeyD") return { x: 1, y: 0 };
+    return null;
+  }
+
+  _getButtonRect(buttonItem) {
+    const btn = buttonItem?.btn;
+    const element = btn?.elt || btn;
+    if (!element || typeof element.getBoundingClientRect !== "function") {
+      return null;
+    }
+    const rect = element.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) {
+      return null;
+    }
+    return rect;
+  }
+
+  _findSpatialWrapTarget(direction) {
+    const validButtons = [];
+    for (let i = 0; i < this.buttons.length; i++) {
+      const rect = this._getButtonRect(this.buttons[i]);
+      if (!rect) continue;
+      validButtons.push({
+        index: i,
+        centerX: rect.left + rect.width / 2,
+        centerY: rect.top + rect.height / 2,
+      });
+    }
+
+    if (validButtons.length === 0) {
+      return -1;
+    }
+
+    if (direction.y < 0) {
+      validButtons.sort(
+        (a, b) => a.centerY - b.centerY || a.centerX - b.centerX,
+      );
+    } else if (direction.y > 0) {
+      validButtons.sort(
+        (a, b) => b.centerY - a.centerY || a.centerX - b.centerX,
+      );
+    } else if (direction.x < 0) {
+      validButtons.sort(
+        (a, b) => a.centerX - b.centerX || a.centerY - b.centerY,
+      );
+    } else {
+      validButtons.sort(
+        (a, b) => b.centerX - a.centerX || a.centerY - b.centerY,
+      );
+    }
+
+    return validButtons[0].index;
   }
 
   /**

@@ -17,6 +17,7 @@ import { EditorUI } from "./EditorUI.js";
 import { EditorPreview } from "./EditorPreview.js";
 import { EditorEntityManager } from "./EditorEntityManager.js";
 import { EditorExporter } from "./EditorExporter.js";
+import { t } from "../i18n/index.js";
 import {
   GROUND_DEFAULTS,
   PLATFORM_DEFAULTS,
@@ -477,7 +478,10 @@ export class MapEditor {
   // ══════════════════════════════════════════════════════════════
 
   async _handleSave() {
-    const rawLevelClassName = window.prompt("Enter level class name:", "LevelX");
+    const rawLevelClassName = window.prompt(
+      t("editor_export_prompt_level_class_name"),
+      t("editor_export_prompt_level_class_default"),
+    );
     if (rawLevelClassName === null) {
       return;
     }
@@ -498,7 +502,7 @@ export class MapEditor {
       },
       levelClassName,
     );
-    this._ui.showToast(`Complete ${levelClassName}.js copied to clipboard`);
+    this._ui.showToast(t("editor_export_success_copied"));
     console.log("[MapEditor] Exported code:\n" + code);
   }
 
@@ -507,7 +511,10 @@ export class MapEditor {
    */
   async _handleUpload() {
     // 1. Prompt for level title
-    const title = window.prompt("请输入关卡标题", "我的关卡");
+    const title = window.prompt(
+      t("editor_upload_prompt_level_title"),
+      t("editor_upload_prompt_level_title_default"),
+    );
     if (title === null || title.trim() === "") {
       return;
     }
@@ -551,13 +558,13 @@ export class MapEditor {
       );
 
       if (success) {
-        this._ui.showToast("上传成功！");
+        this._ui.showToast(t("editor_upload_success"));
       } else {
-        this._ui.showToast("上传失败，请检查网络");
+        this._ui.showToast(t("editor_upload_failed_network"));
       }
     } catch (error) {
       console.error("[MapEditor] Upload error:", error);
-      this._ui.showToast("上传失败，请检查网络");
+      this._ui.showToast(t("editor_upload_failed_network"));
     }
   }
 

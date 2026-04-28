@@ -210,6 +210,15 @@ const _dict = {
       "The previous candidate overlapped with recent history. Generate a clearly different new line in both meaning and structure.",
     ai_voice_prompt_initial: "Generate a new phantom line.",
     ai_voice_prompt_output_instruction: "Speak one sentence in English.",
+
+    // ── Map Editor ────────────────────────────────────────────────
+    editor_export_prompt_level_class_name: "Enter level class name:",
+    editor_export_prompt_level_class_default: "LevelX",
+    editor_export_success_copied: "Level code copied to clipboard",
+    editor_upload_prompt_level_title: "Enter level title",
+    editor_upload_prompt_level_title_default: "My Level",
+    editor_upload_success: "Upload successful!",
+    editor_upload_failed_network: "Upload failed, please check your network",
   },
 
   zh: {
@@ -410,6 +419,15 @@ const _dict = {
       "上一条候选与历史重复，请生成一句在意义和结构上都明显不同的新台词。",
     ai_voice_prompt_initial: "请生成一句新的幻影台词。",
     ai_voice_prompt_output_instruction: "请只用中文说一句话。",
+
+    // ── 地图编辑器 ────────────────────────────────────────────────
+    editor_export_prompt_level_class_name: "请输入关卡类名：",
+    editor_export_prompt_level_class_default: "LevelX",
+    editor_export_success_copied: "关卡代码已复制到剪贴板",
+    editor_upload_prompt_level_title: "请输入关卡标题",
+    editor_upload_prompt_level_title_default: "我的关卡",
+    editor_upload_success: "上传成功！",
+    editor_upload_failed_network: "上传失败，请检查网络",
   },
 };
 

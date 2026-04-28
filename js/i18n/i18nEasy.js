@@ -8,31 +8,31 @@ registerTranslations({
     // ── Level titles & info ──────────────────────────────────────────
     easy_level1_title: "Rules",
     easy_level1_info_left: "Level 1\nRules",
-    easy_level1_info_right: "Difficulty\nBeginner",
+    easy_level1_info_right: "Difficulty\nTutorial",
 
     easy_level2_title: "Spikes",
     easy_level2_info_left: "Level 2\nSpikes",
-    easy_level2_info_right: "Difficulty\nBeginner",
+    easy_level2_info_right: "Difficulty\n💜",
 
     easy_level3_title: "Higher",
     easy_level3_info_left: "Level 3\nHigher",
-    easy_level3_info_right: "Difficulty\nBeginner",
+    easy_level3_info_right: "Difficulty\n💜💜",
 
     easy_level4_title: "Illusions",
     easy_level4_info_left: "Level 4\nIllusions",
-    easy_level4_info_right: "Difficulty\nBeginner",
+    easy_level4_info_right: "Difficulty\n💜💜",
 
     easy_level5_title: "Ghosts",
     easy_level5_info_left: "Level 5\nGhosts",
-    easy_level5_info_right: "Difficulty\nBeginner",
+    easy_level5_info_right: "Difficulty\n💜💜",
 
     easy_level6_title: "Teleport",
     easy_level6_info_left: "Level 6\nTeleport",
-    easy_level6_info_right: "Difficulty\nBeginner",
+    easy_level6_info_right: "Difficulty\n💜💜",
 
     easy_level7_title: "Boxes",
     easy_level7_info_left: "Level 7\nBoxes",
-    easy_level7_info_right: "Difficulty\nBeginner",
+    easy_level7_info_right: "Difficulty\n💜",
 
     easy_level8_title: "Easy Level 8",
     easy_level8_info_left: "Level 8\nEasy Level 8",
@@ -82,31 +82,31 @@ registerTranslations({
     // ── Level titles & info ──────────────────────────────────────────
     easy_level1_title: "规则",
     easy_level1_info_left: "第一关\n规则",
-    easy_level1_info_right: "难度\n初级",
+    easy_level1_info_right: "难度\n教程关",
 
     easy_level2_title: "地刺",
     easy_level2_info_left: "第二关\n地刺",
-    easy_level2_info_right: "难度\n初级",
+    easy_level2_info_right: "难度\n💜",
 
     easy_level3_title: "登高",
     easy_level3_info_left: "第三关\n登高",
-    easy_level3_info_right: "难度\n初级",
+    easy_level3_info_right: "难度\n💜💜",
 
     easy_level4_title: "虚实",
     easy_level4_info_left: "第四关\n虚实",
-    easy_level4_info_right: "难度\n初级",
+    easy_level4_info_right: "难度\n💜💜",
 
     easy_level5_title: "幽灵",
     easy_level5_info_left: "第五关\n幽灵",
-    easy_level5_info_right: "难度\n初级",
+    easy_level5_info_right: "难度\n💜💜",
 
     easy_level6_title: "传送",
     easy_level6_info_left: "第六关\n传送",
-    easy_level6_info_right: "难度\n初级",
+    easy_level6_info_right: "难度\n💜💜",
 
     easy_level7_title: "木箱",
     easy_level7_info_left: "第七关\n木箱",
-    easy_level7_info_right: "难度\n初级",
+    easy_level7_info_right: "难度\n💜",
 
     easy_level8_title: "简易关卡 8",
     easy_level8_info_left: "第八关\n简易关卡 8",

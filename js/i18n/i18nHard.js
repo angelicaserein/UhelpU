@@ -7,7 +7,7 @@ registerTranslations({
   en: {
     hard_level1_title: "Thorns",
     hard_level1_info_left: "Hard level 1\nThorns",
-    hard_level1_info_right: "Difficulty\nHard",
+    hard_level1_info_right: "Difficulty\n💜💜💜",
     hard_hint_level1:
       "Press the matching buttons to retract the linked spikes. The second room also gates the portal behind a button, so plan your route before you start recording.",
     hard_level1_npc_line1: "Welcome to hard mode!",
@@ -19,11 +19,11 @@ registerTranslations({
 
     hard_level2_title: "Jail",
     hard_level2_info_left: "Hard level 2\nJail",
-    hard_level2_info_right: "Difficulty\nHard",
+    hard_level2_info_right: "Difficulty\n💜💜💜💜",
 
     hard_level3_title: "Symbiosis",
     hard_level3_info_left: "Hard level 3\nSymbiosis",
-    hard_level3_info_right: "Difficulty\nHard",
+    hard_level3_info_right: "Difficulty\n💜💜💜💜",
     hard_level3_npc_line1:
       "Buttons can create paths just as easily as they can erase them.",
     hard_level3_npc_line2:
@@ -33,7 +33,7 @@ registerTranslations({
 
     hard_level4_title: "Teleport",
     hard_level4_info_left: "Hard Level 4\nTeleport",
-    hard_level4_info_right: "Difficulty\nHard",
+    hard_level4_info_right: "Difficulty\n💜💜💜💜💜",
 
     hard_level5_title: "Hard Level 5",
     hard_level5_info_left: "Hard Level 5",

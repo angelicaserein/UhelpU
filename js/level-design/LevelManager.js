@@ -188,6 +188,9 @@ export class LevelManager {
       this.cameraNudgeX = 0;
       this.startLevelTitleOverlay(levelIndex, p);
       this._teleportPointSystem.registerTeleportPoints(this.level.entities);
+      this._teleportPointSystem.restoreTeleportPointsFromSnapshot(
+        options.startTeleportPoints,
+      );
       console.log("[LevelManager.loadLevel] Loaded level:", levelIndex);
     } else {
       console.warn(
@@ -228,6 +231,9 @@ export class LevelManager {
       this.cameraNudgeX = 0;
       this.startLevelTitleOverlay(this.currentLevelIndex, p);
       this._teleportPointSystem.registerTeleportPoints(this.level.entities);
+      this._teleportPointSystem.restoreTeleportPointsFromSnapshot(
+        options.startTeleportPoints,
+      );
       // Restore from checkpoint if provided (same as loadLevel)
       this._restoreStartCheckpoint(options.startCheckpoint);
       console.log(
@@ -410,12 +416,15 @@ export class LevelManager {
       ) {
         const startCheckpoint =
           this._checkpointSystem.getLastActivatedCheckpointSnapshot();
+        const startTeleportPoints =
+          this._teleportPointSystem.getActivatedTeleportPointsSnapshot();
 
         if (startCheckpoint) {
           if (!this._pendingDeathReload) {
             this._pendingDeathReload = {
               levelIndex: this.currentLevelIndex,
               startCheckpoint,
+              startTeleportPoints,
               preserveTimer: true,
             };
           }

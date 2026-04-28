@@ -48,6 +48,7 @@ export class TeleportPoint extends GameEntity {
     this._interactionKeyPressed = false;
     this._keyBindingManager = KeyBindingManager.getInstance();
     this._onActivate = options.onActivate || null;
+    this._onTeleportPointActivate = null; // 由 TeleportPointSystem 设置
     this._teleportPointIndex = null; // 由 TeleportPointSystem 设置
 
     this._onKeyDown = (e) => {
@@ -77,6 +78,10 @@ export class TeleportPoint extends GameEntity {
 
   activate() {
     this.activated = true;
+    // 通知 TeleportPointSystem 此传送点已激活
+    if (this._onTeleportPointActivate) {
+      this._onTeleportPointActivate();
+    }
     if (this._onActivate) this._onActivate();
   }
 

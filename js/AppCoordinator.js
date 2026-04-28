@@ -61,6 +61,7 @@ export class AppCoordinator {
       ) {
         const levelId = loadRequest?.levelId || this._currentUserLevelId;
         const startCheckpoint = loadRequest?.startCheckpoint || null;
+        const startTeleportPoints = loadRequest?.startTeleportPoints || null;
         window
           .getUserLevel(levelId)
           .then((levelJSON) => {
@@ -78,6 +79,7 @@ export class AppCoordinator {
 
               this.levelManager.loadLevelInstance(userLevel, this.p, {
                 startCheckpoint,
+                startTeleportPoints,
               });
               this.switcher.gameSwitcher.runtimeLevelManager =
                 this.levelManager;
@@ -106,8 +108,12 @@ export class AppCoordinator {
       }
 
       // Original built-in level loading
-      const { levelIndex, startCheckpoint, preserveTimer } =
-        this._normalizeLoadLevelRequest(loadRequest);
+      const {
+        levelIndex,
+        startCheckpoint,
+        startTeleportPoints,
+        preserveTimer,
+      } = this._normalizeLoadLevelRequest(loadRequest);
       console.log(
         "[AppCoordinator.LOAD_LEVEL] Event received with payload:",
         loadRequest,
@@ -133,9 +139,11 @@ export class AppCoordinator {
       console.log("[AppCoordinator.LOAD_LEVEL] Calling loadLevel with:", {
         levelIndex,
         startCheckpoint,
+        startTeleportPoints,
       });
       this.levelManager.loadLevel(levelIndex, this.p, this.eventBus, {
         startCheckpoint,
+        startTeleportPoints,
       });
       this.switcher.gameSwitcher.runtimeLevelManager = this.levelManager;
 
@@ -306,6 +314,7 @@ export class AppCoordinator {
       return {
         levelIndex: loadRequest.levelIndex ?? null,
         startCheckpoint: loadRequest.startCheckpoint ?? null,
+        startTeleportPoints: loadRequest.startTeleportPoints ?? null,
         preserveTimer: loadRequest.preserveTimer === true,
       };
     }
@@ -313,6 +322,7 @@ export class AppCoordinator {
     return {
       levelIndex: null,
       startCheckpoint: null,
+      startTeleportPoints: null,
       preserveTimer: false,
     };
   }

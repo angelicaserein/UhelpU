@@ -546,7 +546,7 @@ export class MapEditor {
         w: this._spawnPlayerW,
         h: this._spawnPlayerH,
       },
-      { title: title.trim(), authorName }
+      { title: title.trim(), authorName },
     );
 
     // 4. Call upload function
@@ -554,7 +554,7 @@ export class MapEditor {
       const success = await window.uploadUserLevel(
         levelJSON,
         authorName,
-        title.trim()
+        title.trim(),
       );
 
       if (success) {

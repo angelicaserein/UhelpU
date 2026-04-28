@@ -65,23 +65,27 @@ export class TeleportPointSystem {
     // 如果还没分配索引，就分配下一个
     if (tp._teleportPointIndex === null && !this._activatedOrder.includes(tp)) {
       const maxActiveCount = 10; // 最多支持 10 个激活的传送点（对应 0-9 十个快捷键）
-      
+
       // 计算新的快捷键
       let newKeyboardKey;
       if (this._activatedOrder.length < maxActiveCount) {
         // 前 10 个：分别对应 1-9,0
-        newKeyboardKey = this._activatedOrder.length === 9 ? 0 : this._activatedOrder.length + 1;
+        newKeyboardKey =
+          this._activatedOrder.length === 9
+            ? 0
+            : this._activatedOrder.length + 1;
       } else {
-        // 超过 10 个：循环覆盖最旧的
+        // 超过 10 个：循环覆盖最旧的，新的快捷键复用被移除的快捷键
         const oldestTp = this._activatedOrder.shift(); // 移除最旧的
+        const recycledKey = oldestTp._teleportPointIndex; // 获取被移除的快捷键
         oldestTp._teleportPointIndex = null;
         oldestTp.activated = false;
         this._teleportPointMap.delete(oldestTp);
-        
-        // 新的快捷键为 1（第一个位置）
-        newKeyboardKey = 1;
+
+        // 新的快捷键复用被移除的快捷键
+        newKeyboardKey = recycledKey;
       }
-      
+
       // 分配新的快捷键
       tp._teleportPointIndex = newKeyboardKey;
       this._activatedOrder.push(tp);

@@ -1,3 +1,4 @@
+// AchievementData.js — Achievement data definition and state management (localStorage persistence)
 // AchievementData.js — 成就数据定义与状态管理（localStorage 持久化）
 
 const STORAGE_KEY = "kinoko_achievements";
@@ -28,7 +29,7 @@ export const AchievementData = {
         }
       }
     } catch (_) {
-      // ignore
+      // ignore | 忽略
     }
   },
 
@@ -36,7 +37,7 @@ export const AchievementData = {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify([...this._unlocked]));
     } catch (_) {
-      // ignore
+      // ignore | 忽略
     }
   },
 
@@ -64,5 +65,6 @@ export const AchievementData = {
   },
 };
 
+// Initialize by restoring unlocked achievements from localStorage on startup
 // 启动时从 localStorage 恢复已解锁的成就
 AchievementData._load();

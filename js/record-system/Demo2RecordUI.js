@@ -1,4 +1,6 @@
-// Demo2RecordUI.js - 复古像素硬边风格 RECORD HUD + 操作时间轴
+// Demo2RecordUI.js - Retro pixel hard-edge RECORD HUD + operation timeline
+// 复古像素硬边风格RECORD HUD + 操作时间轴
+// Core color palette: deep purple-black #2A1433 + mid-dark purple #6B4A7A + light purple-gray #8A6A99 + light purple/very light purple background
 // 核心色系：深紫黑 #2A1433 + 中深紫 #6B4A7A + 浅紫灰 #8A6A99 + 淡紫/极浅紫背景
 import { keyCodeToLabel } from "./RecordKeyUtil.js";
 import { KeyBindingManager } from "../key-binding-system/KeyBindingManager.js";
@@ -7,6 +9,7 @@ import { isGamePaused } from "../game-runtime/GamePauseState.js";
 import { Assets } from "../AssetsManager.js";
 
 export class Demo2RecordUI {
+  // Core color palette (RGB values)
   // 核心色板（RGB值）
   static COLOR_PALETTE = {
     deepPurpleBlack: { r: 42, g: 20, b: 51 }, // #2A1433
@@ -19,12 +22,17 @@ export class Demo2RecordUI {
     replayBlue: { r: 120, g: 180, b: 255 },
     standbyPurple: { r: 160, g: 120, b: 180 },
 
+    // Operation colors
     // 操作颜色
-    moveLeftColor: { r: 100, g: 200, b: 255 }, // 蓝色左
+    moveLeftColor: { r: 100, g: 200, b: 255 }, // Blue left | 蓝色左
     moveRightColor: { r: 122, g: 92, b: 67 }, // 哑光棕右 #7A5C43
     jumpColor: { r: 255, g: 200, b: 100 }, // 橙色跳
   };
 
+  /**
+   * Generate UI state for record display
+   * 生成录制显示的UI状态
+   */
   static getRecordUiState(
     p,
     state,
@@ -115,19 +123,20 @@ export class Demo2RecordUI {
   }
 
   /**
+   * Draw RECORD HUD + operation timeline
    * 绘制 RECORD HUD + 操作时间轴
-   * @param {object} p - p5实例
-   * @param {object} params - 绘制参数
-   * @param {string} params.state - 状态
-   * @param {number} params.maxRecordTime - 最大录制时长
-   * @param {number} params.recordStartTime - 录制开始时间
-   * @param {number} params.recordEndTime - 录制结束时间
-   * @param {number} params.replayStartTime - 回放开始时间
-   * @param {number|null} params.pausedRecordElapsed - 暂停时的录制经过时间
-   * @param {number|null} params.pausedReplayElapsed - 暂停时的回放经过时间
-   * @param {number} params.airBlockFlashMs - 空中被挡的时间戳
-   * @param {object} params.player - 玩家对象
-   * @param {array} params.recordedActions - [{ time: ms, action: "moveLeft"|"moveRight"|"jump" }, ...]
+   * @param {object} p - p5 instance | p5实例
+   * @param {object} params - drawing parameters | 绘制参数
+   * @param {string} params.state - state | 状态
+   * @param {number} params.maxRecordTime - maximum record duration | 最大录制时长
+   * @param {number} params.recordStartTime - record start time | 录制开始时间
+   * @param {number} params.recordEndTime - record end time | 录制结束时间
+   * @param {number} params.replayStartTime - replay start time | 回放开始时间
+   * @param {number|null} params.pausedRecordElapsed - elapsed time when paused recording | 暂停时的录制经过时间
+   * @param {number|null} params.pausedReplayElapsed - elapsed time when paused replay | 暂停时的回放经过时间
+   * @param {number} params.airBlockFlashMs - air block timestamp | 空中被挡的时间戳
+   * @param {object} params.player - player object | 玩家对象
+   * @param {array} params.recordedActions - [{ time: ms, action: "moveLeft"|"moveRight"|"jump" }, ...] | 已录制的操作
    */
   static draw(
     p,
@@ -156,10 +165,11 @@ export class Demo2RecordUI {
       pausedReplayElapsed,
     );
 
+    // === Layout dimensions ===
     // === 布局尺寸 ===
     const padding = 12;
-    const baseHeight = 80; // 上部分：状态 + 按键提示
-    const timelineHeight = 50; // 下部分：进度条 + 时间轴 + 操作标记
+    const baseHeight = 80; // Top section: state + key hints | 上部分：状态 + 按键提示
+    const timelineHeight = 50; // Bottom section: progress bar + timeline + operation markers | 下部分：进度条 + 时间轴 + 操作标记
     const showTimeline =
       state === "Recording" ||
       state === "ReadyToReplay" ||
@@ -169,7 +179,7 @@ export class Demo2RecordUI {
       : baseHeight;
     const borderWidth = 2;
 
-    // 空中检测
+    // Air detection | 空中检测
     const _cc = player?.controllerManager?.currentControlComponent;
     const _isOnGround = _cc?.abilityCondition?.["isOnGround"] ?? true;
     const isAirBlocked =
@@ -183,8 +193,9 @@ export class Demo2RecordUI {
       p.textFont(Assets.customFont);
     }
 
+    // === Background ===
     // === 背景 ===
-    // 上半部分：紫色背景
+    // Top section: purple background | 上半部分：紫色背景
     Demo2RecordUI._drawBackground(p, baseHeight);
 
     // 下半部分：20%白色背景（仅在显示时间轴时）
@@ -193,8 +204,7 @@ export class Demo2RecordUI {
       p.fill(255, 255, 255, 51); // 255 * 0.2 ≈ 51
       p.rect(0, baseHeight, p.width, timelineHeight + padding);
     }
-
-    // === 主容器（双层硬边描边） ===
+    // === Main container (double-layer hard edge outline) ===    // === 主容器（双层硬边描边） ===
     Demo2RecordUI._drawContainer(
       p,
       padding,
@@ -204,13 +214,14 @@ export class Demo2RecordUI {
       borderWidth,
     );
 
+    // === Internal layout ===
     // === 内部布局 ===
     const innerX = padding + borderWidth + 2;
     const innerY = padding + borderWidth + 2;
     const innerW = p.width - padding * 2 - (borderWidth + 2) * 2;
     const innerH = baseHeight - padding * 2 - (borderWidth + 2) * 2;
 
-    // 左：状态指示器
+    // Left: state indicator | 左：状态指示器
     Demo2RecordUI._drawStateIndicator(
       p,
       innerX + 80,
@@ -220,7 +231,7 @@ export class Demo2RecordUI {
       innerH,
     );
 
-    // 中：按键提示（往右边挪动更多）
+    // Center: key hints (move more to the right) | 中：按键提示（往右边捕捕更多）
     const hintAreaX = innerX + 880;
     const hintAreaW = innerW - 730 - 100;
     Demo2RecordUI._drawActionHints(
@@ -233,6 +244,7 @@ export class Demo2RecordUI {
       state,
     );
 
+    // === Operation timeline (display during recording/ready to replay/replaying) ===
     // === 操作时间轴（录制/准备回放/回放时都显示） ===
     if (showTimeline) {
       const timelineContainerX = padding;
@@ -240,13 +252,13 @@ export class Demo2RecordUI {
       const timelineContainerW = p.width - padding * 2;
       const timelineContainerH = timelineHeight;
 
-      // 先绘制进度条（上方）
+      // Draw progress bar first (top) | 先绘制进度条（上方）
       const progressH = 10;
       const progressX = timelineContainerX + borderWidth + 2;
       const progressY = timelineContainerY + borderWidth + 2;
       const progressW = timelineContainerW - (borderWidth + 2) * 2 - 150;
 
-      // 计算时间轴y坐标
+      // Calculate timeline y coordinate | 计算时间轴y坐标
       const timelineY = progressY + progressH + 4;
 
       Demo2RecordUI._drawProgressBar(
@@ -267,7 +279,7 @@ export class Demo2RecordUI {
         pausedReplayElapsed,
       );
 
-      // 绘制操作时间轴（下方）
+      // Draw operation timeline (bottom) | 绘制操作时间轴（下方）
       const timelineX = progressX;
       const timelineW = progressW;
       const timelineH =
@@ -291,6 +303,7 @@ export class Demo2RecordUI {
       );
     }
 
+    // === Air block warning ===
     // === 空中被挡住警告 ===
     if (isAirBlocked) {
       Demo2RecordUI._drawAirBlockWarning(p, baseHeight, airBlockAge);
@@ -299,16 +312,17 @@ export class Demo2RecordUI {
     p.pop();
   }
 
+  // ========== Drawing helper functions =========="
   // ========== 绘制辅助函数 ==========
 
   static _drawBackground(p, totalHeight) {
     const C = Demo2RecordUI.COLOR_PALETTE;
 
-    // 纯色背景：深紫黑，透明度85%
+    // Solid background: deep purple-black, 85% opacity | 纯色背景：深紫黑，85%不透明度
     p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 217); // 255 * 0.85 ≈ 217
     p.rect(0, 0, p.width, totalHeight);
 
-    // 顶部亮线
+    // Top bright line | 顶部亮线
     p.fill(255, 255, 255, 80);
     p.rect(0, 0, p.width, 2);
   }
@@ -316,7 +330,7 @@ export class Demo2RecordUI {
   static _drawContainer(p, x, y, w, h, bw) {
     const C = Demo2RecordUI.COLOR_PALETTE;
 
-    // 细紫色边框
+    // Thin purple border | 细紫色边框
     p.stroke(C.midPurple.r, C.midPurple.g, C.midPurple.b, 200);
     p.strokeWeight(1);
     p.noFill();
@@ -325,34 +339,33 @@ export class Demo2RecordUI {
 
   static _drawStateIndicator(p, x, y, ui, state, h) {
     const C = Demo2RecordUI.COLOR_PALETTE;
-
-    // === 铭文风格的幻影系统标签 ===
+    // === Inscription-style phantom system label ===    // === 铭文风格的幻影系统标签 ===
     const labelX = x - 90;
     const labelY = y + h / 2;
 
-    // 幻影系统标签文本（铭文风格：金色、斜体、大号）
+    // Phantom system label text (inscription style: golden, italic, large) | 幻影系统标签文本（铧文风格：金色、斜体、大号）
     p.noStroke();
     p.textAlign(p.CENTER, p.CENTER);
     p.textSize(16);
     p.textStyle(p.ITALIC);
 
-    // 发光效果（外光晕）
+    // Glow effect (outer halo) | 发光效果（外光晉）
     p.fill(240, 215, 235, 50);
     p.text(t("rec_system_name"), labelX + 45 + 1, labelY + 1);
 
-    // 投影效果
+    // Shadow effect | 投影效果
     p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 160);
     p.text(t("rec_system_name"), labelX + 45 + 0.5, labelY + 0.5);
 
-    // 淡粉色主文本（铭文风格）
+    // Light pink main text (inscription style) | 淡粉色主文本（铧文风格）
     p.fill(240, 215, 235, 240);
     p.text(t("rec_system_name"), labelX + 45, labelY);
 
-    // 标题文字（右侧）
+    // Title text (right side) | 标题文字（右侧）
     const titleX = x + 45;
     const titleY = labelY;
 
-    // 标题（更大的字体，白色）
+    // Title (larger font, white) | 标题（更大的字体，白色）
     p.textSize(28);
     p.textStyle(p.NORMAL);
     p.textAlign(p.LEFT, p.CENTER);
@@ -435,8 +448,7 @@ export class Demo2RecordUI {
     });
   }
 
-  /**
-   * 绘制操作颜色图例（左、右、跳） - KeyPrompt 样式
+  /**   * Draw operation color legend (left, right, jump) - KeyPrompt style   * 绘制操作颜色图例（左、右、跳） - KeyPrompt 样式
    */
   static _drawOperationLegend(p, x, y, w, h) {
     const C = Demo2RecordUI.COLOR_PALETTE;
@@ -450,12 +462,12 @@ export class Demo2RecordUI {
     // 竖向排列
     const itemH = h / legends.length;
     const startX = x + 8;
-    const keySize = 28; // KeyPrompt 大小
+    const keySize = 28; // KeyPrompt size | KeyPrompt大小
 
     legends.forEach((leg, idx) => {
       const itemY = y + idx * itemH + itemH / 2;
 
-      // 镂空方形框（KeyPrompt 风格）
+      // Hollow square box (KeyPrompt style) | 镁空方形框（KeyPrompt风格）
       p.push();
       p.stroke(255, 255, 255, 255);
       p.strokeWeight(2);
@@ -463,7 +475,7 @@ export class Demo2RecordUI {
       p.rect(startX - keySize / 2, itemY - keySize / 2, keySize, keySize, 2);
       p.pop();
 
-      // 图标
+      // Icon | 图标
       p.noStroke();
       p.fill(255, 255, 255);
       p.textSize(13);
@@ -471,7 +483,7 @@ export class Demo2RecordUI {
       p.textAlign(p.CENTER, p.CENTER);
       p.text(leg.icon, startX + 5, itemY);
 
-      // 标签
+      // Label | 标签
       p.textSize(10);
       p.textStyle(p.NORMAL);
       p.textAlign(p.LEFT, p.CENTER);
@@ -503,12 +515,12 @@ export class Demo2RecordUI {
     const C = Demo2RecordUI.COLOR_PALETTE;
     const now = performance.now();
 
-    // 重置所有文本状态
+    // Reset all text state | 重置所有文本状态
     p.noStroke();
     p.textStyle(p.NORMAL);
     p.fill(255, 255, 255);
 
-    // 计算进度 - 考虑暂停状态
+    // Calculate progress - consider pause state | 计算进度 - 考虑暂停状态
     let currentProgress = 0;
     if (state === "Recording") {
       const isPausedRecording = isPaused && pausedRecordElapsed !== null;
@@ -527,13 +539,13 @@ export class Demo2RecordUI {
       currentProgress = Math.min(1, replayElapsedMs / totalMs);
     }
 
-    // 进度条轨道
+    // Progress bar track | 进度条轨道
     p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 120);
     p.stroke(255, 255, 255, 255);
     p.strokeWeight(1.5);
     p.rect(x, y, w, h);
 
-    // 进度条填充
+    // Progress bar fill | 进度条填充
     const fillW = w * currentProgress;
     if (fillW > 1) {
       let fillColor = C.standbyPurple;
@@ -545,7 +557,7 @@ export class Demo2RecordUI {
       p.strokeWeight(0.5);
       p.rect(x, y, fillW, h);
 
-      // 亮光条
+      // Bright stripe | 亮光条
       for (let i = 0; i < fillW; i += 5) {
         const lightAlpha = 80 * (1 - i / fillW);
         p.fill(255, 255, 255, lightAlpha);
@@ -553,7 +565,7 @@ export class Demo2RecordUI {
       }
     }
 
-    // 进度指示线
+    // Progress indicator line | 进度指示线
     if (state !== "ReadyToReplay") {
       const progressX = x + w * currentProgress;
       p.stroke(255, 255, 255, 255);
@@ -561,7 +573,7 @@ export class Demo2RecordUI {
       p.line(progressX, y - 2, progressX, y + h + 2);
     }
 
-    // 时间显示（放在进度条上方）- 清晰无加粗 - 考虑暂停状态
+    // Time display (above progress bar) - clear no bold - consider pause state | 时间渲示（进度条上方）- 清晰无加粗 - 考虑暂停状态
     let timeStr = "";
     const maxSec = (maxRecordTime / 1000).toFixed(1);
 
@@ -588,11 +600,11 @@ export class Demo2RecordUI {
     p.textStyle(p.NORMAL);
     p.textAlign(p.RIGHT, p.CENTER);
     p.fill(255, 255, 255);
-    p.text(timeStr, x + w + 130, timelineY - 10); //每个参数的含义分别是：文本内容、文本的x坐标、文本的y坐标
+    p.text(timeStr, x + w + 130, timelineY - 10); // Parameters: text content, x coordinate, y coordinate | 每个参数的含义分别是：文本内容、文本的x坐标、文本的y坐标
   }
 
-  /**
-   * 绘制操作时间轴
+  /**   * Draw action timeline
+   * Show recorded movement/jump operation time points during recording   * 绘制操作时间轴
    * 展示录制过程中的移动/跳跃操作时间点
    */
   static _drawActionTimeline(
@@ -614,7 +626,7 @@ export class Demo2RecordUI {
     const C = Demo2RecordUI.COLOR_PALETTE;
     const now = performance.now();
 
-    // 计算总时长
+    // Calculate total duration | 计算总时长
     let totalMs = maxRecordTime;
     if (state === "ReadyToReplay" || state === "Replaying") {
       totalMs = Math.max(1, recordEndTime - recordStartTime);
@@ -627,18 +639,18 @@ export class Demo2RecordUI {
       p.line(tickX, y + 2, tickX, y + 6);
     }
 
-    // 绘制操作标记 - 暂停时使用暂停时间
+    // Draw operation markers - use paused time when paused | 绘制操作标记 - 暂停时使用暂停时间
     const isPausedRecording = isPaused && pausedRecordElapsed !== null;
     const recordedMs = isPausedRecording
       ? pausedRecordElapsed
       : Math.max(0, now - recordStartTime);
 
     recordedActions.forEach((action) => {
-      // 根据操作时间映射到进度条位置
+      // Map action time to progress bar position | 根据操作时间映射到进度条位置
       const actionProgress = action.time / totalMs;
       const actionX = x + w * actionProgress;
 
-      // 检查是否在可见范围内
+      // Check if within visible range | 检查是否在可见范围内
       const isVisible = actionX >= x && actionX <= x + w;
       const isRecorded =
         state === "Recording" ? action.time <= recordedMs : true;
@@ -655,7 +667,7 @@ export class Demo2RecordUI {
           icon = "↑";
         }
 
-        // 操作标记 - KeyPrompt 风格镂空方形框
+        // Operation marker - KeyPrompt style hollow square box | 操作标记 - KeyPrompt风格镁空方形框
         const keySize = 22;
         p.push();
         p.stroke(255, 255, 255, 255);
@@ -670,7 +682,7 @@ export class Demo2RecordUI {
         );
         p.pop();
 
-        // 操作图标
+        // Operation icon | 操作图标
         p.noStroke();
         p.fill(255, 255, 255);
         p.textSize(14);
@@ -684,11 +696,11 @@ export class Demo2RecordUI {
   static _drawAirBlockWarning(p, hudHeight, airBlockAge) {
     const C = Demo2RecordUI.COLOR_PALETTE;
 
-    // 半透明覆盖
+    // Semi-transparent overlay | 半透明览盖
     p.fill(C.deepPurpleBlack.r, C.deepPurpleBlack.g, C.deepPurpleBlack.b, 200);
     p.rect(0, 0, p.width, hudHeight);
 
-    // 警告文字（大号）
+    // Warning text (large) | 警告文字（大号）
     p.textSize(18);
     p.textStyle(p.BOLD);
     p.textAlign(p.CENTER, p.CENTER);
@@ -699,7 +711,7 @@ export class Demo2RecordUI {
     p.fill(255, 255, 255);
     p.text(t("rec_blocked_air"), p.width / 2, hudHeight / 2);
 
-    // 闪烁
+    // Flashing | 闪烁
     if (airBlockAge < 300) {
       const flashAlpha = (1 - airBlockAge / 300) * 80;
       p.fill(C.recordRed.r, C.recordRed.g, C.recordRed.b, flashAlpha);

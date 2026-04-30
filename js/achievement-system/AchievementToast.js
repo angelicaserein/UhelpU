@@ -1,15 +1,19 @@
-// AchievementToast.js — 成就解锁提示（画布底部中央，DOM 实现）
-// 风格与关卡标题横幅保持一致（白色渐变光带）
+// AchievementToast.js — Achievement unlock prompt (canvas bottom center, DOM implementation)
+// AchievementToast.js — 成就解锁提示（画布底部中宜，DOM 实现）
+// Style consistent with level title banner (white gradient light band)
+// 风格与关卡标题横帆保持一致（白色渐变光带）
+// z-index higher than WindowPrompt(9999), will not be obscured
 // z-index 高于 WindowPrompt(9999)，不会被遮挡
+// Usage: new AchievementToast(p).show("achievement_unlocked")
 // 用法：new AchievementToast(p).show("achievement_unlocked")
 
 import { i18n, t } from "../i18n/index.js";
 
 export class AchievementToast {
   /**
-   * @param {p5} p - p5 实例
+   * @param {p5} p - p5 instance | p5 实例
    * @param {Object} options
-   *   - duration: 显示时长(ms)，默认 5500
+   *   - duration: display duration (ms), default 5500 | 昺示时長(ms)，默认 5500
    */
   constructor(p, options = {}) {
     this.p = p;
@@ -21,7 +25,7 @@ export class AchievementToast {
     this._i18nHandler = null;
   }
 
-  /** 触发成就提示 */
+  /** Trigger achievement prompt | 触发成就提示 */
   show(textKey) {
     this._removeToast();
     this._currentKey = textKey;
@@ -89,7 +93,7 @@ export class AchievementToast {
     this._currentKey = null;
   }
 
-  /** 清理资源（关卡切换时调用） */
+  /** Clean up resources (call when switching levels) | 清理资源（关卡切换时调用） */
   remove() {
     this._removeToast();
   }

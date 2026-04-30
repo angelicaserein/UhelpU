@@ -21,6 +21,7 @@ export class BasicEventProcesser extends EventProcesser {
   }
 
   process(event) {
+    // Input layer: filter out keys not in the allowed set.
     //输入层
     if (!this._keyBindingManager.getAllowedKeys().has(event.code)) {
       return null;

@@ -68,6 +68,7 @@ export class Clip {
     return this.records;
   }
 
+  // Dynamically get current allowed keys
   // 动态获取当前允许的按键
   _getAllowedKeys() {
     return new Set(
@@ -84,6 +85,7 @@ export class Clip {
   }
 
   process(event) {
+    // Dynamically get current allowed keys so it works when user changes key bindings
     // 动态获取当前允许的按键，这样当用户改变按键绑定时也能工作
     const allowedKeys = this._getAllowedKeys();
     if (!allowedKeys.has(event.code)) {

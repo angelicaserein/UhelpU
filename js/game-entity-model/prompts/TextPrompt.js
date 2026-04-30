@@ -5,11 +5,11 @@ import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js
 
 export class TextPrompt extends KeyPrompt {
   /**
-   * @param {number} x
-   * @param {number} y
-   * @param {BaseLevel} level
-   * @param {object} options
-   * @param {() => boolean} [options.visibilityFn] - returns true when this prompt should be visible
+   * @param {number} x - Game coordinate x | 游戏坐标 x
+   * @param {number} y - Game coordinate y | 游戏坐标 y
+   * @param {BaseLevel} level - Parent level | 所属关卡
+   * @param {object} options - Configuration options | 配置选项
+   * @param {() => boolean} [options.visibilityFn] - Returns true when this prompt should be visible | 当此提示应显示时返回 true
    */
   constructor(x, y, level = null, options = {}) {
     super(x, y, level, { keys: [] });

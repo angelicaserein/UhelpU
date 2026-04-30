@@ -14,7 +14,7 @@ export class Button extends GameEntity {
     this.collider = new RectangleCollider(ColliderType.TRIGGER, w, h);
     this.isPressed = false;
     this.bindKey = options.bindKey || null;
-    // color: { unpressed: [r,g,b], pressed: [r,g,b] }
+    // color: { unpressed: [r,g,b], pressed: [r,g,b] } | 颜色配置：{ unpressed: [r,g,b], pressed: [r,g,b] }
     this.color = options.color || null;
   }
   pressButton() {

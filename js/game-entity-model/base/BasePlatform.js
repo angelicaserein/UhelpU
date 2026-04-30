@@ -17,6 +17,7 @@ export class BasePlatform extends GameEntity {
 
   update(dt) {
     // Hook for moving platform behavior in subclasses.
+    // 子类中移动平台行为的钉子方法。
   }
 
   draw(p) {

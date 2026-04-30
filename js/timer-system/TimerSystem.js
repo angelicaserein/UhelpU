@@ -1,12 +1,12 @@
 /**
  * TimerSystem.js
- * 核心秒表逻辑 - 独立于UI和事件系统
+ * Core stopwatch logic - independent of UI and event system | 核心秒表逻辑 - 独立于UI和事件系统
  *
- * 功能：
- * - 记录计时的开始、暂停、恢复、结束
- * - 计算已用时间（秒）
- * - 提供格式化时间输出（mm:ss）
- * - 状态管理：idle → running → paused → finished
+ * Features:
+ * - Record the start, pause, resume, finish times of timing | 记录计时的开始、暂停、恢复、结束
+ * - Calculate elapsed time in seconds | 计算已用时间（秒）
+ * - Provide formatted time output (mm:ss) | 提供格式化时间输出 (mm:ss)
+ * - State management: idle → running → paused → finished | 状态管理: idle → running → paused → finished
  */
 
 export class TimerSystem {
@@ -20,8 +20,8 @@ export class TimerSystem {
   }
 
   /**
-   * 开始计时
-   * 从idle→running，记录起始时间戳
+   * Start timing | 开始计时
+   * From idle → running, record the start timestamp | 从 idle → running，记录起始时间戳
    */
   start() {
     if (this._state === "running") {
@@ -40,8 +40,8 @@ export class TimerSystem {
   }
 
   /**
-   * 暂停计时
-   * 从running→paused，记录当前已用时间
+   * Pause timing | 暂停计时
+   * From running → paused, record the current elapsed time | 从 running → paused，记录当前已用时间
    */
   pause() {
     if (this._state !== "running") {
@@ -57,8 +57,8 @@ export class TimerSystem {
   }
 
   /**
-   * 恢复计时
-   * 从paused→running，记录恢复时间以计算暂停时长
+   * Resume timing | 恢复计时
+   * From paused → running, record resume time to calculate pause duration | 从 paused → running，记录恢复时间以计算暂停时長
    */
   resume() {
     if (this._state !== "paused") {
@@ -80,9 +80,9 @@ export class TimerSystem {
   }
 
   /**
-   * 结束计时
-   * 从running→finished，记录最终时间并返回
-   * @returns {number} 已用时间（秒）
+   * Finish timing | 结束计时
+   * From running → finished, record the final time and return | 从 running → finished，记录最终时间并返回
+   * @returns {number} Elapsed time in seconds | 已用时间（秒）
    */
   finish() {
     if (this._state !== "running") {
@@ -101,7 +101,7 @@ export class TimerSystem {
   }
 
   /**
-   * 重置计时器到初始状态
+   * Reset timer to initial state | 重置计时器到初始状态
    */
   reset() {
     this._state = "idle";
@@ -159,12 +159,12 @@ export class TimerSystem {
   }
 
   /**
-   * 获取已用时间（秒，包含小数）
-   * 计算方式：
-   *   - 如果finished: (finalTime - startTime - accumulatedPausedTime) / 1000
-   *   - 如果paused: (pauseTime - startTime - accumulatedPausedTime) / 1000
-   *   - 如果running: (now - startTime - accumulatedPausedTime) / 1000
-   *   - 否则: 0
+   * Get elapsed time in seconds (including decimals) | 获取已用时间（秒，包含小数）
+   * Calculation method: | 计算方式：
+   *   - If finished: (finalTime - startTime - accumulatedPausedTime) / 1000 | 如果finished: (finalTime - startTime - accumulatedPausedTime) / 1000
+   *   - If paused: (pauseTime - startTime - accumulatedPausedTime) / 1000 | 如果paused: (pauseTime - startTime - accumulatedPausedTime) / 1000
+   *   - If running: (now - startTime - accumulatedPausedTime) / 1000 | 如果running: (now - startTime - accumulatedPausedTime) / 1000
+   *   - Otherwise: 0 | 其他: 0
    * @returns {number}
    */
   getElapsedTime() {
@@ -188,8 +188,8 @@ export class TimerSystem {
   }
 
   /**
-   * 获取格式化的时间字符串
-   * @param {string} format - 格式（目前仅支持 "mm:ss"）
+   * Get formatted time string | 获取格式化的时间字符串
+   * @param {string} format - Format (currently only supports "mm:ss") | 格式（目前仅支持 "mm:ss"）
    * @returns {string}
    */
   getFormattedTime(format = "mm:ss") {
@@ -205,7 +205,7 @@ export class TimerSystem {
   }
 
   /**
-   * 获取当前状态
+   * Get current state | 获取当前状态
    * @returns {string}
    */
   getState() {
@@ -213,7 +213,7 @@ export class TimerSystem {
   }
 
   /**
-   * 是否正在运行中
+   * Whether currently running | 是否正在运行中
    * @returns {boolean}
    */
   isRunning() {
@@ -221,7 +221,7 @@ export class TimerSystem {
   }
 
   /**
-   * 是否已暂停
+   * Whether currently paused | 是否已暂停
    * @returns {boolean}
    */
   isPaused() {

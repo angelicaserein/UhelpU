@@ -42,6 +42,7 @@ export class Replayer extends Character {
     this.movementComponent.velX = 0;
     this.movementComponent.velY = 0;
     // Clear control state to prevent residual pressedKeys filtering next replay's keydown
+    // 清除控制状态，防止残留的 pressedKeys 影响下一次重放的 keydown 事件
     const mode = this.controllerManager.currentControlMode;
     mode.eventProcesser.clearPressedKeys();
     mode.intentResolver.resetConflictResolver();
@@ -67,6 +68,7 @@ export class Replayer extends Character {
       this.movementComponent.velY = 0;
 
       // Idle ghost rendering
+      // 待机幽灵渲染
       this._trailParticles = [];
       this._trailEmitAccumulator = 0;
       this._jumpRingEffects = [];

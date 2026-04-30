@@ -1,9 +1,13 @@
 /**
  * EditorEntityManager — Manages list of entities placed by editor
+ * EditorEntityManager — 管理编辑器放置的实体列表
  *
  * On placement creates real game entities (Ground / Portal, etc.),
+ * 放置时创建真实游戏实体 (地面 / 传送门等等),
  * directly adds to level's entities Set and syncs physics/collision system,
+ * 直接添加到级别的 entities Set 中并同步物理/碰撞系统,
  * so player can step on them, interact with them, real-time debug level design.
+ * 以便玩家可以踏上它们、与它们互动、实时调试级别设计。
  */
 
 import {
@@ -45,8 +49,8 @@ import { TeleportPoint } from "../game-entity-model/interactables/TeleportPoint.
 import { Box } from "../game-entity-model/interactables/Box.js";
 /**
  * @typedef {Object} PlacedRecord
- * @property {string} tool      — EntityTool enum value
- * @property {object} gameEntity — Real game entity reference
+ * @property {string} tool      — EntityTool enum value | EntityTool 枚举值
+ * @property {object} gameEntity — Real game entity reference | 真实游戏实体引用
  */
 
 export class EditorEntityManager {
@@ -90,6 +94,7 @@ export class EditorEntityManager {
 
   /**
    * Place a new entity (create real game entity and add to level)
+   * 放置一个新实体 (创建真实游戏实体并添加到级别)
    */
   place(tool, x, y, w, h, options = {}) {
     let gameEntity;
@@ -265,7 +270,10 @@ export class EditorEntityManager {
     return record;
   }
 
-  /** Undo last placement (remove from level) */
+  /**
+   * Undo last placement (remove from level)
+   * 撤销最后放置 (从级别中删除)
+   */
   undoLast() {
     const record = this._records.pop();
     if (!record) return null;
@@ -280,7 +288,10 @@ export class EditorEntityManager {
     return record;
   }
 
-  /** Clear all editor entities (remove from level) */
+  /**
+   * Clear all editor entities (remove from level)
+   * 清除所有编辑器实体 (从级别中删除)
+   */
   clear() {
     for (const record of this._records) {
       this._level.entities.delete(record.gameEntity);
@@ -295,7 +306,10 @@ export class EditorEntityManager {
     this._syncSystems();
   }
 
-  /** Delete specified record (remove from level) */
+  /**
+   * Delete specified record (remove from level)
+   * 删除指定记录 (从级别中删除)
+   */
   remove(record) {
     const idx = this._records.indexOf(record);
     if (idx === -1) return false;
@@ -312,7 +326,10 @@ export class EditorEntityManager {
     return true;
   }
 
-  /** Get all placement records */
+  /**
+   * Get all placement records
+   * 获取所有放置记录
+   */
   getAll() {
     return this._records;
   }
@@ -508,11 +525,12 @@ export class EditorEntityManager {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // Selection & Resizing
+  // Selection & Resizing | 选择和调整大小
   // ══════════════════════════════════════════════════════════════
 
   /**
    * Detect if world coordinate falls on a delete button, return record or null
+   * 检测世界坐标是否落在删除按钮上,返回记录或 null
    */
   getDeleteBtnHit(worldX, worldY) {
     const bs = DELETE_BTN_SIZE;
@@ -584,7 +602,10 @@ export class EditorEntityManager {
     return null;
   }
 
-  /** Find selectable record at world coordinate (later placements take priority) */
+  /**
+   * Find selectable record at world coordinate (later placements take priority)
+   * 在世界坐标处查找可选记录 (后续放置优先)
+   */
   findAt(worldX, worldY) {
     for (let i = this._records.length - 1; i >= 0; i--) {
       const rec = this._records[i];
@@ -614,41 +635,61 @@ export class EditorEntityManager {
     return null;
   }
 
-  /** Select a record */
+  /**
+   * Select a record
+   * 选择一条记录
+   */
   select(record) {
     this._selected = record;
   }
 
-  /** Deselect */
+  /**
+   * Deselect
+   * 取消选择
+   */
   deselect() {
     this._selected = null;
     this._resizeHandle = null;
     this._anchor = null;
   }
 
-  /** Get currently selected */
+  /**
+   * Get currently selected
+   * 获取当前选择的
+   */
   get selected() {
     return this._selected;
   }
 
-  /** Is resizing in progress */
+  /**
+   * Is resizing in progress
+   * 是否正在调整大小
+   */
   isResizing() {
     return this._resizeHandle !== null;
   }
 
-  /** Is moving WirePortal / BtnSpike sub-entity */
+  /**
+   * Is moving WirePortal / BtnSpike sub-entity
+   * 是否正在移动 WirePortal / BtnSpike 子实体
+   */
   isMoving() {
     return this._movingEntity !== null;
   }
 
-  /** Is dragging overall entity */
+  /**
+   * Is dragging overall entity
+   * 是否正在拖动整体实体
+   */
   isDragging() {
     return this._draggingRecord !== null;
   }
 
   /**
    * Find draggable entity at world coordinate (not delete button or resize handle)
+   * 在世界坐标处找到可拖动的实体 (不是删除按钮或调整大小句柄)
    * Return record or null
+   * 返回记录或 null
    */
   findDraggableAt(worldX, worldY) {
     // Reverse iteration (later placements take priority)
@@ -696,14 +737,20 @@ export class EditorEntityManager {
     return null;
   }
 
-  /** Start dragging overall entity */
+  /**
+   * Start dragging overall entity
+   * 开始拖动整体实体
+   */
   startDrag(record, worldX, worldY) {
     this._draggingRecord = record;
     this._dragOffsetX = worldX - record.gameEntity.x;
     this._dragOffsetY = worldY - record.gameEntity.y;
   }
 
-  /** Update entity position during drag */
+  /**
+   * Update entity position during drag
+   * 在拖动期间更新实体位置
+   */
   updateDrag(worldX, worldY) {
     if (!this._draggingRecord) return;
     const e = this._draggingRecord.gameEntity;
@@ -712,7 +759,10 @@ export class EditorEntityManager {
     this._syncSystems();
   }
 
-  /** End drag */
+  /**
+   * End drag
+   * 结束拖动
+   */
   endDrag() {
     this._draggingRecord = null;
     this._dragOffsetX = 0;
@@ -721,6 +771,7 @@ export class EditorEntityManager {
 
   /**
    * Find WirePortal sub-entity at world coordinate
+   * 在世界坐标处找到 WirePortal 子实体
    * @returns {{ record, entity }|null}
    */
   findWirePortalSubEntity(worldX, worldY) {
@@ -757,6 +808,7 @@ export class EditorEntityManager {
 
   /**
    * Find BtnSpike sub-entity at world coordinate
+   * 在世界坐标处找到 BtnSpike 子实体
    * @returns {{ record, entity, isSpike: boolean }|null}
    */
   findBtnSpikeSubEntity(worldX, worldY) {
@@ -793,6 +845,7 @@ export class EditorEntityManager {
 
   /**
    * Find BtnPlatform sub-entity at world coordinate
+   * 在世界坐标处找到 BtnPlatform 子实体
    * @returns {{ record, entity, isPlatform: boolean, platformIdx?: number }|null}
    */
   findBtnPlatformSubEntity(worldX, worldY) {
@@ -836,7 +889,10 @@ export class EditorEntityManager {
     return null;
   }
 
-  /** Start dragging WirePortal sub-entity */
+  /**
+   * Start dragging WirePortal sub-entity
+   * 开始拖动 WirePortal 子实体
+   */
   startMove(record, entity, worldX, worldY) {
     this._movingRecord = record;
     this._movingEntity = entity;
@@ -844,7 +900,10 @@ export class EditorEntityManager {
     this._moveOffsetY = worldY - entity.y;
   }
 
-  /** Update WirePortal sub-entity position during drag */
+  /**
+   * Update WirePortal sub-entity position during drag
+   * 在拖动期间更新 WirePortal 子实体位置
+   */
   updateMove(worldX, worldY) {
     if (!this._movingEntity) return;
     this._movingEntity.x = this._snap(worldX - this._moveOffsetX);
@@ -852,7 +911,10 @@ export class EditorEntityManager {
     this._syncSystems();
   }
 
-  /** End drag and rebuild wire path */
+  /**
+   * End drag and rebuild wire path
+   * 结束拖动并重建电线路径
+   */
   endMove() {
     if (
       this._movingRecord &&
@@ -866,7 +928,10 @@ export class EditorEntityManager {
     this._moveOffsetY = 0;
   }
 
-  /** Rebuild WirePortal record's wire path */
+  /**
+   * Rebuild WirePortal record's wire path
+   * 重建 WirePortal 记录的电线路径
+   */
   _rebuildWirePath(record) {
     const sys = record.wireSystem;
     sys._wirePath = sys._buildAutoWirePath(50);
@@ -884,6 +949,7 @@ export class EditorEntityManager {
 
   /**
    * Detect if world coordinate falls on a resize handle, return handle id or null
+   * 检测世界坐标是否落在调整句柄上，返回句柄 id 或 null
    */
   getHandleAt(worldX, worldY) {
     if (!this._selected) return null;
@@ -906,7 +972,10 @@ export class EditorEntityManager {
     return null;
   }
 
-  /** Start dragging a handle */
+  /**
+   * Start dragging a handle
+   * 开始拖动句柄
+   */
   startResize(handle) {
     if (!this._selected) return;
     const e = this._selected.gameEntity;
@@ -921,13 +990,16 @@ export class EditorEntityManager {
     this._resizeHandle = handle;
   }
 
-  /** Update size during drag */
+  /**
+   * Update size during drag
+   * 在拖动期间更新大小
+   */
   updateResize(worldX, worldY) {
     if (!this._resizeHandle || !this._selected) return;
     const sx = this._snap(worldX);
     const sy = this._snap(worldY);
 
-    // Get size limits based on entity type
+    // Get size limits based on entity type | 根据实体类型获取大小限制
     const limits =
       this._selected.tool === EntityTool.PLATFORM
         ? PLATFORM_DEFAULTS
@@ -944,7 +1016,7 @@ export class EditorEntityManager {
                     minHeight: 40,
                     maxHeight: 300,
                   }
-              : GROUND_DEFAULTS;
+                : GROUND_DEFAULTS;
 
     let newW = Math.abs(this._anchor.x - sx);
     let newH = Math.abs(this._anchor.y - sy);
@@ -961,7 +1033,7 @@ export class EditorEntityManager {
     );
 
     const e = this._selected.gameEntity;
-    // Determine new position based on anchor
+    // Determine new position based on anchor | 根据锚点确定新位置
     if (sx <= this._anchor.x) {
       e.x = this._anchor.x - newW;
     } else {
@@ -986,23 +1058,30 @@ export class EditorEntityManager {
     this._syncSystems();
   }
 
-  /** End drag */
+  /**
+   * End drag
+   * 结束拖动
+   */
   endResize() {
     this._resizeHandle = null;
     this._anchor = null;
   }
 
   // ══════════════════════════════════════════════════════════════
-  // BtnSpike spike resize
+  // BtnSpike spike resize | BtnSpike 尖刺调整大小
   // ══════════════════════════════════════════════════════════════
 
-  /** Is BtnSpike spike resize in progress */
+  /**
+   * Is BtnSpike spike resize in progress
+   * BtnSpike 尖刺调整大小是否正在进行中
+   */
   isBtnSpikeResizing() {
     return this._bsResizeHandle !== null;
   }
 
   /**
    * Detect if world coordinate falls on a BtnSpike spike handle
+   * 检测世界坐标是否落在 BtnSpike 尖刺句柄上
    * @returns {{ record, handle: string }|null}
    */
   getBtnSpikeHandleAt(worldX, worldY) {
@@ -1030,7 +1109,10 @@ export class EditorEntityManager {
     return null;
   }
 
-  /** Start resizing BtnSpike spike */
+  /**
+   * Start resizing BtnSpike spike
+   * 开始调整 BtnSpike 尖刺大小
+   */
   startBtnSpikeResize(record, handle) {
     const spk = record.spikeEntity;
     const w = spk.collider.w;
@@ -1046,7 +1128,10 @@ export class EditorEntityManager {
     this._bsResizeAnchor = anchors[handle];
   }
 
-  /** Resize BtnSpike spike in progress */
+  /**
+   * Resize BtnSpike spike in progress
+   * 正在调整 BtnSpike 尖刺大小
+   */
   updateBtnSpikeResize(worldX, worldY) {
     if (!this._bsResizeHandle || !this._bsResizeRecord) return;
     const sx = this._snap(worldX);
@@ -1074,7 +1159,10 @@ export class EditorEntityManager {
     this._syncSystems();
   }
 
-  /** End BtnSpike spike resize */
+  /**
+   * End BtnSpike spike resize
+   * 结束 BtnSpike 尖刺调整大小
+   */
   endBtnSpikeResize() {
     this._bsResizeRecord = null;
     this._bsResizeHandle = null;
@@ -1082,16 +1170,20 @@ export class EditorEntityManager {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // BtnPlatform platform resize
+  // BtnPlatform platform resize | BtnPlatform 平台调整大小
   // ══════════════════════════════════════════════════════════════
 
-  /** Is BtnPlatform platform resize in progress */
+  /**
+   * Is BtnPlatform platform resize in progress
+   * BtnPlatform 平台调整大小是否正在进行中
+   */
   isBtnPlatformResizing() {
     return this._bpResizeHandle !== null;
   }
 
   /**
    * Detect if world coordinate falls on a BtnPlatform platform handle
+   * 检测世界坐标是否落在 BtnPlatform 平台句柄上
    * @returns {{ record, handle: string, platformIdx: number }|null}
    */
   getBtnPlatformHandleAt(worldX, worldY) {
@@ -1122,7 +1214,10 @@ export class EditorEntityManager {
     return null;
   }
 
-  /** Start resizing BtnPlatform platform */
+  /**
+   * Start resizing BtnPlatform platform
+   * 开始调整 BtnPlatform 平台大小
+   */
   startBtnPlatformResize(record, handle, platformIdx = 0) {
     const plt = record.platformEntities
       ? record.platformEntities[platformIdx]
@@ -1142,7 +1237,10 @@ export class EditorEntityManager {
     this._bpResizePlatformIdx = platformIdx;
   }
 
-  /** Resize BtnPlatform platform in progress */
+  /**
+   * Resize BtnPlatform platform in progress
+   * 正在调整 BtnPlatform 平台大小
+   */
   updateBtnPlatformResize(worldX, worldY) {
     if (!this._bpResizeHandle || !this._bpResizeRecord) return;
     const sx = this._snap(worldX);
@@ -1173,7 +1271,10 @@ export class EditorEntityManager {
     this._syncSystems();
   }
 
-  /** End BtnPlatform platform resize */
+  /**
+   * End BtnPlatform platform resize
+   * 结束 BtnPlatform 平台调整大小
+   */
   endBtnPlatformResize() {
     this._bpResizeRecord = null;
     this._bpResizeHandle = null;
@@ -1244,7 +1345,10 @@ export class EditorEntityManager {
     return true;
   }
 
-  /** Sync physics and collision system entity references */
+  /**
+   * Sync physics and collision system entity references
+   * 同步物理和碰撞系统实体引用
+   */
   _syncSystems() {
     if (this._level.physicsSystem?.setEntities) {
       this._level.physicsSystem.setEntities(this._level.entities);
@@ -1256,7 +1360,9 @@ export class EditorEntityManager {
 
   /**
    * Draw editor annotations in world space (highlight borders + labels),
+   * 在世界空间中绘制编辑器注释 (高亮边框 + 标签),
    * Actual entity rendering is done by level's own draw method.
+   * 实际实体渲染由级别自己的 draw 方法完成。
    */
   draw(p) {
     for (const rec of this._records) {

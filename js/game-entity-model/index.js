@@ -1,20 +1,25 @@
-//index.js是负责导出游戏实体模型中所有类的文件，方便其他模块统一从这里导入所需的实体类。它将游戏中的各种实体，如玩家、地面、墙壁、传送门、NPC、按钮、地刺等，按照类别进行组织和导出，使得在关卡设计和游戏逻辑实现中可以方便地使用这些实体类来创建和管理游戏对象。
+// index.js exports all classes from the game entity model, allowing other modules to uniformly import the required entity classes. It organizes and exports various game entities (players, ground, walls, portals, NPCs, buttons, spikes, etc.) by category for convenient use in level design and game logic.
+// index.js 负责导出游戏实体模型中所有类的文件，方便其他模块统一从这里导入所需的实体类。它将游戏中的各种实体，如玩家、地面、墙壁、传送门、NPC、按钮、地刺等，按照类别进行组织和导出，使得在关卡设计和游戏逻辑实现中可以方便地使用这些实体类来创建和管理游戏对象。
 // base
+// 基础类
 export { GameEntity } from "./base/GameEntity.js";
 export { Character } from "./base/Character.js";
 export { BasePlatform } from "./base/BasePlatform.js";
 
 // characters
+// 角色类
 export { Player } from "./characters/Player.js";
 export { Replayer } from "./characters/Replayer.js";
 export { Enemy } from "./characters/Enemy.js";
 
 // terrain
+// 地形类
 export { Ground } from "./terrain/Ground.js";
 export { Wall } from "./terrain/Wall.js";
 export { Platform } from "./terrain/Platform.js";
 
 // interactables
+// 可交互物类
 export { Spike } from "./interactables/Spike.js";
 export { Portal } from "./interactables/Portal.js";
 export { Button } from "./interactables/Button.js";
@@ -30,5 +35,6 @@ export { TeleportPoint } from "./interactables/TeleportPoint.js";
 export { WireRenderer } from "./interactables/WireRenderer.js";
 
 // prompts
+// 提示类
 export { KeyPrompt } from "./prompts/KeyPrompt.js";
 export { TextPrompt } from "./prompts/TextPrompt.js";

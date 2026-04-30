@@ -1,8 +1,9 @@
 /**
  * EditorConfig — Map editor global constants and defaults
+ * EditorConfig — 地图编辑器全局常量和默认值
  */
 
-/** Enum of placeable entity types */
+/** Enum of placeable entity types | 可放置实体类型的枚举 */
 export const EntityTool = Object.freeze({
   GROUND: "ground",
   PORTAL: "portal",
@@ -22,10 +23,10 @@ export const EntityTool = Object.freeze({
   BOX: "box",
 });
 
-/** Grid snap size */
+/** Grid snap size | 网格对齐大小 */
 export const GRID_SIZE = 10;
 
-/** Ground default/limits */
+/** Ground default/limits | 地面默认/限制 */
 export const GROUND_DEFAULTS = {
   width: 200,
   height: 40,
@@ -35,13 +36,13 @@ export const GROUND_DEFAULTS = {
   maxHeight: 400,
 };
 
-/** Portal fixed size */
+/** Portal fixed size | 传送门固定大小 */
 export const PORTAL_SIZE = {
   width: 50,
   height: 50,
 };
 
-/** Platform default/limits */
+/** Platform default/limits | 平台默认/限制 */
 export const PLATFORM_DEFAULTS = {
   width: 160,
   height: 30,
@@ -51,7 +52,7 @@ export const PLATFORM_DEFAULTS = {
   maxHeight: 200,
 };
 
-/** Spike default/limits */
+/** Spike default/limits | 尖刺默认/限制 */
 export const SPIKE_DEFAULTS = {
   width: 100,
   height: 20,
@@ -61,7 +62,7 @@ export const SPIKE_DEFAULTS = {
   maxHeight: 60,
 };
 
-/** Wall default/limits */
+/** Wall default/limits | 墙默认/限制 */
 export const WALL_DEFAULTS = {
   width: 20,
   height: 400,
@@ -71,7 +72,7 @@ export const WALL_DEFAULTS = {
   maxHeight: 800,
 };
 
-/** Box default/limits */
+/** Box default/limits | 箱子默认/限制 */
 export const BOX_DEFAULTS = {
   width: 40,
   height: 40,
@@ -81,7 +82,7 @@ export const BOX_DEFAULTS = {
   maxHeight: 200,
 };
 
-/** BtnWirePortalSystem defaults (button + portal) */
+/** BtnWirePortalSystem defaults (button + portal) | 按钮传送门系统默认值 (按钮 + 传送门) */
 export const WIRE_PORTAL_DEFAULTS = {
   buttonWidth: 34,
   buttonHeight: 16,
@@ -90,7 +91,7 @@ export const WIRE_PORTAL_DEFAULTS = {
   offsetX: 200,
 };
 
-/** BtnSpikeLink System defaults (button + spike) */
+/** BtnSpikeLink System defaults (button + spike) | 按钮尖刺系统默认值 (按钮 + 尖刺) */
 export const BTN_SPIKE_DEFAULTS = {
   buttonWidth: 34,
   buttonHeight: 16,
@@ -99,7 +100,7 @@ export const BTN_SPIKE_DEFAULTS = {
   offsetX: 200,
 };
 
-/** BtnPlatformLinkSystem defaults (button + disappearing platform) */
+/** BtnPlatformLinkSystem defaults (button + disappearing platform) | 按钮平台系统默认值 (按钮 + 消失平台) */
 export const BTN_PLATFORM_DEFAULTS = {
   buttonWidth: 34,
   buttonHeight: 16,
@@ -108,19 +109,19 @@ export const BTN_PLATFORM_DEFAULTS = {
   offsetX: 200,
 };
 
-/** NPC fixed size */
+/** NPC fixed size | NPC固定大小 */
 export const NPC_SIZE = {
   width: 40,
   height: 40,
 };
 
-/** Signboard fixed size */
+/** Signboard fixed size | 告示牌固定大小 */
 export const SIGNBOARD_SIZE = {
   width: 100,
   height: 65,
 };
 
-/** TextPrompt default size */
+/** TextPrompt default size | 文本提示默认大小 */
 export const TEXT_PROMPT_DEFAULTS = {
   width: 280,
   height: 72,
@@ -128,19 +129,19 @@ export const TEXT_PROMPT_DEFAULTS = {
   lineHeight: 18,
 };
 
-/** Checkpoint fixed size */
+/** Checkpoint fixed size | 检查点固定大小 */
 export const CHECKPOINT_SIZE = {
   width: 40,
   height: 70,
 };
 
-/** TeleportPoint fixed size */
+/** TeleportPoint fixed size | 传送点固定大小 */
 export const TELEPORT_POINT_SIZE = {
   width: 40,
   height: 70,
 };
 
-/** Enemy default size and properties */
+/** Enemy default size and properties | 敌人默认大小和属性 */
 export const ENEMY_DEFAULTS = {
   width: 40,
   height: 40,
@@ -149,31 +150,31 @@ export const ENEMY_DEFAULTS = {
   directionLeft: -1,
 };
 
-/** Preview opacity (0–255) */
+/** Preview opacity (0–255) | 预览不透明度 (0–255) */
 export const PREVIEW_ALPHA = 100;
 
-/** Toolbar height */
+/** Toolbar height | 工具栏高度 */
 export const TOOLBAR_HEIGHT = 80;
 
-/** Drag handle size (world coordinate pixels) */
+/** Drag handle size (world coordinate pixels) | 拖动手柄大小 (世界坐标像素) */
 export const HANDLE_SIZE = 12;
 
-/** Delete button size (world coordinate pixels) */
+/** Delete button size (world coordinate pixels) | 删除按钮大小 (世界坐标像素) */
 export const DELETE_BTN_SIZE = 18;
 
-/** Camera manual movement speed (pixels/frame) */
+/** Camera manual movement speed (pixels/frame) | 摄像机手动移动速度 (像素/帧) */
 export const CAMERA_MOVE_SPEED = 8;
 
-/** Default room count */
+/** Default room count | 默认房间数 */
 export const DEFAULT_ROOM_COUNT = 2;
 
-/** Auto wall thickness (pixels) */
+/** Auto wall thickness (pixels) | 自动墙厚度 (像素) */
 export const WALL_THICKNESS = 20;
 
-/** Spawn marker size (world coordinate pixels) */
+/** Spawn marker size (world coordinate pixels) | 生成点标记大小 (世界坐标像素) */
 export const SPAWN_MARKER_SIZE = 20;
 
-/** Spawn default location */
+/** Spawn default location | 生成点默认位置 */
 export const SPAWN_DEFAULTS = {
   x: 50,
   y: 450,

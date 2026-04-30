@@ -21,6 +21,7 @@ export class ReplayerVoiceBubble {
 
   setLabelText(labelText) {
     this.labelText = typeof labelText === "string" ? labelText : this.labelText;
+    // Note: label text is set in constructor
   }
 
   setOpenChatHandler(handler) {
@@ -45,6 +46,7 @@ export class ReplayerVoiceBubble {
   }
 
   containsPoint(x, y) {
+    // Early return if bubble not visible or has no text | 气泡不可见或没有文本时提前返回
     if (!this.isVisible || !this.text || !this._interactiveBounds) {
       return false;
     }
@@ -168,6 +170,7 @@ export class ReplayerVoiceBubble {
       bottom,
     };
     this.updateInteraction(p);
+    // Debug logging for hover state | 调试悬停状态的日志记录
     console.log(
       "hover:",
       this._isHovered,

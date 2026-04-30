@@ -29,7 +29,8 @@ export class Portal extends GameEntity {
     const w = this.collider.w;
     const h = this.collider.h;
 
-    // 先绘制 边框（不受变换影响）
+    // Draw border first (unaffected by transforms)
+    // 先绘制边框（不受变换影响）
     if (this.isOpen) {
       const breathingAlpha = p.sin(this._frame * 0.05) * 80 + 120;
 
@@ -43,6 +44,7 @@ export class Portal extends GameEntity {
       p.rect(this.x - 3, this.y - 3, w + 6, h + 6, 5);
     }
 
+    // Then draw the tile (in its own transform space)
     // 再绘制贴图（在独立的变换空间中）
     const sprite = this.isOpen
       ? Assets.tileImage_doorOpen

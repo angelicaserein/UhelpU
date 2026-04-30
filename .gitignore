@@ -1,4 +1,5 @@
 config.local.js
+*.local.js
 
 # Local staging area for files pending permanent deletion
 readytodelete/
@@ -10,4 +11,19 @@ Thumbs.db:encryptable
 
 # Editor artifacts
 *.log
-.vscode/launch.json
+.vscode/
+.claude/
+
+# Dependency and cache artifacts
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Temp and backup files
+*.tmp
+*.temp
+*.bak
+*.old
+*~

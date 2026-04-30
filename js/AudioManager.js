@@ -15,7 +15,7 @@ const TRACKS = {
   level10: "assets/audio/bgm/level/level10.mp3",
   levelChoice: "assets/audio/bgm/levelchoice.mp3",
   openingStory: "assets/audio/bgm/openingstory.mp3",
-  achieves: "assets/audio/bgm/achieves.mp3",
+  achieves: "assets/audio/bgm/achieve.mp3",
 };
 
 const SFX_TRACKS = {
@@ -26,8 +26,8 @@ const SFX_TRACKS = {
 
 const clamp01 = (value) => Math.max(0, Math.min(1, Number(value) || 0));
 
-const FADE_INTERVAL = 50; // ms per tick
-const FADE_STEPS = 800 / FADE_INTERVAL; // 800ms total fade
+const FADE_INTERVAL = 50; // ms per tick | 每帧间隔毫秒数
+const FADE_STEPS = 800 / FADE_INTERVAL; // 800ms total fade | 总渐变时长 800ms
 
 class AudioManagerImpl {
   constructor() {
@@ -89,6 +89,7 @@ class AudioManagerImpl {
     if (this._fadeOutTimer) {
       clearInterval(this._fadeOutTimer);
       this._fadeOutTimer = null;
+      // Immediately stop the fading-out BGM to prevent it from becoming an "orphan" that keeps playing.
       // 立即停掉仍在淡出中的旧音频，防止它变成"孤儿"继续播放
       if (this._fadingOutBgm) {
         this._fadingOutBgm.pause();
@@ -218,6 +219,7 @@ class AudioManagerImpl {
     }
 
     // Clone to allow overlapping click sounds.
+    // 克隆音频实例以支持重叠播放点击音效。
     const instance = base.cloneNode();
     instance.volume = this._sfxVolume;
     instance.play().catch(() => {});

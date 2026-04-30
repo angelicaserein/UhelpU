@@ -1,19 +1,24 @@
 ﻿/**
  * WireRenderer — handles electric-wire state, drawing, and portal indicator lights.
+ * 电线游染器 — 处理电线状态、绘制和传送游機指示灯
  * Extracted from Level2 to keep level files focused on layout/design.
+ * 从 Level2 提取以业保持关卡文件专注于布局/设计
  *
  * Automatically detects platforms between each button and the portal
+ * 自动检测每个按鹁与传送游機之间的平台
  * to create routing waypoints. If no platform lies in the path,
+ * 来创建路由中继点。如果路径中没有平台，
  * the wire connects directly.
+ * 电线会直接连接。
  */
 export class WireRenderer {
   /**
    * @param {object} config
-   * @param {object} config.button1      - right button entity
-   * @param {object} config.button2      - left button entity
-   * @param {object} config.portal       - portal entity
-   * @param {Set|Array} config.entities  - all level entities (used to find platforms for routing)
-   * @param {number} [config.wireSpeed=0.05] - per-frame progress increment
+   * @param {object} config.button1      - right button entity | 右按鹁实体
+   * @param {object} config.button2      - left button entity | 左按鹁实体
+   * @param {object} config.portal       - portal entity | 传送游機实体
+   * @param {Set|Array} config.entities  - all level entities (used to find platforms for routing) | 所有关卡实体（用于阅找用于路由的平台）
+   * @param {number} [config.wireSpeed=0.05] - per-frame progress increment | 每帧进度增量
    */
   constructor({ button1, button2, portal, entities, wireSpeed = 0.05 }) {
     this._button1 = button1;
@@ -21,7 +26,7 @@ export class WireRenderer {
     this._portal = portal;
     this._wireSpeed = wireSpeed;
 
-    // Collect platform entities (type "ground" that are NOT full-width floors)
+    // Collect platform entities (type "ground" that are NOT full-width floors) | 收集平台实体（类型“ground”但不是满幅序列）
     this._platforms = [];
     if (entities) {
       for (const e of entities) {
@@ -40,6 +45,7 @@ export class WireRenderer {
   }
 
   // Update wire progress based on button states, and unlock portal when both wires complete
+  // 根据按鹁状态更新电线进度，两条电线都完成时解锁传送游機
 
   update() {
     if (this._button1.isPressed) {
@@ -95,9 +101,13 @@ export class WireRenderer {
 
   /**
    * Build a wire path from (sx,sy) to (ex,ey).
+   * 从 (sx,sy) 到 (ex,ey) 构建电线路径。
    * Finds the best platform whose top surface lies vertically between
+   * 找到最优平台，其顶面垂直摆布于按鹁与传送游機之间，
    * the button and portal, and uses its edge as a routing waypoint.
+   * 并使用其边缘作为路由中继点。
    * If no suitable platform exists, connects directly via an L-shaped path.
+   * 如果没有适用平台，直接通过 L 形路径连接。
    */
   _buildWirePath(sx, sy, ex, ey) {
     const route = this._findRoutePlatform(sx, sy, ex, ey);
@@ -109,7 +119,7 @@ export class WireRenderer {
         { x: ex, y: route.y },
       ];
     }
-    // No platform in the way — L-shaped direct connection
+    // No platform in the way — L-shaped direct connection | 路羄中没有平台 — L 形直接连接
     return [
       { x: sx, y: sy },
       { x: ex, y: sy },
@@ -119,9 +129,13 @@ export class WireRenderer {
 
   /**
    * Find the best platform to route a wire through.
+   * 找到电线路由的最优平台。
    * A platform qualifies if its bounding box overlaps with the rectangular
+   * 平台符合条件是它的边界框与按鹁和传送游機之间的矩形路径重叠。
    * corridor between the button and the portal (i.e. the platform is "in the way").
+   * （即平台“按路羄上”）。
    * Returns { x, y } routing point (platform edge), or null if none qualifies.
+   * 返回 { x, y } 路由点（平台边缘），如果不符合条件则为 null。
    */
   _findRoutePlatform(sx, sy, ex, ey) {
     const minX = Math.min(sx, ex);
@@ -138,14 +152,14 @@ export class WireRenderer {
       const platBottom = plat.y;
       const platTop = plat.y + plat.collider.h;
 
-      // AABB overlap: platform vertical range must overlap wire vertical range
+      // AABB overlap: platform vertical range must overlap wire vertical range | AABB 重叠：平台纵向范围必须与电线纵向范围重叠
       if (platTop < minY || platBottom > maxY) continue;
 
-      // Platform horizontal range must overlap wire horizontal range
+      // Platform horizontal range must overlap wire horizontal range | 平台水平范围必须与电线水平范围重叠
       if (platRight < minX || platLeft > maxX) continue;
 
-      // Use the platform edge closest to the start as routing x,
-      // and platform top as routing y
+      // Use the platform edge closest to the start as routing x, | 使用最接近起点的平台边缘作为路由 x，
+      // and platform top as routing y | 平台顶部作为路由 y
       const routeX = Math.max(platLeft, Math.min(platRight, sx));
       const routeY = platTop;
 
@@ -163,7 +177,7 @@ export class WireRenderer {
     p.push();
     p.noFill();
 
-    // Static cable base colour
+    // Static cable base colour | 静态电缆基础颜色
     p.strokeWeight(2);
     p.stroke(45, 45, 65);
     this._drawPolylineLine(p, path);
@@ -173,26 +187,26 @@ export class WireRenderer {
       const ex = partial.endX;
       const ey = partial.endY;
 
-      // Outer glow
+      // Outer glow | 外层辉光
       p.stroke(20, 90, 255, 55);
       p.strokeWeight(9);
       this._drawPolylineLine(p, partial.points);
 
-      // Middle glow
+      // Middle glow | 中层辉光
       p.stroke(70, 150, 255, 110);
       p.strokeWeight(4);
       this._drawPolylineLine(p, partial.points);
 
-      // Arc core (jitter animation)
+      // Arc core (jitter animation) | 电弧核心（护动动画）
       p.stroke(190, 235, 255, 230);
       p.strokeWeight(1.5);
       this._drawPolylineArc(p, partial.points);
 
-      // Spark head: outer orb
+      // Spark head: outer orb | 电祫头：外型球
       p.noStroke();
       p.fill(80, 160, 255, 130);
       p.ellipse(ex, ey, 14, 14);
-      // Spark head: bright core
+      // Spark head: bright core | 电祫头：亮色核心
       p.fill(240, 250, 255);
       p.ellipse(ex, ey, 5, 5);
     }

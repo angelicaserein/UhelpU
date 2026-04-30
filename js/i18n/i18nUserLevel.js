@@ -1,5 +1,5 @@
-// js/i18nUserLevel.js — 玩家关卡相关文案
-// 导入即自动注册到全局 i18n 字典
+// js/i18nUserLevel.js — Player-created level related text | 玩家关卡相关文案
+// Auto-register to global i18n dictionary on import | 导入即自动注册到全局 i18n 字典
 
 import { registerTranslations } from "./index.js";
 

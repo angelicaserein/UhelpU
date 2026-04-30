@@ -6,7 +6,7 @@ export class Level1 extends HardLevel2 {
     super(p, eventBus);
     this.replayerVoice = new ReplayerVoice(
       this.recordSystem,
-      "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",
+      "server-managed-proxy",
       "In this level, the phantom can be transported to areas the player cannot safely reach, and can interact with triggers on the player's behalf.",
     );
   }

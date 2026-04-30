@@ -23,6 +23,7 @@ export class SwitcherMain {
     }
   }
 
+  // Switch to static page
   // 切换到静态页面
   switchToStatic(page, p = this.p) {
     if (this.activeSwitcher !== this.staticSwitcher) {
@@ -35,6 +36,7 @@ export class SwitcherMain {
     this.staticSwitcher.switchTo(page, p);
   }
 
+  // Switch to game page
   // 切换到游戏页面
   switchToGame(page, p = this.p) {
     if (this.activeSwitcher !== this.gameSwitcher) {

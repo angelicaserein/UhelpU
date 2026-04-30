@@ -13,10 +13,12 @@ export class Box extends GameEntity {
     this._startY = y;
 
     // Physics
-    this.movementComponent = new MovementComponent(0, 0, 0, -0.5); // gravity in accY (negative for upright axis)
+    // 物理属性
+    this.movementComponent = new MovementComponent(0, 0, 0, -0.5); // gravity in accY (negative for upright axis) | 重力在 accY 中（正立坐标轴为负）
     this.collider = new RectangleCollider(ColliderType.DYNAMIC, w, h);
 
     // State tracking
+    // 状态追踪
     this.prevX = x;
     this.prevY = y;
     this.blockedXLastFrame = false;
@@ -45,6 +47,7 @@ export class Box extends GameEntity {
     }
 
     // Fallback: gray box
+    // 备用：灰色矩形
     p.fill(150, 150, 150);
     p.noStroke();
     p.rect(this.x, this.y, w, h);

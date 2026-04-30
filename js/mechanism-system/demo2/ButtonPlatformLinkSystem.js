@@ -1,8 +1,8 @@
-// ButtonPlatformLinkSystem.js
-// 按钮-消失平台联动系统：踩下按钮时平台碰撞瞬间消失，贴图保留但透明度降低
-// 自动为每组 button-platform 分配统一颜色，按钮填色 + 平台彩色轮廓
+// ButtonPlatformLinkSystem.js | 按鹁-消失平台联动系统
+// Button-disappearing platform linkage system: when button is pressed, platform collision disappears instantly, sprite remains but opacity is reduced | 按鹁-消失平台联动系统：踏下按鹁时平台碰撞瞬閴消失，贴图保留但透明度降低
+// Auto-assign unified color for each button-platform group, button fill color + platform color outline | 自动为每组 button-platform 分配统一颜色，按鹁填色 + 平台彩色轮廓
 
-// 预定义颜色调色板，同组 button 和 platform 颜色主色调一致
+// Predefined color palette, same button and platform primary color for same group | 预定义颜色调色板，同组 button 和 platform 颜色主色调一致
 const COLOR_PALETTE = [
   {
     unpressed: [230, 210, 40],
@@ -49,13 +49,14 @@ const COLOR_PALETTE = [
 export class ButtonPlatformLinkSystem {
   /**
    * @param {{button: Button, platforms: Array<{platform: BasePlatform, mode?: string}>}} link
-   *   单组联动：一个按钮控制一组平台
-   *   - platform: 平台实体
-   *   - mode: "disappear"(默认) 踩下按钮时平台消失 | "appear" 踩下按钮时平台出现
-   *   系统会自动按起始配色索引分配颜色，同组 button 和 platform 轮廓颜色一致
-   * @param {CollisionSystem} collisionSystem - 碰撞系统引用，用于 colliderType 切换后自动重新分区
+   *   Single linkage group: one button controls a group of platforms
+   *   单组联动：一个按鹁控制一组平台
+   *   - platform: platform entity | 平台实体
+   *   - mode: "disappear"(default) platform disappears when button pressed | "appear" platform appears when button pressed | "disappear"(默认) 踏下按鹁时平台消失 | "appear" 踏下按鹁时平台出现
+   *   System auto-assigns color by starting palette index, button and platform outline colors are consistent within group | 系统会自动按起始配色索引分配颜色，同组 button 和 platform 轮廓颜色一致
+   * @param {CollisionSystem} collisionSystem - collision system reference, auto-repartition after colliderType switch | 碰撞系统引用，用于 colliderType 切换后自动重新分区
    * @param {Object} [options]
-   * @param {number} [options.startColorIndex] - 配色起始索引，默认 0
+   * @param {number} [options.startColorIndex] - palette starting index, default 0 | 配色起始索引，默认 0
    */
   constructor(link, collisionSystem, options = {}) {
     this._collisionSystem = collisionSystem;
@@ -85,7 +86,7 @@ export class ButtonPlatformLinkSystem {
         platform.collider.colliderType = "TRIGGER";
       }
       const originalDraw = platform.draw.bind(platform);
-      platform.draw = () => {};
+      platform.draw = () => {}; // System takes over platform drawing
 
       return {
         platform,
@@ -95,14 +96,14 @@ export class ButtonPlatformLinkSystem {
         _originalDraw: originalDraw,
       };
     });
-    // 初始化后立即重新分区，确保 appear 模式的平台一开始就没有碰撞
+    // After initialization, repartition immediately to ensure appear-mode platforms have no collision from the start | 初始化后立即重新分区，确保 appear 模式的平台一开始就没有碰撞
     if (this._collisionSystem) {
       this._collisionSystem.partitionEntitiesByType();
     }
   }
 
   /**
-   * 每帧调用，根据按钮状态瞬间切换平台碰撞
+   * Called every frame, instantly switch platform collision based on button state | 每帧调用，根据按鹁状态瞬閴切换平台碰撞
    */
   update() {
     let changed = false;
@@ -121,18 +122,18 @@ export class ButtonPlatformLinkSystem {
       }
       if (wasGone !== entry.gone) changed = true;
     }
-    // colliderType 发生变化时自动重新分区，保证碰撞系统下一帧正确
+    // colliderType changed — auto repartition to ensure collision system works correctly next frame | colliderType 发生变化时自动重新分区，保证碰撞系统下一帧正确
     if (changed && this._collisionSystem) {
       this._collisionSystem.partitionEntitiesByType();
     }
   }
 
   /**
-   * 在 draw 阶段调用：
-   *   - 正常平台：原样绘制 + 彩色轮廓
-   *   - 消失平台：20% 透明度绘制 + 20% 透明度轮廓
-   *   系统已接管平台 draw，关卡无需额外处理 _hidden
-   * @param {p5} p - p5 实例
+   * Called during draw phase:
+   *   - Normal platforms: draw as-is + color outline | 正常平台：原样绘制 + 彩色轮廓
+   *   - Disappearing platforms: draw with 20% opacity + 20% opacity outline | 消失平台：20% 透明度绘制 + 20% 透明度轮廓
+   *   System has taken over platform draw, level doesn't need extra _hidden handling | 系统已接管平台 draw，关卡无需馉外处理 _hidden
+   * @param {p5} p - p5 instance | p5 实例
    */
   draw(p) {
     const [r, g, b] = this._outlineColor;
@@ -162,7 +163,7 @@ export class ButtonPlatformLinkSystem {
   }
 
   /**
-   * 重置所有平台到初始状态
+   * Reset all platforms to initial state | 重置所有平台到初始状态
    */
   reset() {
     for (const entry of this._platforms) {

@@ -1,65 +1,74 @@
 /**
- * KeyBindingManager.js — 按键管理器（单例）
+ * KeyBindingManager.js — Key binding manager (singleton)
+ * 按键管理器（单例）
  *
+ * Responsibilities:
  * 职责：
- * - 维护当前的按键配置
- * - 提供查询接口（按键<->意图的双向映射）
- * - 处理配置变更和持久化
- * - 通知监听器配置已变更
+ * - Maintain current key binding configuration | 维持当前的按键配置
+ * - Provide query interfaces (bidirectional mapping of keys<->intents) | 提供查询接口（按键<->意图的双向映射）
+ * - Handle configuration changes and persistence | 处理配置变更和持久化
+ * - Notify listeners of configuration changes | 通知监听器配置已变更
  */
 
-import { KeyBindingConfig, DEFAULT_KEYBINDING, KEY_ALIASES } from "./KeyBindingConfig.js";
+import {
+  KeyBindingConfig,
+  DEFAULT_KEYBINDING,
+  KEY_ALIASES,
+} from "./KeyBindingConfig.js";
 
 export class KeyBindingManager {
   static _instance = null;
 
   constructor() {
-    // 单例模式：只允许一个实例
+    // Singleton mode: allow only one instance | 单例模式：只允许一个实例
     if (KeyBindingManager._instance) {
       return KeyBindingManager._instance;
     }
 
-    // 加载已保存的配置（或使用默认值）
+    // Load saved configuration (or use default) | 加载已保存的配置（或使用默认值）
     this._config = KeyBindingConfig.load();
 
-    // 反向映射：按键码 -> 意图
-    // 例：{ "KeyW": "jump", "KeyA": "moveLeft", "KeyD": "moveRight" }
+    // Reverse mapping: key code -> intent | 反向映射：按键码 -> 意图
+    // Example: { "KeyW": "jump", "KeyA": "moveLeft", "KeyD": "moveRight" } | 例：{ "KeyW": "jump", "KeyA": "moveLeft", "KeyD": "moveRight" }
     this._reverseMap = this._buildReverseMap();
 
-    // 变更监听器数组
+    // Change listener array | 变更监听器数组
     this._listeners = [];
 
     KeyBindingManager._instance = this;
   }
 
   // ──────────────────────────────────────────────────────────────────────────
-  // 查询接口
+  // Query interfaces | 查询接口
   // ──────────────────────────────────────────────────────────────────────────
 
   /**
-   * 按键码 -> 意图
-   * @param {string} keyCode - 按键码（如 'KeyW'）
-   * @returns {string|undefined} 意图名称（如 'jump'），不存在则返回 undefined
+   * Key code -> intent | 按键码 -> 意图
+   * @param {string} keyCode - Key code (e.g., 'KeyW') | 按键码（如 'KeyW'）
+   * @returns {string|undefined} Intent name (e.g., 'jump'), returns undefined if not found | 意图名称（如 'jump'），不存在则返回 undefined
    */
   getIntentByKey(keyCode) {
     return this._reverseMap[keyCode];
   }
 
   /**
-   * 意图 -> 按键码
-   * @param {string} intent - 意图名称（如 'jump'）
-   * @returns {string|undefined} 按键码（如 'KeyW'），不存在则返回 undefined
+   * Intent -> key code | 意图 -> 按键码
+   * @param {string} intent - Intent name (e.g., 'jump') | 意图名称（如 'jump'）
+   * @returns {string|undefined} Key code (e.g., 'KeyW'), returns undefined if not found | 按键码（如 'KeyW'），不存在则返回 undefined
    */
   getKeyByIntent(intent) {
     return this._config[intent];
   }
 
   /**
-   * 获取所有允许的按键（Set 集合）
-   * @returns {Set<string>} 按键码集合
+   * Get all allowed keys (Set collection) | 获取所有允许的按键（Set 集合）
+   * @returns {Set<string>} Key code set | 按键码集合
    */
   getAllowedKeys() {
-    return new Set([...Object.values(this._config), ...Object.keys(KEY_ALIASES)]);
+    return new Set([
+      ...Object.values(this._config),
+      ...Object.keys(KEY_ALIASES),
+    ]);
   }
 
   /**
@@ -71,14 +80,14 @@ export class KeyBindingManager {
   }
 
   // ──────────────────────────────────────────────────────────────────────────
-  // 修改接口
+  // Modification interfaces | 修改接口
   // ──────────────────────────────────────────────────────────────────────────
 
   /**
-   * 重新绑定某个意图到新按键
-   * @param {string} intent - 意图名称（如 'jump'）
-   * @param {string} newKeyCode - 新的按键码（如 'KeyW'）
-   * @returns {boolean} 成功返回 true，意图不存在返回 false
+   * Re-bind an intent to a new key | 重新绑定成帯到新按键
+   * @param {string} intent - Intent name (e.g., 'jump') | 意图名称（如 'jump'）
+   * @param {string} newKeyCode - New key code (e.g., 'KeyW') | 新的按键码（如 'KeyW'）
+   * @returns {boolean} Returns true on success, false if intent doesn't exist | 成功返回 true，意图不存在返回 false
    */
   rebind(intent, newKeyCode) {
     if (!this._config.hasOwnProperty(intent)) {
@@ -90,38 +99,38 @@ export class KeyBindingManager {
     this._reverseMap = this._buildReverseMap();
     KeyBindingConfig.save(this._config);
 
-    // 通知所有监听器
+    // Notify all listeners | 通知所有监听器
     this._notifyListeners(intent, newKeyCode);
     return true;
   }
 
   /**
-   * 重置为默认按键配置
+   * Reset to default key binding configuration | 重置为默认按键配置
    */
   reset() {
     this._config = { ...DEFAULT_KEYBINDING };
     this._reverseMap = this._buildReverseMap();
     KeyBindingConfig.save(this._config);
 
-    // 通知监听器：完全重置（传 null）
+    // Notify listeners: complete reset (pass null) | 通知监听器：完全重置（传 null）
     this._notifyListeners(null, null);
   }
 
   // ──────────────────────────────────────────────────────────────────────────
-  // 监听器接口
+  // Listener interfaces | 监听器接口
   // ──────────────────────────────────────────────────────────────────────────
 
   /**
-   * 注册配置变更监听器
-   * @param {Function} callback - 回调函数，签名为 (intent, newKeyCode)
+   * Register configuration change listener | 注册配置变更监听器
+   * @param {Function} callback - Callback function with signature (intent, newKeyCode) | 回调函数，签名为 (intent, newKeyCode)
    */
   onChange(callback) {
     this._listeners.push(callback);
   }
 
   /**
-   * 注销监听器
-   * @param {Function} callback - 要移除的回调函数
+   * Unregister listener | 注销监听器
+   * @param {Function} callback - Callback function to remove | 要移除的回调函数
    */
   offChange(callback) {
     const idx = this._listeners.indexOf(callback);
@@ -131,11 +140,11 @@ export class KeyBindingManager {
   }
 
   // ──────────────────────────────────────────────────────────────────────────
-  // 内部辅助方法
+  // Internal helper methods | 内部辅助方法
   // ──────────────────────────────────────────────────────────────────────────
 
   /**
-   * 构建反向映射：按键码 -> 意图
+   * Build reverse mapping: key code -> intent | 构建反向映射：按键码 -> 意图
    * @private
    */
   _buildReverseMap() {
@@ -150,7 +159,7 @@ export class KeyBindingManager {
   }
 
   /**
-   * 通知所有监听器配置已变更
+   * Notify all listeners that configuration has changed | 通知所有监听器配置已变更
    * @private
    */
   _notifyListeners(intent, newKeyCode) {
@@ -164,11 +173,11 @@ export class KeyBindingManager {
   }
 
   // ──────────────────────────────────────────────────────────────────────────
-  // 工具方法
+  // Utility methods | 工具方法
   // ──────────────────────────────────────────────────────────────────────────
 
   /**
-   * 将 keyCode（如 "KeyE"）转换为显示标签（如 "E"）
+   * Convert keyCode (e.g., "KeyE") to display label (e.g., "E") | 将 keyCode（如 "KeyE"）转换为显示标签（如 "E"）
    * @param {string} keyCode
    * @returns {string}
    */
@@ -183,6 +192,8 @@ export class KeyBindingManager {
   }
 
   /**
+   * Parse {key:intent} placeholders in text, replace with currently bound key label.
+   * Example: "{key:teleportCheckpoint}" → "B"
    * 解析文本中的 {key:intent} 占位符，替换为当前绑定的按键标签。
    * 例："{key:teleportCheckpoint}" → "B"
    * @param {string} text
@@ -198,11 +209,11 @@ export class KeyBindingManager {
   }
 
   // ──────────────────────────────────────────────────────────────────────────
-  // 单例获取
+  // Singleton accessor | 单例获取
   // ──────────────────────────────────────────────────────────────────────────
 
   /**
-   * 获取 KeyBindingManager 单例
+   * Get KeyBindingManager singleton | 获取 KeyBindingManager 单例
    * @static
    * @returns {KeyBindingManager}
    */

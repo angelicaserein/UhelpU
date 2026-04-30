@@ -1,12 +1,18 @@
 /**
  * EditorUI — Editor bottom toolbar UI
+ * EditorUI — 编辑器底部工具栏 UI
  *
  * Responsible for:
+ * 负责:
  *   - Draw bottom toolbar (Ground / Portal buttons, current status hint, save button)
+ *   - 绘制底部工具栏 (地面 / 传送门按钮, 当前状态提示, 保存按钮)
  *   - Ground width/height sliders
+ *   - 地面宽度/高度滑块
  *   - Handle mouse clicks in toolbar area
+ *   - 处理工具栏区域中的鼠标点击
  *
  * All drawing and coordinates executed in **screen space** (p5 original coordinates, not flipped).
+ * 所有绘图和坐标在**屏幕空间**中执行 (p5 原始坐标, 未翻转)。
  */
 
 import {
@@ -16,15 +22,16 @@ import {
 } from "./EditorConfig.js";
 
 // ── Internal layout constants ──────────────────────────────────────────────
-// ── First row button size
-// ── Second row button size slightly smaller
+// 内部布局常量
+// ── First row button size | 第一行按钮大小
+// ── Second row button size slightly smaller | 第二行按钮大小略小
 const BTN_W = 110;
 const BTN_H = 36;
 const BTN_W2 = 100;
 const BTN_H2 = 30;
 const BTN_GAP = 14;
 const BTN_GAP2 = 10;
-const BTN_Y_OFFSET = 4; // First row button distance from toolbar top
+const BTN_Y_OFFSET = 4; // First row button distance from toolbar top | 第一行按钮到工具栏顶部的距离
 
 const SAVE_BTN_W = 90;
 const SAVE_BTN_H = 36;
@@ -34,30 +41,30 @@ const CAM_BTN_H = 44;
 
 export class EditorUI {
   /**
-   * @param {number} canvasWidth
-   * @param {number} canvasHeight
+   * @param {number} canvasWidth | 画布宽度
+   * @param {number} canvasHeight | 画布高度
    */
   constructor(canvasWidth, canvasHeight) {
     this._cw = canvasWidth;
     this._ch = canvasHeight;
 
-    /** 当前选中的工具 */
+    /** 当前选中的工具 | Current selected tool */
     this.activeTool = EntityTool.GROUND;
 
-    /** 保存按钮点击回调（由 MapEditor 注入） */
+    /** 保存按钮点击回调（由 MapEditor 注入）| Save button click callback (injected by MapEditor) */
     this.onSave = null;
 
-    /** toast 提示 */
-    this._toast = null; // { text, endTime }
+    /** toast 提示 | Toast message */
+    this._toast = null; // { text, endTime } | {文本, 结束时间}
 
-    /** 摄像机方向按钮按住状态 */
+    /** Camera direction button press state | 摄像机方向按钮按住状态 */
     this._camLeftPressed = false;
     this._camRightPressed = false;
 
-    /** BtnPlatform 平台数量（1~8） */
+    /** BtnPlatform platform count (1~8) | BtnPlatform 平台数量（1~8） */
     this.btnPlatformCount = 1;
 
-    /** 当前选中的 BtnPlatform 复合实体模式列表 */
+    /** Current selected BtnPlatform composite entity mode list | 当前选中的 BtnPlatform 复合实体模式列表 */
     this.btnPlatformModes = null;
     this._btnPlatformModeButtons = [];
     this._btnPlatformModePanel = null;
@@ -246,7 +253,7 @@ export class EditorUI {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // Draw
+  // Draw | 绘制
   // ══════════════════════════════════════════════════════════════
 
   draw(p) {
@@ -396,7 +403,11 @@ export class EditorUI {
       p.noStroke();
       p.textSize(11);
       p.textAlign(p.CENTER, p.BOTTOM);
-      p.text("Platform Count", this._platCountLabelX, this._btnPlatCountMinus.y - 2);
+      p.text(
+        "Platform Count",
+        this._platCountLabelX,
+        this._btnPlatCountMinus.y - 2,
+      );
 
       // - button
       this._drawButton(p, this._btnPlatCountMinus, "−", false, [180, 80, 80]);
@@ -461,7 +472,11 @@ export class EditorUI {
       p.fill(170, 220, 170);
       p.textSize(12);
       p.textAlign(p.LEFT, p.CENTER);
-      p.text("Tip: After placing, select enemy and press F to flip direction", statusX, statusY + 18);
+      p.text(
+        "Tip: After placing, select enemy and press F to flip direction",
+        statusX,
+        statusY + 18,
+      );
     }
 
     // Save button
@@ -557,10 +572,10 @@ export class EditorUI {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // Interaction
+  // Interaction | 交互
   // ══════════════════════════════════════════════════════════════
 
-  /** Mouse press event (screen coordinates). Returns true means event consumed by toolbar. */
+  /** Mouse press event (screen coordinates). Returns true means event consumed by toolbar. | 鼠标按下事件 (屏幕坐标)。返回 true 表示工具栏使用了事件。 */
   handleMousePressed(mx, my) {
     if (this._btnPlatformModePanel) {
       for (const btn of this._btnPlatformModeButtons) {

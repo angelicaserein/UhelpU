@@ -1,5 +1,5 @@
-// js/i18nDemo2.js — Demo2 关卡专属文案
-// 导入即自动注册到全局 i18n 字典
+// js/i18nDemo2.js — Demo2 level exclusive text | Demo2 关卡专属文案
+// Auto-register to global i18n dictionary on import | 导入即自动注册到全局 i18n 字典
 
 import { registerTranslations } from "./index.js";
 

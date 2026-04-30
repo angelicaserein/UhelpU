@@ -1,3 +1,4 @@
+// Demo1AchievementData.js — Demo1 achievement data definition and state management (localStorage persistence)
 // Demo1AchievementData.js — Demo1 成就数据定义与状态管理（localStorage 持久化）
 
 const STORAGE_KEY = "kinoko_achievements_demo1";
@@ -20,7 +21,7 @@ export const Demo1AchievementData = {
 
   _load() {
     try {
-      // 兼容旧 key 迁移
+      // Migrate old key compatibility | 兼容旧 key 迁移
       const oldRaw = localStorage.getItem("kinoko_achievements");
       const raw = localStorage.getItem(STORAGE_KEY) || oldRaw;
       if (raw) {
@@ -28,13 +29,13 @@ export const Demo1AchievementData = {
         if (Array.isArray(ids)) {
           ids.forEach((id) => this._unlocked.add(id));
         }
-        // 如果是从旧 key 读取的，迁移到新 key
+        // If read from old key, migrate to new key | 如果是从旧 key 读取的，迁移到新 key
         if (oldRaw && !localStorage.getItem(STORAGE_KEY)) {
           this._save();
         }
       }
     } catch (_) {
-      // ignore
+      // ignore | 忽略
     }
   },
 
@@ -42,7 +43,7 @@ export const Demo1AchievementData = {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify([...this._unlocked]));
     } catch (_) {
-      // ignore
+      // ignore | 忽略
     }
   },
 
@@ -70,5 +71,6 @@ export const Demo1AchievementData = {
   },
 };
 
+// Initialize by restoring unlocked achievements from localStorage on startup
 // 启动时从 localStorage 恢复已解锁的成就
 Demo1AchievementData._load();

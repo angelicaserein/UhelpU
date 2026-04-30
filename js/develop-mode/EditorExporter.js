@@ -1,7 +1,9 @@
 /**
  * EditorExporter — Export editor-placed entities as copyable code
+ * EditorExporter — 将编辑器放置的实体导出为可复制的代码
  *
  * Generated code format fully matches project's existing entity construction:
+ * 生成的代码格式完全匹配项目现有的实体构造:
  *   new Ground(x, y, w, h)
  *   new Portal(x, y, w, h)
  *   new Platform(x, y, w, h)
@@ -1028,9 +1030,9 @@ export class EditorExporter {
     const levelId = `level_${Date.now()}`;
     const createdAt = new Date().toISOString();
 
-    // Build entity array
+    // Build entity array | 构建实体数组
     const entities = [];
-    const entityIndexMap = new Map(); // track positions for room mapping
+    const entityIndexMap = new Map(); // track positions for room mapping | 追踪房间映射位置
 
     records.forEach((record, recordIndex) => {
       const entity = record.gameEntity;
@@ -1233,7 +1235,9 @@ export class EditorExporter {
         }
 
         default:
-          console.warn(`[EditorExporter.generateJSON] Unsupported tool: ${record.tool}`);
+          console.warn(
+            `[EditorExporter.generateJSON] Unsupported tool: ${record.tool}`,
+          );
           return;
       }
 
@@ -1243,7 +1247,7 @@ export class EditorExporter {
       }
     });
 
-    // Build rooms array for multi-room levels
+    // Build rooms array for multi-room levels | 为多房间级别构建房间数组
     let roomsArray = null;
     if (roomCount > 1) {
       const roomBuckets = buildRoomBuckets(records, roomCount, canvasWidth);
@@ -1251,9 +1255,13 @@ export class EditorExporter {
         const entityIndices = [];
         records.forEach((record, recordIndex) => {
           if (entityIndexMap.has(recordIndex)) {
-            // Check if record belongs to this room
+            // Check if record belongs to this room | 检查记录是否属于此房间
             const sourceEntity = record.gameEntity;
-            const recordRoomIndex = getRoomIndexFromX(sourceEntity.x, roomCount, canvasWidth);
+            const recordRoomIndex = getRoomIndexFromX(
+              sourceEntity.x,
+              roomCount,
+              canvasWidth,
+            );
             if (recordRoomIndex === roomIndex) {
               entityIndices.push(entityIndexMap.get(recordIndex));
             }
@@ -1263,7 +1271,7 @@ export class EditorExporter {
       });
     }
 
-    // Build final JSON structure
+    // Build final JSON structure | 构建最终 JSON 结构
     const levelData = {
       meta: {
         id: levelId,
@@ -1432,4 +1440,3 @@ export class EditorExporter {
     return code;
   }
 }
-

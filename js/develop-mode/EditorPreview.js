@@ -1,8 +1,11 @@
 /**
  * EditorPreview — Mouse hover preview (semi-transparent dashed frame)
+ * EditorPreview — 鼠标悬停预览 (半透明虚线框)
  *
  * Based on current selected tool and mouse position, draw preview of entity to be placed in world space.
+ * 基于当前选定的工具和鼠标位置,在世界空间中绘制要放置的实体的预览。
  * Coordinates snap to GRID_SIZE grid.
+ * 坐标吸附到 GRID_SIZE 网格。
  */
 
 import {
@@ -37,15 +40,16 @@ export class EditorPreview {
 
   /**
    * Update preview position based on screen mouse position.
+   * 基于屏幕鼠标位置更新预览位置。
    *
-   * @param {number} screenMX   Screen space mouse X
-   * @param {number} screenMY   Screen space mouse Y
-   * @param {number} canvasH    Canvas height
-   * @param {number} cameraX    Current camera X offset (world coordinates)
-   * @param {string} tool       Current tool type (EntityTool)
-   * @param {number} groundW    Current Ground width (only valid in Ground mode)
-   * @param {number} groundH    Current Ground height (only valid in Ground mode)
-   * @param {boolean} insideToolbar Is mouse over toolbar
+   * @param {number} screenMX   Screen space mouse X | 屏幕空间鼠标 X
+   * @param {number} screenMY   Screen space mouse Y | 屏幕空间鼠标 Y
+   * @param {number} canvasH    Canvas height | 画布高度
+   * @param {number} cameraX    Current camera X offset (world coordinates) | 当前相机 X 偏移 (世界坐标)
+   * @param {string} tool       Current tool type (EntityTool) | 当前工具类型 (EntityTool)
+   * @param {number} groundW    Current Ground width (only valid in Ground mode) | 当前地面宽度 (仅在地面模式下有效)
+   * @param {number} groundH    Current Ground height (only valid in Ground mode) | 当前地面高度 (仅在地面模式下有效)
+   * @param {boolean} insideToolbar Is mouse over toolbar | 鼠标是否在工具栏上方
    */
   update(
     screenMX,
@@ -62,7 +66,7 @@ export class EditorPreview {
       return;
     }
 
-    // Screen → world coordinates (Y axis flipped)
+    // Screen → world coordinates (Y axis flipped) | 屏幕 → 世界坐标 (Y 轴翻转)
     const worldX = screenMX + cameraX;
     const worldY = canvasH - screenMY;
 
@@ -114,7 +118,7 @@ export class EditorPreview {
       this.previewH = PORTAL_SIZE.height;
     }
 
-    // Snap to grid, using entity center as anchor
+    // Snap to grid, using entity center as anchor | 吸附到网格, 使用实体中心作为锚点
     this.previewX = this._snap(worldX - this.previewW / 2);
     this.previewY = this._snap(worldY - this.previewH / 2);
 
@@ -123,7 +127,9 @@ export class EditorPreview {
 
   /**
    * Draw preview frame in world space.
+   * 在世界空间中绘制预览框架。
    * When called, p5 transformation should already be in flipped + translated world coordinate system.
+   * 调用时，p5 变换应已处于翻转 + 平移的世界坐标系统中。
    */
   draw(p, tool) {
     if (!this.visible) return;
@@ -199,7 +205,7 @@ export class EditorPreview {
       p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
       p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
     } else if (tool === EntityTool.WIRE_PORTAL) {
-      // Button preview (purple)
+      // Button preview (purple) | 按钮预览 (紫色)
       p.stroke(180, 100, 240, PREVIEW_ALPHA);
       this._dashedRect(
         p,
@@ -226,7 +232,7 @@ export class EditorPreview {
       p.fill(180, 100, 240, PREVIEW_ALPHA * 0.4);
       p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
 
-      // Portal preview (offset position)
+      // Portal preview (offset position) | 传送门预览 (偏移位置)
       const portalX = this.previewX + WIRE_PORTAL_DEFAULTS.offsetX;
       const portalY = this.previewY;
       const portalW = WIRE_PORTAL_DEFAULTS.portalWidth;
@@ -237,7 +243,7 @@ export class EditorPreview {
       p.fill(180, 100, 240, PREVIEW_ALPHA * 0.3);
       p.rect(portalX, portalY, portalW, portalH);
 
-      // Connection line
+      // Connection line | 连接线
       p.stroke(180, 100, 240, PREVIEW_ALPHA * 0.6);
       p.strokeWeight(1);
       this._dashedLine(
@@ -250,7 +256,7 @@ export class EditorPreview {
       );
       p.strokeWeight(2);
     } else if (tool === EntityTool.BTN_SPIKE) {
-      // Button preview (orange)
+      // Button preview (orange) | 按钮预览 (橙色)
       p.stroke(240, 160, 30, PREVIEW_ALPHA);
       this._dashedRect(
         p,
@@ -264,7 +270,7 @@ export class EditorPreview {
       p.fill(240, 160, 30, PREVIEW_ALPHA * 0.4);
       p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
 
-      // Spike preview (offset position)
+      // Spike preview (offset position) | 尖刺预览 (偏移位置)
       const spikeX = this.previewX + BTN_SPIKE_DEFAULTS.offsetX;
       const spikeY = this.previewY;
       const spikeW = BTN_SPIKE_DEFAULTS.spikeWidth;
@@ -275,7 +281,7 @@ export class EditorPreview {
       p.fill(240, 160, 30, PREVIEW_ALPHA * 0.3);
       p.rect(spikeX, spikeY, spikeW, spikeH);
 
-      // Connection line
+      // Connection line | 连接线
       p.stroke(240, 160, 30, PREVIEW_ALPHA * 0.6);
       p.strokeWeight(1);
       this._dashedLine(
@@ -288,7 +294,7 @@ export class EditorPreview {
       );
       p.strokeWeight(2);
     } else if (tool === EntityTool.BTN_PLATFORM) {
-      // Button preview (cyan/green)
+      // Button preview (cyan/green) | 按钮预览 (青绿色)
       p.stroke(60, 180, 140, PREVIEW_ALPHA);
       this._dashedRect(
         p,
@@ -302,7 +308,7 @@ export class EditorPreview {
       p.fill(60, 180, 140, PREVIEW_ALPHA * 0.4);
       p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
 
-      // Platform preview (offset position)
+      // Platform preview (offset position) | 平台预览 (偏移位置)
       const platX = this.previewX + BTN_PLATFORM_DEFAULTS.offsetX;
       const platY = this.previewY;
       const platW = BTN_PLATFORM_DEFAULTS.platformWidth;
@@ -313,7 +319,7 @@ export class EditorPreview {
       p.fill(60, 180, 140, PREVIEW_ALPHA * 0.3);
       p.rect(platX, platY, platW, platH);
 
-      // Connection line
+      // Connection line | 连接线
       p.stroke(60, 180, 140, PREVIEW_ALPHA * 0.6);
       p.strokeWeight(1);
       this._dashedLine(
@@ -405,10 +411,10 @@ export class EditorPreview {
       p.rect(this.previewX, this.previewY, this.previewW, this.previewH);
     }
 
-    // Coordinate annotation
+    // Coordinate annotation | 坐标注释
     p.push();
     p.translate(this.previewX, this.previewY + this.previewH);
-    p.scale(1, -1); // Flip back to normal text direction
+    p.scale(1, -1); // Flip back to normal text direction | 翻转回正常文本方向
     p.fill(255, 255, 255, 200);
     p.noStroke();
     p.textSize(11);
@@ -424,12 +430,13 @@ export class EditorPreview {
   }
 
   // ── Internal utilities ──────────────────────────────────────────────
+  // 内部实用工具
 
   _snap(v) {
     return Math.round(v / GRID_SIZE) * GRID_SIZE;
   }
 
-  /** Draw dashed rectangle using short line segments */
+  /** Draw dashed rectangle using short line segments | 使用短线段绘制虚线矩形 */
   _dashedRect(p, x, y, w, h, dashLen) {
     this._dashedLine(p, x, y, x + w, y, dashLen);
     this._dashedLine(p, x + w, y, x + w, y + h, dashLen);

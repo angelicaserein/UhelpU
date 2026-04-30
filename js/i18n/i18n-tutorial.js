@@ -1,5 +1,5 @@
-// js/i18n/i18n-tutorial.js — 教学系统国际化文本
-// 导入即自动注册到全局 i18n 字典
+// js/i18n/i18n-tutorial.js — Tutorial system i18n text | 教学系统国际化文本
+// Auto-register to global i18n dictionary on import | 导入即自动注册到全局 i18n 字典
 
 import { registerTranslations } from "./index.js";
 

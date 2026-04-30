@@ -128,6 +128,7 @@ function resolveFirst(a, b) {
   const crossedFromBelow =
     prevBounds.top <= staticBounds.bottom &&
     currBounds.top > staticBounds.bottom;
+  // X-axis frame crossing: prevents fast horizontal movement from being misclassified as vertical collision.
   // X轴帧穿越：防止高速水平移动时被错判为vertical碰撞
   const crossedFromLeft =
     prevBounds.right <= staticBounds.left &&
@@ -136,11 +137,14 @@ function resolveFirst(a, b) {
     prevBounds.left >= staticBounds.right &&
     currBounds.left < staticBounds.right;
 
+  // Y-axis crossing priority: landing / head bump.
   // Y轴穿越优先：落地 / 顶头
   if (crossedFromAbove) {
     collisionMsg = COLLISION_MSGS.BOTTOM;
+    // If the player just separated from the replayer (still in buffer frames), delay collision correction.
     // 如果玩家刚从分身上分离（仍在缓冲帧内），延迟应用碰撞修正
     if ((a._replayerLeftFrameCount || 0) > 0) {
+      // Do not correct position this frame, let the player continue falling.
       // 这一帧不修正位置，让玩家继续下落
       return collisionMsg;
     }
@@ -154,6 +158,7 @@ function resolveFirst(a, b) {
     a.prevY = a.y;
     return collisionMsg;
   }
+  // X-axis crossing: high-speed lateral entry from the side.
   // X轴穿越：从侧面高速撞入
   if (crossedFromLeft) {
     collisionMsg = COLLISION_MSGS.RIGHT;
@@ -166,6 +171,7 @@ function resolveFirst(a, b) {
     return collisionMsg;
   }
 
+  // Fallback: player was already overlapping the platform in the previous frame (very rare), eject using minimum overlap.
   // Fallback：玩家在上一帧已经与平台重叠（极罕见），用最小重叠量弹出
   const overlap = getCenterOverlap(a, b);
 
@@ -189,9 +195,11 @@ function resolveDynDyn(a, b) {
   const aCurr = getCurrBounds(a);
   const bCurr = getCurrBounds(b);
 
+  // A was above B in the previous frame: A stands on B's head, A snaps precisely to the top of B.
   // A 上一帧在 B 上方：A 踩 B 头，A 精确吸附到 B 顶部
   if (aPrev.bottom >= bPrev.top) {
     if (a.headBlockedThisFrame) {
+      // When A is blocked by a platform above, push B down instead to prevent A/B from clipping through each other.
       // A 被平台顶住时，改为压回下方的 B，防止 A/B 互相穿模重叠
       placeEntityBelow(b, a);
     } else {
@@ -200,9 +208,11 @@ function resolveDynDyn(a, b) {
     return COLLISION_MSGS.A_ON_B;
   }
 
+  // B was above A in the previous frame: B stands on A's head, B snaps precisely to the top of A.
   // B 上一帧在 A 上方：B 踩 A 头，B 精确吸附到 A 顶部
   if (bPrev.bottom >= aPrev.top) {
     if (b.headBlockedThisFrame) {
+      // When B is blocked by a platform above, push A down instead to prevent A/B from clipping through each other.
       // B 被平台顶住时，改为压回下方的 A，防止 A/B 互相穿模重叠
       placeEntityBelow(a, b);
     } else {
@@ -211,6 +221,7 @@ function resolveDynDyn(a, b) {
     return COLLISION_MSGS.B_ON_A;
   }
 
+  // Lateral collision: detect box push.
   // 侧面碰撞：检测box推动
   const boxPushMsg = tryResolveLateralBoxPush(a, b, aPrev, bPrev, aCurr, bCurr);
   if (boxPushMsg) {
@@ -224,7 +235,9 @@ function resolveDynDyn(a, b) {
   const isBoxBoxPair = isBox(a) && isBox(b);
 
   // Deterministic lateral fallback for chain pushes:
+  // 链式推动的确定性侧向备用方案：
   // if side overlap remains after crossing checks, snap by previous-frame side relation.
+  // 若穿越检测后仍有侧面重叠，则按上一帧侧面关系对齐。
   if (
     (isPusherBoxPair || isBoxBoxPair) &&
     overlap.overlapX > 0 &&
@@ -234,6 +247,7 @@ function resolveDynDyn(a, b) {
       aPrev.bottom >= bPrev.top || bPrev.bottom >= aPrev.top;
 
     // Do not consume vertical stack cases (standing/on-head), let other branches handle them.
+    // 不消耗垂直堆叠情况（站立/顶头），由其他分支处理。
     if (!verticallyStacked) {
       const aPrevX = getPrevCoord(a, "x");
       const bPrevX = getPrevCoord(b, "x");
@@ -250,6 +264,7 @@ function resolveDynDyn(a, b) {
       }
 
       // Tie-breaker for exact same prevX: separate by current center direction.
+      // prevX 完全相同时的决胜力量：按当前中心方向分离。
       if (overlap.vectorX <= 0) {
         b.x = a.x + a.collider.w;
       } else {
@@ -259,6 +274,7 @@ function resolveDynDyn(a, b) {
     }
   }
 
+  // Lateral intersection is preserved; no vertical separation is applied.
   // 左右方向的相交保留，不做垂直分离
   return COLLISION_MSGS.ALLOWED;
 }

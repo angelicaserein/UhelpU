@@ -33,7 +33,8 @@ export class RecordSystem {
     this._keydownHandler = (event) => this.eventHandler(event);
     this._keyupHandler = (event) => this.eventHandler(event);
 
-    //状态转移规则（使用意图而不是键码）
+    // State transition rules (use intent instead of keyCode)
+    // 状态转移规则（使用意图而不是键码）
     this.states = {
       ReadyToRecord: {
         record: "Recording",
@@ -105,7 +106,9 @@ export class RecordSystem {
   }
 
   /**
-   * 重置录制系统回到待录制状态（"准备捕捉"）
+   * Reset recording system to ReadyToRecord state
+   * 重置录制系统回到待录制状态（“准备捕捠”）
+   * Called when player dies and respawns
    * 在玩家死亡重生时调用
    */
   resetToReadyToRecord() {
@@ -182,6 +185,7 @@ export class RecordSystem {
     }
   }
   // event: window raw keyboard event -> returns: string (intent) or null
+  // 事件：窗口原始键盘事件 -> 返回：字符串（意图）或 null
   eventHandler(event) {
     if (this._disabled || isGamePaused()) {
       this.resetInputState();
@@ -331,7 +335,7 @@ export class RecordSystem {
       this.clip.getStartY(),
     );
   }
-  //
+  //input: string -> return: void | 输入：字符串 -> 返回：空
   restartRecording() {
     this.recordStartTime = performance.now();
     this.recordEndTime = -1;
@@ -361,6 +365,7 @@ export class RecordSystem {
     });
 
     this._replayCursor = 0;
+    // Only skip events strictly less than: time === elapsedMs events (like injected t=0 move keys) cannot be skipped
     // 严格小于：time === elapsedMs 的事件（如注入的 t=0 移动键）不能跳过
     while (
       this._replayCursor < this._replayRecords.length &&
@@ -369,6 +374,7 @@ export class RecordSystem {
       this._replayCursor += 1;
     }
 
+    // Sync immediate trigger of events due at current time (including t=0 injected move keys), don't wait for next frame
     // 同步立即触发当前时刻到期的事件（包括 t=0 注入的移动键），不等下一帧
     this.flushDueReplayEvents();
     this.scheduleNextReplayEvent();
@@ -408,9 +414,9 @@ export class RecordSystem {
   triggerKey(record) {
     const event = new KeyboardEvent(record["keyType"], {
       code: record["code"],
-    }); //创建键盘事件
+    }); // Create keyboard event | 创建键盘事件
     Object.defineProperty(event, "isReplay", { value: true });
-    window.dispatchEvent(event); //发布键盘事件
+    window.dispatchEvent(event); // Publish keyboard event | 发布键盘事件
   }
 
   beingReplay() {
@@ -516,8 +522,10 @@ export class RecordSystem {
   }
 
   /**
-   * 从当前录制的Clip中提取操作（moveLeft, moveRight, jump）
-   * 返回格式: [{ time: ms, action: "moveLeft"|"moveRight"|"jump" }, ...]
+   * Extract recorded actions for Demo2RecordUI timeline
+   * 提取录制的操作（用于Demo2RecordUI的时间轴）
+   * Returns format: [{ time: ms, action: "moveLeft"|"moveRight"|"jump" }, ...]
+   * 返回格式：[{ time: ms, action: "moveLeft"|"moveRight"|"jump" }, ...]
    */
   _extractRecordedActions() {
     if (!this.clip || !this.clip.records) {
@@ -529,6 +537,7 @@ export class RecordSystem {
     const moveRightKey = kbm.getKeyByIntent("moveRight");
     const jumpKey = kbm.getKeyByIntent("jump");
 
+    // Keycodes for arrow keys and spacebar
     // 方向键和空格键的代码
     const arrowLeftCode = "ArrowLeft";
     const arrowRightCode = "ArrowRight";
@@ -537,6 +546,7 @@ export class RecordSystem {
 
     const actions = [];
 
+    // Only process keydown events, record first press
     // 仅处理keydown事件，记录首次按下
     this.clip.records.forEach((record) => {
       if (record.keyType !== "keydown") {

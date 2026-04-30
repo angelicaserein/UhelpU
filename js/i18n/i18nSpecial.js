@@ -1,3 +1,6 @@
+// js/i18nSpecial.js — Special mode level exclusive text | Special 模式关卡专属文案
+// Auto-register to global i18n dictionary on import | 导入即自动注册到全局 i18n 字典
+
 import { registerTranslations } from "./index.js";
 
 registerTranslations({

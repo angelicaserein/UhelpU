@@ -1,4 +1,4 @@
-import { KeyBindingManager } from "../key-binding-system/KeyBindingManager.js";
+﻿import { KeyBindingManager } from "../key-binding-system/KeyBindingManager.js";
 
 class IntentResolver {
   constructor() {}
@@ -25,8 +25,10 @@ export class BasicIntentResolver extends IntentResolver {
 
   resolve(event) {
     let intent = new Set();
-    //������ͼ��ͻ��������ͬʱ���£�������ͼ
+    // Handle movement intent conflicts: when both keys are pressed simultaneously, use the latest intent.
+    //�������ͼ������������ͬʱ��������ͼ
 
+    // Dynamically query the KeyBindingManager for the intent mapped to this key.
     // ͨ�� KeyBindingManager ��̬��ѯ������Ӧ����ͼ
     const mappedIntent = this._keyBindingManager.getIntentByKey(event.code);
 
@@ -66,6 +68,7 @@ export class BasicIntentResolver extends IntentResolver {
 
     return intent;
   }
+  // Return the intent based on current key state, independent of events, for per-frame querying.
   // ���ص�ǰ����״̬�µ���ͼ���������¼�������ÿ֡��ѯ��
   getCurrentIntent() {
     const intent = new Set();

@@ -23,11 +23,15 @@ import { Assets } from "../AssetsManager.js";
 
 /**
  * UserLevel — Runtime parser for user-created level JSON
+ * UserLevel — 用户创建的业 JSON 的运行时解析器
  *
  * Converts a level data JSON object (as documented in LevelDataFormat.js)
+ * 将一个等级数据 JSON 对象（如 LevelDataFormat.js 中記載）
  * into a playable Level instance with all systems initialized.
+ * 转换成可播放的等级實例，其中所有系統都已初始化。
  *
  * Usage:
+ * 使用：
  *   const levelData = JSON.parse(levelJsonString);
  *   const level = new UserLevel(p, eventBus, levelData);
  */
@@ -66,6 +70,7 @@ export class UserLevel extends BaseLevel {
 
   /**
    * Parse entities from levelData and create runtime instances
+   * 下英文 levelData 的实体并创建下一个实例
    * @private
    */
   _parseEntities(levelData) {
@@ -91,16 +96,13 @@ export class UserLevel extends BaseLevel {
 
   /**
    * Parse entities for single-room level
+   * 解析单一房間等级的实体
    * @private
    */
   _parseEntitiesSingleRoom(entities, canvasHeight = 768) {
     // Add boundary walls
-    this.entities.add(
-      new Wall(-100, 0, 120, canvasHeight)
-    );
-    this.entities.add(
-      new Wall(1346, 0, 120, canvasHeight)
-    );
+    this.entities.add(new Wall(-100, 0, 120, canvasHeight));
+    this.entities.add(new Wall(1346, 0, 120, canvasHeight));
     // Add ground
     this.entities.add(new Ground(0, 0, this.p.width, 80));
 
@@ -119,6 +121,7 @@ export class UserLevel extends BaseLevel {
 
   /**
    * Parse entities for multi-room level
+   * 解析超于一个房間等级的实体
    * @private
    */
   _parseEntitiesMultiRoom(
@@ -129,6 +132,7 @@ export class UserLevel extends BaseLevel {
     canvasHeight,
   ) {
     // Create a map: entityIndex -> Room
+    // 创建映嬉：entityIndex -> Room
     const entityToRoom = new Map();
     rooms.forEach((room) => {
       const room_obj = room;
@@ -138,29 +142,32 @@ export class UserLevel extends BaseLevel {
     });
 
     // Create Room objects for each room
-    this.rooms = Array.from({ length: roomCount }, () => new Room([]));
+    // 為每個房間创建 Room 尋不例
 
     // Add boundary walls and ground to each room
+    // 每個房間添加边界氧汽和地基
     for (let roomIndex = 0; roomIndex < roomCount; roomIndex++) {
       // Add left wall (first room only)
+      // 仅在第一個房間添加左箱
       if (roomIndex === 0) {
         this.rooms[roomIndex].entities.add(
-          new Wall(-100, 0, 120, canvasHeight)
+          new Wall(-100, 0, 120, canvasHeight),
         );
       }
       // Add right wall (last room only)
+      // 仅在最后一個房間添加右箱
       if (roomIndex === roomCount - 1) {
         this.rooms[roomIndex].entities.add(
-          new Wall(1346, 0, 120, canvasHeight)
+          new Wall(1346, 0, 120, canvasHeight),
         );
       }
       // Add ground to every room
-      this.rooms[roomIndex].entities.add(
-        new Ground(0, 0, canvasWidth, 80)
-      );
+      // 预每個房間添加地基
+      this.rooms[roomIndex].entities.add(new Ground(0, 0, canvasWidth, 80));
     }
 
     // Add entities to respective rooms
+    // 將实体添加到各自的房間
     entities.forEach((entity, index) => {
       const roomIndex = entityToRoom.get(index) ?? 0;
       const runtimeEntity = this._createEntity(entity);
@@ -180,6 +187,7 @@ export class UserLevel extends BaseLevel {
 
   /**
    * Apply world offsets to entities in each room and set up exits
+   * 將世界偏移量應用到每個房間中的实体並設置出口
    * @private
    */
   _applyWorldOffsetsToRooms(canvasWidth, canvasHeight, roomCount) {
@@ -189,7 +197,7 @@ export class UserLevel extends BaseLevel {
         entity.x += offsetX;
       }
 
-      // Set up room exits
+      // Set up room exits | 設置房間出口
       this.rooms[roomIndex].exit = {};
       if (roomIndex > 0) {
         this.rooms[roomIndex].exit.left = { targetRoomIndex: roomIndex - 1 };
@@ -200,11 +208,13 @@ export class UserLevel extends BaseLevel {
     }
 
     // Build combined entities set from all rooms
+    // 一我所有房間中延、延長的实体集
     this.entities = this._buildEntities();
   }
 
   /**
    * Build combined entities set from all rooms
+   * 从所有房間中建構組合的实体集
    * @private
    */
   _buildEntities() {
@@ -222,6 +232,7 @@ export class UserLevel extends BaseLevel {
 
   /**
    * Create a single runtime entity from JSON
+   * 從 JSON 中建構单一的主場實例
    * @private
    */
   _createEntity(entityData) {
@@ -265,6 +276,7 @@ export class UserLevel extends BaseLevel {
           entityData.w,
           entityData.h,
         );
+        // Open portal if specified | 彬指了，開啟隨道
         if (entityData.open) {
           portal.openPortal();
         }
@@ -343,17 +355,27 @@ export class UserLevel extends BaseLevel {
           entityData.portal.h,
         );
         // WirePortal systems must be created AFTER room offsets applied (multi-room)
+        // WirePortal 系統必須在應用房間偏移量之實區延墺建立（超一個房間）
         // Create a temporary WireRenderer; system will be set later
+        // 延瘴緩 WireRenderer；系統稱て瘤投設定
         const wireRenderer = new WireRenderer(null);
         // Store for later creation
+        // 存存此之後性延墺建立
         this._pendingWirePortals = this._pendingWirePortals || [];
-        this._pendingWirePortals.push({ button, portal, wireRenderer, entityData });
+        this._pendingWirePortals.push({
+          button,
+          portal,
+          wireRenderer,
+          entityData,
+        });
         return [button, portal, wireRenderer];
       }
 
       case "BtnPlatform": {
         // BtnPlatform must be created after initSystems (collisionSystem initialized)
+        // BtnPlatform 必須在 initSystems 之後才能建立（collisionSystem 已統事）
         // Store for later
+        // 存存此之後性延墺建立
         const button = new Button(
           entityData.button.x,
           entityData.button.y,
@@ -374,6 +396,7 @@ export class UserLevel extends BaseLevel {
 
   /**
    * Create player from spawn data
+   * 從紅身數據後中建構玩家
    * @private
    */
   _createPlayer(levelData) {
@@ -385,6 +408,7 @@ export class UserLevel extends BaseLevel {
 
   /**
    * Parse and create BtnPlatform systems (after initSystems, so collisionSystem exists)
+   * 解析並中建構 BtnPlatform 系統（initSystems 之後，便 collisionSystem 存在）
    * @private
    */
   _parseBtnPlatformSystems(levelData) {
@@ -413,9 +437,11 @@ export class UserLevel extends BaseLevel {
       this._bpSystems.push(system);
 
       // Initialize platform collider state on first update
+      // 第一氡更新時参數化台並婅將器狀態
       system.update();
 
       // Add platforms to entities
+      // 將台並添加到实体
       platforms.forEach((platform) => this.entities.add(platform));
       // Button already added to entities
     });
@@ -425,6 +451,7 @@ export class UserLevel extends BaseLevel {
 
   /**
    * Create WirePortal systems after room offsets are applied (for multi-room)
+   * 在應用房間偏移量之後成编 WirePortal 系統（超一個房間）
    * @private
    */
   _createWirePortalSystems(levelData) {
@@ -445,6 +472,7 @@ export class UserLevel extends BaseLevel {
 
   /**
    * Create WirePortal systems for multi-room levels after offset application
+   * 佚超一個房間等级會後應用偏移量成编 WirePortal 系統
    * @private
    */
   _createWirePortalSystemsMultiRoom(canvasWidth, canvasHeight, roomCount) {
@@ -455,9 +483,11 @@ export class UserLevel extends BaseLevel {
     this._pendingWirePortals.forEach((wpData) => {
       const { button, portal, wireRenderer, entityData } = wpData;
       // Now button and portal have correct world coordinates (offsets applied)
+      // 下一個按遲和全体阮隊深傦。適榺的世界坐標（偏移量已應用）
       const system = new BtnWirePortalSystem({ button, portal });
       this._wpSystems.push({ button, portal, system, entityData });
       // Update WireRenderer to use the newly created system
+      // 更新 WireRenderer 是用新建性延墺系統
       wireRenderer._wireSystem = system;
     });
 
@@ -466,6 +496,7 @@ export class UserLevel extends BaseLevel {
 
   /**
    * Update physics for all composite systems
+   * 更新所有複合系統的其中統
    */
   updatePhysics() {
     super.updatePhysics();
@@ -476,6 +507,7 @@ export class UserLevel extends BaseLevel {
 
   /**
    * Get camera X position for multi-room levels
+   * 取得多房間等级中攀機 X 位置
    * @private
    */
   _getCameraX(p) {
@@ -492,6 +524,7 @@ export class UserLevel extends BaseLevel {
 
   /**
    * Easing function for room transitions
+   * 房間轉換的緩和函數
    * @private
    */
   _easeOutCubic(t) {
@@ -549,7 +582,8 @@ export class UserLevel extends BaseLevel {
    * Clear canvas and draw background for multi-room levels
    */
   clearCanvas(p = this.p, cameraNudgeX = 0, bgParallaxFactor = 1) {
-    const cameraX = this.rooms && this.rooms.length > 1 ? this._getCameraX(p) : 0;
+    const cameraX =
+      this.rooms && this.rooms.length > 1 ? this._getCameraX(p) : 0;
     const bgOffsetX = cameraNudgeX * bgParallaxFactor;
     const bg = Assets.bgImageDemo2Level;
 
@@ -582,7 +616,8 @@ export class UserLevel extends BaseLevel {
    * Get view bounds for camera culling
    */
   getViewBounds(p = this.p) {
-    const cameraX = this.rooms && this.rooms.length > 1 ? this._getCameraX(p) : 0;
+    const cameraX =
+      this.rooms && this.rooms.length > 1 ? this._getCameraX(p) : 0;
     return { minX: cameraX, maxX: cameraX + p.width, minY: 0, maxY: p.height };
   }
 

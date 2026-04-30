@@ -108,7 +108,7 @@ export class CollisionSystem {
   }
 
   collisionEntry(eventBus = this.eventBus) {
-    // [NEW] 支撑链velX传递：每帧开始清空支撑关系，由本帧碰撞检测重新建立
+    // [NEW] VelX chain propagation: clear support relations at start of each frame, rebuilt by collision detection this frame. | [NEW] 支撑链velX传递：每帧开始清空支撑关系，由本帧碰撞检测重新建立
     for (const dyn of this._dynamicEntities) {
       dyn._supportingEntity = null;
       dyn._supportingType = null;
@@ -118,6 +118,7 @@ export class CollisionSystem {
     const replayerActive = replayer && replayer.isReplaying;
 
     // Run dynamic-static passes first so box/platform support settles before player/replayer pairing.
+    // 先执行动态-静态碰撞检测，使箱子/平台支撑关系在玩家/分身配对前稳定。
     for (let pass = 0; pass < 2; pass++) {
       for (const dyn of this._dynamicEntities) {
         for (const sta of this._staticEntities) {
@@ -127,6 +128,7 @@ export class CollisionSystem {
     }
 
     // Player collision detection with enemies (DYNAMIC-DYNAMIC pairs)
+    // 玩家与敌人的碰撞检测（动态-动态碰撞对）
     const player2 = this.getPlayer();
     if (player2) {
       this.processEnemyCollisionsForActor(player2, (actor, enemy) =>
@@ -134,7 +136,9 @@ export class CollisionSystem {
       );
     }
 
+    // [FIX] Box clipping through walls: DD pushes box → DS bounces back → second DD re-pushes box into wall using old prevX.
     // [FIX] 推箱穿模：DD 推箱 → DS 弹回 → 再次 DD 会用旧 prevX 把箱子重新推进墙。
+    // Changed to: record box x displacement before/after DS, apply same offset to player to fully eliminate overlap without a third DD.
     // 改为：记录 DS 前后箱子的 x 位移量，把同等位移施加给 player，彻底消除重叠，不再做第三次 DD。
     const player3 = this.getPlayer();
     if (player3) {
@@ -143,6 +147,7 @@ export class CollisionSystem {
     }
 
     // Replayer collision detection with enemies (DYNAMIC-DYNAMIC pairs)
+    // 分身与敌人的碰撞检测（动态-动态碰撞对）
     const replayer2 = this.getReplayer();
     if (replayer2 && replayer2.isReplaying) {
       this.processEnemyCollisionsForActor(replayer2, (actor, enemy) =>
@@ -150,6 +155,7 @@ export class CollisionSystem {
       );
     }
 
+    // [FIX] Box clipping through walls: same as player box pushing, perform DS after DD and use displacement to correct replayer.
     // [FIX] 推箱穿模：replayer 推箱子与玩家推箱子同理，DD 后补 DS，再用位移量修正 replayer
     const replayer3 = this.getReplayer();
     if (replayer3 && replayer3.isReplaying) {
@@ -158,10 +164,12 @@ export class CollisionSystem {
     }
 
     // Keep all box colliders physically solid against both boxes and static world.
+    // 保持所有箱子碰撞器对箱子和静态世界始终保持物理实体状态。
     this.stabilizeBoxCollisions();
     this.restackStandingChains();
 
     // Resolve player/replayer standing only after box support settles for this frame.
+    // 仅在本帧箱子支撑稳定后才处理玩家/分身的站立关系。
     if (replayerActive) {
       const player = this.getPlayer();
       const settledReplayer = this.getReplayer();
@@ -169,6 +177,7 @@ export class CollisionSystem {
     }
 
     // Final guard: if box stabilization moved boxes into pusher, separate them immediately.
+    // 最终保护：若箱子稳定化阶段将箱子移入推动者内，立即将其分离。
     if (player3 && player3._supportingType === SUPPORT_TYPES.PUSHING) {
       this.resolvePusherOverlapsWithBoxes(player3);
     }
@@ -181,6 +190,7 @@ export class CollisionSystem {
     }
 
     // Enemy collision detection with other DYNAMIC/STATIC entities (platforms, walls, etc.)
+    // 敌人与其他动态/静态实体（平台、墙壁等）的碰撞检测
     for (const dyn of this._dynamicEntities) {
       if (isEnemy(dyn)) {
         for (const sta of this._staticEntities) {
@@ -190,8 +200,7 @@ export class CollisionSystem {
         }
       }
     }
-
-    // 每帧重置所有按钮状态，碰撞检测时会重新按下仍被踩到的按钮
+    // Reset all button states each frame; buttons still being stepped on will be re-pressed during collision detection.    // 每帧重置所有按钮状态，碰撞检测时会重新按下仍被踩到的按钮
     for (const tri of this._triggerEntities) {
       if (isButton(tri) && tri.isPressed) {
         tri.releaseButton();
@@ -213,7 +222,9 @@ export class CollisionSystem {
       }
     }
 
+    // [FIX] Standing follow: box x position is directly modified by DD resolver instead of velX;
     // [FIX] standing跟随：box 由 DD resolver 直接修改 x 位置而非 velX，
+    // record actual displacement this frame for next frame's velXPropagationEntry (box.velX is always 0 and cannot reflect real movement).
     // 记录本帧实际位移量供下帧 velXPropagationEntry 使用（box.velX 恒为 0，不能反映真实移动）
     for (const dyn of this._dynamicEntities) {
       dyn._lastFrameDeltaX = dyn.x - dyn.prevX;
@@ -247,6 +258,7 @@ export class CollisionSystem {
 
     for (const entity of this.entities) {
       // Skip entities without a collider (e.g., KeyPrompt which is purely visual)
+      // 跳过没有碰撞器的实体（例如纯视觉展示的 KeyPrompt）
       if (!hasCollider(entity)) {
         continue;
       }
@@ -266,11 +278,13 @@ export class CollisionSystem {
   }
 
   processDynamicStaticPair(dyn, sta) {
+    // Dead characters ignore all platform collisions.
     // 死亡的角色无视所有平台碰撞
     if (dyn.deathState && dyn.deathState.isDead) {
       return;
     }
 
+    // Dead enemy collisions are ignored.
     // 死敌人的碰撞被忽略
     if (sta.type === "enemy" && sta.deathState && sta.deathState.isDead) {
       return;
@@ -284,9 +298,11 @@ export class CollisionSystem {
     const fullKey = `${typePair}-${shapePair}`;
 
     const detectFunc = detectorMap[shapePair];
-    const detectResult = detectFunc(dyn, sta); //dynamic-static
+    const detectResult = detectFunc(dyn, sta); //dynamic-static | 动态-静态碰撞检测
     if (detectResult) {
+      //If collision occurred, execute the if block; otherwise skip.
       //如果发生碰撞，执行if语句，如果没有则跳过
+      //Step 2: Collision resolution.
       //第二步：碰撞修复
       const resolveFunc = resolverMap[fullKey];
 
@@ -302,6 +318,7 @@ export class CollisionSystem {
       return;
     }
 
+    // Dead entities do not participate in DD collision.
     // 死亡实体不参与 DD
     if (a.deathState && a.deathState.isDead) {
       return;
@@ -318,7 +335,7 @@ export class CollisionSystem {
     const fullKey = `${typePair}-${shapePair}`;
 
     const detectFunc = detectorMap[shapePair];
-    const detectResult = detectFunc(a, b); //dynamic-dynamic
+    const detectResult = detectFunc(a, b); //dynamic-dynamic | 动态-动态碰撞检测
 
     if (detectResult) {
       const resolveFunc = resolverMap[fullKey];
@@ -355,6 +372,7 @@ export class CollisionSystem {
 
   stabilizeBoxCollisions() {
     // Iterate to converge chain pushes: box-box influences box-static and vice versa.
+    // 迭代以收敛链式推动：box-box 影响 box-static，反之也然。
     for (let i = 0; i < BOX_STABILIZATION_PASSES; i++) {
       this.processAllBoxPairs();
       this.processAllBoxStaticPairs();
@@ -480,9 +498,11 @@ export class CollisionSystem {
   resolvePusherOverlapsWithBoxes(pusher) {
     if (!pusher || !pusher.collider) return;
     // Only apply this guard during active head-push state.
+    // 仅在头顶推动状态激活时应用此保护。
     if (pusher._supportingType !== SUPPORT_TYPES.PUSHING) return;
 
     // Unpushed boxes should behave like regular platforms: never side-eject from them.
+    // 未被推动的箱子应表现如普通平台：永远不会为其的侧面穿模。
     const pushedBox = pusher._supportingEntity;
     if (!isBox(pushedBox)) return;
 
@@ -549,8 +569,9 @@ export class CollisionSystem {
     const shapePair = `${dynShape}-${triShape}`;
 
     const detectFunc = detectorMap[shapePair];
-    const detectResult = detectFunc(dyn, tri); //dynamic-static
+    const detectResult = detectFunc(dyn, tri); //dynamic-static | 动态-静态碰撞检测
     if (detectResult) {
+      //If collision occurred, execute the if block; otherwise skip.
       //如果发生碰撞，执行if语句，如果没有则跳过
       const responseFunc = responderMap[typePair];
       responseFunc(dyn, tri, eventBus);
@@ -566,7 +587,8 @@ export class CollisionSystem {
   }
 
   processEnemyCharacterPair(actor, enemy) {
-    // Enemy collision detection with Player (DYNAMIC-DYNAMIC pairs)
+    // Enemy collision detection with actor (DYNAMIC-DYNAMIC pairs)
+    // 敌人与角色的碰撞检测（动态-动态碰撞对）
     if (actor.deathState && actor.deathState.isDead) {
       return;
     }
@@ -594,6 +616,7 @@ export class CollisionSystem {
 
   processEnemyTriggerPair(enemy, tri, eventBus = this.eventBus) {
     // Enemy collision detection with TRIGGER entities (buttons, spikes, etc.)
+    // 敌人与触发器实体（按鈕、地刺等）的碰撞检测
     if (enemy.deathState && enemy.deathState.isDead) {
       return;
     }
@@ -621,9 +644,11 @@ export class CollisionSystem {
     if (!cc) return;
 
     // Limit to airborne frames to avoid affecting normal ground-side push logic.
+    // 仅限于空中帧，避免影响普通地面侧推逻辑。
     if (cc.abilityCondition["isOnGround"]) return;
 
     // If pusher is standing on something, keep existing stack semantics.
+    // 若推动者站在某物上，保持现有的堆叠语义。
     if (pusher._supportingType === SUPPORT_TYPES.STANDING) return;
 
     const candidates = [];
@@ -646,10 +671,13 @@ export class CollisionSystem {
     if (candidates.length === 0) return;
 
     // Deterministic order: closest contact first.
+    // 确定性排序：最近接触优先。
     candidates.sort((a, b) => a.contactScore - b.contactScore);
 
     // Keep current semantics: pusher marks one representative pushed target,
+    // 保持当前语义：推动者标记一个代表性被推目标，
     // while every contacted target gets standing relation for propagation.
+    // 所有接触目标均获得站立关系以供传播。
     const primaryTarget = candidates[0].target;
     pusher._supportingEntity = primaryTarget;
     for (const candidate of candidates) {
@@ -698,6 +726,7 @@ export class CollisionSystem {
     if (!overlapX) return null;
 
     // Lower score means better candidate: prioritize vertical alignment, then center proximity.
+    // 分数越低代表候选者越优先：先考虑垂直对齐，再考虑中心距离。
     const pusherCenterX = pusherLeft + pusher.collider.w / 2;
     const targetCenterX = targetLeft + target.collider.w / 2;
     const centerDistance = Math.abs(pusherCenterX - targetCenterX);
@@ -737,12 +766,14 @@ export class CollisionSystem {
   }
 
   resolveBoxAgainstStatics(box) {
+    // [FIX] Box clipping through walls: immediately perform a DS pass after DD box push to prevent box from stopping inside walls.
     // [FIX] 推箱穿模：DD 推完箱子后立即补一次 DS，防止箱子停在墙内。
     const boxXBeforeDS = box.x;
     for (const sta of this._staticEntities) {
       this.processDynamicStaticPair(box, sta);
     }
 
+    // [FIX] When DS bounces the box back, apply the same correction offset to the pusher to prevent the pusher from sinking into the box.
     // [FIX] DS 把箱子弹回时，将同等修正量施加给推动者，防止推动者陷入箱内。
     return box.x - boxXBeforeDS;
   }

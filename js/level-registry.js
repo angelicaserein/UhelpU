@@ -1,16 +1,21 @@
 /**
  * @fileoverview Single source of truth mapping every levelIndex string to its
  * Level class and GamePage class.
+ * 将每个关卡索引字符串映射到对应关卡类和游戏页面类的唯一权威来源。
  *
  * Both LevelManager and SwitcherGamePage consume this registry, so adding a
  * new level or changing which class handles it only requires one edit here.
+ * LevelManager 和 SwitcherGamePage 均使用此注册表，新增关卡或修改处理类只需在此处编辑一次。
  *
  * Entry shape: { LevelClass, PageClass }
  *   LevelClass — the Level subclass to instantiate (receives p, eventBus)
+ *   关卡类 — 要实例化的 Level 子类（接收 p 和 eventBus 参数）
  *   PageClass  — the GamePage subclass to instantiate (receives switcher, p)
+ *   页面类 — 要实例化的 GamePage 子类（接收 switcher 和 p 参数）
  */
 
 // ── Level classes ──────────────────────────────────────────────────────────
+// 关卡类导入 ────────────────────────────────────────────────────────────────
 import { Level1 } from "./level-design/demo1/Level1.js";
 import { Level2 } from "./level-design/demo1/Level2.js";
 import { Level3 } from "./level-design/demo1/Level3.js";
@@ -67,23 +72,29 @@ import { Level9 as SpecialLevel9 } from "./level-design/special/Level9.js";
 import { Level10 as SpecialLevel10 } from "./level-design/special/Level10.js";
 
 // User-created level editor
+// 用户自制关卡编辑器
 import { LevelEmpty10Room } from "./user-levels/LevelEmpty10Room.js";
 
 // ── GamePage classes ───────────────────────────────────────────────────────
+// 游戏页面类导入 ───────────────────────────────────────────────────────────
 // demo1: Level1 and Level3 have real subclasses; the rest use the base class directly.
+// demo1：Level1 和 Level3 有专属子类，其余关卡直接使用基类。
 import { GamePageLevel1 as Demo1GamePageLevel1 } from "./ui/pages/game-pages/demo1/GamePageLevel1.js";
 import { GamePageLevel3 as Demo1GamePageLevel3 } from "./ui/pages/game-pages/demo1/GamePageLevel3.js";
 import { GamePageBaseDemo1 } from "./ui/pages/game-pages/GamePageBaseDemo1.js";
 
 // demo2: all levels use the base class directly (each subclass only defaults the levelIndex arg).
+// demo2：所有关卡直接使用基类（每个子类仅设置 levelIndex 默认参数）。
 import { GamePageBaseDemo2 } from "./ui/pages/game-pages/GamePageBaseDemo2.js";
 
 // easy: Level1 has a real subclass (Tutorial integration); the rest use a factory below.
+// easy：Level1 有专属子类（集成教程），其余关卡通过下方工厂函数创建。
 import { GamePageLevel1 as EasyGamePageLevel1 } from "./ui/pages/game-pages/easy/GamePageLevel1.js";
 
 /**
  * Factory helpers — create a GamePageBase subclass instance with the correct
  * constructor arguments for each mode, avoiding 40+ identical shell files.
+ * 工厂辅助函数 — 为每种模式创建带有正确构造函数参数的 GamePageBase 子类实例，避免编写 40+ 个相同的壳文件。
  *
  * @param {*} BaseClass
  * @param {number} levelNum
@@ -115,10 +126,12 @@ function makePageFactory(
 }
 
 // ── Registry ───────────────────────────────────────────────────────────────
+// 关卡注册表 ────────────────────────────────────────────────────────────────
 
 /** @type {Object.<string, {LevelClass: Function, PageClass: Function}>} */
 export const LEVEL_REGISTRY = {
-  // demo1
+  // demo1 — original campaign levels
+  // demo1 — 原始主线关卡
   level1: { LevelClass: Level1, PageClass: Demo1GamePageLevel1 },
   level2: {
     LevelClass: Level2,
@@ -154,7 +167,8 @@ export const LEVEL_REGISTRY = {
     PageClass: makePageFactory(GamePageBaseDemo1, 10, "hint_level10"),
   },
 
-  // demo2
+  // demo2 — second campaign
+  // demo2 — 第二套主线关卡
   demo2_level1: {
     LevelClass: Demo2Level1,
     PageClass: makePageFactory(
@@ -246,7 +260,8 @@ export const LEVEL_REGISTRY = {
     ),
   },
 
-  // easy
+  // easy — easy difficulty mode
+  // easy — 简单难度模式
   easy_level1: { LevelClass: EasyLevel1, PageClass: EasyGamePageLevel1 },
   easy_level2: {
     LevelClass: EasyLevel2,
@@ -339,7 +354,8 @@ export const LEVEL_REGISTRY = {
     ),
   },
 
-  // hard
+  // hard — hard difficulty mode
+  // hard — 困难难度模式
   hard_level1: {
     LevelClass: HardLevel1,
     PageClass: makePageFactory(
@@ -441,7 +457,8 @@ export const LEVEL_REGISTRY = {
     ),
   },
 
-  // special
+  // special — special difficulty mode
+  // special — 特殊难度模式
   special_level1: {
     LevelClass: SpecialLevel1,
     PageClass: makePageFactory(
@@ -544,6 +561,7 @@ export const LEVEL_REGISTRY = {
   },
 
   // user-created level editor
+  // 用户自制关卡编辑器
   empty_editor: {
     LevelClass: LevelEmpty10Room,
     PageClass: makePageFactory(GamePageBaseDemo2, 0, "", "empty_editor", false),

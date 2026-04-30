@@ -1,20 +1,26 @@
 // AssetsManager.js
+// Asset loader — p5 instance mode (p5.js 2.0 async/await)
 // 资源加载器 — p5 instance mode (p5.js 2.0 async/await)
+// Call await Assets.loadAll(p) inside async setup()
 // 在 async setup() 中调用 await Assets.loadAll(p)
 
 export const Assets = {
+  // Font
   // 字体
   customFont: null,
 
+  // Story text (bilingual)
   // 故事文案（双语言）
   storyTexts_en: null,
   storyTexts_zh: null,
 
+  // Main menu animated images
   // 主页动图
   followerImg1: null,
   followerImg2: null,
   followerCircleImg: null,
 
+  // Background images
   // 背景图
   bgImageMenu: null,
   bgImageSettings: null,
@@ -25,6 +31,7 @@ export const Assets = {
   bgImageLanguageChoice: null,
   bgImageLevel1: null,
 
+  // Achievement icons (1.png ~ 10.png)
   // 成就图标（1.png ~ 10.png）
   achieveImgs: [],
   bgImageLevel2: null,
@@ -38,6 +45,7 @@ export const Assets = {
   bgImageLevel10: null,
   bgImageDemo2Level: null,
 
+  // Player sprites (5 directions)
   // 本体贴图（5方向）
   playerImg_right: null,
   playerImg_left: null,
@@ -47,6 +55,7 @@ export const Assets = {
   playerImg_dead: null,
   playerIdleImgs: [],
 
+  // Clone sprites (5 directions)
   // 分身贴图（5方向）
   cloneImg_right: null,
   cloneImg_left: null,
@@ -55,10 +64,12 @@ export const Assets = {
   cloneImg_upLeft: null,
   cloneIdleImgs: [],
 
+  // NPC sprites
   // NPC 贴图
   npcIdleImgs: [],
   npcFaceImg: null,
 
+  // Tile sprites
   // 地块贴图
   tileImage_goal: null,
   tileImage_ground: null,
@@ -71,10 +82,12 @@ export const Assets = {
   tileImage_doorOpen: null,
   tileImage_doorClose: null,
 
+  // Teleport point sprites
   // 传送点贴图
   tileImage_teleportPointClose: null,
   tileImage_teleportPointOpen: null,
 
+  // Enemy sprites
   // 敌人贴图
   enemyImg: null,
   _onItemLoaded: null,
@@ -93,6 +106,7 @@ export const Assets = {
     }
   },
 
+  // Preload all assets (async/await, compatible with p5.js 2.0)
   // 预加载所有资源（async/await，适配 p5.js 2.0）
   async loadAll(p, onProgress) {
     let loadedCount = 0;
@@ -133,16 +147,17 @@ export const Assets = {
       this._safeLoad(p.loadImage("assets/images/bg/level4.png"), "关卡4背景"),
       this._safeLoad(p.loadImage("assets/images/bg/level5.png"), "关卡5背景"),
       this._safeLoad(p.loadImage("assets/images/bg/level6.png"), "关卡6背景"),
-      this._safeLoad(p.loadImage("assets/images/bg/level7.png"), "关卡7背景"),
-      this._safeLoad(p.loadImage("assets/images/bg/level8.png"), "关卡8背景"),
-      this._safeLoad(p.loadImage("assets/images/bg/level9.png"), "关卡9背景"),
-      this._safeLoad(p.loadImage("assets/images/bg/level10.png"), "关卡10背景"),
+      this._safeLoad(p.loadImage("assets/images/bg/level6.png"), "关卡7背景"),
+      this._safeLoad(p.loadImage("assets/images/bg/level6.png"), "关卡8背景"),
+      this._safeLoad(p.loadImage("assets/images/bg/level6.png"), "关卡9背景"),
+      this._safeLoad(p.loadImage("assets/images/bg/level6.png"), "关卡10背景"),
       this._safeLoad(p.loadImage("assets/images/bg/follower1.png"), "动图1"),
       this._safeLoad(p.loadImage("assets/images/bg/follower2.png"), "动图2"),
       this._safeLoad(p.loadImage("assets/images/bg/circel.png"), "菜单圆环图"),
       this._safeLoad(p.loadFont("assets/fonts/HYPixel11pxU-2.ttf"), "字体"),
       this._safeLoad(p.loadStrings("assets/text/story_en.txt"), "故事文案-EN"),
       this._safeLoad(p.loadStrings("assets/text/story_zh.txt"), "故事文案-ZH"),
+      // Player sprites
       // 本体贴图
       this._safeLoad(
         p.loadImage("assets/images/player/right.png"),
@@ -186,6 +201,7 @@ export const Assets = {
         p.loadImage("assets/images/idle-action/6.png"),
         "本体idle6",
       ),
+      // Clone sprites
       // 分身贴图
       this._safeLoad(
         p.loadImage("assets/images/player/right2.png"),
@@ -225,6 +241,7 @@ export const Assets = {
         p.loadImage("assets/images/idle-action/66.png"),
         "分身idle66",
       ),
+      // NPC sprites
       // NPC 贴图
       this._safeLoad(p.loadImage("assets/images/npc/npc11.png"), "NPC idle1"),
       this._safeLoad(p.loadImage("assets/images/npc/npc12.png"), "NPC idle2"),
@@ -232,8 +249,10 @@ export const Assets = {
       this._safeLoad(p.loadImage("assets/images/npc/npc14.png"), "NPC idle4"),
       this._safeLoad(p.loadImage("assets/images/npc/npc15.png"), "NPC idle5"),
       this._safeLoad(p.loadImage("assets/images/npc/npc-face.png"), "NPC face"),
+      // Enemy sprites
       // 敌人贴图
-      this._safeLoad(p.loadImage("assets/images/bg/enemy.png"), "敌人"),
+      this._safeLoad(p.loadImage("assets/images/bg/enemy.PNG"), "敌人"),
+      // Tile sprites
       // 地块贴图
       this._safeLoad(p.loadImage("assets/images/tiles/goal.png"), "终点门"),
       this._safeLoad(p.loadImage("assets/images/tiles/ground.png"), "地面贴图"),
@@ -300,6 +319,7 @@ export const Assets = {
     }
     this._onItemLoaded = null;
 
+    // Assign results in order
     // 按顺序赋值
     this.bgImageMenu = results[0];
     this.bgImageSettings = results[1];
@@ -323,6 +343,7 @@ export const Assets = {
     this.customFont = results[19];
     this.storyTexts_en = results[20];
     this.storyTexts_zh = results[21];
+    // Player sprites
     // 本体贴图
     this.playerImg_right = results[22];
     this.playerImg_left = results[23];
@@ -338,6 +359,7 @@ export const Assets = {
       results[32],
       results[33],
     ];
+    // Clone sprites
     // 分身贴图
     this.cloneImg_right = results[34];
     this.cloneImg_left = results[35];
@@ -352,6 +374,7 @@ export const Assets = {
       results[43],
       results[44],
     ];
+    // NPC sprites
     // NPC 贴图
     this.npcIdleImgs = [
       results[45],
@@ -361,8 +384,10 @@ export const Assets = {
       results[49],
     ];
     this.npcFaceImg = results[50];
+    // Enemy sprites
     // 敌人贴图
     this.enemyImg = results[51];
+    // Tile sprites
     // 地块贴图
     this.tileImage_goal = results[52];
     this.tileImage_ground = results[53];

@@ -1,16 +1,25 @@
 /**
  * MapEditor — Minimal map entity editor (main coordinator)
+ * MapEditor — 最小化地图实体编辑器 (主协调器)
  *
  * Usage:
+ * 用法:
  *   In the level you want to edit (e.g. Level10):
+ *   在您想编辑的级别中 (例如 Level10):
  *   1. import { MapEditor } from "../../develop-mode/MapEditor.js";
  *   2. At the end of constructor: this._mapEditor = new MapEditor(this);
+ *   在构造函数末尾: this._mapEditor = new MapEditor(this);
  *   3. At the end of draw():  this._mapEditor.draw(p);
+ *   在 draw() 末尾: this._mapEditor.draw(p);
  *
  * Design principles:
+ * 设计原则:
  *   - Do not modify Level10's original logic, only overlay on render layer
+ *   - 不要修改 Level10 的原始逻辑,仅在渲染层上覆盖
  *   - All editor UI drawn in screen space (resetMatrix)
+ *   - 所有编辑器 UI 在屏幕空间中绘制 (resetMatrix)
  *   - All entity previews/placed entities drawn in world space (same coordinate system as level)
+ *   - 所有实体预览/放置的实体在世界空间中绘制 (与级别相同的坐标系统)
  */
 
 import { EditorUI } from "./EditorUI.js";
@@ -36,6 +45,7 @@ const EDITOR_SESSION_STORE = new Map();
 export class MapEditor {
   /**
    * @param {object} level - Host level instance (must have p, _getCameraX properties/methods)
+   * 主级别实例 (必须具有 p, _getCameraX 属性/方法)
    */
   constructor(level) {
     this._level = level;
@@ -108,23 +118,23 @@ export class MapEditor {
     this._restoreSessionSnapshot();
   }
 
-  /** Whether editor is active */
+  /** Whether editor is active | 编辑器是否处于活跃状态 */
   get active() {
     return this._active;
   }
 
-  /** Externally activate editor (skip M key toggle on same frame) */
+  /** Externally activate editor (skip M key toggle on same frame) | 外部激活编辑器 (跳过同一帧上的 M 键切换) */
   activate() {
     this._active = true;
     this._skipNextToggle = true;
   }
 
   // ══════════════════════════════════════════════════════════════
-  // Draw each frame — called at end of Level's draw()
+  // Draw each frame — called at end of Level's draw() | 每帧绘制 — 在 Level 的 draw() 末尾调用
   // ══════════════════════════════════════════════════════════════
 
   /**
-   * @param {object} p - p5 instance
+   * @param {object} p - p5 instance | p5 实例
    */
   draw(p) {
     if (!this._active) return;
@@ -197,7 +207,7 @@ export class MapEditor {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // Event handling
+  // Event handling | 事件处理
   // ══════════════════════════════════════════════════════════════
 
   _onKeyPressed(e) {
@@ -474,7 +484,7 @@ export class MapEditor {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // Export
+  // Export | 导出
   // ══════════════════════════════════════════════════════════════
 
   async _handleSave() {
@@ -578,10 +588,10 @@ export class MapEditor {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // Spawn point management
+  // Spawn point management | 生成点管理
   // ══════════════════════════════════════════════════════════════
 
-  /** Check if world coordinates are inside spawn marker range */
+  /** Check if world coordinates are inside spawn marker range | 检查世界坐标是否在生成标记范围内 */
   _isInsideSpawnMarker(worldX, worldY) {
     const half = SPAWN_MARKER_SIZE + 6;
     return (
@@ -592,7 +602,7 @@ export class MapEditor {
     );
   }
 
-  /** Apply spawn point to level's Player entity */
+  /** Apply spawn point to level's Player entity | 将生成点应用到级别的 Player 实体 */
   _applySpawnToPlayer() {
     const player = this._level._player;
     if (!player) return;
@@ -602,7 +612,7 @@ export class MapEditor {
     player._startY = this._spawnY;
   }
 
-  /** Draw spawn marker (world space, already in push/translate) */
+  /** Draw spawn marker (world space, already in push/translate) | 绘制生成标记 (世界空间, 已在 push/translate 中) */
   _drawSpawnMarker(p) {
     const sx = this._spawnX;
     const sy = this._spawnY;
@@ -642,7 +652,7 @@ export class MapEditor {
     p.pop();
   }
 
-  /** Draw dashed rectangle (world space) */
+  /** Draw dashed rectangle (world space) | 绘制虚线矩形 (世界空间) */
   _drawDashedRect(p, x, y, w, h) {
     this._drawDashedLine(p, x, y, x + w, y);
     this._drawDashedLine(p, x + w, y, x + w, y + h);
@@ -651,11 +661,12 @@ export class MapEditor {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // Internal draw helpers
+  // Internal draw helpers | 内部绘制助手
   // ══════════════════════════════════════════════════════════════
 
   /**
    * Get current camera X (compatible with multi-room levels and single-room levels without camera)
+   * 获取当前相机 X (与多房间级别和不带相机的单房间级别兼容)
    */
   _getCameraX(p) {
     if (typeof this._level._getCameraX === "function") {
@@ -665,7 +676,7 @@ export class MapEditor {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // Room management
+  // Room management | 房间管理
   // ══════════════════════════════════════════════════════════════
 
   _addRoom() {
@@ -684,7 +695,7 @@ export class MapEditor {
     this._ui.showToast(`Room deleted, total ${this._roomCount} rooms`);
   }
 
-  /** Draw room boundary dashed lines and auto-wall indicators (world space) */
+  /** Draw room boundary dashed lines and auto-wall indicators (world space) | 绘制房间边界虚线和自动墙指示器 (世界空间) */
   _drawRoomBoundaries(p) {
     const roomWidth = this._p.width;
     const wallThick = WALL_THICKNESS;
@@ -720,7 +731,7 @@ export class MapEditor {
     }
   }
 
-  /** Draw dashed line */
+  /** Draw dashed line | 绘制虚线 */
   _drawDashedLine(p, x1, y1, x2, y2, dashLen = 10, gapLen = 8) {
     const dx = x2 - x1;
     const dy = y2 - y1;

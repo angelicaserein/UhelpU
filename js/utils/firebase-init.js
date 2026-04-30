@@ -1,7 +1,7 @@
 /**
  * firebase-init.js
- * Firebase Firestore 排行榜系统 - REST API 版本
- * 不需要 Firebase SDK，直接调用 Firestore REST 端点
+ * Firebase Firestore Leaderboard System - REST API Version | Firebase Firestore 排行榜系统 - REST API 版本
+ * No Firebase SDK needed, directly calls Firestore REST endpoints | 不需要 Firebase SDK，直接调用 Firestore REST 端点
  */
 
 const PROJECT_ID = "uhelpu";
@@ -10,7 +10,7 @@ const API_KEY = "AIzaSyA34riJGsAh-jx9YHME-M5Nw5OHr4ndFuI";
 const FIRESTORE_API = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
 /**
- * 初始化 Firebase（只是日志，REST API 无需初始化）
+ * Initialize Firebase (just logging, REST API doesn't need initialization) | 初始化 Firebase（只是日志，REST API 无需初始化）
  */
 export async function initializeFirebase() {
   console.log("[Firebase] 🟢 Firestore REST API ready");
@@ -18,7 +18,7 @@ export async function initializeFirebase() {
 }
 
 /**
- * 提交成绩到 Firestore
+ * Submit score to Firestore | 提交成绩到 Firestore
  */
 window.submitScore = async (playerName, timeMs, levelId) => {
   console.log(
@@ -34,7 +34,7 @@ window.submitScore = async (playerName, timeMs, levelId) => {
     const timeSeconds = timeMs / 1000;
     const timestamp = new Date().toISOString();
 
-    // 判断是否为账号用户
+    // Determine whether this is an account user | 判断是否为账号用户
     let isAccount = false;
     try {
       const acctRaw = localStorage.getItem("playerAccount");
@@ -43,7 +43,7 @@ window.submitScore = async (playerName, timeMs, levelId) => {
       /* ignore */
     }
 
-    // 构建请求数据
+    // Build request data | 构建请求数据
     const docData = {
       fields: {
         playerName: { stringValue: playerName.trim() },
@@ -58,8 +58,8 @@ window.submitScore = async (playerName, timeMs, levelId) => {
 
     console.log("[Firebase] Submitting to leaderboard...");
 
-    // POST 到 Firestore REST API
-    // 路径: leaderboard/{levelId}/scores
+    // POST to Firestore REST API | POST 到 Firestore REST API
+    // Path: leaderboard/{levelId}/scores | 路径: leaderboard/{levelId}/scores
     const url = `${FIRESTORE_API}/leaderboard/${levelId}/scores?key=${API_KEY}`;
 
     const response = await fetch(url, {
@@ -84,7 +84,7 @@ window.submitScore = async (playerName, timeMs, levelId) => {
 };
 
 /**
- * 获取排行榜数据
+ * Get leaderboard data | 获取排行榜数据
  */
 window.getLeaderboard = async (levelId, limitCount = 10) => {
   console.log(`[Firebase] getLeaderboard: ${levelId}, limit: ${limitCount}`);
@@ -92,7 +92,7 @@ window.getLeaderboard = async (levelId, limitCount = 10) => {
 };
 
 /**
- * 降级方案：直接读取所有scores文档并本地排序
+ * Fallback solution: directly read all scores documents and sort locally | 降级方案：直接读取所有scores文档并本地排序
  * @private
  */
 async function _getLeaderboardFallback(levelId, limitCount) {
@@ -102,7 +102,7 @@ async function _getLeaderboardFallback(levelId, limitCount) {
     const allDocs = [];
     let pageToken = null;
 
-    // 翻页直到没有更多数据
+    // Paginate until no more data | 翻页直到没有更多数据
     do {
       let url = `${FIRESTORE_API}/leaderboard/${levelId}/scores?key=${API_KEY}&pageSize=300`;
       if (pageToken) url += `&pageToken=${encodeURIComponent(pageToken)}`;
@@ -124,7 +124,7 @@ async function _getLeaderboardFallback(levelId, limitCount) {
 
     console.log(`[Firebase] Fetched ${allDocs.length} total docs`);
 
-    // 去重：每个 (playerName, isAccount) 组合只保留最佳成绩
+    // Deduplication: keep only the best score for each (playerName, isAccount) combination | 去重：每个 (playerName, isAccount) 组合只保留最佳成绩
     const bestMap = new Map();
     for (const doc of allDocs) {
       const fields = doc.fields || {};
@@ -160,7 +160,7 @@ async function _getLeaderboardFallback(levelId, limitCount) {
 }
 
 /**
- * 上传用户自制关卡
+ * Upload user-created level | 上传用户自制关卡
  */
 window.uploadUserLevel = async (levelJSON, authorName, title) => {
   console.log(`[Firebase] uploadUserLevel: "${title}" by "${authorName}"`);
@@ -171,7 +171,7 @@ window.uploadUserLevel = async (levelJSON, authorName, title) => {
   }
 
   try {
-    // 解析 levelJSON 获取 meta.id
+    // Parse levelJSON to get meta.id | 解析 levelJSON 获取 meta.id
     let levelData;
     try {
       levelData = JSON.parse(levelJSON);
@@ -221,7 +221,7 @@ window.uploadUserLevel = async (levelJSON, authorName, title) => {
 };
 
 /**
- * 获取用户自制关卡列表
+ * Get user-created level list | 获取用户自制关卡列表
  */
 window.getUserLevelList = async () => {
   console.log("[Firebase] getUserLevelList");
@@ -230,7 +230,7 @@ window.getUserLevelList = async () => {
     const allDocs = [];
     let pageToken = null;
 
-    // 翻页获取所有关卡
+    // Paginate to get all levels | 翻页获取所有关卡
     do {
       let url = `${FIRESTORE_API}/userLevels?key=${API_KEY}&pageSize=100`;
       if (pageToken) url += `&pageToken=${encodeURIComponent(pageToken)}`;
@@ -252,7 +252,7 @@ window.getUserLevelList = async () => {
 
     console.log(`[Firebase] Fetched ${allDocs.length} user levels`);
 
-    // 提取必要字段并排序
+    // Extract necessary fields and sort | 提取必要字段并排序
     const levelList = allDocs
       .map((doc) => {
         const fields = doc.fields || {};
@@ -264,7 +264,7 @@ window.getUserLevelList = async () => {
         };
       })
       .sort((a, b) => {
-        // 按 createdAt 倒序（最新的在前）
+        // Sort by createdAt descending (newest first) | 按 createdAt 倒序（最新的在前）
         return new Date(b.createdAt) - new Date(a.createdAt);
       });
 
@@ -279,7 +279,7 @@ window.getUserLevelList = async () => {
 };
 
 /**
- * 获取单个用户自制关卡数据
+ * Get a single user-created level data | 获取单个用户自制关卡数据
  */
 window.getUserLevel = async (levelId) => {
   console.log(`[Firebase] getUserLevel: ${levelId}`);

@@ -1,5 +1,6 @@
-// Demo1RecordUI.js
-// Demo1 专用录制系统 UI — 蒸汽朋克暗紫风格
+// Demo1RecordUI.js | Demo1专用录制系统 UI
+// Demo1-specific recording system UI — Steampunk dark purple style
+// Demo1专用录制系统 UI — 蒸汽朋克暗紫风格
 import { keyCodeToLabel } from "./RecordKeyUtil.js";
 import { KeyBindingManager } from "../key-binding-system/KeyBindingManager.js";
 import { t } from "../i18n/index.js";

@@ -8,7 +8,7 @@ export class CheckpointDemo1 extends GameEntity {
    * @param {number} y
    * @param {number} w
    * @param {number} h
-   * @param {() => Player | null} getPlayer - 获取玩家引用的函数
+   * @param {() => Player | null} getPlayer - function to get the player reference | 获取玩家引用的函数
    * @param {object} options
    */
   constructor(x, y, w = 40, h = 70, getPlayer = null, options = {}) {
@@ -21,15 +21,18 @@ export class CheckpointDemo1 extends GameEntity {
     this._getPlayer = getPlayer;
     this._inRange = false;
 
+    // Pole and flag colors
     // 旗杆和旗帜颜色
     this.poleColor = options.poleColor || [80, 80, 80];
-    this.flagColor = options.flagColor || [75, 0, 130]; // 深紫色
-    this.activatedFlagColor = options.activatedFlagColor || [255, 182, 193]; // 激活后浅粉色
+    this.flagColor = options.flagColor || [75, 0, 130]; // deep purple | 深紫色
+    this.activatedFlagColor = options.activatedFlagColor || [255, 182, 193]; // light pink after activation | 激活后浅粉色
 
+    // Halo animation state
     // 光环动画状态
     this._haloTime = 0;
     this._haloParticles = [];
 
+    // Activation callback
     // 激活回调
     this._onActivate = options.onActivate || null;
   }
@@ -41,6 +44,7 @@ export class CheckpointDemo1 extends GameEntity {
     }
     if (this.activated) {
       this._haloTime += 0.04;
+      // Spawn a small particle every few frames
       // 每几帧生成一个小粒子
       if (Math.random() < 0.3) {
         const w = this.collider.w;
@@ -53,6 +57,7 @@ export class CheckpointDemo1 extends GameEntity {
           life: 1.0,
         });
       }
+      // Update particles
       // 更新粒子
       for (let i = this._haloParticles.length - 1; i >= 0; i--) {
         const pt = this._haloParticles[i];
@@ -102,14 +107,16 @@ export class CheckpointDemo1 extends GameEntity {
     const poleX = this.x + w / 2;
     const flagW = w * 1.2;
     const flagH = h * 0.4;
-    const flagTop = this.y + h; // y轴向上：杆顶
+    const flagTop = this.y + h; // y-axis upward: pole top | y轴向上：杆顶
     const flagColor = this.activated ? this.activatedFlagColor : this.flagColor;
 
+    // --- Pole ---
     // --- 旗杆 ---
     p.stroke(...this.poleColor);
     p.strokeWeight(3);
     p.line(poleX, this.y, poleX, this.y + h);
 
+    // --- Flag ---
     // --- 旗帜 ---
     p.fill(...flagColor);
     p.noStroke();
@@ -122,11 +129,13 @@ export class CheckpointDemo1 extends GameEntity {
       flagTop - flagH,
     );
 
+    // --- Cute halo effect after activation ---
     // --- 激活后可爱光环特效 ---
     if (this.activated) {
       const cx = poleX + flagW * 0.35;
       const cy = flagTop - flagH / 2;
 
+      // Rising small particles / stars
       // 上升的小粒子/星星
       for (const pt of this._haloParticles) {
         const alpha = pt.life * 200;

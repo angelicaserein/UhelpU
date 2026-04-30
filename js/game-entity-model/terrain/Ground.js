@@ -25,6 +25,7 @@ export class Ground extends GameEntity {
     let drawX = this.x;
     let drawW = w;
 
+    // Extend ground visually so the tile remains visible when the camera pans slightly
     // 地面做可视延申，镜头轻微拉动时仍显示贴图而不是空白边缘
     if (!this.isPlatform && w >= p.width - 2) {
       const overdraw = 96;
@@ -33,10 +34,14 @@ export class Ground extends GameEntity {
     }
 
     if (tile) {
+      // Draw tile in a y-flipped environment: flip back to normal direction first, then tile
+      // Draw tile in a y-flipped environment: flip back to normal direction first, then tile
       // y轴翻转环境下绘制贴图：先翻回正常方向再平铺
       p.push();
       p.translate(drawX, this.y + h);
       p.scale(1, -1);
+      // Tile the entire area with the tile image
+      // Tile the entire area with the tile image
       // 用贴图平铺整个区域
       const tw = tile.width;
       const th = tile.height;

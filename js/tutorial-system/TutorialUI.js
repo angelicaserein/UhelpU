@@ -19,28 +19,29 @@ export class TutorialUI {
     this.overlay = new TutorialOverlay();
     this.overlay.create(container);
 
-    this._promptBoxes = []; // 所有提示框
-    this._labels = []; // 所有标签元素，用于清理
-    this._activeElements = []; // 所有创建的 DOM 元素
-    this._escHintEl = null; // ESC 跳过提示元素（独立的，不被 _removeAllPrompts 删除）
+    this._promptBoxes = []; // All prompt boxes | 所有提示框
+    this._labels = []; // All label elements for cleanup | 所有标签元素，用于清理
+    this._activeElements = []; // All created DOM elements | 所有创建的 DOM 元素
+    this._escHintEl = null; // ESC skip hint element (independent, not deleted by _removeAllPrompts) | ESC 跳过提示元素（独立的，不被 _removeAllPrompts 删除）
 
-    // 订阅语言变化，实时更新提示文本
+    // Subscribe to language changes and update hint text in real time | 订阅语言变化，实时更新提示文本
     this._onLangChange = () => this._updatePromptTexts();
     i18n.onChange(this._onLangChange);
   }
 
   /**
-   * 获取黑幕对象（用于高级操作）
+   * Get the overlay object (for advanced operations) | 获取默静对象（用于高级操作）
    */
   getOverlay() {
     return this.overlay;
   }
 
   /**
-   * 显示黑幕
+   * Show overlay (full or partial transparency)
+   * 显示默静（全屏或部分透明）
    * @param {Object} options
    *   - type: 'full' | 'partial'
-   *   - visibleRects: [{x, y, width, height}, ...] 仅在 type: 'partial' 时使用
+   *   - visibleRects: [{x, y, width, height}, ...] 仅在 type: 'partial' 时使用 | Only used when type: 'partial'
    */
   showOverlay(options = {}) {
     const { type = "full", visibleRects = [] } = options;

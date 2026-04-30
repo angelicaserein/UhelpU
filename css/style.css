@@ -554,7 +554,7 @@ canvas {
 /*main panel*/
 #main {
   position: absolute;
-  background-image: url("../assets/UI/menu.png");
+  background-image: url("../assets/images/bg/menu.png");
   background-size: contain;
   width: 960px;
   height: 540px;
@@ -606,7 +606,7 @@ canvas {
 /*setting panel*/
 /* #setting-panel {
     position: absolute;
-    background-image: url("../assets/UI/setting-panel.png");
+    background-image: url("../assets/images/bg/settings.png");
     background-size: contain;
     width: 960px;
     height: 540px;
@@ -625,7 +625,7 @@ canvas {
 /*achieves panel*/
 /* #achieves-panel {
     position: absolute;
-    background-image: url("../assets/UI/credits-panel.png");
+    background-image: url("../assets/images/bg/achieve.png");
     background-size: contain;
     width: 960px;
     height: 540px;
@@ -642,7 +642,7 @@ canvas {
 /*level select panel*/
 #levelSelect {
   position: absolute;
-  background-image: url("../assets/UI/level-select-panel.png");
+  background-image: url("../assets/images/bg/level_choice.png");
   background-size: contain;
   width: 960px;
   height: 540px;
@@ -718,7 +718,7 @@ canvas {
 /*level1 result*/
 #level1Result {
   position: absolute;
-  background-image: url("../assets/UI/level-select-panel.png");
+  background-image: url("../assets/images/bg/level_choice.png");
   background-size: contain;
   width: 960px;
   height: 540px;
@@ -735,7 +735,7 @@ canvas {
 /*level2 result*/
 #level2Result {
   position: absolute;
-  background-image: url("../assets/UI/level-select-panel.png");
+  background-image: url("../assets/images/bg/level_choice.png");
   background-size: contain;
   width: 960px;
   height: 540px;

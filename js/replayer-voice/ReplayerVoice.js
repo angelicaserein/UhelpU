@@ -119,7 +119,7 @@ export class ReplayerVoice {
         this._systemPrompt = await res.text();
       }
     } catch {
-      // 静默失败，使用空字符串
+      // Silently fail, use empty string | 静默失败，使用空字符串
     }
   }
 

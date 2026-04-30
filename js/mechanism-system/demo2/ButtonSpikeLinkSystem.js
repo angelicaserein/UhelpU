@@ -1,6 +1,6 @@
-// ButtonSpikeLinkSystem.js
-// 按钮-地刺联动系统：实体踩到按钮时，关联的地刺向下平移指定距离
-// 自动为每组 button-spike 分配统一颜色，无需手动设置
+// ButtonSpikeLinkSystem.js | 按鹁-地劉联动系统
+// Button-spike linkage system: when entity steps on button, associated spikes move down by specified distance | 按鹁-地劉联动系统：实体踏到按鹁时，关联的地劉向下平移指定距离
+// Auto-assign unified color for each button-spike group, no manual setting needed | 自动为每组 button-spike 分配统一颜色，无需手动设置
 
 // 预定义颜色调色板，每组包含：按钮未按下色、按钮按下色、地刺色
 // 同一组的 button 和 spike 颜色主色调一致，便于玩家识别对应关系
@@ -42,14 +42,14 @@ const COLOR_PALETTE = [
 export class ButtonSpikeLinkSystem {
   /**
    * @param {{button: Button, spikes: Array<{spike: Spike, retractDistance: number}>}} link
-   *   单组联动：一个按钮控制一组地刺，每个地刺可指定下移距离
-   *   spikes 也可以直接传 Spike 对象，此时使用默认下移距离（地刺高度 + 10）
-   *   系统会自动按起始配色索引分配颜色，同组 button 和 spike 颜色一致
+   *   Single linkage group: one button controls a group of spikes, each spike can specify move distance | 单组联动：一个按鹁控制一组地劉，每个地劉可指定下移距离
+   *   spikes can also directly pass Spike object, then use default move distance (spike height + 10) | spikes 也可以直接传 Spike 对象，此时使用默认下移距离（地劉高度 + 10）
+   *   System auto-assigns color by starting palette index, button and spike colors are consistent within group | 系统会自动按起始配色索引分配颜色，同组 button 和 spike 颜色一致
    * @param {Object} [options]
-   * @param {number} [options.retractSpeed] - 地刺下移速度 (px/frame)，默认 3
-   * @param {boolean} [options.autoReset] - 按钮松开后地刺是否自动复位，默认 true
-   * @param {number} [options.resetSpeed] - 复位上移速度 (px/frame)，默认 2
-   * @param {number} [options.startColorIndex] - 配色起始索引，默认 0
+   * @param {number} [options.retractSpeed] - spike move-down speed (px/frame), default 3 | 地劉下移速度 (px/frame)，默认 3
+   * @param {boolean} [options.autoReset] - whether spike auto-resets when button is released, default true | 按鹁松开后地劉是否自动复位，默认 true
+   * @param {number} [options.resetSpeed] - reset move-up speed (px/frame), default 2 | 复位上移速度 (px/frame)，默认 2
+   * @param {number} [options.startColorIndex] - palette starting index, default 0 | 配色起始索引，默认 0
    */
   constructor(link, options = {}) {
     this.retractSpeed = options.retractSpeed || 3;
@@ -89,7 +89,7 @@ export class ButtonSpikeLinkSystem {
   }
 
   /**
-   * 每帧调用，驱动地刺平移动画
+   * Called every frame, drive spike movement animation | 每帧调用，驱动地劉平移动画
    */
   update() {
     const pressed = this._button.isPressed;
@@ -107,7 +107,7 @@ export class ButtonSpikeLinkSystem {
   }
 
   /**
-   * 重置所有地刺到初始位置
+   * Reset all spikes to initial position | 重置所有地劉到初始位置
    */
   reset() {
     for (const entry of this._spikes) {

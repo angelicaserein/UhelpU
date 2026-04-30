@@ -1,22 +1,17 @@
-// BtnWirePortalSystem.js
-// 按钮-电线-传送门联动系统
-// 按住按钮充电 → 电流从按钮（起点）传播到传送门（终点） → 门打开
-// 松开按钮放电 → 电流从按钮端开始消失，向传送门方向退去 → 放电完成后门关闭
-//
-// 双进度模型：
-//   _headProgress (0~1) — 电流前端位置（充电时增长）
-//   _tailProgress (0~1) — 电流尾部位置（放电时从起点向终点推进）
-//   可见电流 = 路径的 [_tailProgress, _headProgress] 区间
-//
-// 充电：head 从 0→1，tail=0
-// 放电：head 不动，tail 从 0→head（电流从按钮端消失向门端退去）
+// BtnWirePortalSystem.js | 按鹁-电线-传送游機联动系统
+// Button-wire-portal linkage system
+// 按鹁-电线-传送游機联动系统
+// Hold button to charge → electric current propagates from button (start) to portal (end) → gate opens
+// 按住按鹁充电 → 电流从按鹁（起点）传播到传送游機（终点） → 门打开
+// Release button to discharge → electric current disappears from button end, retreats towards gate → gate closes after discharge completes
+// 松开按鹁放电 → 电流从按鹁端开始消失，向传送游機方向退去 → 放电完成后门关闭
 
 export class BtnWirePortalSystem {
   /** 推荐按钮尺寸 */
   static BUTTON_W = 34;
   static BUTTON_H = 16;
 
-  /** 按钮配色方案：未按下深紫色，按下浅蓝色 */
+  /** Button color scheme: unpressed dark purple, pressed light blue | 按鹁配色方案：未按下深紫色，按下浅蓝色 */
   static BUTTON_COLOR = {
     unpressed: [154, 123, 154], // 深紫色
     pressed: [135, 206, 250], // 浅蓝色
@@ -24,40 +19,40 @@ export class BtnWirePortalSystem {
 
   /**
    * @param {Object} config
-   * @param {Button}   config.button     - 按钮实体（需有 isPressed 属性）
-   * @param {Portal}   config.portal     - 传送门实体（需有 openPortal / isOpen）
-   * @param {Array<{x:number,y:number}>} [config.wirePath] - 可选，手动指定电线路径；省略时自动根据按钮/门位置计算
+   * @param {Button}   config.button     - button entity (need isPressed property) | 按鹁实体（需要 isPressed 属性）
+   * @param {Portal}   config.portal     - portal entity (need openPortal / isOpen) | 传送游機实体（需要 openPortal / isOpen）
+   * @param {Array<{x:number,y:number}>} [config.wirePath] - optional, manually specify wire path; omit to auto-calculate based on button/gate position | 可选，手动指定电线路径；省略时自动根据按鹁/门位置计算
    * @param {Object}  [config.options]
-   * @param {number}  [config.options.chargeSpeed=0.04]    - 每帧充电进度增量 (0~1)
-   * @param {number}  [config.options.dischargeSpeed=0.025] - 每帧放电进度增量 (0~1)
-   * @param {number}  [config.options.wireMargin=50] - 电线拐点距较高实体顶部的像素距离
+   * @param {number}  [config.options.chargeSpeed=0.04]    - per-frame charge progress increment (0~1) | 每帧充电进度增量 (0~1)
+   * @param {number}  [config.options.dischargeSpeed=0.025] - per-frame discharge progress increment (0~1) | 每帧放电进度增量 (0~1)
+   * @param {number}  [config.options.wireMargin=50] - wire corner point pixel distance from top of higher entity | 电线拐点距较高实体顶部的像素距离
    */
   constructor({ button, portal, wirePath, options = {} }) {
     this._button = button;
     this._portal = portal;
 
-    // 自动应用系统专属按钮配色
+    // Auto-apply system-exclusive button color scheme | 自动应用系统专属按鹁配色
     this._button.color = BtnWirePortalSystem.BUTTON_COLOR;
     this._button.isWirePortalButton = true;
 
-    // 自动计算电线路径（或使用手动指定的）
+    // Auto-calculate wire path (or use manually specified) | 自动计算电线路径（或使用手动指定的）
     this._wirePath =
       wirePath || this._buildAutoWirePath(options.wireMargin ?? 50);
 
     this._chargeSpeed = options.chargeSpeed ?? 0.04;
     this._dischargeSpeed = options.dischargeSpeed ?? 0.025;
 
-    // 双进度模型
-    this._headProgress = 0; // 电流前端 (0~1)
-    this._tailProgress = 0; // 电流尾部 (0~1)
+    // Dual-progress model | 双进度模型
+    this._headProgress = 0; // Electric current front end (0~1) | 电流前端 (0~1)
+    this._tailProgress = 0; // Electric current tail (0~1) | 电流尾部 (0~1)
 
-    // 状态机：idle / charging / charged / discharging
+    // State machine: idle / charging / charged / discharging | 状态机：idle / charging / charged / discharging
     this._state = "idle";
 
-    // 动画帧计数器
+    // Animation frame counter | 动画帧计数器
     this._frame = 0;
 
-    // 预计算路径总长度
+    // Pre-calculate path total length | 预计算路径总长度
     this._totalLen = 0;
     this._segLens = [];
     const wp = this._wirePath;
@@ -94,14 +89,14 @@ export class BtnWirePortalSystem {
             this._openPortal();
           }
         } else {
-          // 还没充满就松开 → 开始放电（尾部从按钮端开始消失）
+          // Not fully charged, release button → start discharging (tail disappears from button end) | 整没充满就松开 → 开始放电（尾部从按鹁端开始消失）
           this._state = "discharging";
         }
         break;
 
       case "charged":
         if (!pressed) {
-          // 松开 → 开始放电
+          // Release → start discharging | 松开 → 开始放电
           this._state = "discharging";
         }
         // 按住期间保持满电、门保持打开
@@ -109,8 +104,8 @@ export class BtnWirePortalSystem {
 
       case "discharging":
         if (pressed) {
-          // 放电中途再次按下 → 重新充电
-          // 将当前尾部作为新的充电起点：重置 head=tail, tail=0
+          // Re-press during discharge → resume charging | 放电中途再次按下 → 重新充电
+          // Set current tail as new charging start point: reset head=tail, tail=0 | 将当前尾部作为新的充电起点：重置 head=tail, tail=0
           this._headProgress = this._tailProgress;
           this._tailProgress = 0;
           this._state = "charging";
@@ -121,7 +116,7 @@ export class BtnWirePortalSystem {
           this._tailProgress + this._dischargeSpeed,
         );
         if (this._tailProgress >= this._headProgress) {
-          // 放电完成 → 关门
+          // Discharge complete → close gate | 放电完成 → 关办
           this._headProgress = 0;
           this._tailProgress = 0;
           this._state = "idle";

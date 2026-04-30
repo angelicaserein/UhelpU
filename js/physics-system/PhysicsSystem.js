@@ -96,6 +96,7 @@ export class PhysicsSystem {
     for (const entity of this.entities) {
       if (!hasMovement(entity)) continue;
 
+      // Initialize death effect (executed only once).
       // 初始化死亡效果（仅执行一次）
       if (entity.initDeathEffect) {
         entity.initDeathEffect();
@@ -109,6 +110,7 @@ export class PhysicsSystem {
       const blockedXLastFrame = entity.blockedXLastFrame === true;
       entity.blockedXLastFrame = false;
 
+      // Reset isOnGround each frame; only set to true when collision detection confirms ground contact.
       // 每帧重置isOnGround，只有通过碰撞检测时才设置为true
       if (entity.controllerManager) {
         const controlComponent =
@@ -124,10 +126,14 @@ export class PhysicsSystem {
     }
   }
 
+  // [FIX] VelX chain fix: full BFS propagates velX from bottom layer up, replacing the original two-phase flat traversal.
   // [FIX] velX链修复：完整 BFS 从底层向上传播 velX，替换原有两阶段 flat 遍历。
   velXPropagationEntry() {
+    // Step 1: Build supporter → riders[] adjacency list.
     // 第一步：构建 supporter → riders[] 邻接表
+    // standing: entity stands on top of _supportingEntity → ridersOf[supporter].push(entity)
     // standing：entity 站在 _supportingEntity 头上 → ridersOf[supporter].push(entity)
+    // pushing: entity head-pushes _supportingEntity → ridersOf[entity].push(_supportingEntity)
     // pushing：entity 在顶着 _supportingEntity    → ridersOf[entity].push(_supportingEntity)
     const ridersOf = new Map();
 
@@ -146,6 +152,7 @@ export class PhysicsSystem {
       }
     }
 
+    // Step 2: Find root nodes (bottom of chain): entities with support or pushing type.
     // 第二步：找根节点（链底层）：support 或 pushing 类型的实体
     const roots = [];
     for (const entity of this.entities) {
@@ -158,6 +165,7 @@ export class PhysicsSystem {
       }
     }
 
+    // Step 3: BFS propagates velX upward from root nodes.
     // 第三步：BFS 从根节点向上传播 velX
     const queue = [...roots];
     const visited = new Set();
@@ -183,9 +191,11 @@ export class PhysicsSystem {
         )
           continue;
 
+        // [FIX] VelX chain fix: cut this rider branch on jump takeoff frame, without affecting other riders at the same level.
         // [FIX] velX链修复：跳跃起飞帧切断该 rider 分支，不影响其他同层 rider。
         if (isTakeoffFrame(rider)) continue;
 
+        // Directly modify position to avoid velX being overwritten by controller.tick().
         // 直接改位置，避免被 controller.tick() 覆盖 velX。
         rider.x += supporterDeltaX;
         movedRiders.add(rider);

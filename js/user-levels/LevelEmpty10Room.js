@@ -22,6 +22,7 @@ export class LevelEmpty10Room extends BaseLevel {
     this.entities = this._buildEntities();
     this.initSystems(this._player, 5000, { uiClass: Demo2RecordUI });
 
+    // Activate map editor
     // 激活编辑器
     this._mapEditor = new MapEditor(this);
     this._mapEditor.activate();

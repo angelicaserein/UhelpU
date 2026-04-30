@@ -12,11 +12,11 @@ function getPlayerSprite(velX, velY, isOnGround) {
       if (velX < 0) return Assets.playerImg_upLeft;
       return Assets.playerImg_up;
     }
-    return null; // keep last sprite while falling
+    return null; // keep last sprite while falling | 下落时保持上一帧精灵图
   }
   if (velX > 0) return Assets.playerImg_right;
   if (velX < 0) return Assets.playerImg_left;
-  return null; // keep last sprite while idle
+  return null; // keep last sprite while idle | 待机时保持上一帧精灵图
 }
 
 export class Player extends Character {
@@ -35,11 +35,13 @@ export class Player extends Character {
     this.collider = new RectangleCollider(ColliderType.DYNAMIC, w, h);
 
     // Player-only landing dust particles
+    // 玩家独有的落地尘埃粒子
     this._landingDustParticles = [];
     this._prevVelY = 0;
   }
 
   // ── Landing dust (Player-only) ────────────────────────────────
+  // ── 落地尘埃（玩家独有）────────────────────────────────────────
 
   _spawnLandingDust(p, drawX, drawY, impactVelY) {
     const count = Math.floor(Math.min(Math.abs(impactVelY) * 1.6, 14));
@@ -91,8 +93,7 @@ export class Player extends Character {
     p.pop();
   }
 
-  // ── Draw ──────────────────────────────────────────────────────
-
+  // ── Draw ──────────────────────────────────────────────────────  // ── 绘制 ─────────────────────────────────────────────
   draw(p) {
     if (this.deathState && this.deathState.isDead) {
       this._trailParticles = [];
@@ -192,7 +193,7 @@ export class Player extends Character {
     this._updateZzzBubbles(
       p,
       this.x + this.collider.w * 0.8,
-      this.y + this.collider.h + 6, // y 轴翻转：头顶 = y + h + offset
+      this.y + this.collider.h + 6, // y-axis flipped: head top = y + h + offset | y 轴翻转：头顶 = y + h + 偏移量
       isIdleAnimating,
     );
 
@@ -218,22 +219,26 @@ export class Player extends Character {
     }
 
     // Landing dust drawn after sprite so it appears at the character's sides
+    // 落地尘埃在精灵图后绘制，使其出现在角色两侧
     this._drawLandingDust(p);
     this._drawZzzBubbles(p);
   }
 
   /**
-   * 通知计时器系统：玩家进行了首次输入
-   * 供 ControllerManager 调用
+   * Notify the timer system that the player has made their first input.
+   * 通知计时器系统：玩家进行了首次输入。
+   * Called by ControllerManager.
+   * 供 ControllerManager 调用。
    */
   notifyFirstInput() {
     if (this._hasReceivedFirstInput) {
-      return; // 已通知过，不重复
+      return; // already notified, do not repeat | 已通知过，不重复
     }
 
     this._hasReceivedFirstInput = true;
 
-    // 发布事件到全局名称空间（会在 GamePageBase 初始化时设置）
+    // Publish event to global namespace (set during GamePageBase initialization)
+    // 发布事件到全局命名空间（在 GamePageBase 初始化时设置）
     if (window.__gameEventBus) {
       window.__gameEventBus.publish("GAME_FIRST_INPUT");
       console.log("[Player] First input detected, timer should start");

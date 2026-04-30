@@ -5,13 +5,19 @@ import { Assets } from "../../AssetsManager.js";
 import { KeyBindingManager } from "../../key-binding-system/KeyBindingManager.js";
 
 /**
- * TeleportPoint — 手动激活的传送点
+ * TeleportPoint — Manually activated teleport point
+ * 手动激活的传送点
  *
- * 玩家靠近后按交互键（E）激活；激活后通过数字键（1、2、3...）
- * 可传送回此处。不参与死亡重生逻辑（死亡仍回到 Checkpoint）。
+ * Player presses interaction key (E) when nearby to activate; after activation can teleport back via number keys (1, 2, 3...).
+ * 玩家靠近后按交互键（E）激活；激活后通过数字键（1、2、3...）可传送回此处。
+ * Not involved in respawn logic (respawn still goes to Checkpoint).
+ * 不参与死亡重理辑辑(死亡仍回到 Checkpoint)。
  *
+ * Texture:
  * 贴图：
+ *   Inactive → TeleportPointClose.png
  *   未激活 → TeleportPointClose.png
+ *   Active after → TeleportPointOpen.png
  *   激活后 → TeleportPointOpen.png
  */
 export class TeleportPoint extends GameEntity {
@@ -23,7 +29,8 @@ export class TeleportPoint extends GameEntity {
    * @param {number} y
    * @param {number} w
    * @param {number} h
-   * @param {() => Player | null} getPlayer
+   * @param {() => Player | null} getPlayer - Function to get player reference
+   * @param {() => Player | null} getPlayer - 获取玩家引用的函数
    * @param {object} options
    * @param {() => void} [options.onActivate]
    */
@@ -78,6 +85,7 @@ export class TeleportPoint extends GameEntity {
 
   activate() {
     this.activated = true;
+    // Notify TeleportPointSystem that this teleport point has been activated
     // 通知 TeleportPointSystem 此传送点已激活
     if (this._onTeleportPointActivate) {
       this._onTeleportPointActivate();
@@ -123,6 +131,7 @@ export class TeleportPoint extends GameEntity {
       p.image(img, 0, 0, this.w, this.h);
       p.pop();
     } else {
+      // Fallback when texture is missing
       // 贴图缺失时的 fallback
       p.push();
       if (this.activated) {
@@ -135,8 +144,8 @@ export class TeleportPoint extends GameEntity {
       p.pop();
     }
 
-    // 在范围内且未激活时，在贴图上方显示交互键提示（E）
-    // 激活后，显示常亮的序号提示（1、2、3...）
+    // Show interaction key prompt above sprite when in range and not activated; show lightup number prompt (1, 2, 3...) after activation
+    // 在范围内且未激活时，在贴图上方显示交互键提示（E）；激活后，显示常亮的序号提示（1、2、3...）
     if (this._inRange && !this.activated) {
       this._drawKeyPrompt(p, "interaction");
     } else if (this.activated && this._teleportPointIndex !== null) {
@@ -145,10 +154,11 @@ export class TeleportPoint extends GameEntity {
   }
 
   /**
-   * 在贴图正上方绘制键提示方块（与 KeyPrompt 样式一致）
-   * @param {object} p - p5.js 实例
-   * @param {string} promptType - "interaction" 或 "number"
-   * @param {string} [label] - 自定义标签（仅 promptType="number" 时使用）
+   * Draw key prompt box above sprite (consistent with KeyPrompt style)
+   * 在贴图正上方绘制键提示方块（与KeyPrompt样式一致）
+   * @param {object} p - p5.js instance
+   * @param {string} promptType - "interaction" or "number"
+   * @param {string} [label] - Custom label (only used when promptType="number")
    */
   _drawKeyPrompt(p, promptType, label) {
     let displayLabel = label;

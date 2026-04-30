@@ -1,4 +1,5 @@
-// RecordUI.js
+// RecordUI.js | 罕制系统 UI
+// Responsible for recording system UI state generation and rendering
 // 负责录制系统的 UI 状态生成和渲染
 import { keyCodeToLabel } from "./RecordKeyUtil.js";
 import { KeyBindingManager } from "../key-binding-system/KeyBindingManager.js";

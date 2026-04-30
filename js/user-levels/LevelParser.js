@@ -142,10 +142,14 @@ export class UserLevel extends BaseLevel {
     });
 
     // Create Room objects for each room
-    // 為每個房間创建 Room 尋不例
+    // 為每個房間创建 Room 實例
+    this.rooms = [];
+    for (let i = 0; i < roomCount; i++) {
+      this.rooms.push(new Room([]));
+    }
 
     // Add boundary walls and ground to each room
-    // 每個房間添加边界氧汽和地基
+    // 每個房間添加边界墙和地基
     for (let roomIndex = 0; roomIndex < roomCount; roomIndex++) {
       // Add left wall (first room only)
       // 仅在第一個房間添加左箱

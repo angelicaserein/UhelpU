@@ -202,6 +202,7 @@ body {
   );
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34);
   overflow: hidden;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
 }
 
 .leaderboard-card-header {

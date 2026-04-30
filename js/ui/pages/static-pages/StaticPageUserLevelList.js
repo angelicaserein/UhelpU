@@ -56,6 +56,7 @@ export class StaticPageUserLevelList extends PageBase {
     createBtn.style("border", "1px solid rgba(255,255,255,0.2)");
     createBtn.style("border-radius", "8px");
     createBtn.style("font-size", "14px");
+    createBtn.style("font-family", '"HYPixel11", "PixelFont", sans-serif');
     createBtn.style("cursor", "pointer");
     createBtn.style("z-index", "1000");
     createBtn.mousePressed(() => {

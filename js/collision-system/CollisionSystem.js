@@ -305,7 +305,10 @@ export class CollisionSystem {
       //Step 2: Collision resolution.
       //第二步：碰撞修复
       const resolveFunc = resolverMap[fullKey];
-
+      if (!resolveFunc) {
+        console.warn(`[CollisionSystem] No resolver for key: ${fullKey}`);
+        return;
+      }
       const collisionMsg = resolveFunc(dyn, sta);
 
       const responseFunc = responderMap[typePair];
@@ -339,6 +342,10 @@ export class CollisionSystem {
 
     if (detectResult) {
       const resolveFunc = resolverMap[fullKey];
+      if (!resolveFunc) {
+        console.warn(`[CollisionSystem] No resolver for key: ${fullKey}`);
+        return;
+      }
       const collisionMsg = resolveFunc(a, b);
 
       const responseFunc = responderMap[typePair];
@@ -607,6 +614,10 @@ export class CollisionSystem {
     const detectResult = detectFunc(actor, enemy);
     if (detectResult) {
       const resolveFunc = resolverMap[fullKey];
+      if (!resolveFunc) {
+        console.warn(`[CollisionSystem] No resolver for key: ${fullKey}`);
+        return;
+      }
       const collisionMsg = resolveFunc(actor, enemy);
 
       const responseFunc = responderMap[typePair];

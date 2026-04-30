@@ -77,6 +77,7 @@ export const Assets = {
 
   // 敌人贴图
   enemyImg: null,
+  _onItemLoaded: null,
   async _safeLoad(promise, name) {
     try {
       const result = await promise;
@@ -85,12 +86,26 @@ export const Assets = {
     } catch (err) {
       console.warn(name + "加载失败：", err);
       return null;
+    } finally {
+      if (typeof this._onItemLoaded === "function") {
+        this._onItemLoaded();
+      }
     }
   },
 
   // 预加载所有资源（async/await，适配 p5.js 2.0）
-  async loadAll(p) {
-    const results = await Promise.all([
+  async loadAll(p, onProgress) {
+    let loadedCount = 0;
+    let totalCount = 0;
+
+    this._onItemLoaded = () => {
+      loadedCount += 1;
+      if (typeof onProgress === "function" && totalCount > 0) {
+        onProgress(loadedCount / totalCount, loadedCount, totalCount);
+      }
+    };
+
+    const loadPromises = [
       this._safeLoad(p.loadImage("assets/images/bg/menu.png"), "菜单背景"),
       this._safeLoad(
         p.loadImage("assets/images/bg/settings.png"),
@@ -271,7 +286,19 @@ export const Assets = {
         p.loadImage("assets/images/tiles/TeleportPointOpen.png"),
         "传送点开启贴图",
       ),
-    ]);
+    ];
+
+    totalCount = loadPromises.length;
+    if (typeof onProgress === "function") {
+      onProgress(0, 0, totalCount);
+    }
+
+    const results = await Promise.all(loadPromises);
+
+    if (typeof onProgress === "function") {
+      onProgress(1, totalCount, totalCount);
+    }
+    this._onItemLoaded = null;
 
     // 按顺序赋值
     this.bgImageMenu = results[0];

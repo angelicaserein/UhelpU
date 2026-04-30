@@ -215,6 +215,25 @@ export class StaticPageWinEasy extends PageBase {
       this._currentPlayerIsAccount = currentPlayerIsAccount;
       const currentPlayerKey = window.playerName + "|" + currentPlayerIsAccount;
 
+      // 将本次通关成绩先合并到本地排行榜视图中，避免云端写入延迟导致“有排名但榜单未显示”。
+      if (this._currentScore !== null && window.playerName) {
+        const mergedCurrentEntry = {
+          playerName: window.playerName,
+          isAccount: currentPlayerIsAccount,
+          timeSeconds: Number(this._currentScore),
+          rank: 0,
+          timestamp: new Date().toISOString(),
+        };
+
+        const existingCurrent = playerBestScores[currentPlayerKey];
+        if (
+          !existingCurrent ||
+          Number(existingCurrent.timeSeconds) > this._currentScore
+        ) {
+          playerBestScores[currentPlayerKey] = mergedCurrentEntry;
+        }
+      }
+
       // 打印诊断信息
       console.log("[WinEasy] Total entries loaded:", allEntries.length);
       if (window.playerName) {
@@ -241,17 +260,11 @@ export class StaticPageWinEasy extends PageBase {
 
       // 计算当前玩家的排名信息
       if (this._currentScore !== null && window.playerName) {
-        // 本次排名（当前成绩和所有人最佳成绩对比，但排除当前玩家自己）
+        // 本次排名：按“本次成绩插入历史最佳榜”计算，包含当前玩家自己的历史最佳。
         let currentRank = 1;
         for (const entry of Object.values(playerBestScores)) {
-          // 排除当前玩家自己的历史最佳，只看其他玩家
-          if (
-            entry.playerName !== window.playerName ||
-            !!entry.isAccount !== currentPlayerIsAccount
-          ) {
-            if (entry.timeSeconds < this._currentScore) {
-              currentRank++;
-            }
+          if (entry.timeSeconds < this._currentScore) {
+            currentRank++;
           }
         }
         this._currentRank = currentRank;
@@ -582,8 +595,19 @@ export class StaticPageWinEasy extends PageBase {
       // 右侧显示时间
       p.fill(220, 220, 200, Math.min(200, alpha));
       p.textAlign(p.RIGHT, p.TOP);
-      p.text(`${entry.timeSeconds}s`, baseX + panelWidth / 2 - 12, y);
+      const displayTime = this._formatLeaderboardTime(entry.timeSeconds);
+      p.text(`${displayTime}s`, baseX + panelWidth / 2 - 12, y);
     }
+  }
+
+  _formatLeaderboardTime(value) {
+    const num = Number(value);
+    if (!Number.isFinite(num)) return String(value);
+    return num.toLocaleString("en-US", {
+      useGrouping: false,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
   }
 
   exit() {

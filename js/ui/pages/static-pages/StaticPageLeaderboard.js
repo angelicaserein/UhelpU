@@ -330,7 +330,7 @@ export class StaticPageLeaderboard extends PageBase {
           name.parent(row);
 
           const time = this.p.createDiv(
-            `${this._escapeHtml(entry.timeSeconds)}s`,
+            `${this._escapeHtml(this._formatLeaderboardTime(entry.timeSeconds))}s`,
           );
           time.addClass("leaderboard-entry-time");
           time.parent(row);
@@ -413,5 +413,15 @@ export class StaticPageLeaderboard extends PageBase {
       .replace(/>/g, "&gt;")
       .replace(/\"/g, "&quot;")
       .replace(/'/g, "&#39;");
+  }
+
+  _formatLeaderboardTime(value) {
+    const num = Number(value);
+    if (!Number.isFinite(num)) return String(value);
+    return num.toLocaleString("en-US", {
+      useGrouping: false,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
   }
 }

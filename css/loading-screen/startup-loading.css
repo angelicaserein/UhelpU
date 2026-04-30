@@ -1,0 +1,96 @@
+.startup-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(118, 48, 102, 0.45),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 78% 78%,
+      rgba(127, 43, 131, 0.34),
+      transparent 50%
+    ),
+    rgba(25, 8, 24, 0.88);
+  transition: opacity 220ms ease;
+}
+
+.startup-loading-overlay-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.startup-loading-card {
+  width: min(520px, 100%);
+  border: 2px solid rgba(251, 180, 255, 0.55);
+  border-radius: 14px;
+  padding: 20px 18px;
+  background: rgba(32, 10, 36, 0.9);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.42),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.startup-loading-title {
+  color: #f4fbff;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+
+.startup-loading-status {
+  margin-top: 10px;
+  color: rgba(210, 230, 255, 0.95);
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+
+.startup-loading-track {
+  margin-top: 16px;
+  width: 100%;
+  height: 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(151, 216, 255, 0.45);
+  background: rgba(3, 10, 28, 0.92);
+  overflow: hidden;
+}
+
+.startup-loading-fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4dc8ff 0%, #6df2c5 100%);
+  box-shadow: 0 0 16px rgba(83, 234, 255, 0.45);
+  transition: width 140ms ease;
+}
+
+.startup-loading-percent {
+  margin-top: 10px;
+  color: #f4fbff;
+  font-family: "HYPixel11", "PixelFont", sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 700px) {
+  .startup-loading-card {
+    padding: 16px 14px;
+  }
+
+  .startup-loading-title {
+    font-size: 22px;
+  }
+
+  .startup-loading-status,
+  .startup-loading-percent {
+    font-size: 12px;
+  }
+}

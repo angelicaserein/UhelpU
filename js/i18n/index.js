@@ -35,7 +35,7 @@ const _dict = {
     win_keybind: "⌨ Controls",
     win_credits: "📜 Credits",
     win_credits_content:
-      "Game Design & Development:\nTeam 13\n\nSpecial Thanks:\nBristol University",
+      "Game Design & Development:\nzzq\n \nwechat: moosry229\n\n",
     pause_title: "⏸  Paused",
     pause_hint: "Game is paused",
     pause_resume: "▶  Resume",
@@ -250,8 +250,7 @@ const _dict = {
     win_language: "🌐 语言",
     win_keybind: "⌨ 按键设置",
     win_credits: "📜 制作人员",
-    win_credits_content:
-      "游戏设计与开发：\nTeam 13\n\n特别鸣谢：\n布里斯托尔大学",
+    win_credits_content: "游戏设计与开发：\nzzq\n \n微信： moosry229\n\n",
     pause_title: "⏸  已暂停",
     pause_hint: "游戏已暂停",
     pause_resume: "▶  继续游戏",

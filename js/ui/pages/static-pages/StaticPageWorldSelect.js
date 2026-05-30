@@ -29,8 +29,8 @@ export class StaticPageWorldSelect extends PageBase {
     this._createPlayerNameSection();
 
     const { leaderboardBtn } = this._createLeaderboardPanel();
-    const { legacyDemo1Btn, legacyDemo2Btn } = this._createLegacyDemoPanel();
-    this._createMemorialLinks();
+    const { legacyDemo1Btn, legacyDemo2Btn } =
+      this._createLegacyDemoPanel(true); // 右上角
 
     // 世界按钮配置（主区域难度入口）
     const worlds = [
@@ -1023,50 +1023,23 @@ export class StaticPageWorldSelect extends PageBase {
     }
   }
 
-  _createMemorialLinks() {
-    const p = this.p;
-    const panelWidth = 340;
-    const panelX = p.width - panelWidth - 28;
-    const panelY = 28;
+  // 已删除纪念版本面板
 
-    const panel = p.createDiv("");
-    panel.addClass("world-memorial-panel");
-    panel.style("width", panelWidth + "px");
-    panel.position(panelX, panelY);
-
-    const title = p.createDiv(t("world_memorial_title"));
-    title.addClass("world-memorial-title");
-    title.parent(panel);
-
-    const oldDemoLink = p.createA(
-      "https://lsironman789.github.io/Demo1-copy/Demo1/",
-      t("world_memorial_earliest"),
-      "_blank",
-    );
-    oldDemoLink.attribute("rel", "noopener noreferrer");
-    oldDemoLink.addClass("world-memorial-link");
-    oldDemoLink.parent(panel);
-
-    const lavaIdeaLink = p.createA(
-      "https://lsironman789.github.io/lava-level/lava/",
-      t("world_memorial_discarded"),
-      "_blank",
-    );
-    lavaIdeaLink.attribute("rel", "noopener noreferrer");
-    lavaIdeaLink.addClass("world-memorial-link");
-    lavaIdeaLink.parent(panel);
-
-    this.addElement(panel);
-  }
-
-  _createLegacyDemoPanel() {
+  _createLegacyDemoPanel(topRight = false) {
     const p = this.p;
     const panelWidth = 220;
-    // Position directly below the Memorial Versions panel
-    const memorialPanelY = 28;
-    const memorialPanelHeight = 120; // Estimated height of memorial panel
-    const panelX = p.width - 340 - 28; // Same X as memorial panel right edge
-    const panelY = memorialPanelY + memorialPanelHeight + 12; // Below memorial with gap
+    let panelX, panelY;
+    if (topRight) {
+      // 右上角
+      panelX = p.width - panelWidth - 28;
+      panelY = 28;
+    } else {
+      // 原位置（纪念版本下方）
+      const memorialPanelY = 28;
+      const memorialPanelHeight = 120;
+      panelX = p.width - 340 - 28;
+      panelY = memorialPanelY + memorialPanelHeight + 12;
+    }
 
     const panel = p.createDiv("");
     panel.addClass("world-memorial-panel");

@@ -9,8 +9,9 @@ registerTranslations({
     special_level1_title: "Special Level 1",
     special_level1_info_left: "Level 1\nSpecial Level 1",
     special_level1_info_right: "Difficulty\nSpecial",
-    special_hint_level1:
-      "This Special level currently uses the same map as Hard Level 2.",
+    special_hint_level1: "A level with a mysterious NPC.",
+    special_npc1_line1:
+      "Summon your phantom — it seems like it can talk now.",
     special_level2_title: "Special Level 2",
     special_level2_info_left: "Level 2\nSpecial Level 2",
     special_level2_info_right: "Difficulty\nSpecial",
@@ -63,7 +64,8 @@ registerTranslations({
     special_level1_title: "特殊关卡 1",
     special_level1_info_left: "第一关\n特殊关卡 1",
     special_level1_info_right: "难度\n特殊",
-    special_hint_level1: "这个特殊关卡目前与 Hard Level 2 使用相同地图。",
+    special_hint_level1: "一个有神秘 NPC 的关卡。",
+    special_npc1_line1: "召唤出你的幻影，他好像会说话了。",
     special_level2_title: "特殊关卡 2",
     special_level2_info_left: "第二关\n特殊关卡 2",
     special_level2_info_right: "难度\n特殊",
